@@ -1,0 +1,6 @@
+Action action
+---
+bool report
+string state
+---
+string state
