@@ -17,7 +17,7 @@ action_server_(node_handle_, name,
 	boost::bind(&ActionExecutor::execute,this, _1), false)
  {
  	action_server_.start();
- 	ROS_INFO("Action server ready");
+ 	ROS_INFO("[action_executor] Action server ready");
 }
 
 
@@ -116,7 +116,7 @@ VirtualAction* ActionExecutor::initializeAction(supervisor_msgs::Action action) 
 	if(action.name == "pick"){
 		act = new Pick(action);
 	}else{
-		ROS_WARN("Unknown action");
+		ROS_WARN("[action_executor] Unknown action");
 	}	
 
 	return act;
@@ -127,7 +127,7 @@ int main (int argc, char **argv)
 {
   ros::init(argc, argv, "action_executor");
 
-  ROS_INFO("Init action_executor");
+  ROS_INFO("[action_executor] Init action_executor");
 
   ActionExecutor executor("supervisor/action_executor");
 
