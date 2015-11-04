@@ -1,0 +1,10 @@
+---
+goals:
+  names: ['CLEAN','STACK']
+  CLEAN_actors: ['PR2_ROBOT', 'HERAKLES_HUMAN1']
+  CLEAN_objective: ['NULL,isOn,TABLE_4']
+  STACK_actors: ['PR2_ROBOT', 'HERAKLES_HUMAN1']
+  STACK_objective: ['RED_CUBE,isOn,PLACEMAT_RED',
+                    'BLACK_CUBE,isOn,RED_CUBE',
+                    'BLUE_CUBE,isOn,BLACK_CUBE',
+                    'GREEN_CUBE,isOn,BLUE_CUBE']
