@@ -20,6 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
    FILES
    Action.msg
+   Plan.msg
    ActionMS.msg
    PlanMS.msg
    GoalMS.msg
@@ -27,9 +28,12 @@ add_message_files(
 )
 
 # Generate services in the 'srv' folder
-#add_service_files(
-#  FILES
-#)
+add_service_files(
+  FILES
+  NewPlan.srv
+  NewGoal.srv
+  StartGoal.srv
+)
 
  add_action_files(
    FILES
