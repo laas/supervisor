@@ -181,7 +181,7 @@ include_directories(
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
 
-add_executable(mental_states src/ms_manager.cpp src/db_interface.cpp)
+add_executable(mental_states src/main.cpp src/ms_manager.cpp src/db_interface.cpp)
 target_link_libraries( 
   mental_states
   ${catkin_LIBRARIES}

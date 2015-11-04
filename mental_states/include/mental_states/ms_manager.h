@@ -11,29 +11,46 @@
 #include <mental_states/db_interface.h>
 #include "toaster_msgs/Fact.h"
 #include "toaster_msgs/FactList.h"
+#include "supervisor_msgs/NewPlan.h"
+#include "supervisor_msgs/NewGoal.h"
+#include "supervisor_msgs/StartGoal.h"
 #include "supervisor_msgs/ActionMS.h"
 #include "supervisor_msgs/PlanMS.h"
 #include "supervisor_msgs/GoalMS.h"
 #include "supervisor_msgs/Link.h"
+#include "supervisor_msgs/Action.h"
+#include "supervisor_msgs/Plan.h"
 
 
 using namespace std;
 
 class MSManager{
 public:
-	MSManager() {};
+	MSManager();
 	void update(string agent);
+	void initGoals();
+	void initHighLevelActions();
+	supervisor_msgs::GoalMS* getGoalByName(string name);
+	supervisor_msgs::ActionMS createActionFromHighLevel(supervisor_msgs::Action action);
+	int getAndIncreasePlanId();
 protected:
 
 private:
 	vector<supervisor_msgs::ActionMS> actionList;
 	vector<supervisor_msgs::PlanMS> planList;
 	vector<supervisor_msgs::GoalMS> goalList;
+	vector<supervisor_msgs::ActionMS> highLevelActions;
 	int actionId;
 	int planId;
 	boost::mutex actionList_mutex;
 	boost::mutex planList_mutex;
 	boost::mutex goalList_mutex;
+
+	void checkEffects(string agent);
+	void computePreconditions(string agent);
+	void planFeasibility(string agent);
+	void checkGoals(string agent);
+	supervisor_msgs::ActionMS getHighLevelActionByName(string name);
 
 };
 
