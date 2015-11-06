@@ -203,25 +203,25 @@ supervisor_msgs::ActionMS MSManager::createActionFromHighLevel(supervisor_msgs::
 	supervisor_msgs::ActionMS highLevelAction = getHighLevelActionByName(action.name);
 	map<string, string> highLevelNames;
 	highLevelNames["NULL"] = "NULL";
-	if(newAction.parameters.size() != highLevelAction.parameters.size()){
-		vector<string>::iterator it2 = newAction.parameters.begin();
+	if(action.parameters.size() == highLevelAction.parameters.size()){
+		vector<string>::iterator it2 = action.parameters.begin();
 		for(vector<string>::iterator it = highLevelAction.parameters.begin(); it != highLevelAction.parameters.end(); it++){
 			highLevelNames[*it] = *it2;
 			it2++;
 		}
 	}else{
-		ROS_ERROR("[mental_state] Incorrect number of parameters");
+		ROS_ERROR("[mental_state] Incorrect number of parameters: should be %i but is %i!", (int)highLevelAction.parameters.size(), (int)action.parameters.size());
 		return newAction;
 	}
-	if(newAction.actors.size() != highLevelAction.actors.size()){
-		vector<string>::iterator it2 = newAction.actors.begin();
+	if(action.actors.size() == highLevelAction.actors.size()){
+		vector<string>::iterator it2 = action.actors.begin();
 		for(vector<string>::iterator it = highLevelAction.actors.begin(); it != highLevelAction.actors.end(); it++){
 			highLevelNames[*it] = *it2;
 			it2++;
 		}
 
 	}else{
-		ROS_ERROR("[mental_state] Incorrect number of actors");
+		ROS_ERROR("[mental_state] Incorrect number of actors: should be %i but is %i!", (int)highLevelAction.actors.size(), (int)action.actors.size());
 		return newAction;
 	}
 
