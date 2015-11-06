@@ -42,31 +42,22 @@ void DBInterface::addGoalState(supervisor_msgs::GoalMS goal, string agent, strin
 
 	ros::NodeHandle node;
   	ros::ServiceClient client = node.serviceClient<toaster_msgs::AddFactToAgent>("database/add_fact_to_agent");
-  	ros::ServiceClient client_rm = node.serviceClient<toaster_msgs::RemoveFactToAgent>("database/remove_fact_to_agent");
-  	ros::ServiceClient client_SQL = node.serviceClient<toaster_msgs::ExecuteSQL>("database/execute_SQL");
+  	ros::ServiceClient client_rm = node.serviceClient<toaster_msgs::AddFactsToAgent>("database/remove_facts_to_agent");
+	vector<toaster_msgs::Fact> to_remove;
 
-	//retrieve previous state of the goal
-	toaster_msgs::ExecuteSQL srvSQL;
-	srvSQL.request.order = "SELECT target_id FROM fact_table_";
-	srvSQL.request.order = srvSQL.request.order + agent + " WHERE subject_id = '" + goal.name +"' AND predicate = 'goalState'";
-  	if (client_SQL.call(srvSQL)){
-		if(srvSQL.response.results.size() > 0){
-			//we remove previous state
-			toaster_msgs::RemoveFactToAgent srv_rm;
-			srv_rm.request.agentId = agent;
-			toaster_msgs::Fact fact;
-			fact.subjectId = goal.name;
-			fact.property = "goalState";
-			fact.targetId = srvSQL.response.results[0];
-			srv_rm.request.fact = fact;
-	  		if (!client_rm.call(srv_rm)){
-	   		 ROS_ERROR("Failed to call service database/remove_fact_to_agent");
-	  		}
-		}
-	}else{
-   	 	ROS_ERROR("[mental_state] Failed to call service database/execute_SQL");
-  	}
+	//we remove previous state
+	toaster_msgs::AddFactsToAgent srv_rm;
+	srv_rm.request.agentId = agent;
+	toaster_msgs::Fact fact_rm;
+	fact_rm.subjectId = goal.name;
+	fact_rm.property = "goalState";
+	to_remove.push_back(fact_rm);
+	srv_rm.request.facts = to_remove;
+	if (!client_rm.call(srv_rm)){
+	 ROS_ERROR("Failed to call service database/remove_fact_to_agent");
+	}
 	
+	//Then we add the new state
 	toaster_msgs::AddFactToAgent srv;
 	srv.request.agentId = agent;
 	toaster_msgs::Fact fact;
@@ -89,34 +80,26 @@ void DBInterface::addPlanState(supervisor_msgs::PlanMS plan, string agent, strin
 
 	ros::NodeHandle node;
   	ros::ServiceClient client = node.serviceClient<toaster_msgs::AddFactToAgent>("database/add_fact_to_agent");
-  	ros::ServiceClient client_rm = node.serviceClient<toaster_msgs::RemoveFactToAgent>("database/remove_fact_to_agent");
-  	ros::ServiceClient client_SQL = node.serviceClient<toaster_msgs::ExecuteSQL>("database/execute_SQL");
+  	ros::ServiceClient client_rm = node.serviceClient<toaster_msgs::AddFactsToAgent>("database/remove_facts_to_agent");
+	vector<toaster_msgs::Fact> to_remove;
 
 	//retrieve previous state of the plan
 	toaster_msgs::ExecuteSQL srvSQL;
 	ostringstream to_string;
         to_string << plan.id;
         string plan_id = to_string.str();
-	srvSQL.request.order = "SELECT target_id FROM fact_table_";
-	srvSQL.request.order = srvSQL.request.order + agent + " WHERE subject_id = " + plan_id +" AND predicate = 'planState'";
-  	if (client_SQL.call(srvSQL)){
-		if(srvSQL.response.results.size() > 0){
-			//we remove previous state
-			toaster_msgs::RemoveFactToAgent srv_rm;
-			srv_rm.request.agentId = agent;
-			toaster_msgs::Fact fact;
-			fact.subjectId = plan_id;
-			fact.property = "planState";
-			fact.targetId = srvSQL.response.results[0];
-			srv_rm.request.fact = fact;
-	  		if (!client_rm.call(srv_rm)){
-	   		 ROS_ERROR("[mental_state] Failed to call service database/remove_fact_to_agent");
-	  		}
-		}
-	}else{
-   	 	ROS_ERROR("[mental_state] Failed to call service database/execute_SQL");
-  	}
-	
+	//we remove previous state
+	toaster_msgs::AddFactsToAgent srv_rm;
+	srv_rm.request.agentId = agent;
+	toaster_msgs::Fact fact_rm;
+	fact_rm.subjectId = plan_id;
+	fact_rm.property = "planState";
+	to_remove.push_back(fact_rm);
+	srv_rm.request.facts = to_remove;
+	if (!client_rm.call(srv_rm)){
+	 ROS_ERROR("[mental_state] Failed to call service database/remove_fact_to_agent");
+	}
+	//then we add the new state
 	toaster_msgs::AddFactToAgent srv;
 	srv.request.agentId = agent;
 	toaster_msgs::Fact fact;
@@ -135,47 +118,41 @@ Function which add the state of an action in an agent knowledge
 	@agent: the agent name 
 	@goal: the state we want to put
 */
-void DBInterface::addActionState(supervisor_msgs::ActionMS action, string agent, string state){
+void DBInterface::addActionsState(vector<supervisor_msgs::ActionMS> actions, string agent, string state){
 
 	ros::NodeHandle node;
-  	ros::ServiceClient client = node.serviceClient<toaster_msgs::AddFactToAgent>("database/add_fact_to_agent");
-  	ros::ServiceClient client_rm = node.serviceClient<toaster_msgs::RemoveFactToAgent>("database/remove_fact_to_agent");
-  	ros::ServiceClient client_SQL = node.serviceClient<toaster_msgs::ExecuteSQL>("database/execute_SQL");
+  	ros::ServiceClient client = node.serviceClient<toaster_msgs::AddFactsToAgent>("database/add_facts_to_agent");
+  	ros::ServiceClient client_rm = node.serviceClient<toaster_msgs::AddFactsToAgent>("database/remove_facts_to_agent");
+	vector<toaster_msgs::Fact> to_add;
+	vector<toaster_msgs::Fact> to_remove;
 
-	//retrieve previous state of the plan
-	toaster_msgs::ExecuteSQL srvSQL;
-	ostringstream to_string;
-        to_string << action.id;
-        string action_id = to_string.str();
-	srvSQL.request.order = "SELECT target_id FROM fact_table_";
-	srvSQL.request.order = srvSQL.request.order + agent + " WHERE subject_id = " + action_id +" AND predicate = 'actionState'";
-  	if (client_SQL.call(srvSQL)){
-		if(srvSQL.response.results.size() > 0){
-			//we remove previous state
-			toaster_msgs::RemoveFactToAgent srv_rm;
-			srv_rm.request.agentId = agent;
-			toaster_msgs::Fact fact;
-			fact.subjectId = action_id;
-			fact.property = "actionState";
-			fact.targetId = srvSQL.response.results[0];
-			srv_rm.request.fact = fact;
-	  		if (!client_rm.call(srv_rm)){
-	   		 ROS_ERROR("[mental_state] Failed to call service database/remove_fact_to_agent");
-	  		}
-		}
-	}else{
-   	 	ROS_ERROR("[mental_state] Failed to call service database/execute_SQL");
-  	}
-	
-	toaster_msgs::AddFactToAgent srv;
+	for(vector<supervisor_msgs::ActionMS>::iterator it = actions.begin(); it != actions.end(); it++){
+		//we remove previous state
+		ostringstream to_string;
+        	to_string << it->id;
+        	string action_id = to_string.str();
+		toaster_msgs::Fact fact_rm;
+		fact_rm.subjectId = action_id;
+		fact_rm.property = "actionState";
+		to_remove.push_back(fact_rm);
+		//then we add the new state
+		toaster_msgs::Fact fact_add;
+		fact_add.subjectId = action_id;
+		fact_add.property = "actionState";
+		fact_add.targetId = state;
+		to_add.push_back(fact_add);
+	}
+	toaster_msgs::AddFactsToAgent srv_rm;
+	srv_rm.request.agentId = agent;
+	srv_rm.request.facts = to_remove;
+	if (!client_rm.call(srv_rm)){
+	 ROS_ERROR("[mental_state] Failed to call service database/remove_fact_to_agent");
+	}
+	toaster_msgs::AddFactsToAgent srv;
 	srv.request.agentId = agent;
-	toaster_msgs::Fact fact;
-	fact.subjectId = action_id;
-	fact.property = "actionState";
-	fact.targetId = state;
-	srv.request.fact = fact;
+	srv.request.facts = to_add;
   	if (!client.call(srv)){
-   	 ROS_ERROR("[mental_state] Failed to call service database/add_fact_to_agent");
+   	 ROS_ERROR("[mental_state] Failed to call service database/add_facts_to_agent");
   	}
 }
 

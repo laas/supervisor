@@ -89,14 +89,10 @@ bool newPlan(supervisor_msgs::NewPlan::Request  &req, supervisor_msgs::NewPlan::
 	for(vector<string>::iterator it = other_agents.begin(); it != other_agents.end(); it++){
 		if(*it == robot_name){
 			db->addPlanState(plan, *it, "PROGRESS");
-			for(vector<supervisor_msgs::ActionMS>::iterator ita = plan.actions.begin(); ita != plan.actions.end(); ita++){
-				db->addActionState(*ita, *it, "PLANNED");
-			}
+			db->addActionsState(plan.actions, *it, "PLANNED");
 		}else{
 			db->addPlanState(plan, *it, "UNKNOWN");
-			for(vector<supervisor_msgs::ActionMS>::iterator ita = plan.actions.begin(); ita != plan.actions.end(); ita++){
-				db->addActionState(*ita, *it, "UNKNOWN");
-			}
+			db->addActionsState(plan.actions, *it, "UNKNOWN");
 		}
 	}
 

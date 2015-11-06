@@ -8,6 +8,7 @@
 
 #include "toaster_msgs/GetAgents.h"
 #include "toaster_msgs/AddFactToAgent.h"
+#include "toaster_msgs/AddFactsToAgent.h"
 #include "toaster_msgs/RemoveFactToAgent.h"
 #include "toaster_msgs/ExecuteSQL.h"
 #include "toaster_msgs/Fact.h"
@@ -27,7 +28,7 @@ public:
 	vector<string> getAgents();
 	void addGoalState(supervisor_msgs::GoalMS goal, string agent, string state);
 	void addPlanState(supervisor_msgs::PlanMS plan, string agent, string state);
-	void addActionState(supervisor_msgs::ActionMS action, string agent, string state);
+	void addActionsState(vector<supervisor_msgs::ActionMS> actions, string agent, string state);
 protected:
 
 private:
