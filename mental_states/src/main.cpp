@@ -72,10 +72,17 @@ bool newPlan(supervisor_msgs::NewPlan::Request  &req, supervisor_msgs::NewPlan::
 	supervisor_msgs::PlanMS plan;
 	plan.goal = *(ms->getGoalByName(req.plan.goal));
 	plan.id = ms->getAndIncreasePlanId();
-	plan.links = req.plan.links;
+	map<int, int> lmap;
 	for(vector<supervisor_msgs::Action>::iterator it = req.plan.actions.begin(); it != req.plan.actions.end(); it++){
 		supervisor_msgs::ActionMS action = ms->createActionFromHighLevel(*it);
 		plan.actions.push_back(action);
+		lmap[it->id] = action.id;
+	}
+	for(vector<supervisor_msgs::Link>::iterator it = req.plan.links.begin(); it != req.plan.links.end(); it++){
+		supervisor_msgs::Link new_link;
+		new_link.origin = lmap[it->origin];
+		new_link.following = lmap[it->following];
+		plan.links.push_back(new_link);
 	}
 
 	//add the plan state to PROGRESS and the action to PLANNED into the robot knowledge and both to UNKNOWN into the other agent knowledge
