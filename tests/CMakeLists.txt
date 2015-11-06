@@ -186,6 +186,13 @@ target_link_libraries(
 )
 add_dependencies(action_test supervisor_msgs_generate_messages_cpp)
 
+add_executable(ms_test src/ms_test.cpp)
+target_link_libraries( 
+  ms_test
+  ${catkin_LIBRARIES}
+)
+add_dependencies(ms_test supervisor_msgs_generate_messages_cpp)
+
 #############
 ## Testing ##
 #############
