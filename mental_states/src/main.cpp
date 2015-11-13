@@ -23,7 +23,7 @@ vector<string> other_agents;
 Service call when we ask the robot to execute a new goal
 */
 bool newGoal(supervisor_msgs::NewGoal::Request  &req, supervisor_msgs::NewGoal::Response &res){
-		
+	
 	supervisor_msgs::GoalMS* goal = NULL;
 	//Get the goal by its name
 	goal = ms->getGoalByName(req.goal);
@@ -84,17 +84,31 @@ bool newPlan(supervisor_msgs::NewPlan::Request  &req, supervisor_msgs::NewPlan::
 		new_link.following = lmap[it->following];
 		plan.links.push_back(new_link);
 	}
+	
+	//Add the plan to the list of plans
+	ms->addPlanToList(plan);
 
 	//add the plan state to PROGRESS and the action to PLANNED into the robot knowledge and both to UNKNOWN into the other agent knowledge
 	for(vector<string>::iterator it = other_agents.begin(); it != other_agents.end(); it++){
 		if(*it == robot_name){
-			db->addPlanState(plan, *it, "PROGRESS");
 			db->addActionsState(plan.actions, *it, "PLANNED");
+			db->addPlanState(plan, *it, "PROGRESS");
 		}else{
-			db->addPlanState(plan, *it, "UNKNOWN");
 			db->addActionsState(plan.actions, *it, "UNKNOWN");
+			db->addPlanState(plan, *it, "UNKNOWN");
 		}
 	}
+
+
+	return true;
+}
+
+/*
+Service call to abort the current plan for an agent
+*/
+bool abortPlan(supervisor_msgs::AbortPlan::Request  &req, supervisor_msgs::AbortPlan::Response &res){
+	
+	ms->abortPlan(req.agent);
 
 
 	return true;
@@ -112,6 +126,7 @@ int main (int argc, char **argv)
   ros::ServiceServer service_new_goal = node.advertiseService("mental_state/new_goal", newGoal); //to add a new goal (state PENDING)
   ros::ServiceServer service_start_goal = node.advertiseService("mental_state/start_goal", startGoal); //to start a goal
   ros::ServiceServer service_new_plan = node.advertiseService("mental_state/new_plan", newPlan); //to add a new plan (in PROGRESS for the robot and UNKNOWN for others)
+  ros::ServiceServer service_abort_plan = node.advertiseService("mental_state/abort_plan", abortPlan); //abort the current plan for an agent
 
   node.getParam("/robot/name", robot_name);
   other_agents = db->getAgents();

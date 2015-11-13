@@ -1,12 +1,16 @@
 #include <ros/ros.h>
+#include <vector>
 #include "toaster_msgs/Fact.h"
 #include "toaster_msgs/FactList.h"
+#include "toaster_msgs/AddFactsToAgent.h"
 #include "supervisor_msgs/NewPlan.h"
 #include "supervisor_msgs/NewGoal.h"
 #include "supervisor_msgs/StartGoal.h"
 #include "supervisor_msgs/Link.h"
 #include "supervisor_msgs/Action.h"
 #include "supervisor_msgs/Plan.h"
+
+using namespace std;
 
 int main (int argc, char **argv)
 {
@@ -16,9 +20,32 @@ int main (int argc, char **argv)
   ros::ServiceClient new_goal = n.serviceClient<supervisor_msgs::NewGoal>("mental_state/new_goal");
   ros::ServiceClient start_goal = n.serviceClient<supervisor_msgs::StartGoal>("mental_state/start_goal");
   ros::ServiceClient new_plan = n.serviceClient<supervisor_msgs::NewPlan>("mental_state/new_plan");
+  ros::ServiceClient add_fact = n.serviceClient<toaster_msgs::AddFactsToAgent>("database/add_facts_to_agent");
+
+
+  vector<toaster_msgs::Fact> to_add;
   
+  toaster_msgs::Fact fact;
+  fact.subjectId = "RED_CUBE";
+  fact.property = "isReachableBy";
+  fact.targetId = "PR2_ROBOT";
+  to_add.push_back(fact);
+
+  toaster_msgs::Fact fact2;
+  fact2.subjectId = "TABLE_4";
+  fact2.property = "isReachableBy";
+  fact2.targetId = "PR2_ROBOT";
+  to_add.push_back(fact2);
+
+  toaster_msgs::AddFactsToAgent srvAdd;
+  srvAdd.request.agentId = "PR2_ROBOT";
+  srvAdd.request.facts = to_add;
+  if (!add_fact.call(srvAdd)){
+    ROS_ERROR("[mental_state] Failed to call service database/add_facts_to_agent");
+  }
+
   supervisor_msgs::NewGoal srv_ngoal;
-  srv_ngoal.request.goal = "CLEAN";
+  srv_ngoal.request.goal = "TEST";
 
   if (new_goal.call(srv_ngoal))
   {
@@ -31,7 +58,7 @@ int main (int argc, char **argv)
   }
 
   supervisor_msgs::StartGoal srv_sgoal;
-  srv_sgoal.request.goal = "CLEAN";
+  srv_sgoal.request.goal = "TEST";
 
   if (start_goal.call(srv_sgoal))
   {
@@ -72,6 +99,24 @@ int main (int argc, char **argv)
     ROS_ERROR("Failed to call service mental_state/new_plan");
     return 1;
   }
+
+   ros::Duration(2).sleep();
+
+  to_add = vector<toaster_msgs::Fact>();
+ 
+
+  toaster_msgs::Fact fact3;
+  fact3.subjectId = "RED_CUBE";
+  fact3.property = "isOn";
+  fact3.targetId = "TABLE_4";
+  to_add.push_back(fact3);
+
+  srvAdd.request.agentId = "PR2_ROBOT";
+  srvAdd.request.facts = to_add;
+  if (!add_fact.call(srvAdd)){
+    ROS_ERROR("[mental_state] Failed to call service database/add_facts_to_agent");
+  }
+  
 
   //exit
   return 0;

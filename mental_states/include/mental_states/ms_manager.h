@@ -14,6 +14,7 @@
 #include "supervisor_msgs/NewPlan.h"
 #include "supervisor_msgs/NewGoal.h"
 #include "supervisor_msgs/StartGoal.h"
+#include "supervisor_msgs/AbortPlan.h"
 #include "supervisor_msgs/ActionMS.h"
 #include "supervisor_msgs/PlanMS.h"
 #include "supervisor_msgs/GoalMS.h"
@@ -33,6 +34,9 @@ public:
 	supervisor_msgs::GoalMS* getGoalByName(string name);
 	supervisor_msgs::ActionMS createActionFromHighLevel(supervisor_msgs::Action action);
 	int getAndIncreasePlanId();
+	void addPlanToList(supervisor_msgs::PlanMS plan);
+	pair<bool, supervisor_msgs::PlanMS> getAgentPlan(string agent);
+	void abortPlan(string agent);
 protected:
 
 private:
@@ -51,6 +55,7 @@ private:
 	void planFeasibility(string agent);
 	void checkGoals(string agent);
 	supervisor_msgs::ActionMS getHighLevelActionByName(string name);
+	vector<supervisor_msgs::ActionMS> getActionsFromIds(vector<int> ids);
 
 };
 

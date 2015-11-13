@@ -11,6 +11,7 @@
 #include "toaster_msgs/AddFactsToAgent.h"
 #include "toaster_msgs/RemoveFactToAgent.h"
 #include "toaster_msgs/ExecuteSQL.h"
+#include "toaster_msgs/AreInTable.h"
 #include "toaster_msgs/Fact.h"
 #include "toaster_msgs/FactList.h"
 #include "supervisor_msgs/ActionMS.h"
@@ -29,6 +30,11 @@ public:
 	void addGoalState(supervisor_msgs::GoalMS goal, string agent, string state);
 	void addPlanState(supervisor_msgs::PlanMS plan, string agent, string state);
 	void addActionsState(vector<supervisor_msgs::ActionMS> actions, string agent, string state);
+	vector<int> getActionsIdFromState(string agent, string state);
+	bool factsAreIn(string agent, vector<toaster_msgs::Fact> facts);
+	int getAgentIdPlan(string agent);
+	void removeActionsState(string agent, string state);
+	vector<string> getAgentGoals(string agent, string state);
 protected:
 
 private:
