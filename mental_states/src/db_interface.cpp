@@ -355,5 +355,21 @@ vector<string> DBInterface::getAgentsWhoSee(string agent){
   	return agents;
 }
 
+/*
+Function which add facts to the knowledge of an agent
+	@facts: the facts to add
+	@agent: the agent name 
+*/
+void DBInterface::addFacts(vector<toaster_msgs::Fact> facts, string agent){
 
+	ros::NodeHandle node;
+  	ros::ServiceClient client = node.serviceClient<toaster_msgs::AddFactsToAgent>("database/add_facts_to_agent");
+
+	toaster_msgs::AddFactsToAgent srv;
+	srv.request.agentId = agent;
+	srv.request.facts = facts;
+  	if (!client.call(srv)){
+   	 ROS_ERROR("[mental_state] Failed to call service database/add_facts_to_agent");
+  	}
+}
 

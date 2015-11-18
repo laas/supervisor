@@ -136,6 +136,41 @@ bool sharePlan(supervisor_msgs::SharePlan::Request  &req, supervisor_msgs::Share
 	return true;
 }
 
+/*
+Service call when the robot detects the change of state of an action (either action in PROGRESS, DONE or ABORTED)
+*/
+bool actionState(supervisor_msgs::ActionState::Request  &req, supervisor_msgs::ActionState::Response &res){
+	
+	//first we get the corresponding action
+	pair<bool, supervisor_msgs::ActionMS> action = ms->getActionFromAction(req.action);
+
+	//then we get all the agent which can see the actors of the action
+	vector<string> canSee_agents = all_agents;
+	for(vector<string>::iterator it = action.second.actors.begin(); it != action.second.actors.end(); it++){
+		vector<string> temp_agents = db->getAgentsWhoSee(*it);
+		vector<string> temp(100);
+		sort(temp_agents.begin(), temp_agents.end());
+		sort(canSee_agents.begin(), canSee_agents.end());
+		vector<string>::iterator i = set_intersection(temp_agents.begin(), temp_agents.end(), canSee_agents.begin(), canSee_agents.end(), temp.begin());
+		temp.resize(i-temp.begin());       
+		canSee_agents = temp;
+	}
+	canSee_agents.insert(canSee_agents.end(), action.second.actors.begin(), action.second.actors.end());
+	
+	//for all these agent and for the actors we change the state of the action
+	for(vector<string>::iterator it = canSee_agents.begin(); it != canSee_agents.end(); it++){
+		vector<supervisor_msgs::ActionMS> actions;
+		actions.push_back(action.second);
+		db->addActionsState(actions, *it, req.state);
+		if(req.state == "DONE"){//if the state is done, we also add the effects of the action in the agent knowledge
+			db->addFacts(action.second.effects, *it);
+		}		
+	}
+
+	return true;
+	 
+}
+
 int main (int argc, char **argv)
 {
   ros::init(argc, argv, "mental_state");
@@ -150,6 +185,7 @@ int main (int argc, char **argv)
   ros::ServiceServer service_new_plan = node.advertiseService("mental_state/new_plan", newPlan); //to add a new plan (in PROGRESS for the robot and UNKNOWN for others)
   ros::ServiceServer service_abort_plan = node.advertiseService("mental_state/abort_plan", abortPlan); //abort the current plan for an agent
   ros::ServiceServer service_share_plan = node.advertiseService("mental_state/share_plan", sharePlan); //the robot shares the current plan
+  ros::ServiceServer service_action_state = node.advertiseService("mental_state/action_state", actionState); //to change the state of an action
 
   node.getParam("/robot/name", robot_name);
   all_agents = db->getAgents();

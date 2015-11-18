@@ -477,4 +477,46 @@ void MSManager::abortPlan(string agent){
 	}
 }
 
+/*
+Function which return the action (ActionMS format) corresponding to the action in parameters
+	@action: the action in Action format
+*/
+pair<bool, supervisor_msgs::ActionMS> MSManager::getActionFromAction(supervisor_msgs::Action action){
+
+	boost::unique_lock<boost::mutex> lock(actionList_mutex);
+	pair<bool, supervisor_msgs::ActionMS> answer;
+	for(vector<supervisor_msgs::ActionMS>::iterator it = actionList.begin(); it != actionList.end(); it++){
+		if(action.parameters.size() == it->parameters.size()){
+			vector<string>::iterator itp2 = action.parameters.begin();
+			for(vector<string>::iterator itp = it->parameters.begin(); itp != it->parameters.end(); itp++){
+				if(*itp != *itp2){
+					continue;
+				}
+				itp2++;
+			}
+		}else{
+			continue;
+		}
+		if(action.actors.size() == it->actors.size()){
+			vector<string>::iterator ita2 = action.actors.begin();
+			for(vector<string>::iterator ita = it->actors.begin(); ita != it->actors.end(); ita++){
+				if(*ita != *ita2){
+					continue;
+				}
+				ita2++;
+			}
+		}else{
+			continue;
+		}
+
+
+		answer.first = true;
+		answer.second = *it;
+		return answer;
+	}
+
+	answer.first = false;
+	return answer;
+}
+
 

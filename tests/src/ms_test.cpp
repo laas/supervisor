@@ -7,6 +7,7 @@
 #include "supervisor_msgs/NewGoal.h"
 #include "supervisor_msgs/StartGoal.h"
 #include "supervisor_msgs/SharePlan.h"
+#include "supervisor_msgs/ActionState.h"
 #include "supervisor_msgs/Link.h"
 #include "supervisor_msgs/Action.h"
 #include "supervisor_msgs/Plan.h"
@@ -23,6 +24,8 @@ int main (int argc, char **argv)
   ros::ServiceClient new_plan = n.serviceClient<supervisor_msgs::NewPlan>("mental_state/new_plan");
   ros::ServiceClient add_fact = n.serviceClient<toaster_msgs::AddFactsToAgent>("database/add_facts_to_agent");
   ros::ServiceClient share_plan = n.serviceClient<supervisor_msgs::SharePlan>("mental_state/share_plan");
+  ros::ServiceClient action_state = n.serviceClient<supervisor_msgs::ActionState>("mental_state/action_state");
+
 
 
   vector<toaster_msgs::Fact> to_add;
@@ -136,6 +139,21 @@ int main (int argc, char **argv)
 
    ros::Duration(2).sleep();
 
+
+ supervisor_msgs::ActionState srv_astate;
+ srv_astate.request.action = action1;
+ srv_astate.request.state = "DONE";
+  if (action_state.call(srv_astate))
+  {
+    ROS_INFO("Action 0 DONE");
+  }
+  else
+  {
+    ROS_ERROR("Failed to call service mental_state/action_state");
+    return 1;
+  }
+
+
   to_add = vector<toaster_msgs::Fact>();
  
 
@@ -147,9 +165,9 @@ int main (int argc, char **argv)
 
   srvAdd.request.agentId = "PR2_ROBOT";
   srvAdd.request.facts = to_add;
-  if (!add_fact.call(srvAdd)){
-    ROS_ERROR("[mental_state] Failed to call service database/add_facts_to_agent");
-  }
+  //if (!add_fact.call(srvAdd)){
+  //  ROS_ERROR("[mental_state] Failed to call service database/add_facts_to_agent");
+ // }
   
 
   //exit
