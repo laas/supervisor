@@ -329,8 +329,31 @@ vector<string> DBInterface::getAgentGoals(string agent, string state){
 
 }
 
+/*
+Function which return all the agents who can see an agent
+	@agent: the agent name 
+*/
+vector<string> DBInterface::getAgentsWhoSee(string agent){
+
+	ros::NodeHandle node;
+  	ros::ServiceClient client = node.serviceClient<toaster_msgs::ExecuteSQL>("database/execute_SQL");
+	vector<string> agents;
+	string robot_name;
+  	node.getParam("/robot/name", robot_name);
+	
+	//we ask to the database the ids of the action of the given state
+	string SQLOrder = "SELECT target_id FROM fact_table_" + robot_name + " WHERE predicate = 'isVisibleBy' AND subject_id = '" + agent + "'";
+	toaster_msgs::ExecuteSQL srv;
+	srv.request.order = SQLOrder;
+	if (client.call(srv)){
+	 return srv.response.results;
+	}else{
+	 ROS_ERROR("[mental_state] Failed to call service database/execute_SQL");
+	}
 
 
+  	return agents;
+}
 
 
 

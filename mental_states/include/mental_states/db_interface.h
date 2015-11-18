@@ -35,6 +35,7 @@ public:
 	int getAgentIdPlan(string agent);
 	void removeActionsState(string agent, string state);
 	vector<string> getAgentGoals(string agent, string state);
+	vector<string> getAgentsWhoSee(string agent);
 protected:
 
 private:

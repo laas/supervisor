@@ -17,7 +17,7 @@ Function which updates the mental state of an agent
 MSManager* ms = new MSManager();
 DBInterface* db = new DBInterface();
 string robot_name;
-vector<string> other_agents;
+vector<string> all_agents;
 
 /*
 Service call when we ask the robot to execute a new goal
@@ -89,7 +89,7 @@ bool newPlan(supervisor_msgs::NewPlan::Request  &req, supervisor_msgs::NewPlan::
 	ms->addPlanToList(plan);
 
 	//add the plan state to PROGRESS and the action to PLANNED into the robot knowledge and both to UNKNOWN into the other agent knowledge
-	for(vector<string>::iterator it = other_agents.begin(); it != other_agents.end(); it++){
+	for(vector<string>::iterator it = all_agents.begin(); it != all_agents.end(); it++){
 		if(*it == robot_name){
 			db->addActionsState(plan.actions, *it, "PLANNED");
 			db->addPlanState(plan, *it, "PROGRESS");
@@ -114,6 +114,28 @@ bool abortPlan(supervisor_msgs::AbortPlan::Request  &req, supervisor_msgs::Abort
 	return true;
 }
 
+/*
+Service call to abort the robot shares the current plan
+*/
+bool sharePlan(supervisor_msgs::SharePlan::Request  &req, supervisor_msgs::SharePlan::Response &res){
+	
+	//we get all the agents which can see the robot
+	vector<string> present_agents = db->getAgentsWhoSee(robot_name);
+	//We get the current plan
+	pair<bool, supervisor_msgs::PlanMS> robotPlan = ms->getAgentPlan(robot_name);
+	if(!robotPlan.first){
+		return true;
+	}
+
+	//For all these agents, the plan is now in PROGRESS and its actions PLANNED
+	for(vector<string>::iterator it = present_agents.begin(); it != present_agents.end(); it++){
+		db->addActionsState(robotPlan.second.actions, *it, "PLANNED");
+		db->addPlanState(robotPlan.second, *it, "PROGRESS");
+	}
+
+	return true;
+}
+
 int main (int argc, char **argv)
 {
   ros::init(argc, argv, "mental_state");
@@ -127,9 +149,10 @@ int main (int argc, char **argv)
   ros::ServiceServer service_start_goal = node.advertiseService("mental_state/start_goal", startGoal); //to start a goal
   ros::ServiceServer service_new_plan = node.advertiseService("mental_state/new_plan", newPlan); //to add a new plan (in PROGRESS for the robot and UNKNOWN for others)
   ros::ServiceServer service_abort_plan = node.advertiseService("mental_state/abort_plan", abortPlan); //abort the current plan for an agent
+  ros::ServiceServer service_share_plan = node.advertiseService("mental_state/share_plan", sharePlan); //the robot shares the current plan
 
   node.getParam("/robot/name", robot_name);
-  other_agents = db->getAgents();
+  all_agents = db->getAgents();
   ms->initGoals();
   ms->initHighLevelActions();
 
@@ -137,7 +160,7 @@ int main (int argc, char **argv)
 
   while (node.ok()) {
 
-  for(vector<string>::iterator it = other_agents.begin(); it != other_agents.end(); it++){
+  for(vector<string>::iterator it = all_agents.begin(); it != all_agents.end(); it++){
 	ms->update(*it);
   }
 

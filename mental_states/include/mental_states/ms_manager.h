@@ -15,6 +15,7 @@
 #include "supervisor_msgs/NewGoal.h"
 #include "supervisor_msgs/StartGoal.h"
 #include "supervisor_msgs/AbortPlan.h"
+#include "supervisor_msgs/SharePlan.h"
 #include "supervisor_msgs/ActionMS.h"
 #include "supervisor_msgs/PlanMS.h"
 #include "supervisor_msgs/GoalMS.h"

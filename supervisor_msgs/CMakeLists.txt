@@ -34,6 +34,7 @@ add_service_files(
   NewGoal.srv
   StartGoal.srv
   AbortPlan.srv
+  SharePlan.srv
 )
 
  add_action_files(
