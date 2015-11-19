@@ -8,6 +8,7 @@
 #include "supervisor_msgs/StartGoal.h"
 #include "supervisor_msgs/SharePlan.h"
 #include "supervisor_msgs/ActionState.h"
+#include "supervisor_msgs/AbortGoal.h"
 #include "supervisor_msgs/Link.h"
 #include "supervisor_msgs/Action.h"
 #include "supervisor_msgs/Plan.h"

@@ -17,6 +17,7 @@
 #include "supervisor_msgs/AbortPlan.h"
 #include "supervisor_msgs/SharePlan.h"
 #include "supervisor_msgs/ActionState.h"
+#include "supervisor_msgs/AbortGoal.h"
 #include "supervisor_msgs/ActionMS.h"
 #include "supervisor_msgs/PlanMS.h"
 #include "supervisor_msgs/GoalMS.h"

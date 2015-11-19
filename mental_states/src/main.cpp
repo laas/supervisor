@@ -171,6 +171,25 @@ bool actionState(supervisor_msgs::ActionState::Request  &req, supervisor_msgs::A
 	 
 }
 
+/*
+Service call to abort a goal for an agent
+*/
+bool abortGoal(supervisor_msgs::AbortGoal::Request  &req, supervisor_msgs::AbortGoal::Response &res){
+	
+	supervisor_msgs::GoalMS* goal = NULL;
+	//Get the goal by its name
+	goal = ms->getGoalByName(req.goal);
+	if(!goal){
+		ROS_ERROR("[mental_state] Unknown goal");
+		return false;
+	}
+
+	db->addGoalState(*goal, req.agent, "ABORTED");
+
+
+	return true;
+}
+
 int main (int argc, char **argv)
 {
   ros::init(argc, argv, "mental_state");
@@ -186,6 +205,7 @@ int main (int argc, char **argv)
   ros::ServiceServer service_abort_plan = node.advertiseService("mental_state/abort_plan", abortPlan); //abort the current plan for an agent
   ros::ServiceServer service_share_plan = node.advertiseService("mental_state/share_plan", sharePlan); //the robot shares the current plan
   ros::ServiceServer service_action_state = node.advertiseService("mental_state/action_state", actionState); //to change the state of an action
+  ros::ServiceServer service_abort_goal = node.advertiseService("mental_state/abort_goal", abortGoal); //abort a goal for an agent
 
   node.getParam("/robot/name", robot_name);
   all_agents = db->getAgents();
