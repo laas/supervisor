@@ -8,6 +8,7 @@
 #include "supervisor_msgs/StartGoal.h"
 #include "supervisor_msgs/SharePlan.h"
 #include "supervisor_msgs/ActionState.h"
+#include "supervisor_msgs/InfoGiven.h"
 #include "supervisor_msgs/AbortGoal.h"
 #include "supervisor_msgs/Link.h"
 #include "supervisor_msgs/Action.h"
@@ -99,6 +100,7 @@ int main (int argc, char **argv)
   supervisor_msgs::Link link;
   supervisor_msgs::Action action1, action2;
   plan.goal = "CLEAN";
+  plan.id = 0;
   action1.name = "pick";
   action1.id = 0;
   action1.parameters.push_back("RED_CUBE");

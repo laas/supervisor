@@ -519,4 +519,42 @@ pair<bool, supervisor_msgs::ActionMS> MSManager::getActionFromAction(supervisor_
 	return answer;
 }
 
+/*
+Function which return the action (ActionMS format) corresponding to an id
+	@id: the id of the action
+*/
+pair<bool, supervisor_msgs::ActionMS> MSManager::getActionFromId(int id){
+
+	boost::unique_lock<boost::mutex> lock(actionList_mutex);
+	pair<bool, supervisor_msgs::ActionMS> answer;
+	if(id < actionId){
+		answer.second = actionList[id];
+		answer.first = true;
+		return answer;
+	}else{//the action does not exist
+		ROS_ERROR("[mental_state] Unknown action id");
+		answer.first = false;
+		return answer;
+	}
+}
+
+/*
+Function which return the plan (PLanMS format) corresponding to an id
+	@id: the id of the plan
+*/
+pair<bool, supervisor_msgs::PlanMS> MSManager::getPlanFromId(int id){
+
+	boost::unique_lock<boost::mutex> lock(planList_mutex);
+	pair<bool, supervisor_msgs::PlanMS> answer;
+	if(id < planId){
+		answer.second = planList[id];
+		answer.first = true;
+		return answer;
+	}else{//the plan does not exist
+		ROS_ERROR("[mental_state] Unknown plan id");
+		answer.first = false;
+		return answer;
+	}
+}
+
 

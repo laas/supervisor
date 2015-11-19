@@ -1,0 +1,10 @@
+string receiver
+string sender
+string infoType
+string goal
+int32 planId
+int32 actionId
+string state
+toaster_msgs/Fact fact
+---
+bool answer

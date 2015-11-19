@@ -190,6 +190,53 @@ bool abortGoal(supervisor_msgs::AbortGoal::Request  &req, supervisor_msgs::Abort
 	return true;
 }
 
+/*
+Service when an agent informs an other agent about something, it can be:
+	- the state of a goal, @infoType = goalState
+	- the state of a plan, @infoType = planState
+	- the state of a action, @infoType = actionState
+	- a fact, @infoType = fact
+*/
+bool infoGiven(supervisor_msgs::InfoGiven::Request  &req, supervisor_msgs::InfoGiven::Response &res){
+	
+	if(req.infoType == "goalState"){//we put the state of the goal into the receiver and sender knowledge
+		supervisor_msgs::GoalMS* goal = NULL;
+		goal = ms->getGoalByName(req.goal);
+		if(!goal){
+			ROS_ERROR("[mental_state] Unknown goal");
+			return false;
+		}
+		db->addGoalState(*goal, req.receiver, req.state);
+		db->addGoalState(*goal, req.sender, req.state);
+	}else if(req.infoType == "planState"){//we put the state of the plan into the receiver and sender knowledge
+		pair<bool, supervisor_msgs::PlanMS> plan = ms->getPlanFromId(req.planId);
+		if(plan.first){
+			db->addPlanState(plan.second, req.receiver, req.state);
+			db->addPlanState(plan.second, req.sender, req.state);
+		}
+	}else if(req.infoType == "actionState"){//we put the state of the action into the receiver and sender knowledge
+		pair<bool, supervisor_msgs::ActionMS> action = ms->getActionFromId(req.actionId);
+		if(action.first){
+			vector<supervisor_msgs::ActionMS> actions;
+			actions.push_back(action.second);
+			db->addActionsState(actions, req.receiver, req.state);
+			db->addActionsState(actions, req.sender, req.state);
+		}
+
+	}else if(req.infoType == "fact"){//we put the fact into the receiver and sender knowledge
+		vector<toaster_msgs::Fact> facts;
+		facts.push_back(req.fact);
+		db->addFacts(facts, req.receiver);
+		db->addFacts(facts, req.sender);
+	}else {
+		ROS_ERROR("[mental_state] Unknown infoType");
+		return false;
+	}
+
+
+	return true;
+}
+
 int main (int argc, char **argv)
 {
   ros::init(argc, argv, "mental_state");
@@ -206,6 +253,7 @@ int main (int argc, char **argv)
   ros::ServiceServer service_share_plan = node.advertiseService("mental_state/share_plan", sharePlan); //the robot shares the current plan
   ros::ServiceServer service_action_state = node.advertiseService("mental_state/action_state", actionState); //to change the state of an action
   ros::ServiceServer service_abort_goal = node.advertiseService("mental_state/abort_goal", abortGoal); //abort a goal for an agent
+  ros::ServiceServer service_info_given = node.advertiseService("mental_state/info_given", infoGiven); //when an agent informs an other agent about something
 
   node.getParam("/robot/name", robot_name);
   all_agents = db->getAgents();

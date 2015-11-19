@@ -37,6 +37,7 @@ add_service_files(
   SharePlan.srv
   ActionState.srv
   AbortGoal.srv
+  InfoGiven.srv
 )
 
  add_action_files(
