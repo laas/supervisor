@@ -1,0 +1,5 @@
+string agent
+string object
+string support
+---
+bool answer

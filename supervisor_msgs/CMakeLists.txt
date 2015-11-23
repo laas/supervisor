@@ -38,6 +38,8 @@ add_service_files(
   ActionState.srv
   AbortGoal.srv
   InfoGiven.srv
+  HumanPick.srv
+  HumanPlace.srv
 )
 
  add_action_files(
