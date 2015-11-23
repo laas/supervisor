@@ -486,6 +486,9 @@ pair<bool, supervisor_msgs::ActionMS> MSManager::getActionFromAction(supervisor_
 	boost::unique_lock<boost::mutex> lock(actionList_mutex);
 	pair<bool, supervisor_msgs::ActionMS> answer;
 	for(vector<supervisor_msgs::ActionMS>::iterator it = actionList.begin(); it != actionList.end(); it++){
+		if(action.name != it->name){
+			continue;
+		}
 		if(action.parameters.size() == it->parameters.size()){
 			vector<string>::iterator itp2 = action.parameters.begin();
 			for(vector<string>::iterator itp = it->parameters.begin(); itp != it->parameters.end(); itp++){
