@@ -142,11 +142,17 @@ Service call when the robot detects the change of state of an action (either act
 bool actionState(supervisor_msgs::ActionState::Request  &req, supervisor_msgs::ActionState::Response &res){
 	
 	//first we get the corresponding action
-	pair<bool, supervisor_msgs::ActionMS> action = ms->getActionFromAction(req.action);
+	pair<bool, supervisor_msgs::ActionMS> actionFind = ms->getActionFromAction(req.action);
+	supervisor_msgs::ActionMS action;
+	if(actionFind.first){
+		action = actionFind.second;
+	}else {
+		action = ms->createActionFromHighLevel(req.action);
+	}
 
 	//then we get all the agent which can see the actors of the action
 	vector<string> canSee_agents = all_agents;
-	for(vector<string>::iterator it = action.second.actors.begin(); it != action.second.actors.end(); it++){
+	for(vector<string>::iterator it = action.actors.begin(); it != action.actors.end(); it++){
 		vector<string> temp_agents = db->getAgentsWhoSee(*it);
 		vector<string> temp(100);
 		sort(temp_agents.begin(), temp_agents.end());
@@ -155,15 +161,15 @@ bool actionState(supervisor_msgs::ActionState::Request  &req, supervisor_msgs::A
 		temp.resize(i-temp.begin());       
 		canSee_agents = temp;
 	}
-	canSee_agents.insert(canSee_agents.end(), action.second.actors.begin(), action.second.actors.end());
+	canSee_agents.insert(canSee_agents.end(), action.actors.begin(), action.actors.end());
 	
 	//for all these agent and for the actors we change the state of the action
 	for(vector<string>::iterator it = canSee_agents.begin(); it != canSee_agents.end(); it++){
 		vector<supervisor_msgs::ActionMS> actions;
-		actions.push_back(action.second);
+		actions.push_back(action);
 		db->addActionsState(actions, *it, req.state);
 		if(req.state == "DONE"){//if the state is done, we also add the effects of the action in the agent knowledge
-			db->addFacts(action.second.effects, *it);
+			db->addFacts(action.effects, *it);
 		}		
 	}
 
