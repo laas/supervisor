@@ -162,6 +162,7 @@ bool actionState(supervisor_msgs::ActionState::Request  &req, supervisor_msgs::A
 		canSee_agents = temp;
 	}
 	canSee_agents.insert(canSee_agents.end(), action.actors.begin(), action.actors.end());
+	canSee_agents.push_back(robot_name);
 	
 	//for all these agent and for the actors we change the state of the action
 	for(vector<string>::iterator it = canSee_agents.begin(); it != canSee_agents.end(); it++){
