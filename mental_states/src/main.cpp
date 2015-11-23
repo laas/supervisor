@@ -170,7 +170,7 @@ bool actionState(supervisor_msgs::ActionState::Request  &req, supervisor_msgs::A
 		actions.push_back(action);
 		db->addActionsState(actions, *it, req.state);
 		if(req.state == "DONE"){//if the state is done, we also add the effects of the action in the agent knowledge
-			db->addFacts(action.effects, *it);
+			db->addEffects(action.effects, *it);
 		}		
 	}
 

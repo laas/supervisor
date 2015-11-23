@@ -373,3 +373,44 @@ void DBInterface::addFacts(vector<toaster_msgs::Fact> facts, string agent){
   	}
 }
 
+/*
+Function which add effects of an actions to the knowledge of an agent
+	@facts: the effects to add
+	@agent: the agent name 
+*/
+void DBInterface::addEffects(vector<toaster_msgs::Fact> facts, string agent){
+
+	ros::NodeHandle node;
+  	ros::ServiceClient client = node.serviceClient<toaster_msgs::AddFactsToAgent>("database/add_facts_to_agent");
+  	ros::ServiceClient client_rm = node.serviceClient<toaster_msgs::AddFactsToAgent>("database/remove_facts_to_agent");
+	vector<toaster_msgs::Fact> to_add;
+	vector<toaster_msgs::Fact> to_remove;
+
+	//if there is NULL in the description of the effect, we remove all facts of this type on the knowledge of the agent
+	for(vector<toaster_msgs::Fact>::iterator it = facts.begin(); it != facts.end(); it++){
+		if(it->subjectId == "NULL" || it->targetId == "NULL"){
+			to_remove.push_back(*it);
+		}else{
+			to_add.push_back(*it);
+		}
+	}
+
+	if(to_remove.size() != 0){
+		toaster_msgs::AddFactsToAgent srv_rm;
+		srv_rm.request.agentId = agent;
+		srv_rm.request.facts = to_remove;
+		if (!client_rm.call(srv_rm)){
+		 ROS_ERROR("[mental_state] Failed to call service database/remove_facts_to_agent");
+		}
+	}
+
+	if(to_add.size() != 0){
+		toaster_msgs::AddFactsToAgent srv;
+		srv.request.agentId = agent;
+		srv.request.facts = to_add;
+	  	if (!client.call(srv)){
+	   	 ROS_ERROR("[mental_state] Failed to call service database/add_facts_to_agent");
+	  	}
+	}
+}
+

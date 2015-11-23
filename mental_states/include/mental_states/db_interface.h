@@ -37,6 +37,7 @@ public:
 	vector<string> getAgentGoals(string agent, string state);
 	vector<string> getAgentsWhoSee(string agent);
 	void addFacts(vector<toaster_msgs::Fact> facts, string agent);
+	void addEffects(vector<toaster_msgs::Fact> facts, string agent);
 protected:
 
 private:
