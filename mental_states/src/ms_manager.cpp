@@ -560,4 +560,19 @@ pair<bool, supervisor_msgs::PlanMS> MSManager::getPlanFromId(int id){
 	}
 }
 
+/*
+Function which convert an ActionMS in Action
+	@actionMS: the action to convert
+*/
+supervisor_msgs::Action MSManager::convertActionMStoAction(supervisor_msgs::ActionMS actionMS){
+
+	supervisor_msgs::Action action;
+	action.name = actionMS.name;
+	action.id = actionMS.id;
+	action.parameters = actionMS.parameters;
+	action.actors = actionMS.actors;
+
+	return action;
+}
+
 

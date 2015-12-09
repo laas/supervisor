@@ -40,6 +40,7 @@ add_service_files(
   InfoGiven.srv
   HumanPick.srv
   HumanPlace.srv
+  GetActionTodo.srv
 )
 
  add_action_files(

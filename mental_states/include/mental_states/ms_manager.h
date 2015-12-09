@@ -18,6 +18,7 @@
 #include "supervisor_msgs/SharePlan.h"
 #include "supervisor_msgs/ActionState.h"
 #include "supervisor_msgs/InfoGiven.h"
+#include "supervisor_msgs/GetActionTodo.h"
 #include "supervisor_msgs/AbortGoal.h"
 #include "supervisor_msgs/ActionMS.h"
 #include "supervisor_msgs/PlanMS.h"
@@ -44,6 +45,8 @@ public:
 	pair<bool, supervisor_msgs::ActionMS> getActionFromAction(supervisor_msgs::Action action);
 	pair<bool, supervisor_msgs::ActionMS> getActionFromId(int id);
 	pair<bool, supervisor_msgs::PlanMS> getPlanFromId(int id);
+	supervisor_msgs::Action convertActionMStoAction(supervisor_msgs::ActionMS actionMS);
+	vector<supervisor_msgs::ActionMS> getActionsFromIds(vector<int> ids);
 protected:
 
 private:
@@ -62,7 +65,6 @@ private:
 	void planFeasibility(string agent);
 	void checkGoals(string agent);
 	supervisor_msgs::ActionMS getHighLevelActionByName(string name);
-	vector<supervisor_msgs::ActionMS> getActionsFromIds(vector<int> ids);
 
 };
 
