@@ -103,7 +103,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES mental_states
+#  LIBRARIES state_machines
    CATKIN_DEPENDS toaster_msgs roscpp std_msgs supervisor_msgs
 #  DEPENDS system_lib
 )
@@ -122,21 +122,21 @@ include_directories(
 )
 
 ## Declare a C++ library
-# add_library(mental_states
-#   src/${PROJECT_NAME}/mental_states.cpp
+# add_library(state_machines
+#   src/${PROJECT_NAME}/state_machines.cpp
 # )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(mental_states ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(state_machines ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-# add_executable(mental_states_node src/mental_states_node.cpp)
+# add_executable(state_machines_node src/state_machines_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(mental_states_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(state_machines_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(mental_states_node
@@ -178,7 +178,7 @@ include_directories(
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
 
-add_executable(state_machines src/main.cpp)
+add_executable(state_machines src/main.cpp  src/robot_sm.cpp)
 target_link_libraries( 
   state_machines
   ${catkin_LIBRARIES}
@@ -190,7 +190,7 @@ add_dependencies(state_machines supervisor_msgs_generate_messages_cpp)
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_mental_states.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_state_machines.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

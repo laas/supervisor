@@ -146,15 +146,15 @@ int main (int argc, char **argv)
  supervisor_msgs::ActionState srv_astate;
  srv_astate.request.action = action1;
  srv_astate.request.state = "DONE";
-  if (action_state.call(srv_astate))
-  {
-    ROS_INFO("Action 0 DONE");
-  }
-  else
-  {
-    ROS_ERROR("Failed to call service mental_state/action_state");
-    return 1;
-  }
+ // if (action_state.call(srv_astate))
+ // {
+ //   ROS_INFO("Action 0 DONE");
+ // }
+ // else
+ // {
+ //   ROS_ERROR("Failed to call service mental_state/action_state");
+ //   return 1;
+ // }
 
 
   to_add = vector<toaster_msgs::Fact>();
