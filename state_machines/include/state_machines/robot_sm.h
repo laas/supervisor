@@ -14,6 +14,8 @@
 #include "supervisor_msgs/GetActionTodo.h"
 #include "supervisor_msgs/Action.h"
 #include "supervisor_msgs/ActionExecutorAction.h"
+#include "supervisor_msgs/ActionExecutorActionResult.h"
+#include "supervisor_msgs/ActionExecutorActionFeedback.h"
 
 
 typedef actionlib::SimpleActionClient<supervisor_msgs::ActionExecutorAction> Client;
@@ -32,6 +34,9 @@ private:
 	ros::NodeHandle node;
 	string robot_name;
 	Client action_client;
+	bool isActing;
+
+	void doneCb(const actionlib::SimpleClientGoalState& state, const supervisor_msgs::ActionExecutorResultConstPtr& result);
 
 };
 
