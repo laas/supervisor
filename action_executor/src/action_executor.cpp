@@ -22,6 +22,10 @@ action_server_(node_handle_, name,
 
 
 void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& goal) {
+  	ros::ServiceClient client = node_handle_.serviceClient<supervisor_msgs::ActionState>("mental_state/action_state");
+	supervisor_msgs::ActionState srv;
+	srv.request.action = goal->action;
+
 	//Getting action informations
 	string name = goal->action.name;
 	int id = goal->action.id;
@@ -29,6 +33,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 	for(int i=0; i<goal->action.parameters.size();i++){
 		ROS_INFO("  %s", goal->action.parameters[i].c_str());
 	}
+
 	//Creating the action
 	VirtualAction* act = NULL;
 	act = initializeAction(goal->action);
@@ -40,10 +45,21 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 		return;
 	}
 
+
+	//send the fact that the action is in progress to the MS Manager
+	srv.request.state = "PROGRESS";
+	if (!client.call(srv)){
+	 ROS_ERROR("[state_machines] Failed to call service mental_state/action_state");
+	}
+
 	//Checking preconditions
 	feedback_.state = "PREC";
 	action_server_.publishFeedback(feedback_);
 	if(!act->preconditions()){
+		srv.request.state = "FAILED";
+		if (!client.call(srv)){
+		 ROS_ERROR("[state_machines] Failed to call service mental_state/action_state");
+		}
 		result_.report = false;
 		if(!action_server_.isPreemptRequested()){
 			result_.state = feedback_.state;
@@ -60,6 +76,10 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 	feedback_.state = "PLAN";
 	action_server_.publishFeedback(feedback_);
 	if(!act->plan()){
+		srv.request.state = "FAILED";
+		if (!client.call(srv)){
+		 ROS_ERROR("[state_machines] Failed to call service mental_state/action_state");
+		}
 		result_.report = false;
 		if(!action_server_.isPreemptRequested()){
 			result_.state = feedback_.state;
@@ -71,11 +91,16 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 		}
 		return;
 	}
+	
 
 	//Execution of the action
 	feedback_.state = "EXEC";
 	action_server_.publishFeedback(feedback_);
 	if(!act->exec()){
+		srv.request.state = "FAILED";
+		if (!client.call(srv)){
+		 ROS_ERROR("[state_machines] Failed to call service mental_state/action_state");
+		}
 		result_.report = false;
 		if(!action_server_.isPreemptRequested()){
 			result_.state = feedback_.state;
@@ -92,6 +117,10 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 	feedback_.state = "POST";
 	action_server_.publishFeedback(feedback_);
 	if(!act->post()){
+		srv.request.state = "FAILED";
+		if (!client.call(srv)){
+		 ROS_ERROR("[state_machines] Failed to call service mental_state/action_state");
+		}
 		result_.report = false;
 		if(!action_server_.isPreemptRequested()){
 			result_.state = feedback_.state;
@@ -104,6 +133,10 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 		return;
 	}
 	
+	srv.request.state = "DONE";
+	if (!client.call(srv)){
+	 ROS_ERROR("[state_machines] Failed to call service mental_state/action_state");
+	}
 	result_.report = true;
 	result_.state = "OK";
 	action_server_.setSucceeded(result_);

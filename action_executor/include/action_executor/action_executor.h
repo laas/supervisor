@@ -2,6 +2,7 @@
 #define ACTIONEXECUTOR_H
 
 #include "supervisor_msgs/ActionExecutorAction.h"
+#include "supervisor_msgs/ActionState.h"
 #include "action_executor/virtual_action.h"
 #include "action_executor/Actions/action_pkg.h"
 
