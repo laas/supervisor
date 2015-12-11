@@ -315,6 +315,33 @@ bool getActionTodo(supervisor_msgs::GetActionTodo::Request  &req, supervisor_msg
 	return true;
 }
 
+/*
+Service call to abort a goal for an agent
+*/
+bool getAllAgents(supervisor_msgs::GetAllAgents::Request  &req, supervisor_msgs::GetAllAgents::Response &res){
+	
+	res.agents =  db->getAgents();
+
+
+	return true;
+}
+
+/*
+Service call to get the state of an action
+*/
+bool getActionState(supervisor_msgs::GetActionState::Request  &req, supervisor_msgs::GetActionState::Response &res){
+	
+	pair<bool, supervisor_msgs::ActionMS> actionFind = ms->getActionFromAction(req.action);
+	if(actionFind.first){
+		res.state = db->getActionState(req.agent, actionFind.second);
+	}else {
+		res.state = "UNKNOWN";
+	}
+
+
+	return true;
+}
+
 
 int main (int argc, char **argv)
 {
@@ -334,6 +361,8 @@ int main (int argc, char **argv)
   ros::ServiceServer service_abort_goal = node.advertiseService("mental_state/abort_goal", abortGoal); //abort a goal for an agent
   ros::ServiceServer service_info_given = node.advertiseService("mental_state/info_given", infoGiven); //when an agent informs an other agent about something
   ros::ServiceServer service_get_action_todo = node.advertiseService("mental_state/get_action_todo", getActionTodo); //get the action an agent thinks it has to do
+  ros::ServiceServer service_get_all_agents = node.advertiseService("mental_state/get_all_agents", getAllAgents); //return all agents name
+  ros::ServiceServer service_get_action_state = node.advertiseService("mental_state/get_action_state", getActionState); //return the state of an action in the knowledge of an agent
 
   node.getParam("/robot/name", robot_name);
   all_agents = db->getAgents();

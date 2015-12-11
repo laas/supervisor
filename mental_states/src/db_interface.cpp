@@ -304,6 +304,35 @@ void DBInterface::removeActionsState(string agent, string state){
 }
 
 /*
+Function which return the state of an action in the knowledge of an agent
+	@agent: the agent name 
+	@state: the action we want the state
+*/
+string DBInterface::getActionState(string agent, supervisor_msgs::ActionMS action){
+
+	ros::NodeHandle node;
+  	ros::ServiceClient client = node.serviceClient<toaster_msgs::ExecuteSQL>("database/execute_SQL");
+
+	//we ask to the database the ids of the action of the given state
+	ostringstream to_string;
+        to_string << action.id;
+        string action_id = to_string.str();
+	string SQLOrder = "SELECT target_id FROM fact_table_" + agent + " WHERE predicate = 'actionState' AND subject_id = '" + action_id + "'";
+	toaster_msgs::ExecuteSQL srv;
+	srv.request.order = SQLOrder;
+	if (client.call(srv)){
+	 if(srv.response.results.size() != 0){
+		return srv.response.results[0];
+	 }else{
+		return "UNKNOWN";
+	  }
+	}else{
+	 ROS_ERROR("[mental_state] Failed to call service database/execute_SQL");
+	}
+		return "UNKNOWN";
+}
+
+/*
 Function which remove all knowledge of an agent about actions with a specific state
 	@agent: the agent name 
 	@state: the state of the actions we want to remove

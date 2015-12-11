@@ -19,6 +19,8 @@
 #include "supervisor_msgs/ActionState.h"
 #include "supervisor_msgs/InfoGiven.h"
 #include "supervisor_msgs/GetActionTodo.h"
+#include "supervisor_msgs/GetAllAgents.h"
+#include "supervisor_msgs/GetActionState.h"
 #include "supervisor_msgs/AbortGoal.h"
 #include "supervisor_msgs/ActionMS.h"
 #include "supervisor_msgs/PlanMS.h"

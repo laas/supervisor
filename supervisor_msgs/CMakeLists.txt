@@ -41,6 +41,8 @@ add_service_files(
   HumanPick.srv
   HumanPlace.srv
   GetActionTodo.srv
+  GetAllAgents.srv
+  GetActionState.srv
 )
 
  add_action_files(
