@@ -159,6 +159,8 @@ void MSManager::checkEffects(string agent){
 		}
 	}
 
+	//TODO: for all in PROGRESS action, if the agent see its actors and there are not perfoming it anymore, the agent considers the action DONE
+
 	db.addActionsState(to_done, agent, "DONE");
 }
 
@@ -268,6 +270,7 @@ void MSManager::planFeasibility(string agent){
 			possibleActions.insert(possibleActions.end(), askedActions.begin(), askedActions.end() );
 			possibleActions.insert(possibleActions.end(), readyActions.begin(), readyActions.end() );
 			if(possibleActions.size() == 0){
+				//TODO: if a human is not here and the robot has already tried to computes an other plan, it waits the human to come back
 				abortPlan(agent);
 			}
 		}
