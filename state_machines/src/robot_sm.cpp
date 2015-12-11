@@ -28,7 +28,7 @@ void RobotSM::doneCb(const actionlib::SimpleClientGoalState& state, const superv
 /*
 State where the robot is IDLE
 */
-string RobotSM::idleState(string humanState){
+string RobotSM::idleState(){
 
 	//We look if the robot has an action to do
   	ros::ServiceClient client = node.serviceClient<supervisor_msgs::GetActionTodo>("mental_state/get_action_todo");
@@ -57,7 +57,7 @@ string RobotSM::idleState(string humanState){
 /*
 State where the robot is ACTING
 */
-string RobotSM::actingState(string humanState){
+string RobotSM::actingState(){
 
 	//TODO stop order and interference
 	if(!isActing){
@@ -71,7 +71,7 @@ string RobotSM::actingState(string humanState){
 /*
 State where the robot is WAITING
 */
-string RobotSM::waitingState(string humanState){
+string RobotSM::waitingState(){
 
 	//We look if the robot has an action to do
   	ros::ServiceClient client = node.serviceClient<supervisor_msgs::GetActionTodo>("mental_state/get_action_todo");

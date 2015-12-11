@@ -178,7 +178,7 @@ include_directories(
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
 
-add_executable(state_machines src/main.cpp  src/robot_sm.cpp)
+add_executable(state_machines src/main.cpp  src/robot_sm.cpp src/human_sm.cpp)
 target_link_libraries( 
   state_machines
   ${catkin_LIBRARIES}
