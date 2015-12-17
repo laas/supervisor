@@ -14,6 +14,7 @@
 #include "supervisor_msgs/GetActionTodo.h"
 #include "supervisor_msgs/GetActionState.h"
 #include "supervisor_msgs/SolveDivergentBelief.h"
+#include "supervisor_msgs/ActionState.h"
 #include "supervisor_msgs/Action.h"
 #include "supervisor_msgs/ActionExecutorAction.h"
 #include "supervisor_msgs/ActionExecutorActionResult.h"
@@ -39,6 +40,10 @@ private:
 	string human_name;
 	string robot_name;
 	Client action_client;
+	bool simu;
+	double timeToWait;
+	bool timerStarted;
+	clock_t start;
 
 };
 

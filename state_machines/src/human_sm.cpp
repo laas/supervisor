@@ -13,7 +13,10 @@ action_client("supervisor/action_executor", true)
  {
 	human_name = _human_name;
 	node.getParam("/robot/name", robot_name);
+	node.getParam("/timeNoAction", timeToWait);
+  	node.getParam("/simu", simu);
 	action_client.waitForServer();
+	timerStarted = false;
 }
 
 /*
@@ -169,6 +172,52 @@ string HumanSM::shouldActState(){
 	
 	//TODO if human ACTING
 	//TODO if human PRESENT
+
+  	ros::ServiceClient client = node.serviceClient<supervisor_msgs::GetActionTodo>("mental_state/get_action_todo");
+  	ros::ServiceClient client_state = node.serviceClient<supervisor_msgs::GetActionState>("mental_state/get_action_state");
+	ros::ServiceClient action_state = node.serviceClient<supervisor_msgs::ActionState>("mental_state/action_state");
+	supervisor_msgs::GetActionTodo srv_todo;
+	supervisor_msgs::GetActionState srv_state;
+	supervisor_msgs::ActionState srv_action;
+	srv_todo.request.agent = human_name;
+	srv_todo.request.actor = human_name;
+
+	if(!timerStarted){//we we just enter the state, we start the timer
+		start = clock();
+		timerStarted= true;
+	}else{
+		double duration = (clock() - start ) / (double) CLOCKS_PER_SEC;
+		if(duration >= timeToWait){
+			if (client.call(srv_todo)){
+				srv_state.request.agent = robot_name;
+				srv_state.request.action = srv_todo.response.action;
+				if (client_state.call(srv_state)){
+				 if(srv_state.response.state != "ASKED"){//if the action is not already ASKED, the robot asks to do the action
+					  if(simu){
+					 	srv_action.request.action = srv_todo.response.action;
+					 	srv_action.request.state = "ASKED";
+					  	if (!action_state.call(srv_action)){
+					   	 ROS_ERROR("Failed to call service mental_state/action_state");
+					 	}
+					  }else{
+						//TODO: ask action
+					  }
+				  }else{//else, we consider the action failed
+					 srv_action.request.action = srv_todo.response.action;
+					 srv_action.request.state = "FAILED";
+					  if (!action_state.call(srv_action)){
+					    ROS_ERROR("Failed to call service mental_state/action_state");
+					 }
+				  }
+				}else{
+				 ROS_ERROR("[state_machines] Failed to call service mental_state/get_action_todo");
+				}
+			}else{
+			 ROS_ERROR("[state_machines] Failed to call service mental_state/get_action_todo");
+			}
+		}
+	}
+	
 	
 	return "SHOULDACT";
 }

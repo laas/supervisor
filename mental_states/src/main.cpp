@@ -448,13 +448,7 @@ int main (int argc, char **argv)
   ros::ServiceServer service_get_action_state = node.advertiseService("mental_state/get_action_state", getActionState); //return the state of an action in the knowledge
   ros::ServiceServer service_solve_divergent_belief = node.advertiseService("mental_state/solve_divergent_belief", solveDivergentBelief); //solve a divergent belief concerning an action
 
-  string simuParam;
-  node.getParam("/simu", simuParam);
-  if(simuParam == "TRUE"){
-	simu = true;
-  }else{
-	simu = false;
-  }
+  node.getParam("/simu", simu);
   node.getParam("/robot/name", robot_name);
   all_agents = db->getAgents();
   ms->initGoals();
