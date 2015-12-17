@@ -1,3 +1,4 @@
 ---
 robot:
     name: 'PR2_ROBOT'
+simu: 'TRUE'
