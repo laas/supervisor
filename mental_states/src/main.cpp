@@ -13,6 +13,7 @@ MSManager* ms = new MSManager();
 DBInterface* db = new DBInterface();
 string robot_name;
 vector<string> all_agents;
+bool simu;
 
 /*
 Service call when we ask the robot to execute a new goal
@@ -347,7 +348,78 @@ Service call to get the state of an action
 */
 bool solveDivergentBelief(supervisor_msgs::SolveDivergentBelief::Request  &req, supervisor_msgs::SolveDivergentBelief::Response &res){
 	
-	
+	pair<bool, supervisor_msgs::ActionMS> actionFind = ms->getActionFromAction(req.action);
+	if(actionFind.first){
+		string humanState = db->getActionState(req.agent, actionFind.second);
+		string robotState = db->getActionState(robot_name, actionFind.second);
+		if(robotState == "READY" && humanState != "READY"){
+			//we first look if the agent has the same plan as the robot
+			pair<bool, supervisor_msgs::PlanMS> robotPlan = ms->getAgentPlan(robot_name);
+			if(robotPlan.first){
+				pair<bool, supervisor_msgs::PlanMS> humanPlan = ms->getAgentPlan(req.agent);
+				if(!humanPlan.first){
+					if(simu){
+						db->addActionsState(robotPlan.second.actions, req.agent, "PLANNED");
+						db->addPlanState(robotPlan.second, req.agent, "PROGRESS");
+					}else{
+						//TODO: share plan
+					}
+					return true;
+				}else{
+					if(robotPlan.second.id != humanPlan.second.id){
+						if(simu){
+							db->addActionsState(robotPlan.second.actions, req.agent, "PLANNED");
+							db->addPlanState(robotPlan.second, req.agent, "PROGRESS");
+						}else{
+							//TODO: share plan
+						}
+						return true;
+					}
+					//If the agent thinks the action is NEEDED, the problem comes from the preconditions
+					if(humanState == "NEEDED"){
+						for(vector<toaster_msgs::Fact>::iterator it = actionFind.second.prec.begin(); it != actionFind.second.prec.end(); it++){
+							vector<toaster_msgs::Fact> to_test;
+							to_test.push_back(*it);
+							if(!db->factsAreIn(req.agent, to_test)){
+								if(simu){
+									db->addFacts(to_test, req.agent);
+								}else{
+									//TODO: give info
+								}
+							}	
+						}
+					}else if(humanState == "PLANNED"){//If the agent thinks the action is PLANNED, the problem comes from the previous actions
+						//we get all actions id with a link to the action
+						for(vector<supervisor_msgs::Link>::iterator itl = robotPlan.second.links.begin(); itl != robotPlan.second.links.end(); itl++){
+							if(itl->following == actionFind.second.id){
+								toaster_msgs::Fact fact;
+								vector<toaster_msgs::Fact> to_check;
+								ostringstream to_string;
+								to_string << itl->origin;
+								fact.subjectId = to_string.str();
+								fact.property = "actionState";
+								fact.targetId = "DONE";
+								to_check.push_back(fact);
+								if(!db->factsAreIn(req.agent, to_check)){
+									if(simu){
+									vector<supervisor_msgs::ActionMS> actions;
+									actions.push_back(actionFind.second);
+									db->addActionsState(actions, req.agent, "DONE");
+									}else{
+										//TODO: give action state
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}else if(humanState == "READY" && robotState != "READY"){
+			//TODO
+		}
+	}else {
+		ROS_ERROR("[mental_states] No such action");
+	}
 
 
 	return true;
@@ -376,6 +448,13 @@ int main (int argc, char **argv)
   ros::ServiceServer service_get_action_state = node.advertiseService("mental_state/get_action_state", getActionState); //return the state of an action in the knowledge
   ros::ServiceServer service_solve_divergent_belief = node.advertiseService("mental_state/solve_divergent_belief", solveDivergentBelief); //solve a divergent belief concerning an action
 
+  string simuParam;
+  node.getParam("/simu", simuParam);
+  if(simuParam == "TRUE"){
+	simu = true;
+  }else{
+	simu = false;
+  }
   node.getParam("/robot/name", robot_name);
   all_agents = db->getAgents();
   ms->initGoals();
