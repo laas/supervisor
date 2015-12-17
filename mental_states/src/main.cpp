@@ -342,6 +342,17 @@ bool getActionState(supervisor_msgs::GetActionState::Request  &req, supervisor_m
 	return true;
 }
 
+/*
+Service call to get the state of an action
+*/
+bool solveDivergentBelief(supervisor_msgs::SolveDivergentBelief::Request  &req, supervisor_msgs::SolveDivergentBelief::Response &res){
+	
+	
+
+
+	return true;
+}
+
 
 int main (int argc, char **argv)
 {
@@ -362,7 +373,8 @@ int main (int argc, char **argv)
   ros::ServiceServer service_info_given = node.advertiseService("mental_state/info_given", infoGiven); //when an agent informs an other agent about something
   ros::ServiceServer service_get_action_todo = node.advertiseService("mental_state/get_action_todo", getActionTodo); //get the action an agent thinks it has to do
   ros::ServiceServer service_get_all_agents = node.advertiseService("mental_state/get_all_agents", getAllAgents); //return all agents name
-  ros::ServiceServer service_get_action_state = node.advertiseService("mental_state/get_action_state", getActionState); //return the state of an action in the knowledge of an agent
+  ros::ServiceServer service_get_action_state = node.advertiseService("mental_state/get_action_state", getActionState); //return the state of an action in the knowledge
+  ros::ServiceServer service_solve_divergent_belief = node.advertiseService("mental_state/solve_divergent_belief", solveDivergentBelief); //solve a divergent belief concerning an action
 
   node.getParam("/robot/name", robot_name);
   all_agents = db->getAgents();

@@ -43,6 +43,7 @@ add_service_files(
   GetActionTodo.srv
   GetAllAgents.srv
   GetActionState.srv
+  SolveDivergentBelief.srv
 )
 
  add_action_files(
