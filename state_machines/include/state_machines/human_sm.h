@@ -13,6 +13,7 @@
 
 #include "supervisor_msgs/GetActionTodo.h"
 #include "supervisor_msgs/GetActionState.h"
+#include "supervisor_msgs/SolveDivergentBelief.h"
 #include "supervisor_msgs/Action.h"
 #include "supervisor_msgs/ActionExecutorAction.h"
 #include "supervisor_msgs/ActionExecutorActionResult.h"

@@ -27,35 +27,44 @@ string HumanSM::idleState(){
 	//We look if the human thinks he has an action to do
   	ros::ServiceClient client = node.serviceClient<supervisor_msgs::GetActionTodo>("mental_state/get_action_todo");
   	ros::ServiceClient client_state = node.serviceClient<supervisor_msgs::GetActionState>("mental_state/get_action_state");
+  	ros::ServiceClient client_db = node.serviceClient<supervisor_msgs::SolveDivergentBelief>("mental_state/solve_divergent_belief");
 	supervisor_msgs::GetActionTodo srv_todo;
 	supervisor_msgs::GetActionState srv_state;
+	supervisor_msgs::SolveDivergentBelief srv_db;
 	srv_todo.request.agent = human_name;
 	srv_todo.request.actor = human_name;
+	srv_db.request.agent = human_name;
 	if (client.call(srv_todo)){
 	 if(srv_todo.response.state == "READY"){//the human thinks he has an action to do
 		//we look if the robot also thinks the human should do the action
 		srv_state.request.agent = robot_name;
 		srv_state.request.action = srv_todo.response.action;
-		if (client.call(srv_state)){
+		if (client_state.call(srv_state)){
 		 if(srv_state.response.state == "READY"){//the state is the same in the robot knowledge, the human SOULD ACT
 			ROS_INFO("[state_machines] %s goes to SHOULD ACT", human_name.c_str());
 			return "SHOULD_ACT";
 		 }else{//it is necessary to solve the divergent belief
-			//TODO Divergent belief
+			srv_db.request.action = srv_todo.response.action;
+			if (!client_db.call(srv_db)){
+				ROS_ERROR("[state_machines] Failed to call service mental_state/solve_divergent_belief");
+			}
 		  }
 		}else{
 	 	 ROS_ERROR("[state_machines] Failed to call service mental_state/get_action_state");
 		}
-	 }else if(srv_todo.response.state == "NEEDED"){//the human thinks he has an actio nto do but no possible
+	 }else if(srv_todo.response.state == "NEEDED"){//the human thinks he has an action to do but no possible
 		//we look if the robot also thinks the human should do the action and that the action is not possible
 		srv_state.request.agent = robot_name;
 		srv_state.request.action = srv_todo.response.action;
-		if (client.call(srv_state)){
+		if (client_state.call(srv_state)){
 		 if(srv_state.response.state == "NEEDED"){//the state is the same in the robot knowledge, the human has to WAIT
 			ROS_INFO("[state_machines] %s goes to WAITING", human_name.c_str());
 			return "WAITING";
-		 }else{//it is necessary to solve the divergent belief
-			//TODO Divergent belief
+		 }else if(srv_state.response.state == "READY"){//the robot thinks the human can act, it is necessary to solve the divergent belief
+			srv_db.request.action = srv_todo.response.action;
+			if (!client_db.call(srv_db)){
+				ROS_ERROR("[state_machines] Failed to call service mental_state/solve_divergent_belief");
+			}
 		  }
 		}else{
 	 	 ROS_ERROR("[state_machines] Failed to call service mental_state/get_action_state");
@@ -64,7 +73,10 @@ string HumanSM::idleState(){
 		srv_todo.request.agent = robot_name;
 		if (client.call(srv_todo)){
 		  if(srv_todo.response.state == "READY"){//the robot thinks the human should act, it is necessary to solve the divergent belief
-			//TODO Divergent belief
+			srv_db.request.action = srv_todo.response.action;
+			if (!client_db.call(srv_db)){
+				ROS_ERROR("[state_machines] Failed to call service mental_state/solve_divergent_belief");
+			}
 		  }
 		}else{
 		 ROS_ERROR("[state_machines] Failed to call service mental_state/get_action_todo");
