@@ -106,7 +106,6 @@ State where the human is WAITING
 */
 string HumanSM::absentState(){
 
-	//TODO if human ACTING
 	//TODO if human PRESENT
 	
 	
@@ -121,6 +120,43 @@ string HumanSM::waitingState(){
 	//TODO if human ACTING
 	//TODO if human PRESENT
 	
+	//We look if the human still thinks he has an action to do
+  	ros::ServiceClient client = node.serviceClient<supervisor_msgs::GetActionTodo>("mental_state/get_action_todo");
+  	ros::ServiceClient client_state = node.serviceClient<supervisor_msgs::GetActionState>("mental_state/get_action_state");
+  	ros::ServiceClient client_db = node.serviceClient<supervisor_msgs::SolveDivergentBelief>("mental_state/solve_divergent_belief");
+	supervisor_msgs::GetActionTodo srv_todo;
+	supervisor_msgs::GetActionState srv_state;
+	supervisor_msgs::GetActionState srv_db;
+	srv_todo.request.agent = human_name;
+	srv_todo.request.actor = human_name;
+	srv_db.request.agent = human_name;
+	if (client.call(srv_todo)){
+	 if(srv_todo.response.state == "NEEDED"){
+		//we verify that the robot also thinks the action is NEEDED
+		srv_state.request.agent = robot_name;
+		srv_state.request.action = srv_todo.response.action;
+		if (client_state.call(srv_state)){
+		 if(srv_state.response.state == "NEEDED"){
+			//the state is the same in the robot knowledge, the human continue to WAIT
+			return "WAITING";
+		 }else{//there is a divergent belief, we solve it and return to IDLE
+			srv_db.request.action = srv_todo.response.action;
+			if (!client_db.call(srv_db)){
+				ROS_ERROR("[state_machines] Failed to call service mental_state/solve_divergent_belief");
+			}
+			ROS_INFO("[state_machines] %s goes to IDLE", human_name.c_str());
+			return "IDLE";
+		  }
+		}else{
+	 	 ROS_ERROR("[state_machines] Failed to call service mental_state/get_action_state");
+		}
+	 }else{//we return to IDLE to look for other actions
+		ROS_INFO("[state_machines] %s goes to IDLE", human_name.c_str());
+		return "IDLE";
+	  }
+	}else{
+	 ROS_ERROR("[state_machines] Failed to call service mental_state/get_action_todo");
+	}
 	
 	return "WAITING";
 }
