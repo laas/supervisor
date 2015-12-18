@@ -7,7 +7,7 @@ author Sandra Devin
 
 
 HumanMonitor::HumanMonitor(){
-	hasPicked = false;
+	hasPicked_ = false;
 }
 
 /*
@@ -24,7 +24,7 @@ void HumanMonitor::humanPick(string agent, string object){
 	//TODO
 
 	//we remember the action in order to recognize pickandplace
-	hasPicked = true;
+	hasPicked_ = true;
 
 	//we create the corresponding action
 	supervisor_msgs::Action action;
@@ -73,8 +73,8 @@ void HumanMonitor::humanPlace(string agent, string object, string support){
    	 ROS_ERROR("Failed to call service mental_state/action_state");
  	}
 
-	if(hasPicked){//if there was a pick, it is also a pickand place action
-		hasPicked = false;
+	if(hasPicked_){//if there was a pick, it is also a pickand place action
+		hasPicked_ = false;
 		//we create the corresponding action
 		supervisor_msgs::Action action2;
 		action2.name = "pickandplace";

@@ -7,8 +7,8 @@ Class which allows to maintain mental states of the agents
 #include <mental_states/ms_manager.h>
 
 MSManager::MSManager(){
-	actionId = 0;
-	planId = 0;
+	actionId_ = 0;
+	planId_ = 0;
 }
 
 /*
@@ -21,23 +21,23 @@ void MSManager::initGoals(){
 	node.getParam("/goals/names", names);
 	for(vector<string>::iterator it = names.begin(); it != names.end(); it++){
 		//for each goal we retreive its actors and objective
-		string actors_topic = "goals/";
-		actors_topic = actors_topic + *it + "_actors";
+		string actorsTopic = "goals/";
+		actorsTopic = actorsTopic + *it + "_actors";
 		vector<string> actors;
-		node.getParam(actors_topic, actors);
-		string objective_topic = "goals/";
-		objective_topic = objective_topic + *it + "_objective";
+		node.getParam(actorsTopic, actors);
+		string objectiveTopic = "goals/";
+		objectiveTopic = objectiveTopic + *it + "_objective";
 		vector<string> objective;
-		node.getParam(objective_topic, objective);
-		//we transform the objectiv into facts
+		node.getParam(objectiveTopic, objective);
+		//we transform the objective into facts
 		vector<toaster_msgs::Fact> obj;
 		for(vector<string>::iterator ob = objective.begin(); ob != objective.end(); ob++){
 			int beg = ob->find(',');
-    			int end = ob->find(',', beg+1);
+    		int end = ob->find(',', beg+1);
 			toaster_msgs::Fact fact;
-    			fact.subjectId = ob->substr(0, beg);
-    			fact.property = ob->substr(beg+1, end - beg - 1);
-    			fact.targetId = ob->substr(end+1, ob->size() - end - 1);
+    		fact.subjectId = ob->substr(0, beg);
+    		fact.property = ob->substr(beg+1, end - beg - 1);
+    		fact.targetId = ob->substr(end+1, ob->size() - end - 1);
 			obj.push_back(fact);
 		}
 		//we then fill the goal list
@@ -45,7 +45,7 @@ void MSManager::initGoals(){
 		goal.name = *it;
 		goal.actors = actors;
 		goal.objective = obj;
-		goalList.push_back(goal);
+		goalList_.push_back(goal);
 	}
 	
 }
@@ -60,52 +60,52 @@ void MSManager::initHighLevelActions(){
 	node.getParam("/highLevelActions/names", names);
 	for(vector<string>::iterator it = names.begin(); it != names.end(); it++){
 		//for each high level action we retreive its composition
-		string param_topic = "highLevelActions/";
-		param_topic = param_topic + *it + "_param";
+		string paramTopic = "highLevelActions/";
+		paramTopic = paramTopic + *it + "_param";
 		vector<string> params;
-		node.getParam(param_topic, params);
-		string actors_topic = "highLevelActions/";
-		actors_topic = actors_topic + *it + "_actors";
+		node.getParam(paramTopic, params);
+		string actorsTopic = "highLevelActions/";
+		actorsTopic = actorsTopic + *it + "_actors";
 		vector<string> actors;
-		node.getParam(actors_topic, actors);
-		string prec_topic = "highLevelActions/";
-		prec_topic = prec_topic + *it + "_prec";
+		node.getParam(actorsTopic, actors);
+		string precTopic = "highLevelActions/";
+		precTopic = precTopic + *it + "_prec";
 		vector<string> prec;
-		node.getParam(prec_topic, prec);
+		node.getParam(precTopic, prec);
 		//we transform the preconditions into facts
-		vector<toaster_msgs::Fact> prec_fact;
+		vector<toaster_msgs::Fact> precFact;
 		for(vector<string>::iterator p = prec.begin(); p != prec.end(); p++){
 			int beg = p->find(',');
-    			int end = p->find(',', beg+1);
+    		int end = p->find(',', beg+1);
 			toaster_msgs::Fact fact;
-    			fact.subjectId = p->substr(0, beg);
-    			fact.property = p->substr(beg+2, end - beg - 2);
-    			fact.targetId = p->substr(end+2, p->size() - end - 2);
-			prec_fact.push_back(fact);
+    		fact.subjectId = p->substr(0, beg);
+    		fact.property = p->substr(beg+2, end - beg - 2);
+    		fact.targetId = p->substr(end+2, p->size() - end - 2);
+			precFact.push_back(fact);
 		}
-		string effects_topic = "highLevelActions/";
-		effects_topic = effects_topic + *it + "_effects";
+		string effectsTopic = "highLevelActions/";
+		effectsTopic = effectsTopic + *it + "_effects";
 		vector<string> effects;
-		node.getParam(effects_topic, effects);
+		node.getParam(effectsTopic, effects);
 		//we transform the effects into facts
-		vector<toaster_msgs::Fact> effects_fact;
+		vector<toaster_msgs::Fact> effectsFact;
 		for(vector<string>::iterator e = effects.begin(); e != effects.end(); e++){
 			int beg = e->find(',');
-    			int end = e->find(',', beg+1);
+    		int end = e->find(',', beg+1);
 			toaster_msgs::Fact fact;
-    			fact.subjectId = e->substr(0, beg);
-    			fact.property = e->substr(beg+2, end - beg - 2);
-    			fact.targetId = e->substr(end+2, e->size() - end - 2);
-			effects_fact.push_back(fact);
+    		fact.subjectId = e->substr(0, beg);
+    		fact.property = e->substr(beg+2, end - beg - 2);
+    		fact.targetId = e->substr(end+2, e->size() - end - 2);
+			effectsFact.push_back(fact);
 		}
 		//we then fill the high level action list
 		supervisor_msgs::ActionMS highLevelAction;
 		highLevelAction.name = *it;
 		highLevelAction.parameters = params;
 		highLevelAction.actors = actors;
-		highLevelAction.prec = prec_fact;
-		highLevelAction.effects = effects_fact;
-		highLevelActions.push_back(highLevelAction);
+		highLevelAction.prec = precFact;
+		highLevelAction.effects = effectsFact;
+		highLevelActions_.push_back(highLevelAction);
 	}
 	
 }
@@ -119,11 +119,11 @@ void MSManager::update(string agent){
 	//We check if the agent can deduce an action from its effects.
  	checkEffects(agent);
 	//We check if the precondition and links of the planned action.
-        computePreconditions(agent);
+   computePreconditions(agent);
 	//We check if the agent still think that the current plan is still feasible (and not achieved too).
-        planFeasibility(agent);
+   planFeasibility(agent);
 	//We check if the agent still think that the current goal is still feasible (and not achieved too).
-        checkGoals(agent);
+   checkGoals(agent);
 
 }
 
@@ -152,16 +152,16 @@ void MSManager::checkEffects(string agent){
 	toCheckActions.insert(toCheckActions.end(), readyActions.begin(), readyActions.end() );
 
 	//For each of these actions we look if its effects are in the knowledge of the agent, if they are, the action becomes DONE in the agent knowledge
-	vector<supervisor_msgs::ActionMS> to_done;
+	vector<supervisor_msgs::ActionMS> toDone;
 	for(vector<supervisor_msgs::ActionMS>::iterator it = toCheckActions.begin(); it != toCheckActions.end(); it++){
 		if(db.factsAreIn(agent, it->effects)){
-			to_done.push_back(*it);
+			toDone.push_back(*it);
 		}
 	}
 
 	//TODO: for all in PROGRESS action, if the agent see its actors and there are not perfoming it anymore, the agent considers the action DONE
 
-	db.addActionsState(to_done, agent, "DONE");
+	db.addActionsState(toDone, agent, "DONE");
 }
 
 /*
@@ -177,11 +177,11 @@ void MSManager::computePreconditions(string agent){
 		//Check if the READY actions are still READY
 		vector<int> readyIds = db.getActionsIdFromState(agent, "READY");
 		vector<supervisor_msgs::ActionMS> readyActions = getActionsFromIds(readyIds);
-		vector<supervisor_msgs::ActionMS> to_needed;
-		vector<supervisor_msgs::ActionMS> to_ready;
+		vector<supervisor_msgs::ActionMS> toNeeded;
+		vector<supervisor_msgs::ActionMS> toReady;
 		for(vector<supervisor_msgs::ActionMS>::iterator it = readyActions.begin(); it != readyActions.end(); it++){
 			if(!db.factsAreIn(agent, it->prec)){ //if the preconditions are not respected anymore, the action goes back to NEEDED
-				to_needed.push_back(*it);
+				toNeeded.push_back(*it);
 			}
 		}
 
@@ -191,21 +191,21 @@ void MSManager::computePreconditions(string agent){
 		vector<supervisor_msgs::ActionMS> linksOk;
 		if(plannedIds.size() != 0){
 			for(vector<int>::iterator it = plannedIds.begin(); it != plannedIds.end(); it++){
-				vector<toaster_msgs::Fact> to_check;
+				vector<toaster_msgs::Fact> toCheck;
 				//we get all actions id with a link to the action
 				for(vector<supervisor_msgs::Link>::iterator itl = agentPlan.second.links.begin(); itl != agentPlan.second.links.end(); itl++){
 					if(itl->following == *it){
 						toaster_msgs::Fact fact;
-						ostringstream to_string;
-						to_string << itl->origin;
-						fact.subjectId = to_string.str();
+						ostringstream toString;
+						toString << itl->origin;
+						fact.subjectId = toString.str();
 						fact.property = "actionState";
 						fact.targetId = "DONE";
-						to_check.push_back(fact);
+						toCheck.push_back(fact);
 					}
 				}
 				//we check the agent thinks all these actions are DONE
-				if(db.factsAreIn(agent, to_check)){
+				if(db.factsAreIn(agent, toCheck)){
 					linksOkIds.push_back(*it);
 				}
 			}
@@ -217,19 +217,19 @@ void MSManager::computePreconditions(string agent){
 		vector<supervisor_msgs::ActionMS> neededActions = getActionsFromIds(neededIds);
 		for(vector<supervisor_msgs::ActionMS>::iterator it = linksOk.begin(); it != linksOk.end(); it++){
 			if(db.factsAreIn(agent, it->prec)){ //if the preconditions are respected the action becomes READY, else it goes to NEEDED
-				to_ready.push_back(*it);
+				toReady.push_back(*it);
 			}else{
-				to_needed.push_back(*it);
+				toNeeded.push_back(*it);
 			}
 		}
 		for(vector<supervisor_msgs::ActionMS>::iterator it = neededActions.begin(); it != neededActions.end(); it++){
 			if(db.factsAreIn(agent, it->prec)){ //if the preconditions are respected the action becomes READY, else it remains to NEEDED
-				to_ready.push_back(*it);
+				toReady.push_back(*it);
 			}
 		}
 
-		db.addActionsState(to_needed, agent, "NEEDED");
-		db.addActionsState(to_ready, agent, "READY");
+		db.addActionsState(toNeeded, agent, "NEEDED");
+		db.addActionsState(toReady, agent, "READY");
 	}
 }
 
@@ -317,7 +317,7 @@ supervisor_msgs::ActionMS MSManager::getHighLevelActionByName(string name){
 
 	supervisor_msgs::ActionMS action;
 
-	for(vector<supervisor_msgs::ActionMS>::iterator it = highLevelActions.begin(); it != highLevelActions.end(); it++){
+	for(vector<supervisor_msgs::ActionMS>::iterator it = highLevelActions_.begin(); it != highLevelActions_.end(); it++){
 		if(it->name == name){
 			return *it;
 		}
@@ -329,8 +329,8 @@ supervisor_msgs::ActionMS MSManager::getHighLevelActionByName(string name){
 }
 
 int MSManager::getAndIncreasePlanId(){
-	planId++;
-	return (planId - 1);
+	planId_++;
+	return (planId_ - 1);
 
 }
 
@@ -369,8 +369,8 @@ supervisor_msgs::ActionMS MSManager::createActionFromHighLevel(supervisor_msgs::
 
 	//We fill the action
 	newAction.name = action.name;
-	newAction.id = actionId;
-	actionId ++;
+	newAction.id = actionId_;
+	actionId_ ++;
 	newAction.parameters = action.parameters;
 	newAction.actors = action.actors;
 	for(vector<toaster_msgs::Fact>::iterator it = highLevelAction.prec.begin(); it != highLevelAction.prec.end(); it++){
@@ -389,8 +389,8 @@ supervisor_msgs::ActionMS MSManager::createActionFromHighLevel(supervisor_msgs::
 	}
 
 	//Add the action to the list of actions
-	boost::unique_lock<boost::mutex> lock(actionList_mutex);
-	actionList.push_back(newAction);
+	boost::unique_lock<boost::mutex> lock(actionListMutex_);
+	actionList_.push_back(newAction);
 	
 
 	return newAction;
@@ -405,9 +405,9 @@ supervisor_msgs::GoalMS* MSManager::getGoalByName(string name){
 
 	supervisor_msgs::GoalMS* goal = NULL;
 
-	boost::unique_lock<boost::mutex> lock(goalList_mutex);
+	boost::unique_lock<boost::mutex> lock(goalListMutex_);
 	
-	for(vector<supervisor_msgs::GoalMS>::iterator it = goalList.begin(); it != goalList.end(); it++){
+	for(vector<supervisor_msgs::GoalMS>::iterator it = goalList_.begin(); it != goalList_.end(); it++){
 		if(it->name == name)
 			return &(*it);
 	}
@@ -422,11 +422,11 @@ Function which return the action of the ids given in paramaters
 */
 vector<supervisor_msgs::ActionMS> MSManager::getActionsFromIds(vector<int> ids){
 
-	boost::unique_lock<boost::mutex> lock(actionList_mutex);
+	boost::unique_lock<boost::mutex> lock(actionListMutex_);
 	
 	vector<supervisor_msgs::ActionMS> actions;
 	for(vector<int>::iterator it = ids.begin(); it != ids.end(); it++){
-		actions.push_back(actionList[*it]);
+		actions.push_back(actionList_[*it]);
 	}
 	
 	return actions;
@@ -438,8 +438,8 @@ Function which add a plan to the plan list
 */
 void MSManager::addPlanToList(supervisor_msgs::PlanMS plan){
 
-	boost::unique_lock<boost::mutex> lock(planList_mutex);
-	planList.push_back(plan);
+	boost::unique_lock<boost::mutex> lock(planListMutex_);
+	planList_.push_back(plan);
 }
 
 /*
@@ -451,11 +451,11 @@ pair<bool, supervisor_msgs::PlanMS> MSManager::getAgentPlan(string agent){
 	DBInterface db;
 	int planId = db.getAgentIdPlan(agent);// we get the id of the plan
 	pair<bool, supervisor_msgs::PlanMS> answer;
-	boost::unique_lock<boost::mutex> lock(planList_mutex);
+	boost::unique_lock<boost::mutex> lock(planListMutex_);
 	//we return the corresponding plan
 	if(planId != -1){
 		answer.first = true;
-		answer.second = planList[planId];
+		answer.second = planList_[planId];
 		return answer;
 	}else{
 		answer.first = false;
@@ -486,9 +486,9 @@ Function which return the action (ActionMS format) corresponding to the action i
 */
 pair<bool, supervisor_msgs::ActionMS> MSManager::getActionFromAction(supervisor_msgs::Action action){
 
-	boost::unique_lock<boost::mutex> lock(actionList_mutex);
+	boost::unique_lock<boost::mutex> lock(actionListMutex_);
 	pair<bool, supervisor_msgs::ActionMS> answer;
-	for(vector<supervisor_msgs::ActionMS>::iterator it = actionList.begin(); it != actionList.end(); it++){
+	for(vector<supervisor_msgs::ActionMS>::iterator it = actionList_.begin(); it != actionList_.end(); it++){
 		if(action.name != it->name){
 			continue;
 		}
@@ -531,10 +531,10 @@ Function which return the action (ActionMS format) corresponding to an id
 */
 pair<bool, supervisor_msgs::ActionMS> MSManager::getActionFromId(int id){
 
-	boost::unique_lock<boost::mutex> lock(actionList_mutex);
+	boost::unique_lock<boost::mutex> lock(actionListMutex_);
 	pair<bool, supervisor_msgs::ActionMS> answer;
-	if(id < actionId){
-		answer.second = actionList[id];
+	if(id < actionId_){
+		answer.second = actionList_[id];
 		answer.first = true;
 		return answer;
 	}else{//the action does not exist
@@ -550,10 +550,10 @@ Function which return the plan (PLanMS format) corresponding to an id
 */
 pair<bool, supervisor_msgs::PlanMS> MSManager::getPlanFromId(int id){
 
-	boost::unique_lock<boost::mutex> lock(planList_mutex);
+	boost::unique_lock<boost::mutex> lock(planListMutex_);
 	pair<bool, supervisor_msgs::PlanMS> answer;
-	if(id < planId){
-		answer.second = planList[id];
+	if(id < planId_){
+		answer.second = planList_[id];
 		answer.first = true;
 		return answer;
 	}else{//the plan does not exist

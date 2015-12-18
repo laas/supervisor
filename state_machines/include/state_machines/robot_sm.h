@@ -31,10 +31,10 @@ public:
 protected:
 
 private:
-	ros::NodeHandle node;
-	string robot_name;
-	Client action_client;
-	bool isActing;
+	ros::NodeHandle node_;
+	string robotName_;
+	Client actionClient_;
+	bool isActing_;
 
 	void doneCb(const actionlib::SimpleClientGoalState& state, const supervisor_msgs::ActionExecutorResultConstPtr& result);
 

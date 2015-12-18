@@ -11,8 +11,8 @@ The mental state manager estimates and maintains the mental states of each agent
 
 MSManager* ms = new MSManager();
 DBInterface* db = new DBInterface();
-string robot_name;
-vector<string> all_agents;
+string robotName;
+vector<string> allAgents;
 bool simu;
 
 /*
@@ -75,18 +75,18 @@ bool newPlan(supervisor_msgs::NewPlan::Request  &req, supervisor_msgs::NewPlan::
 		lmap[it->id] = action.id;
 	}
 	for(vector<supervisor_msgs::Link>::iterator it = req.plan.links.begin(); it != req.plan.links.end(); it++){
-		supervisor_msgs::Link new_link;
-		new_link.origin = lmap[it->origin];
-		new_link.following = lmap[it->following];
-		plan.links.push_back(new_link);
+		supervisor_msgs::Link newLink;
+		newLink.origin = lmap[it->origin];
+		newLink.following = lmap[it->following];
+		plan.links.push_back(newLink);
 	}
 	
 	//Add the plan to the list of plans
 	ms->addPlanToList(plan);
 
 	//add the plan state to PROGRESS and the action to PLANNED into the robot knowledge and both to UNKNOWN into the other agent knowledge
-	for(vector<string>::iterator it = all_agents.begin(); it != all_agents.end(); it++){
-		if(*it == robot_name){
+	for(vector<string>::iterator it = allAgents.begin(); it != allAgents.end(); it++){
+		if(*it == robotName){
 			db->addActionsState(plan.actions, *it, "PLANNED");
 			db->addPlanState(plan, *it, "PROGRESS");
 		}else{
@@ -116,15 +116,15 @@ Service call to abort the robot shares the current plan
 bool sharePlan(supervisor_msgs::SharePlan::Request  &req, supervisor_msgs::SharePlan::Response &res){
 	
 	//we get all the agents which can see the robot
-	vector<string> present_agents = db->getAgentsWhoSee(robot_name);
+	vector<string> presentAgents = db->getAgentsWhoSee(robotName);
 	//We get the current plan
-	pair<bool, supervisor_msgs::PlanMS> robotPlan = ms->getAgentPlan(robot_name);
+	pair<bool, supervisor_msgs::PlanMS> robotPlan = ms->getAgentPlan(robotName);
 	if(!robotPlan.first){
 		return true;
 	}
 
 	//For all these agents, the plan is now in PROGRESS and its actions PLANNED
-	for(vector<string>::iterator it = present_agents.begin(); it != present_agents.end(); it++){
+	for(vector<string>::iterator it = presentAgents.begin(); it != presentAgents.end(); it++){
 		db->addActionsState(robotPlan.second.actions, *it, "PLANNED");
 		db->addPlanState(robotPlan.second, *it, "PROGRESS");
 	}
@@ -147,21 +147,21 @@ bool actionState(supervisor_msgs::ActionState::Request  &req, supervisor_msgs::A
 	}
 
 	//then we get all the agent which can see the actors of the action
-	vector<string> canSee_agents = all_agents;
+	vector<string> canSeeAgents = allAgents;
 	for(vector<string>::iterator it = action.actors.begin(); it != action.actors.end(); it++){
-		vector<string> temp_agents = db->getAgentsWhoSee(*it);
+		vector<string> tempAgents = db->getAgentsWhoSee(*it);
 		vector<string> temp(100);
-		sort(temp_agents.begin(), temp_agents.end());
-		sort(canSee_agents.begin(), canSee_agents.end());
-		vector<string>::iterator i = set_intersection(temp_agents.begin(), temp_agents.end(), canSee_agents.begin(), canSee_agents.end(), temp.begin());
+		sort(tempAgents.begin(), tempAgents.end());
+		sort(canSeeAgents.begin(), canSeeAgents.end());
+		vector<string>::iterator i = set_intersection(tempAgents.begin(), tempAgents.end(), canSeeAgents.begin(), canSeeAgents.end(), temp.begin());
 		temp.resize(i-temp.begin());       
-		canSee_agents = temp;
+		canSeeAgents = temp;
 	}
-	canSee_agents.insert(canSee_agents.end(), action.actors.begin(), action.actors.end());
-	canSee_agents.push_back(robot_name);
+	canSeeAgents.insert(canSeeAgents.end(), action.actors.begin(), action.actors.end());
+	canSeeAgents.push_back(robotName);
 	
 	//for all these agent and for the actors we change the state of the action
-	for(vector<string>::iterator it = canSee_agents.begin(); it != canSee_agents.end(); it++){
+	for(vector<string>::iterator it = canSeeAgents.begin(); it != canSeeAgents.end(); it++){
 		vector<supervisor_msgs::ActionMS> actions;
 		actions.push_back(action);
 		db->addActionsState(actions, *it, req.state);
@@ -351,10 +351,10 @@ bool solveDivergentBelief(supervisor_msgs::SolveDivergentBelief::Request  &req, 
 	pair<bool, supervisor_msgs::ActionMS> actionFind = ms->getActionFromAction(req.action);
 	if(actionFind.first){
 		string humanState = db->getActionState(req.agent, actionFind.second);
-		string robotState = db->getActionState(robot_name, actionFind.second);
+		string robotState = db->getActionState(robotName, actionFind.second);
 		if(robotState == "READY" && humanState != "READY"){
 			//we first look if the agent has the same plan as the robot
-			pair<bool, supervisor_msgs::PlanMS> robotPlan = ms->getAgentPlan(robot_name);
+			pair<bool, supervisor_msgs::PlanMS> robotPlan = ms->getAgentPlan(robotName);
 			if(robotPlan.first){
 				pair<bool, supervisor_msgs::PlanMS> humanPlan = ms->getAgentPlan(req.agent);
 				if(!humanPlan.first){
@@ -378,11 +378,11 @@ bool solveDivergentBelief(supervisor_msgs::SolveDivergentBelief::Request  &req, 
 					//If the agent thinks the action is NEEDED, the problem comes from the preconditions
 					if(humanState == "NEEDED"){
 						for(vector<toaster_msgs::Fact>::iterator it = actionFind.second.prec.begin(); it != actionFind.second.prec.end(); it++){
-							vector<toaster_msgs::Fact> to_test;
-							to_test.push_back(*it);
-							if(!db->factsAreIn(req.agent, to_test)){
+							vector<toaster_msgs::Fact> toTest;
+							toTest.push_back(*it);
+							if(!db->factsAreIn(req.agent, toTest)){
 								if(simu){
-									db->addFacts(to_test, req.agent);
+									db->addFacts(toTest, req.agent);
 								}else{
 									//TODO: give info
 								}
@@ -393,14 +393,14 @@ bool solveDivergentBelief(supervisor_msgs::SolveDivergentBelief::Request  &req, 
 						for(vector<supervisor_msgs::Link>::iterator itl = robotPlan.second.links.begin(); itl != robotPlan.second.links.end(); itl++){
 							if(itl->following == actionFind.second.id){
 								toaster_msgs::Fact fact;
-								vector<toaster_msgs::Fact> to_check;
-								ostringstream to_string;
-								to_string << itl->origin;
-								fact.subjectId = to_string.str();
+								vector<toaster_msgs::Fact> toCheck;
+								ostringstream toString;
+								toString << itl->origin;
+								fact.subjectId = toString.str();
 								fact.property = "actionState";
 								fact.targetId = "DONE";
-								to_check.push_back(fact);
-								if(!db->factsAreIn(req.agent, to_check)){
+								toCheck.push_back(fact);
+								if(!db->factsAreIn(req.agent, toCheck)){
 									if(simu){
 									vector<supervisor_msgs::ActionMS> actions;
 									actions.push_back(actionFind.second);
@@ -449,8 +449,8 @@ int main (int argc, char **argv)
   ros::ServiceServer service_solve_divergent_belief = node.advertiseService("mental_state/solve_divergent_belief", solveDivergentBelief); //solve a divergent belief concerning an action
 
   node.getParam("/simu", simu);
-  node.getParam("/robot/name", robot_name);
-  all_agents = db->getAgents();
+  node.getParam("/robot/name", robotName);
+  allAgents = db->getAgents();
   ms->initGoals();
   ms->initHighLevelActions();
 
@@ -458,7 +458,7 @@ int main (int argc, char **argv)
 
   while (node.ok()) {
 
-  for(vector<string>::iterator it = all_agents.begin(); it != all_agents.end(); it++){
+  for(vector<string>::iterator it = allAgents.begin(); it != allAgents.end(); it++){
 	ms->update(*it);
   }
 

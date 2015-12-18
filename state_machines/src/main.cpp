@@ -78,22 +78,22 @@ int main (int argc, char **argv)
 
   //Services declarations
 
-  vector<string> all_agents;
-  string robot_name;
-  node.getParam("/robot/name", robot_name);
+  vector<string> allAgents;
+  string robotName;
+  node.getParam("/robot/name", robotName);
   ros::service::waitForService("mental_state/get_all_agents", -1);
   ros::ServiceClient client = node.serviceClient<supervisor_msgs::GetAllAgents>("mental_state/get_all_agents");
   supervisor_msgs::GetAllAgents srv;
   if (client.call(srv)){
-	 all_agents = srv.response.agents;
+	 allAgents = srv.response.agents;
   }else{
 	ROS_ERROR("[state_machines] Failed to call service mental_state/get_all_agents");
   }
 
   ROS_INFO("[state_machines] state_machines ready");
 
-  for(vector<string>::iterator it = all_agents.begin(); it != all_agents.end(); it++){
-	if(*it == robot_name){
+  for(vector<string>::iterator it = allAgents.begin(); it != allAgents.end(); it++){
+	if(*it == robotName){
 		boost::thread robotThread(robotStateMachine);
 	}else{
   		boost::thread humanThread(boost::bind(humanStateMachine, *it));

@@ -25,7 +25,7 @@ public:
 protected:
 
 private:
-	bool hasPicked;
+	bool hasPicked_;
 
 };
 

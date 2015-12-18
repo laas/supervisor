@@ -22,9 +22,9 @@ public:
 	virtual bool exec();
 	virtual bool post();
 protected:
-	string object;
 
 private:
+	string object_;
 
 
 };

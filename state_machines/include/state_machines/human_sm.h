@@ -21,12 +21,11 @@
 #include "supervisor_msgs/ActionExecutorActionFeedback.h"
 
 
-typedef actionlib::SimpleActionClient<supervisor_msgs::ActionExecutorAction> Client;
 using namespace std;
 
 class HumanSM{
 public:
-	HumanSM(string _human_name);
+	HumanSM(string humanName);
 	~HumanSM() {};
 	string idleState();
 	string actingState();
@@ -36,14 +35,13 @@ public:
 protected:
 
 private:
-	ros::NodeHandle node;
-	string human_name;
-	string robot_name;
-	Client action_client;
-	bool simu;
-	double timeToWait;
-	bool timerStarted;
-	clock_t start;
+	ros::NodeHandle node_;
+	string humanName_;
+	string robotName_;
+	bool simu_;
+	double timeToWait_;
+	bool timerStarted_;
+	clock_t start_;
 
 };
 

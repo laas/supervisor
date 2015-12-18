@@ -30,41 +30,41 @@ int main (int argc, char **argv)
 
 
 
-  vector<toaster_msgs::Fact> to_add;
+  vector<toaster_msgs::Fact> toAdd;
   
   toaster_msgs::Fact fact;
   fact.subjectId = "RED_CUBE";
   fact.property = "isReachableBy";
   fact.targetId = "PR2_ROBOT";
-  to_add.push_back(fact);
+  toAdd.push_back(fact);
 
   toaster_msgs::Fact fact1;
   fact1.subjectId = "HERAKLES_HUMAN1";
   fact1.property = "isVisibleBy";
   fact1.targetId = "PR2_ROBOT";
-  to_add.push_back(fact1);
+  toAdd.push_back(fact1);
 
   toaster_msgs::Fact fact11;
   fact11.subjectId = "PR2_ROBOT";
   fact11.property = "isVisibleBy";
   fact11.targetId = "HERAKLES_HUMAN1";
-  to_add.push_back(fact11);
+  toAdd.push_back(fact11);
 
   toaster_msgs::Fact fact2;
   fact2.subjectId = "TABLE_4";
   fact2.property = "isReachableBy";
   fact2.targetId = "PR2_ROBOT";
-  to_add.push_back(fact2);
+  toAdd.push_back(fact2);
 
   toaster_msgs::AddFactsToAgent srvAdd;
   srvAdd.request.agentId = "PR2_ROBOT";
-  srvAdd.request.facts = to_add;
+  srvAdd.request.facts = toAdd;
   if (!add_fact.call(srvAdd)){
     ROS_ERROR("[mental_state] Failed to call service database/add_facts_to_agent");
   }
 
   srvAdd.request.agentId = "HERAKLES_HUMAN1";
-  srvAdd.request.facts = to_add;
+  srvAdd.request.facts = toAdd;
   if (!add_fact.call(srvAdd)){
     ROS_ERROR("[mental_state] Failed to call service database/add_facts_to_agent");
   }
@@ -157,17 +157,17 @@ int main (int argc, char **argv)
  // }
 
 
-  to_add = vector<toaster_msgs::Fact>();
+  toAdd = vector<toaster_msgs::Fact>();
  
 
   toaster_msgs::Fact fact3;
   fact3.subjectId = "RED_CUBE";
   fact3.property = "isOn";
   fact3.targetId = "TABLE_4";
-  to_add.push_back(fact3);
+  toAdd.push_back(fact3);
 
   srvAdd.request.agentId = "PR2_ROBOT";
-  srvAdd.request.facts = to_add;
+  srvAdd.request.facts = toAdd;
   //if (!add_fact.call(srvAdd)){
   //  ROS_ERROR("[mental_state] Failed to call service database/add_facts_to_agent");
  // }

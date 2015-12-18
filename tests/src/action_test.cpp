@@ -24,9 +24,9 @@ int main (int argc, char **argv)
   ac.sendGoal(goal);
 
   //wait for the action to return
-  bool finished_before_timeout = ac.waitForResult(ros::Duration(30.0));
+  bool finishedBeforeTimeout = ac.waitForResult(ros::Duration(30.0));
 
-  if (finished_before_timeout)
+  if (finishedBeforeTimeout)
   {
     actionlib::SimpleClientGoalState state = ac.getState();
     ROS_INFO("Action finished: %s",state.toString().c_str());

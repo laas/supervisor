@@ -8,15 +8,13 @@ State machine for the robot
 
 
 
-HumanSM::HumanSM(string _human_name):
-action_client("supervisor/action_executor", true)
+HumanSM::HumanSM(string humanName)
  {
-	human_name = _human_name;
-	node.getParam("/robot/name", robot_name);
-	node.getParam("/timeNoAction", timeToWait);
-  	node.getParam("/simu", simu);
-	action_client.waitForServer();
-	timerStarted = false;
+	humanName_ = humanName;
+	node_.getParam("/robot/name", robotName_);
+	node_.getParam("/timeNoAction", timeToWait_);
+  	node_.getParam("/simu", simu_);
+	timerStarted_ = false;
 }
 
 /*
@@ -28,23 +26,23 @@ string HumanSM::idleState(){
 	//TODO if human PRESENT
 
 	//We look if the human thinks he has an action to do
-  	ros::ServiceClient client = node.serviceClient<supervisor_msgs::GetActionTodo>("mental_state/get_action_todo");
-  	ros::ServiceClient client_state = node.serviceClient<supervisor_msgs::GetActionState>("mental_state/get_action_state");
-  	ros::ServiceClient client_db = node.serviceClient<supervisor_msgs::SolveDivergentBelief>("mental_state/solve_divergent_belief");
+  	ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetActionTodo>("mental_state/get_action_todo");
+  	ros::ServiceClient client_state = node_.serviceClient<supervisor_msgs::GetActionState>("mental_state/get_action_state");
+  	ros::ServiceClient client_db = node_.serviceClient<supervisor_msgs::SolveDivergentBelief>("mental_state/solve_divergent_belief");
 	supervisor_msgs::GetActionTodo srv_todo;
 	supervisor_msgs::GetActionState srv_state;
 	supervisor_msgs::SolveDivergentBelief srv_db;
-	srv_todo.request.agent = human_name;
-	srv_todo.request.actor = human_name;
-	srv_db.request.agent = human_name;
+	srv_todo.request.agent = humanName_;
+	srv_todo.request.actor = humanName_;
+	srv_db.request.agent = humanName_;
 	if (client.call(srv_todo)){
 	 if(srv_todo.response.state == "READY"){//the human thinks he has an action to do
 		//we look if the robot also thinks the human should do the action
-		srv_state.request.agent = robot_name;
+		srv_state.request.agent = robotName_;
 		srv_state.request.action = srv_todo.response.action;
 		if (client_state.call(srv_state)){
 		 if(srv_state.response.state == "READY"){//the state is the same in the robot knowledge, the human SOULD ACT
-			ROS_INFO("[state_machines] %s goes to SHOULD ACT", human_name.c_str());
+			ROS_INFO("[state_machines] %s goes to SHOULD ACT", humanName_.c_str());
 			return "SHOULD_ACT";
 		 }else{//it is necessary to solve the divergent belief
 			srv_db.request.action = srv_todo.response.action;
@@ -57,11 +55,11 @@ string HumanSM::idleState(){
 		}
 	 }else if(srv_todo.response.state == "NEEDED"){//the human thinks he has an action to do but no possible
 		//we look if the robot also thinks the human should do the action and that the action is not possible
-		srv_state.request.agent = robot_name;
+		srv_state.request.agent = robotName_;
 		srv_state.request.action = srv_todo.response.action;
 		if (client_state.call(srv_state)){
 		 if(srv_state.response.state == "NEEDED"){//the state is the same in the robot knowledge, the human has to WAIT
-			ROS_INFO("[state_machines] %s goes to WAITING", human_name.c_str());
+			ROS_INFO("[state_machines] %s goes to WAITING", humanName_.c_str());
 			return "WAITING";
 		 }else if(srv_state.response.state == "READY"){//the robot thinks the human can act, it is necessary to solve the divergent belief
 			srv_db.request.action = srv_todo.response.action;
@@ -73,7 +71,7 @@ string HumanSM::idleState(){
 	 	 ROS_ERROR("[state_machines] Failed to call service mental_state/get_action_state");
 		}
 	 }else{//the human thinks he has no action, we check if the robot thinks he has an action to do	
-		srv_todo.request.agent = robot_name;
+		srv_todo.request.agent = robotName_;
 		if (client.call(srv_todo)){
 		  if(srv_todo.response.state == "READY"){//the robot thinks the human should act, it is necessary to solve the divergent belief
 			srv_db.request.action = srv_todo.response.action;
@@ -124,19 +122,19 @@ string HumanSM::waitingState(){
 	//TODO if human PRESENT
 	
 	//We look if the human still thinks he has an action to do
-  	ros::ServiceClient client = node.serviceClient<supervisor_msgs::GetActionTodo>("mental_state/get_action_todo");
-  	ros::ServiceClient client_state = node.serviceClient<supervisor_msgs::GetActionState>("mental_state/get_action_state");
-  	ros::ServiceClient client_db = node.serviceClient<supervisor_msgs::SolveDivergentBelief>("mental_state/solve_divergent_belief");
+  	ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetActionTodo>("mental_state/get_action_todo");
+  	ros::ServiceClient client_state = node_.serviceClient<supervisor_msgs::GetActionState>("mental_state/get_action_state");
+  	ros::ServiceClient client_db = node_.serviceClient<supervisor_msgs::SolveDivergentBelief>("mental_state/solve_divergent_belief");
 	supervisor_msgs::GetActionTodo srv_todo;
 	supervisor_msgs::GetActionState srv_state;
 	supervisor_msgs::GetActionState srv_db;
-	srv_todo.request.agent = human_name;
-	srv_todo.request.actor = human_name;
-	srv_db.request.agent = human_name;
+	srv_todo.request.agent = humanName_;
+	srv_todo.request.actor = humanName_;
+	srv_db.request.agent = humanName_;
 	if (client.call(srv_todo)){
 	 if(srv_todo.response.state == "NEEDED"){
 		//we verify that the robot also thinks the action is NEEDED
-		srv_state.request.agent = robot_name;
+		srv_state.request.agent = robotName_;
 		srv_state.request.action = srv_todo.response.action;
 		if (client_state.call(srv_state)){
 		 if(srv_state.response.state == "NEEDED"){
@@ -147,14 +145,14 @@ string HumanSM::waitingState(){
 			if (!client_db.call(srv_db)){
 				ROS_ERROR("[state_machines] Failed to call service mental_state/solve_divergent_belief");
 			}
-			ROS_INFO("[state_machines] %s goes to IDLE", human_name.c_str());
+			ROS_INFO("[state_machines] %s goes to IDLE", humanName_.c_str());
 			return "IDLE";
 		  }
 		}else{
 	 	 ROS_ERROR("[state_machines] Failed to call service mental_state/get_action_state");
 		}
 	 }else{//we return to IDLE to look for other actions
-		ROS_INFO("[state_machines] %s goes to IDLE", human_name.c_str());
+		ROS_INFO("[state_machines] %s goes to IDLE", humanName_.c_str());
 		return "IDLE";
 	  }
 	}else{
@@ -173,27 +171,27 @@ string HumanSM::shouldActState(){
 	//TODO if human ACTING
 	//TODO if human PRESENT
 
-  	ros::ServiceClient client = node.serviceClient<supervisor_msgs::GetActionTodo>("mental_state/get_action_todo");
-  	ros::ServiceClient client_state = node.serviceClient<supervisor_msgs::GetActionState>("mental_state/get_action_state");
-	ros::ServiceClient action_state = node.serviceClient<supervisor_msgs::ActionState>("mental_state/action_state");
+  	ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetActionTodo>("mental_state/get_action_todo");
+  	ros::ServiceClient client_state = node_.serviceClient<supervisor_msgs::GetActionState>("mental_state/get_action_state");
+	ros::ServiceClient action_state = node_.serviceClient<supervisor_msgs::ActionState>("mental_state/action_state");
 	supervisor_msgs::GetActionTodo srv_todo;
 	supervisor_msgs::GetActionState srv_state;
 	supervisor_msgs::ActionState srv_action;
-	srv_todo.request.agent = human_name;
-	srv_todo.request.actor = human_name;
+	srv_todo.request.agent = humanName_;
+	srv_todo.request.actor = humanName_;
 
-	if(!timerStarted){//we we just enter the state, we start the timer
-		start = clock();
-		timerStarted= true;
+	if(!timerStarted_){//we we just enter the state, we start the timer
+		start_ = clock();
+		timerStarted_ = true;
 	}else{
-		double duration = (clock() - start ) / (double) CLOCKS_PER_SEC;
-		if(duration >= timeToWait){
+		double duration = (clock() - start_ ) / (double) CLOCKS_PER_SEC;
+		if(duration >= timeToWait_){
 			if (client.call(srv_todo)){
-				srv_state.request.agent = robot_name;
+				srv_state.request.agent = robotName_;
 				srv_state.request.action = srv_todo.response.action;
 				if (client_state.call(srv_state)){
 				 if(srv_state.response.state != "ASKED"){//if the action is not already ASKED, the robot asks to do the action
-					  if(simu){
+					  if(simu_){
 					 	srv_action.request.action = srv_todo.response.action;
 					 	srv_action.request.state = "ASKED";
 					  	if (!action_state.call(srv_action)){
@@ -207,7 +205,9 @@ string HumanSM::shouldActState(){
 					 srv_action.request.state = "FAILED";
 					  if (!action_state.call(srv_action)){
 					    ROS_ERROR("Failed to call service mental_state/action_state");
-					 }
+					  }
+		           ROS_INFO("[state_machines] %s goes to IDLE", humanName_.c_str());
+		           return "IDLE";
 				  }
 				}else{
 				 ROS_ERROR("[state_machines] Failed to call service mental_state/get_action_todo");

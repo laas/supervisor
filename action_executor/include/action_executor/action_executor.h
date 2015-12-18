@@ -22,7 +22,7 @@ class ActionExecutor{
 public:
 	ActionExecutor(string name);
 protected:
-	ros::NodeHandle node_handle_;
+	ros::NodeHandle node_;
 	supervisor_msgs::ActionExecutorFeedback feedback_;
 	supervisor_msgs::ActionExecutorResult result_;
 	Server action_server_;

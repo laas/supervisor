@@ -13,7 +13,7 @@ Available actions:
 
 
 ActionExecutor::ActionExecutor(string name):
-action_server_(node_handle_, name, 
+action_server_(node_, name, 
 	boost::bind(&ActionExecutor::execute,this, _1), false)
  {
  	action_server_.start();
@@ -22,7 +22,7 @@ action_server_(node_handle_, name,
 
 
 void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& goal) {
-  	ros::ServiceClient client = node_handle_.serviceClient<supervisor_msgs::ActionState>("mental_state/action_state");
+  	ros::ServiceClient client = node_.serviceClient<supervisor_msgs::ActionState>("mental_state/action_state");
 	supervisor_msgs::ActionState srv;
 	srv.request.action = goal->action;
 

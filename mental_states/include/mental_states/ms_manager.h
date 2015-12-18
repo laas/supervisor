@@ -53,15 +53,15 @@ public:
 protected:
 
 private:
-	vector<supervisor_msgs::ActionMS> actionList;
-	vector<supervisor_msgs::PlanMS> planList;
-	vector<supervisor_msgs::GoalMS> goalList;
-	vector<supervisor_msgs::ActionMS> highLevelActions;
-	int actionId;
-	int planId;
-	boost::mutex actionList_mutex;
-	boost::mutex planList_mutex;
-	boost::mutex goalList_mutex;
+	vector<supervisor_msgs::ActionMS> actionList_;
+	vector<supervisor_msgs::PlanMS> planList_;
+	vector<supervisor_msgs::GoalMS> goalList_;
+	vector<supervisor_msgs::ActionMS> highLevelActions_;
+	int actionId_;
+	int planId_;
+	boost::mutex actionListMutex_;
+	boost::mutex planListMutex_;
+	boost::mutex goalListMutex_;
 
 	void checkEffects(string agent);
 	void computePreconditions(string agent);
