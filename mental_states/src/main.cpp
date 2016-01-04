@@ -5,6 +5,9 @@ Main class of the mental_state manager.
 
 The mental state manager estimates and maintains the mental states of each agent concerning goals, plans and actions.
 
+TODO: - weak achievement goal and plan
+      - similar actions: ignore DONE and FAILED actions in actionState: changeActionStateFunction?
+
 **/
 
 #include <mental_states/ms_manager.h>
