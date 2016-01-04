@@ -1,64 +1,50 @@
 /**
- * @file /include/graphical_interface/main_window.hpp
- *
- * @brief Qt based gui for graphical_interface.
- *
- * @date November 2010
+
  **/
 #ifndef graphical_interface_MAIN_WINDOW_H
 #define graphical_interface_MAIN_WINDOW_H
 
-/*****************************************************************************
-** Includes
-*****************************************************************************/
-
+#include <QtGui>
 #include <QtGui/QMainWindow>
+#include <QMessageBox>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <ros/ros.h>
 #include "ui_main_window.h"
-#include "qnode.hpp"
+#include <actionlib/client/simple_action_client.h>
+#include <actionlib/client/terminal_state.h>
 
-/*****************************************************************************
-** Namespace
-*****************************************************************************/
+#include "supervisor_msgs/Action.h"
+#include "supervisor_msgs/ActionExecutorAction.h"
+#include "supervisor_msgs/ActionExecutorActionResult.h"
+#include "supervisor_msgs/ActionExecutorActionFeedback.h"
+#include "supervisor_msgs/ActionState.h"
 
-namespace graphical_interface {
+using namespace std;
 
-/*****************************************************************************
-** Interface [MainWindow]
-*****************************************************************************/
-/**
- * @brief Qt central, all operations relating to the view part here.
- */
+typedef actionlib::SimpleActionClient<supervisor_msgs::ActionExecutorAction> Client;
+
 class MainWindow : public QMainWindow {
 Q_OBJECT
 
 public:
-	MainWindow(int argc, char** argv, QWidget *parent = 0);
-	~MainWindow();
-
-	void ReadSettings(); // Load up qt program settings at startup
-	void WriteSettings(); // Save qt program settings when closing
-
-	void closeEvent(QCloseEvent *event); // Overloaded function
-	void showNoMasterMessage();
+    MainWindow(int argc, char** argv, QWidget *parent = 0);
+    ~MainWindow();
 
 public Q_SLOTS:
-	/******************************************
-	** Auto-connections (connectSlotsByName())
-	*******************************************/
-	void on_actionAbout_triggered();
-	void on_button_connect_clicked(bool check );
-	void on_checkbox_use_environment_stateChanged(int state);
 
-    /******************************************
-    ** Manual connections
-    *******************************************/
-    void updateLoggingView(); // no idea why this can't connect automatically
+private Q_SLOTS:
+    void on_pushButtonExecuteAction_clicked();
+
+    void on_pushButtonAskAction_clicked();
 
 private:
-	Ui::MainWindowDesign ui;
-	QNode qnode;
+    Ui::MainWindowDesign ui;
+    ros::NodeHandle node_;
+    Client actionClient_;
+    string robotName_;
 };
 
-}  // namespace graphical_interface
 
 #endif // graphical_interface_MAIN_WINDOW_H

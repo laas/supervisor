@@ -8,4 +8,5 @@
 	<node name="mental_states" pkg="mental_states" type="mental_states" output="screen" />  <!-- Launch the mental state manager -->
 	<node name="human_monitor" pkg="human_monitor" type="human_monitor" output="screen" />  <!-- Launch the human monitor -->
 	<node name="state_machines" pkg="state_machines" type="state_machines" output="screen" />  <!-- Launch the state machines -->
+	<node name="graphical_interface" pkg="graphical_interface" type="graphical_interface" output="screen" />  <!-- Launch the graphical interface -->
 </launch>
