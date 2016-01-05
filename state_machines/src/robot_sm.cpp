@@ -82,7 +82,7 @@ string RobotSM::waitingState(){
 	 if(srv.response.state == "READY"){//the robot has an action to do, we send it to the action manager
 		supervisor_msgs::ActionExecutorGoal goal;
   		goal.action = srv.response.action;
-  		action_client.sendGoal(goal, &this->doneCb, &this->activeCb, &this->feedbackCb);
+  		actionClient_.sendGoal(goal,  boost::bind(&RobotSM::doneCb, this, _1, _2), Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
 		isActing_ = true;
 		ROS_INFO("[state_machines] Robot goes to ACTING");
 		return "ACTING";
