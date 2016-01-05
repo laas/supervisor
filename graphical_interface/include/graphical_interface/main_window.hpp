@@ -20,6 +20,7 @@
 #include "supervisor_msgs/ActionExecutorActionResult.h"
 #include "supervisor_msgs/ActionExecutorActionFeedback.h"
 #include "supervisor_msgs/ActionState.h"
+#include "supervisor_msgs/HumanActionSimu.h"
 
 using namespace std;
 
@@ -38,6 +39,8 @@ private Q_SLOTS:
     void on_pushButtonExecuteAction_clicked();
 
     void on_pushButtonAskAction_clicked();
+
+    void on_pushButtonSendHumanAction_clicked();
 
 private:
     Ui::MainWindowDesign ui;

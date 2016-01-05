@@ -15,6 +15,16 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     node_.getParam("/highLevelActions/names", actionNames);
     for(vector<string>::iterator it = actionNames.begin(); it != actionNames.end(); it++){
         ui.comboBoxActionName->addItem(it->c_str());
+        ui.comboBoxHumanActionName->addItem(it->c_str());
+    }
+
+    //we retrieve the possible agents from param of the .yaml file
+    vector<string> agents;
+    node_.getParam("/entities/agents", agents);
+    for(vector<string>::iterator it = agents.begin(); it != agents.end(); it++){
+        if(*it != robotName_){
+            ui.comboBoxHumanAgent->addItem(it->c_str());
+        }
     }
 
     //we retrieve the possible objects from param of the .yaml file
@@ -22,6 +32,7 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     node_.getParam("/entities/objects", objects);
     for(vector<string>::iterator it = objects.begin(); it != objects.end(); it++){
         ui.comboBoxActionObject->addItem(it->c_str());
+        ui.comboBoxHumanActionObject->addItem(it->c_str());
     }
 
 
@@ -30,6 +41,7 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     node_.getParam("/entities/supports", supports);
     for(vector<string>::iterator it = supports.begin(); it != supports.end(); it++){
         ui.comboBoxActionSupport->addItem(it->c_str());
+        ui.comboBoxHumanActionSupport->addItem(it->c_str());
     }
 
     actionClient_.waitForServer();
@@ -39,6 +51,10 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
 
 MainWindow::~MainWindow() {}
 
+
+/*************************************
+ * Action tab
+ *************************************/
 
 /*
 Send an action to the action executor (simple non aware execution without head control)
@@ -104,6 +120,36 @@ void MainWindow::on_pushButtonAskAction_clicked()
     //Sending the action
     if (!action_state.call(srv_astate)) {
        ROS_ERROR("Failed to call service mental_state/action_state");
+       return;
+    }
+}
+
+
+/*************************************
+ * Human Simu tab
+ *************************************/
+
+
+
+void MainWindow::on_pushButtonSendHumanAction_clicked()
+{
+    //Getting parameters
+    string agent = ui.comboBoxHumanAgent->currentText().toStdString();
+    string actionName = ui.comboBoxHumanActionName->currentText().toStdString();
+    string actionObject = ui.comboBoxHumanActionObject->currentText().toStdString();
+    string actionSupport = ui.comboBoxHumanActionSupport->currentText().toStdString();
+
+    //creating the action
+    ros::ServiceClient human_action = node_.serviceClient<supervisor_msgs::HumanActionSimu>("human_monitor/human_action_simu");
+    supervisor_msgs::HumanActionSimu srv_haction;
+    srv_haction.request.actionName = actionName;
+    srv_haction.request.agent = agent;
+    srv_haction.request.object = actionObject;
+    srv_haction.request.support = actionSupport;
+
+    //Sending the action
+    if (!human_action.call(srv_haction)) {
+       ROS_ERROR("Failed to call service human_monitor/human_action_simu");
        return;
     }
 }
