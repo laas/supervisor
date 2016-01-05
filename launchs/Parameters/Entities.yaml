@@ -1,0 +1,4 @@
+---
+entities:
+        objects: ['RED_CUBE', 'BLUE_CUBE', 'BLACK_CUBE', 'GREEN_CUBE', 'GREY_TAPE', 'LOTR_TAPE', 'WALLE_TAPE']
+        supports: ['RED_CUBE', 'BLUE_CUBE', 'BLACK_CUBE', 'GREEN_CUBE', 'TABLE_4', 'IKEA_SHELF_LIGHT', 'IKEA_SHELF_DARK']
