@@ -17,6 +17,8 @@ Function to call when a human picks an object
 */
 void HumanMonitor::humanPick(string agent, string object){
 	
+	ROS_INFO("[human_monitor] %s has picked %s", agent.c_str(), object.c_str());
+	
 	ros::NodeHandle node;
 	ros::ServiceClient action_state = node.serviceClient<supervisor_msgs::ActionState>("mental_state/action_state");
 
@@ -48,6 +50,8 @@ Function to call when a human picks an object
 	@object: the object picked
 */
 void HumanMonitor::humanPlace(string agent, string object, string support){
+	
+	ROS_INFO("[human_monitor] %s has placed %s on %s", agent.c_str(), object.c_str(), support.c_str());
 	
 	ros::NodeHandle node;
 	ros::ServiceClient action_state = node.serviceClient<supervisor_msgs::ActionState>("mental_state/action_state");

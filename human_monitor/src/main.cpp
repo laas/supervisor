@@ -14,25 +14,18 @@ HumanMonitor* hm = new HumanMonitor();
 /*
 Service call from simulation to tell that a human picked an object
 */
-bool humanPick(supervisor_msgs::HumanPick::Request  &req, supervisor_msgs::HumanPick::Response &res){
+bool humaActionSimu(supervisor_msgs::HumanActionSimu::Request  &req, supervisor_msgs::HumanActionSimu::Response &res){
 	
-	
-	hm->humanPick(req.agent, req.object);
+	if(req.actionName == "pick"){
+	   hm->humanPick(req.agent, req.object);
+	}else if(req.actionName == "place"){
+	   hm->humanPlace(req.agent, req.object, req.support);
+	}else{
+	   ROS_ERROR("[human_monitor] Unknown action name");
+	}
 
 	return true;
 }
-
-/*
-Service call from simulation to tell that a human placed an object on a support
-*/
-bool humanPlace(supervisor_msgs::HumanPlace::Request  &req, supervisor_msgs::HumanPlace::Response &res){
-	
-	
-	hm->humanPlace(req.agent, req.object, req.support);
-
-	return true;
-}
-
 
 int main (int argc, char **argv)
 {
@@ -40,13 +33,12 @@ int main (int argc, char **argv)
   ros::NodeHandle node;
   ros::Rate loop_rate(30);
 
-  ROS_INFO("[mental_state] Init human_monitor");
+  ROS_INFO("[human_monitor] Init human_monitor");
 
   //Services declarations
-  ros::ServiceServer service_pick = node.advertiseService("human_monitor/human_pick", humanPick); //allows the simulation to tell that a human picked an object
-  ros::ServiceServer service_place = node.advertiseService("human_monitor/human_place", humanPlace); //allows the simulation to tell that a human place an object
+  ros::ServiceServer service_action = node.advertiseService("human_monitor/human_action_simu", humaActionSimu); //allows the simulation to tell that a human has done an action
 
-  ROS_INFO("[mental_state] human_monitor ready");
+  ROS_INFO("[human_monitor] human_monitor ready");
 
   while (node.ok()) {
 

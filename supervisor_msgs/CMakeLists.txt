@@ -38,8 +38,7 @@ add_service_files(
   ActionState.srv
   AbortGoal.srv
   InfoGiven.srv
-  HumanPick.srv
-  HumanPlace.srv
+  HumanActionSimu.srv
   GetActionTodo.srv
   GetAllAgents.srv
   GetActionState.srv

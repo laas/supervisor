@@ -9,8 +9,7 @@
 #include <boost/thread/locks.hpp>
 
 #include "supervisor_msgs/Action.h"
-#include "supervisor_msgs/HumanPick.h"
-#include "supervisor_msgs/HumanPlace.h"
+#include "supervisor_msgs/HumanActionSimu.h"
 #include "supervisor_msgs/ActionState.h"
 
 
