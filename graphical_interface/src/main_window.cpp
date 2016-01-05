@@ -10,20 +10,27 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     setWindowTitle("PR2 supervisor");
     node_.getParam("/robot/name", robotName_);
 
-    //Add possible actions name
-    ui.comboBoxActionName->addItem("pick");
-    ui.comboBoxActionName->addItem("place");
-    ui.comboBoxActionName->addItem("pickandplace");
+    //we retrieve the possible actions from param of the .yaml file
+    vector<string> actionNames;
+    node_.getParam("/highLevelActions/names", actionNames);
+    for(vector<string>::iterator it = actionNames.begin(); it != actionNames.end(); it++){
+        ui.comboBoxActionName->addItem(it->c_str());
+    }
 
-    //Add possible actions object
-    ui.comboBoxActionObject->addItem("RED_CUBE");
+    //we retrieve the possible objects from param of the .yaml file
+    vector<string> objects;
+    node_.getParam("/entities/objects", objects);
+    for(vector<string>::iterator it = objects.begin(); it != objects.end(); it++){
+        ui.comboBoxActionObject->addItem(it->c_str());
+    }
 
-    //Add possible actions support
-    ui.comboBoxActionSupport->addItem("TABLE_4");
 
-    //Add possible actions agent
-    ui.comboBoxActionAgent->addItem("HERAKLES_HUMAN1");
-    ui.comboBoxActionAgent->addItem("HERAKLES_HUMAN1");
+    //we retrieve the possible supports from param of the .yaml file
+    vector<string> supports;
+    node_.getParam("/entities/supports", supports);
+    for(vector<string>::iterator it = supports.begin(); it != supports.end(); it++){
+        ui.comboBoxActionSupport->addItem(it->c_str());
+    }
 
     actionClient_.waitForServer();
 
@@ -42,20 +49,22 @@ void MainWindow::on_pushButtonExecuteAction_clicked()
     string actionName = ui.comboBoxActionName->currentText().toStdString();
     string actionObject = ui.comboBoxActionObject->currentText().toStdString();
     string actionSupport = ui.comboBoxActionSupport->currentText().toStdString();
-    string actionAgent = ui.comboBoxActionAgent->currentText().toStdString();
 
-    //creating the action
+    //creating the action with the good parameters coming from higl level actions
     supervisor_msgs::ActionExecutorGoal goal;
     goal.action.name = actionName;
     goal.action.id = -1;
     goal.action.actors.push_back(robotName_);
-    if(actionName == "pick"){
-          goal.action.parameters.push_back(actionObject);
-    }else if(actionName == "place"){
-        goal.action.parameters.push_back(actionObject);
-        goal.action.parameters.push_back(actionSupport);
-    }else if(actionName == "pickandplace"){
-        goal.action.parameters.push_back(actionSupport);
+    string paramTopic = "highLevelActions/";
+    paramTopic = paramTopic + actionName + "_param";
+    vector<string> params;
+    node_.getParam(paramTopic, params);
+    for(vector<string>::iterator it = params.begin(); it != params.end(); it++){
+        if(*it == "mainObject"){
+             goal.action.parameters.push_back(actionObject);
+        }else if(*it == "supportObject"){
+            goal.action.parameters.push_back(actionSupport);
+       }
     }
 
     //Sending the actions
@@ -71,7 +80,6 @@ void MainWindow::on_pushButtonAskAction_clicked()
     string actionName = ui.comboBoxActionName->currentText().toStdString();
     string actionObject = ui.comboBoxActionObject->currentText().toStdString();
     string actionSupport = ui.comboBoxActionSupport->currentText().toStdString();
-    string actionAgent = ui.comboBoxActionAgent->currentText().toStdString();
 
     //creating the action
     ros::ServiceClient action_state = node_.serviceClient<supervisor_msgs::ActionState>("mental_state/action_state");
@@ -79,13 +87,16 @@ void MainWindow::on_pushButtonAskAction_clicked()
     srv_astate.request.action.name = actionName;
     srv_astate.request.action.id = -1;
     srv_astate.request.action.actors.push_back(robotName_);
-    if(actionName == "pick"){
-          srv_astate.request.action.parameters.push_back(actionObject);
-    }else if(actionName == "place"){
-        srv_astate.request.action.parameters.push_back(actionObject);
-        srv_astate.request.action.parameters.push_back(actionSupport);
-    }else if(actionName == "pickandplace"){
-        srv_astate.request.action.parameters.push_back(actionSupport);
+    string paramTopic = "highLevelActions/";
+    paramTopic = paramTopic + actionName + "_param";
+    vector<string> params;
+    node_.getParam(paramTopic, params);
+    for(vector<string>::iterator it = params.begin(); it != params.end(); it++){
+        if(*it == "mainObject"){
+             srv_astate.request.action.parameters.push_back(actionObject);
+        }else if(*it == "supportObject"){
+            srv_astate.request.action.parameters.push_back(actionSupport);
+       }
     }
 
     srv_astate.request.state = "ASKED";
