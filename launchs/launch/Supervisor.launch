@@ -1,9 +1,9 @@
 <launch>
-	<rosparam command="load" file="Parameters/General.yaml" />
-	<rosparam command="load" file="Parameters/Goals.yaml" />
-	<rosparam command="load" file="Parameters/HighLevelActions.yaml" />
-	<rosparam command="load" file="Parameters/HumanMonitoring.yaml" />
-	<rosparam command="load" file="Parameters/Entities.yaml" />
+	<rosparam command="load" file="$(find launchs)/Parameters/General.yaml" />
+	<rosparam command="load" file="$(find launchs)/Parameters/Goals.yaml" />
+	<rosparam command="load" file="$(find launchs)/Parameters/HighLevelActions.yaml" />
+	<rosparam command="load" file="$(find launchs)/Parameters/HumanMonitoring.yaml" />
+	<rosparam command="load" file="$(find launchs)/Parameters/Entities.yaml" />
 
 	<node name="action_executor" pkg="action_executor" type="action_executor" output="screen" />  <!-- Launch the action executor -->
 	<node name="mental_states" pkg="mental_states" type="mental_states" output="screen" />  <!-- Launch the mental state manager -->
