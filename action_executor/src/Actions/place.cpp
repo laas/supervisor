@@ -17,6 +17,33 @@ Place::Place(supervisor_msgs::Action action) : VirtualAction(){
 }
 
 bool Place::preconditions(){
+
+   //First we check if the object is a known manipulable object
+   if(!isManipulableObject(object_)){
+      return false;
+      ROS_WARN("[action_executor] The object to place is not a known manipulable object");
+   }
+   
+   //Then we check if the support is a known support object
+   if(!isSupportObject(support_)){
+      return false;
+      ROS_WARN("[action_executor] The support is not a known support object");
+   }
+   
+   //Then we check if the robot has the object in hand and if the support is reachable
+   vector<toaster_msgs::Fact> precsTocheck;
+   toaster_msgs::Fact fact;
+   fact.subjectId = object_;
+	fact.property = "isHoldBy";
+	fact.targetId = robotName_;
+	precsTocheck.push_back(fact);
+   fact.subjectId = support_;
+	fact.property = "isReachableBy";
+	fact.targetId = robotName_;
+	precsTocheck.push_back(fact);
+	
+	return ArePreconditionsChecked(precsTocheck);
+   
 	return true;
 }
 
