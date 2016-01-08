@@ -11,6 +11,7 @@
 #include "supervisor_msgs/Action.h"
 #include "supervisor_msgs/HumanActionSimu.h"
 #include "supervisor_msgs/ActionState.h"
+#include "toaster_msgs/FactList.h"
 
 
 using namespace std;
@@ -21,6 +22,7 @@ public:
 	~HumanMonitor() {};
 	void humanPick(string agent, string object);
 	void humanPlace(string agent, string object, string support);
+	void humanDrop(string agent, string object, string container);
 protected:
 
 private:

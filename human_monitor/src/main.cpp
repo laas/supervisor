@@ -20,11 +20,23 @@ bool humaActionSimu(supervisor_msgs::HumanActionSimu::Request  &req, supervisor_
 	   hm->humanPick(req.agent, req.object);
 	}else if(req.actionName == "place"){
 	   hm->humanPlace(req.agent, req.object, req.support);
+	}else if(req.actionName == "drop"){
+	   hm->humanDrop(req.agent, req.object, req.container);
 	}else{
 	   ROS_ERROR("[human_monitor] Unknown action name");
 	}
 
 	return true;
+}
+
+
+/*
+Call back for the topic agent_monitor/fact_list
+*/
+void agentFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
+	
+	//TODO: action recognition based on distances
+	
 }
 
 int main (int argc, char **argv)
@@ -37,14 +49,12 @@ int main (int argc, char **argv)
 
   //Services declarations
   ros::ServiceServer service_action = node.advertiseService("human_monitor/human_action_simu", humaActionSimu); //allows the simulation to tell that a human has done an action
+  
+  ros::Subscriber sub = node.subscribe("agent_monitor/factList", 1000, agentFactListCallback);
 
   ROS_INFO("[human_monitor] human_monitor ready");
 
-  while (node.ok()) {
-
-  ros::spinOnce();
-  loop_rate.sleep();
-  }
+  ros::spin();
 
   return 0;
 }
