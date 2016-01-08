@@ -6,6 +6,10 @@ Main class of the action executor
 This module allows the robot to execute high level actions.
 Available actions:
 
+In progess: pick, place (+pickandplace), drop (+pickanddrop)
+
+TODO: placereachable (+pickandplacereachable), give/grab, moveTo, goTo (+engage/disengage), scan, sweep
+
 **/
 
 #include <action_executor/action_executor.h>
