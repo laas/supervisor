@@ -1,0 +1,4 @@
+string agent
+toaster_msgs/Fact[] facts
+---
+bool result
