@@ -3,3 +3,4 @@ entities:
         agents: ['PR2_ROBOT', 'HERAKLES_HUMAN1', 'HERAKLES_HUMAN2']
         objects: ['RED_CUBE', 'BLUE_CUBE', 'BLACK_CUBE', 'GREEN_CUBE', 'GREY_TAPE', 'LOTR_TAPE', 'WALLE_TAPE']
         supports: ['RED_CUBE', 'BLUE_CUBE', 'BLACK_CUBE', 'GREEN_CUBE', 'TABLE_4', 'IKEA_SHELF_LIGHT', 'IKEA_SHELF_DARK']
+        containers: ['PINK_TRASHBIN', 'BLUE_TRASHBIN', 'GREEN_TRASHBIN']

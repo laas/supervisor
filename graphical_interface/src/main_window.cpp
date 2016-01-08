@@ -44,6 +44,15 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
         ui.comboBoxHumanActionSupport->addItem(it->c_str());
     }
 
+
+    //we retrieve the possible containers from param of the .yaml file
+    vector<string> containers;
+    node_.getParam("/entities/containers", containers);
+    for(vector<string>::iterator it = containers.begin(); it != containers.end(); it++){
+        ui.comboBoxActionContainer->addItem(it->c_str());
+        ui.comboBoxHumanActionContainer->addItem(it->c_str());
+    }
+
     actionClient_.waitForServer();
 
 
@@ -65,6 +74,7 @@ void MainWindow::on_pushButtonExecuteAction_clicked()
     string actionName = ui.comboBoxActionName->currentText().toStdString();
     string actionObject = ui.comboBoxActionObject->currentText().toStdString();
     string actionSupport = ui.comboBoxActionSupport->currentText().toStdString();
+    string actionContainer = ui.comboBoxActionContainer->currentText().toStdString();
 
     //creating the action with the good parameters coming from higl level actions
     supervisor_msgs::ActionExecutorGoal goal;
@@ -80,6 +90,8 @@ void MainWindow::on_pushButtonExecuteAction_clicked()
              goal.action.parameters.push_back(actionObject);
         }else if(*it == "supportObject"){
             goal.action.parameters.push_back(actionSupport);
+       }else if(*it == "containerObject"){
+            goal.action.parameters.push_back(actionContainer);
        }
     }
 
@@ -96,6 +108,7 @@ void MainWindow::on_pushButtonAskAction_clicked()
     string actionName = ui.comboBoxActionName->currentText().toStdString();
     string actionObject = ui.comboBoxActionObject->currentText().toStdString();
     string actionSupport = ui.comboBoxActionSupport->currentText().toStdString();
+    string actionContainer = ui.comboBoxActionContainer->currentText().toStdString();
 
     //creating the action
     ros::ServiceClient action_state = node_.serviceClient<supervisor_msgs::ActionState>("mental_state/action_state");
@@ -112,6 +125,8 @@ void MainWindow::on_pushButtonAskAction_clicked()
              srv_astate.request.action.parameters.push_back(actionObject);
         }else if(*it == "supportObject"){
             srv_astate.request.action.parameters.push_back(actionSupport);
+       }else if(*it == "containerObject"){
+            srv_astate.request.action.parameters.push_back(actionContainer);
        }
     }
 
@@ -138,6 +153,7 @@ void MainWindow::on_pushButtonSendHumanAction_clicked()
     string actionName = ui.comboBoxHumanActionName->currentText().toStdString();
     string actionObject = ui.comboBoxHumanActionObject->currentText().toStdString();
     string actionSupport = ui.comboBoxHumanActionSupport->currentText().toStdString();
+    string actionContainer = ui.comboBoxHumanActionContainer->currentText().toStdString();
 
     //creating the action
     ros::ServiceClient human_action = node_.serviceClient<supervisor_msgs::HumanActionSimu>("human_monitor/human_action_simu");
@@ -146,6 +162,7 @@ void MainWindow::on_pushButtonSendHumanAction_clicked()
     srv_haction.request.agent = agent;
     srv_haction.request.object = actionObject;
     srv_haction.request.support = actionSupport;
+    srv_haction.request.container = actionContainer;
 
     //Sending the action
     if (!human_action.call(srv_haction)) {

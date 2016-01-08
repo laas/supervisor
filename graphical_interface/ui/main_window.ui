@@ -240,6 +240,29 @@
        <string>Complete Execution</string>
       </property>
      </widget>
+     <widget class="QLabel" name="label_13">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>180</y>
+        <width>71</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Container:</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="comboBoxActionContainer">
+      <property name="geometry">
+       <rect>
+        <x>110</x>
+        <y>170</y>
+        <width>101</width>
+        <height>27</height>
+       </rect>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab">
      <attribute name="title">
@@ -264,7 +287,7 @@
         <x>10</x>
         <y>20</y>
         <width>20</width>
-        <height>251</height>
+        <height>291</height>
        </rect>
       </property>
       <property name="orientation">
@@ -277,7 +300,7 @@
         <x>320</x>
         <y>20</y>
         <width>20</width>
-        <height>251</height>
+        <height>291</height>
        </rect>
       </property>
       <property name="orientation">
@@ -288,7 +311,7 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>260</y>
+        <y>300</y>
         <width>311</width>
         <height>16</height>
        </rect>
@@ -329,7 +352,7 @@
      <widget class="QComboBox" name="comboBoxHumanAgent">
       <property name="geometry">
        <rect>
-        <x>100</x>
+        <x>130</x>
         <y>60</y>
         <width>101</width>
         <height>27</height>
@@ -339,7 +362,7 @@
      <widget class="QComboBox" name="comboBoxHumanActionName">
       <property name="geometry">
        <rect>
-        <x>100</x>
+        <x>130</x>
         <y>100</y>
         <width>101</width>
         <height>27</height>
@@ -349,7 +372,7 @@
      <widget class="QComboBox" name="comboBoxHumanActionObject">
       <property name="geometry">
        <rect>
-        <x>100</x>
+        <x>130</x>
         <y>140</y>
         <width>101</width>
         <height>27</height>
@@ -359,7 +382,7 @@
      <widget class="QComboBox" name="comboBoxHumanActionSupport">
       <property name="geometry">
        <rect>
-        <x>100</x>
+        <x>130</x>
         <y>180</y>
         <width>101</width>
         <height>27</height>
@@ -409,13 +432,36 @@
       <property name="geometry">
        <rect>
         <x>100</x>
-        <y>230</y>
+        <y>270</y>
         <width>141</width>
         <height>27</height>
        </rect>
       </property>
       <property name="text">
        <string>Send</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_12">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>230</y>
+        <width>91</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Container:</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="comboBoxHumanActionContainer">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>220</y>
+        <width>101</width>
+        <height>27</height>
+       </rect>
       </property>
      </widget>
     </widget>
