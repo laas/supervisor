@@ -5,11 +5,6 @@ author Sandra Devin
 
 #include <human_monitor/human_monitor.h>
 
-
-HumanMonitor::HumanMonitor(){
-	hasPicked_ = false;
-}
-
 /*
 Function to call when a human picks an object
 	@agent: the human who does the action
@@ -24,9 +19,6 @@ void HumanMonitor::humanPick(string agent, string object){
 
 	//put the object in the hand of the agent
 	//TODO
-
-	//we remember the action in order to recognize pickandplace or pickanddrop
-	hasPicked_ = true;
 
 	//we create the corresponding action
 	supervisor_msgs::Action action;
@@ -78,22 +70,19 @@ void HumanMonitor::humanPlace(string agent, string object, string support){
    	 ROS_ERROR("Failed to call service mental_state/action_state");
  	}
 
-	if(hasPicked_){//if there was a pick, it is also a pickand place action
-		hasPicked_ = false;
-		//we create the corresponding action
-		supervisor_msgs::Action action2;
-		action2.name = "pickandplace";
-		action2.parameters.push_back(object);
-		action2.parameters.push_back(support);
-		action2.actors.push_back(agent);
-
-		//send the action to the mental state manager
- 		srv_astate.request.action = action2;
- 		srv_astate.request.state = "DONE";
-  		if (!action_state.call(srv_astate)){
-   		 ROS_ERROR("Failed to call service mental_state/action_state");
- 		}
-	}
+	//we also consider a pick and place action
+	supervisor_msgs::Action action2;
+	action2.name = "pickandplace";
+	action2.parameters.push_back(object);
+	action2.parameters.push_back(support);
+	action2.actors.push_back(agent);
+	
+	//send the action to the mental state manager
+ 	srv_astate.request.action = action2;
+ 	srv_astate.request.state = "DONE";
+  	if (!action_state.call(srv_astate)){
+   	 ROS_ERROR("Failed to call service mental_state/action_state");
+ 	}
 }
 
 /*
@@ -130,21 +119,18 @@ void HumanMonitor::humanDrop(string agent, string object, string container){
    	 ROS_ERROR("Failed to call service mental_state/action_state");
  	}
 
-	if(hasPicked_){//if there was a pick, it is also a pickanddrop action
-		hasPicked_ = false;
-		//we create the corresponding action
-		supervisor_msgs::Action action2;
-		action2.name = "pickanddrop";
-		action2.parameters.push_back(object);
-		action2.parameters.push_back(container);
-		action2.actors.push_back(agent);
-
-		//send the action to the mental state manager
- 		srv_astate.request.action = action2;
- 		srv_astate.request.state = "DONE";
-  		if (!action_state.call(srv_astate)){
-   		 ROS_ERROR("Failed to call service mental_state/action_state");
- 		}
-	}
+	//we also consider a pick and drop action
+	supervisor_msgs::Action action2;
+	action2.name = "pickanddrop";
+	action2.parameters.push_back(object);
+	action2.parameters.push_back(container);
+	action2.actors.push_back(agent);
+	
+	//send the action to the mental state manager
+ 	srv_astate.request.action = action2;
+ 	srv_astate.request.state = "DONE";
+  	if (!action_state.call(srv_astate)){
+   	 ROS_ERROR("Failed to call service mental_state/action_state");
+ 	}
 }
 
