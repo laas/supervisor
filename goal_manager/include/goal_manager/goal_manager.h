@@ -22,7 +22,6 @@ public:
 protected:
 
 private:
-   ros::NodeHandle node_;
    string currentGoal_;
    queue<string> waitingGoals_; 
 	void executeGoal(string goal);

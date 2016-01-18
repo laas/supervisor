@@ -15,7 +15,8 @@ New goal to manage
 */
 void GoalManager::addGoal(string goal){
 
-   ros::ServiceClient client = node_.serviceClient<supervisor_msgs::NewGoal>("mental_state/start_goal");
+   ros::NodeHandle node;
+   ros::ServiceClient client = node.serviceClient<supervisor_msgs::NewGoal>("mental_state/start_goal");
 
    if(currentGoal_ == "NONE"){//if there is no current goal, we execute the goal
       //We say to the mental state manager that we start the goal
@@ -26,6 +27,7 @@ void GoalManager::addGoal(string goal){
 	   }
 	   //And we execute it
       currentGoal_ = goal;
+      ROS_INFO("[goal_manager] Executing the goal %s", goal.c_str());
       executeGoal(goal);
    }else{//else we put it in the waiting queue
       waitingGoals_.push(goal);
