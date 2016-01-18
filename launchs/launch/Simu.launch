@@ -1,4 +1,5 @@
 <launch>
+
     <!-- Launch gazebo -->
 	<include file="$(find gazebo_ros)/launch/empty_world.launch"/>
 	<include file="$(find pr2_gazebo)/launch/pr2.launch"/>

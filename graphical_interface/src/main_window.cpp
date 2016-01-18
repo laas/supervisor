@@ -53,6 +53,15 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
         ui.comboBoxHumanActionContainer->addItem(it->c_str());
     }
 
+
+    //we retrieve the possible goals from param of the .yaml file
+    vector<string> goals;
+    node_.getParam("/goals/names", goals);
+    for(vector<string>::iterator it = goals.begin(); it != goals.end(); it++){
+        ui.comboBoxGoalName->addItem(it->c_str());
+    }
+
+
     actionClient_.waitForServer();
 
 
@@ -169,4 +178,26 @@ void MainWindow::on_pushButtonSendHumanAction_clicked()
        ROS_ERROR("Failed to call service human_monitor/human_action_simu");
        return;
     }
+}
+
+
+/*************************************
+ * Goal tab
+ *************************************/
+
+
+void MainWindow::on_pushButtonExecuteGoal_clicked()
+{
+    //Getting parameters
+    string goal = ui.comboBoxGoalName->currentText().toStdString();
+
+    //sending the goal to the goal manager
+    ros::ServiceClient new_goal = node_.serviceClient<supervisor_msgs::NewGoal>("goal_manager/new_goal");
+    supervisor_msgs::NewGoal srv;
+    srv.request.goal = goal;
+    if (!new_goal.call(srv)) {
+       ROS_ERROR("Failed to call service goal_manager/new_goal");
+       return;
+    }
+
 }
