@@ -77,12 +77,12 @@ bool VirtualAction::isContainerObject(string container){
 }
 
 /*
-Function which return true if an object is a container object (based on parameters)
-	@container: the tested object
+Function which check if the preconditions are in the knowledge of the robot
+	@precs: list of facts to check
 */
 bool VirtualAction::ArePreconditionsChecked(vector<toaster_msgs::Fact> precs){
 
-   ros::ServiceClient client = node_.serviceClient<supervisor_msgs::FactsAreIn>("mental_states/facts_are_in");
+   ros::ServiceClient client = node_.serviceClient<supervisor_msgs::FactsAreIn>("mental_state/facts_are_in");
    supervisor_msgs::FactsAreIn srv;
 	srv.request.agent = robotName_;
 	srv.request.facts = precs;
@@ -91,6 +91,6 @@ bool VirtualAction::ArePreconditionsChecked(vector<toaster_msgs::Fact> precs){
 	}else{
 	   ROS_ERROR("[mental_state] Failed to call service mental_states/facts_are_in");
 	}
-   
+   return false;
 }
 

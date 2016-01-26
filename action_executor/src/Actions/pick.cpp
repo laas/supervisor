@@ -19,8 +19,8 @@ bool Pick::preconditions(){
    
    //First we check if the object is a known manipulable object
    if(!isManipulableObject(object_)){
-      return false;
       ROS_WARN("[action_executor] The object to pick is not a known manipulable object");
+      return false;
    }
    
    //Then we check if the robot has the hands free and if the object is reachable
