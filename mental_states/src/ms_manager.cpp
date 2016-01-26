@@ -323,7 +323,7 @@ supervisor_msgs::ActionMS MSManager::getHighLevelActionByName(string name){
 		}
 	}
 
-	ROS_ERROR("[mental_state] Unknown action name");
+	ROS_ERROR("[mental_state] Unknown action name: %s", name.c_str());
 	return action;
 
 }
@@ -489,6 +489,7 @@ pair<bool, supervisor_msgs::ActionMS> MSManager::getActionFromAction(supervisor_
 	boost::unique_lock<boost::mutex> lock(actionListMutex_);
 	pair<bool, supervisor_msgs::ActionMS> answer;
 	for(vector<supervisor_msgs::ActionMS>::iterator it = actionList_.begin(); it != actionList_.end(); it++){
+	   bool same = false;
 		if(action.name != it->name){
 			continue;
 		}
@@ -496,9 +497,13 @@ pair<bool, supervisor_msgs::ActionMS> MSManager::getActionFromAction(supervisor_
 			vector<string>::iterator itp2 = action.parameters.begin();
 			for(vector<string>::iterator itp = it->parameters.begin(); itp != it->parameters.end(); itp++){
 				if(*itp != *itp2){
-					continue;
+					same = true;
+					break;
 				}
 				itp2++;
+			}
+			if(same){
+			   continue;
 			}
 		}else{
 			continue;
@@ -507,9 +512,13 @@ pair<bool, supervisor_msgs::ActionMS> MSManager::getActionFromAction(supervisor_
 			vector<string>::iterator ita2 = action.actors.begin();
 			for(vector<string>::iterator ita = it->actors.begin(); ita != it->actors.end(); ita++){
 				if(*ita != *ita2){
+					same = false;
 					continue;
 				}
 				ita2++;
+			}
+			if(same){
+			   continue;
 			}
 		}else{
 			continue;
