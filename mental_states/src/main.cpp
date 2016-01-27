@@ -498,6 +498,7 @@ int main (int argc, char **argv)
   node.getParam("/simu", simu);
   node.getParam("/robot/name", robotName);
   allAgents = db->getAgents();
+  db->cleanDB();
   ms->initGoals();
   ms->initHighLevelActions();
 

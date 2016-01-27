@@ -41,6 +41,7 @@ public:
 	void addFacts(vector<toaster_msgs::Fact> facts, string agent);
 	void addEffects(vector<toaster_msgs::Fact> facts, string agent);
 	vector<toaster_msgs::Fact> getFactsAgent(string agent);
+	void cleanDB();
 protected:
 
 private:
