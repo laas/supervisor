@@ -51,6 +51,7 @@ void DBInterface::addGoalState(supervisor_msgs::GoalMS goal, string agent, strin
 	toaster_msgs::Fact factRm;
 	factRm.subjectId = goal.name;
 	factRm.property = "goalState";
+	factRm.propertyType = "state";
 	factRm.targetId = "NULL";
 	toRemove.push_back(factRm);
 	srv_rm.request.facts = toRemove;
@@ -64,6 +65,7 @@ void DBInterface::addGoalState(supervisor_msgs::GoalMS goal, string agent, strin
 	toaster_msgs::Fact fact;
 	fact.subjectId = goal.name;
 	fact.property = "goalState";
+	fact.propertyType = "state";
 	fact.targetId = state;
 	srv.request.fact = fact;
   	if (!client.call(srv)){
@@ -95,6 +97,7 @@ void DBInterface::addPlanState(supervisor_msgs::PlanMS plan, string agent, strin
 	toaster_msgs::Fact factRm;
 	factRm.subjectId = planId;
 	factRm.property = "planState";
+	factRm.propertyType = "state";
 	factRm.targetId = "NULL";
 	toRemove.push_back(factRm);
 	srv_rm.request.facts = toRemove;
@@ -107,6 +110,7 @@ void DBInterface::addPlanState(supervisor_msgs::PlanMS plan, string agent, strin
 	toaster_msgs::Fact fact;
 	fact.subjectId = planId;
 	fact.property = "planState";
+	fact.propertyType = "state";
 	fact.targetId = state;
 	srv.request.fact = fact;
   	if (!client.call(srv)){
@@ -136,12 +140,14 @@ void DBInterface::addActionsState(vector<supervisor_msgs::ActionMS> actions, str
 		toaster_msgs::Fact factRm;
 		factRm.subjectId = actionId;
 		factRm.property = "actionState";
+	   factRm.propertyType = "state";
 		factRm.targetId = "NULL";
 		toRemove.push_back(factRm);
 		//then we add the new state
 		toaster_msgs::Fact factAdd;
 		factAdd.subjectId = actionId;
 		factAdd.property = "actionState";
+	   factAdd.propertyType = "state";
 		factAdd.targetId = state;
 		toAdd.push_back(factAdd);
 	}
@@ -293,6 +299,7 @@ void DBInterface::removeActionsState(string agent, string state){
 	toaster_msgs::Fact factRm;
 	factRm.subjectId = "NULL";
 	factRm.property = "actionState";
+	factRm.propertyType = "state";
 	factRm.targetId = state;
 	toRemove.push_back(factRm);
 	toaster_msgs::AddFactsToAgent srv_rm;
