@@ -13,6 +13,7 @@
 #include "supervisor_msgs/StartGoal.h"
 #include "supervisor_msgs/NewPlan.h"
 #include "supervisor_msgs/SharePlan.h"
+#include "supervisor_msgs/AbortGoal.h"
 #include "supervisor_msgs/Plan.h"
 #include "hatp_msgs/PlanningRequest.h"
 #include "hatp_msgs/Plan.h"

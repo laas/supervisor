@@ -43,9 +43,11 @@ void GoalManager::executeGoal(string goal){
    ros::ServiceClient client = node.serviceClient<hatp_msgs::PlanningRequest>("Planner");
    ros::ServiceClient clientNP = node.serviceClient<supervisor_msgs::NewPlan>("mental_state/new_plan");
    ros::ServiceClient clientSP = node.serviceClient<supervisor_msgs::SharePlan>("mental_state/share_plan");
+   ros::ServiceClient clientAG = node.serviceClient<supervisor_msgs::AbortGoal>("mental_state/abort_goal");
 	hatp_msgs::PlanningRequest service;
 	supervisor_msgs::NewPlan serviceNP;
 	supervisor_msgs::SharePlan serviceSP;
+	supervisor_msgs::AbortGoal serviceAG;
 	
 	//We look for the HATP method name to call
 	string methodTopic = "HATP_domains/";
@@ -67,16 +69,26 @@ void GoalManager::executeGoal(string goal){
 	service.request.request.type="all";
 	if(client.call(service)){
 	   //we convert the plan in the supervisor format
-	   supervisor_msgs::Plan newPlan = convertPlan(service.response.solution, goal);
-	   //we send him to the mental state manager
-	   serviceNP.request.plan = newPlan;
-	   if(!clientNP.call(serviceNP)){
-		   ROS_ERROR("Failed to call service mental_state/new_plan");
-	   }
-	   //For now, we consider the plan automatically shared
-	   if(!clientSP.call(serviceSP)){
-		   ROS_ERROR("Failed to call service mental_state/share_plan");
-	   }
+	   if(service.response.solution.report == "OK"){
+	      supervisor_msgs::Plan newPlan = convertPlan(service.response.solution, goal);
+	      //we send him to the mental state manager
+	      serviceNP.request.plan = newPlan;
+	      if(!clientNP.call(serviceNP)){
+		      ROS_ERROR("Failed to call service mental_state/new_plan");
+	      }
+	      //For now, we consider the plan automatically shared
+	      if(!clientSP.call(serviceSP)){
+		      ROS_ERROR("Failed to call service mental_state/share_plan");
+	      }
+	  }else{//the robot aborts the goal
+	      string robotName;
+         node.getParam("/robot/name", robotName);
+	      serviceAG.request.agent = robotName;
+	      serviceAG.request.goal = goal;
+	      if(!clientAG.call(serviceAG)){
+		      ROS_ERROR("Failed to call service mental_state/abort_goal");
+	      }
+	  }
 	}else{
 		ROS_ERROR("Failed to call service 'Planner'");
 	}
