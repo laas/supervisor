@@ -12,6 +12,7 @@
 #include "toaster_msgs/RemoveFactToAgent.h"
 #include "toaster_msgs/ExecuteSQL.h"
 #include "toaster_msgs/AreInTable.h"
+#include "toaster_msgs/GetFacts.h"
 #include "toaster_msgs/Fact.h"
 #include "toaster_msgs/FactList.h"
 #include "supervisor_msgs/ActionMS.h"
@@ -39,6 +40,7 @@ public:
 	vector<string> getAgentsWhoSee(string agent);
 	void addFacts(vector<toaster_msgs::Fact> facts, string agent);
 	void addEffects(vector<toaster_msgs::Fact> facts, string agent);
+	vector<toaster_msgs::Fact> getFactsAgent(string agent);
 protected:
 
 private:

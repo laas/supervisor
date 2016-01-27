@@ -23,6 +23,7 @@
 #include "supervisor_msgs/GetActionState.h"
 #include "supervisor_msgs/SolveDivergentBelief.h"
 #include "supervisor_msgs/FactsAreIn.h"
+#include "supervisor_msgs/GetFactsAgent.h"
 #include "supervisor_msgs/AbortGoal.h"
 #include "supervisor_msgs/ActionMS.h"
 #include "supervisor_msgs/PlanMS.h"

@@ -443,3 +443,22 @@ void DBInterface::addEffects(vector<toaster_msgs::Fact> facts, string agent){
 	}
 }
 
+/*
+Function which return all the knowledge of an agent
+	@agent: the agent name 
+*/
+vector<toaster_msgs::Fact> DBInterface::getFactsAgent(string agent){
+
+   ros::NodeHandle node;
+  	ros::ServiceClient client = node.serviceClient<toaster_msgs::GetFacts>("database/get_current_facts_from_agent");
+	toaster_msgs::GetFacts srv;
+	
+	
+	srv.request.agentId = agent;
+	if (client.call(srv)){
+	   return srv.response.resFactList.factList;
+	}else{
+	   ROS_ERROR("[mental_state] Failed to call service database/get_current_facts_from_agent");
+	}
+}
+

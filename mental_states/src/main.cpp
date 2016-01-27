@@ -439,6 +439,17 @@ bool factsAreIn(supervisor_msgs::FactsAreIn::Request  &req, supervisor_msgs::Fac
 	return true;
 }
 
+
+/*
+Service which return all knowledge of an agent
+*/
+bool getFactsAgents(supervisor_msgs::GetFactsAgent::Request  &req, supervisor_msgs::GetFactsAgent::Response &res){
+	
+	res.facts = db->getFactsAgent(req.agent);
+
+	return true;
+}
+
 int main (int argc, char **argv)
 {
   ros::init(argc, argv, "mental_state");
@@ -461,6 +472,7 @@ int main (int argc, char **argv)
   ros::ServiceServer service_get_action_state = node.advertiseService("mental_state/get_action_state", getActionState); //return the state of an action in the knowledge
   ros::ServiceServer service_solve_divergent_belief = node.advertiseService("mental_state/solve_divergent_belief", solveDivergentBelief); //solve a divergent belief concerning an action
   ros::ServiceServer service_facts_are_in = node.advertiseService("mental_state/facts_are_in", factsAreIn); //say if a set of fact is in the mental state of an agent
+  ros::ServiceServer service_get_facts_agents = node.advertiseService("mental_state/get_facts_agents", getFactsAgents); //return all knowledge of an agent
 
   node.getParam("/simu", simu);
   node.getParam("/robot/name", robotName);

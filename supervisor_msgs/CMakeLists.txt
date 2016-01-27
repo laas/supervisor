@@ -44,6 +44,7 @@ add_service_files(
   GetActionState.srv
   SolveDivergentBelief.srv
   FactsAreIn.srv
+  GetFactsAgent.srv
 )
 
  add_action_files(
