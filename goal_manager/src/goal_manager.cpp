@@ -66,7 +66,7 @@ void GoalManager::executeGoal(string goal){
 	}
 	
 	//We ask a plan to HATP
-	service.request.request.type="all";
+	service.request.request.type="plan";
 	if(client.call(service)){
 	   //we convert the plan in the supervisor format
 	   if(service.response.solution.report == "OK"){
