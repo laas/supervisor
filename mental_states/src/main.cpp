@@ -165,12 +165,12 @@ bool actionState(supervisor_msgs::ActionState::Request  &req, supervisor_msgs::A
 	
 	//for all these agent and for the actors we change the state of the action
 	for(vector<string>::iterator it = canSeeAgents.begin(); it != canSeeAgents.end(); it++){
-		vector<supervisor_msgs::ActionMS> actions;
-		actions.push_back(action);
-		db->addActionsState(actions, *it, req.state);
 		if(req.state == "DONE"){//if the state is done, we also add the effects of the action in the agent knowledge
 			db->addEffects(action.effects, *it);
 		}		
+		vector<supervisor_msgs::ActionMS> actions;
+		actions.push_back(action);
+		db->addActionsState(actions, *it, req.state);
 	}
 
 	return true;
@@ -461,11 +461,20 @@ bool getActions(supervisor_msgs::GetActions::Request  &req, supervisor_msgs::Get
 	return true;
 }
 
+
+/*
+Service which return all actions
+*/
+void update(MSManager* ms, string agent){
+	
+	 ms->update(agent);
+}
+
 int main (int argc, char **argv)
 {
   ros::init(argc, argv, "mental_state");
   ros::NodeHandle node;
-  ros::Rate loop_rate(30);
+  	ros::Rate loop_rate(30);
 
   ROS_INFO("[mental_state] Init mental_state");
 
@@ -493,16 +502,15 @@ int main (int argc, char **argv)
   ms->initHighLevelActions();
 
   ROS_INFO("[mental_state] mental_state ready");
-
-  while (node.ok()) {
-
-  for(vector<string>::iterator it = allAgents.begin(); it != allAgents.end(); it++){
-	ms->update(*it);
+  
+  boost::thread_group g;
+  while(true){
+    for(vector<string>::iterator it = allAgents.begin(); it != allAgents.end(); it++){
+	      g.create_thread(boost::bind(update, ms, *it));
+    }
+   g.join_all(); 
+   ros::spinOnce();
+  	loop_rate.sleep();
   }
-
-  ros::spinOnce();
-  loop_rate.sleep();
-  }
-
   return 0;
 }

@@ -7,6 +7,7 @@
 #include <ros/ros.h>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
+#include <boost/thread.hpp>
 
 #include <mental_states/db_interface.h>
 #include "toaster_msgs/Fact.h"
