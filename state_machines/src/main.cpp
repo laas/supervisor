@@ -12,7 +12,6 @@ The state machines manager keeps trace of the activity of each agent.
 #include "supervisor_msgs/GetAllAgents.h"
 
 string robotState;
-string humanState;
 
 
 
@@ -46,7 +45,7 @@ Main function of the human state machine
 */
 void humanStateMachine(string human_name){
   	ros::Rate loop_rate(30);
-	humanState = "IDLE";
+   string humanState = "IDLE";
 	HumanSM* hsm = new HumanSM(human_name);
 	
 	while(true){
@@ -59,7 +58,7 @@ void humanStateMachine(string human_name){
 		}else if(humanState == "SHOULDACT"){
 			humanState = hsm->shouldActState();
 		}else if(humanState == "ABSENT"){
-			humanState = hsm->shouldActState();
+			humanState = hsm->absentState();
 		}else{
 			ROS_ERROR("[state_machines] Wrong human state");	
 		}

@@ -87,7 +87,6 @@ string RobotSM::waitingState(){
 		ROS_INFO("[state_machines] Robot goes to ACTING");
 		return "ACTING";
 	 }else if(srv.response.state == "NEEDED"){//the robot is still not possible, we stay in the WAITING state
-		ROS_INFO("[state_machines] Robot goes to WAITING");
 		return "WAITING";
 	 }else{// the robot has no more action to do, we return to IDLE
 		ROS_INFO("[state_machines] Robot goes to IDLE");

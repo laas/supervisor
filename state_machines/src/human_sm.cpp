@@ -24,7 +24,6 @@ string HumanSM::idleState(){
 
 	//TODO if human ACTING
 	//TODO if human PRESENT
-
 	//We look if the human thinks he has an action to do
   	ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetActionTodo>("mental_state/get_action_todo");
   	ros::ServiceClient client_state = node_.serviceClient<supervisor_msgs::GetActionState>("mental_state/get_action_state");
@@ -43,7 +42,7 @@ string HumanSM::idleState(){
 		if (client_state.call(srv_state)){
 		 if(srv_state.response.state == "READY"){//the state is the same in the robot knowledge, the human SOULD ACT
 			ROS_INFO("[state_machines] %s goes to SHOULD ACT", humanName_.c_str());
-			return "SHOULD_ACT";
+			return "SHOULDACT";
 		 }else{//it is necessary to solve the divergent belief
 			srv_db.request.action = srv_todo.response.action;
 			if (!client_db.call(srv_db)){
@@ -166,7 +165,6 @@ string HumanSM::waitingState(){
 State where the human SHOULD ACT
 */
 string HumanSM::shouldActState(){
-
 	
 	//TODO if human ACTING
 	//TODO if human PRESENT
