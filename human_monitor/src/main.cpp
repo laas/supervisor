@@ -43,7 +43,6 @@ int main (int argc, char **argv)
 {
   ros::init(argc, argv, "human_monitor");
   ros::NodeHandle node;
-  ros::Rate loop_rate(30);
 
   ROS_INFO("[human_monitor] Init human_monitor");
 

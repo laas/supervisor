@@ -36,7 +36,6 @@ int main (int argc, char **argv)
 {
   ros::init(argc, argv, "goal_manager");
   ros::NodeHandle node;
-  ros::Rate loop_rate(30);
 
   ROS_INFO("[goal_manager] Init goal_manager");
  
