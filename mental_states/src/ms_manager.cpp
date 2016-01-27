@@ -43,6 +43,7 @@ void MSManager::initGoals(){
 			toaster_msgs::Fact fact;
     		fact.subjectId = ob->substr(0, beg);
     		fact.property = ob->substr(beg+1, end - beg - 1);
+    		fact.propertyType = "state";
     		fact.targetId = ob->substr(end+1, ob->size() - end - 1);
 			obj.push_back(fact);
 		}
@@ -86,6 +87,7 @@ void MSManager::initHighLevelActions(){
 			toaster_msgs::Fact fact;
     		fact.subjectId = p->substr(0, beg);
     		fact.property = p->substr(beg+2, end - beg - 2);
+    		fact.propertyType = "state";
     		fact.targetId = p->substr(end+2, p->size() - end - 2);
 			precFact.push_back(fact);
 		}
@@ -101,6 +103,7 @@ void MSManager::initHighLevelActions(){
 			toaster_msgs::Fact fact;
     		fact.subjectId = e->substr(0, beg);
     		fact.property = e->substr(beg+2, end - beg - 2);
+    		fact.propertyType = "state";
     		fact.targetId = e->substr(end+2, e->size() - end - 2);
 			effectsFact.push_back(fact);
 		}
@@ -206,6 +209,7 @@ void MSManager::computePreconditions(string agent){
 						toString << itl->origin;
 						fact.subjectId = toString.str();
 						fact.property = "actionState";
+    		         fact.propertyType = "state";
 						fact.targetId = "DONE";
 						toCheck.push_back(fact);
 					}
@@ -384,6 +388,7 @@ supervisor_msgs::ActionMS MSManager::createActionFromHighLevel(supervisor_msgs::
 		fact.subjectId = highLevelNames[it->subjectId];
 		fact.targetId = highLevelNames[it->targetId];
 		fact.property = it->property;
+    	fact.propertyType = "state";
 		newAction.prec.push_back(fact);
 	}
 	for(vector<toaster_msgs::Fact>::iterator it = highLevelAction.effects.begin(); it != highLevelAction.effects.end(); it++){
@@ -391,6 +396,7 @@ supervisor_msgs::ActionMS MSManager::createActionFromHighLevel(supervisor_msgs::
 		fact.subjectId = highLevelNames[it->subjectId];
 		fact.targetId = highLevelNames[it->targetId];
 		fact.property = it->property;
+    	fact.propertyType = "state";
 		newAction.effects.push_back(fact);
 	}
 
