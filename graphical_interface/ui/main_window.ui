@@ -583,8 +583,31 @@
         <x>10</x>
         <y>80</y>
         <width>481</width>
-        <height>261</height>
+        <height>241</height>
        </rect>
+      </property>
+     </widget>
+     <widget class="QTextBrowser" name="textBrowserActions">
+      <property name="geometry">
+       <rect>
+        <x>200</x>
+        <y>340</y>
+        <width>291</width>
+        <height>141</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonSeeActions">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>350</y>
+        <width>141</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>See Actions</string>
       </property>
      </widget>
     </widget>

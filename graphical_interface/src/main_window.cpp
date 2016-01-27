@@ -251,12 +251,33 @@ void MainWindow::on_pushButtonPrintKnowledge_clicked()
         for(vector<toaster_msgs::Fact>::iterator it = actionFacts.begin(); it != actionFacts.end(); it++){
             toPrint = toPrint + it->subjectId + " " + it->property + " " + it->targetId + "\n";
         }
-        ROS_ERROR("To print: %s", toPrint.c_str());
         ui.textBrowserKnowledge->setText(QString::fromStdString(toPrint));
 
     }else{
        ROS_ERROR("Failed to call service mental_state/get_facts_agents");
-       return;
     }
 
+}
+void MainWindow::on_pushButtonSeeActions_clicked()
+{
+    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetActions>("mental_state/get_actions");
+    supervisor_msgs::GetActions srv;
+    ui.textBrowserActions->setText("");
+    if (client.call(srv)) {
+        string toPrint;
+        for(vector<supervisor_msgs::ActionMS>::iterator it = srv.response.actions.begin(); it != srv.response.actions.end(); it++){
+            toPrint = toPrint + boost::lexical_cast<string>(it->id) + "\n" + it->name + "\n" + "Actors: ";
+            for(vector<string>::iterator itt = it->actors.begin(); itt != it->actors.end(); itt++){
+                toPrint = toPrint + *itt + " ";
+            }
+            toPrint = toPrint + "\n" + "Parameters: ";
+            for(vector<string>::iterator itt = it->parameters.begin(); itt != it->parameters.end(); itt++){
+                toPrint = toPrint + *itt + " ";
+            }
+            toPrint = toPrint + "\n" + "-----------------\n";
+        }
+        ui.textBrowserActions->setText(QString::fromStdString(toPrint));
+    }else{
+        ROS_ERROR("Failed to call service mental_state/get_actions");
+   }
 }

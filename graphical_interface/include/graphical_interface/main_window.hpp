@@ -23,7 +23,9 @@
 #include "supervisor_msgs/HumanActionSimu.h"
 #include "supervisor_msgs/NewGoal.h"
 #include "supervisor_msgs/GetFactsAgent.h"
+#include "supervisor_msgs/GetActions.h"
 #include "toaster_msgs/Fact.h"
+#include "supervisor_msgs/ActionMS.h"
 
 using namespace std;
 
@@ -48,6 +50,8 @@ private Q_SLOTS:
     void on_pushButtonExecuteGoal_clicked();
 
     void on_pushButtonPrintKnowledge_clicked();
+
+    void on_pushButtonSeeActions_clicked();
 
 private:
     Ui::MainWindowDesign ui;
