@@ -11,6 +11,12 @@ MSManager::MSManager(){
 	planId_ = 0;
 }
 
+vector<supervisor_msgs::ActionMS> MSManager::getActionList(){
+
+   boost::unique_lock<boost::mutex> lock(actionListMutex_);
+	return actionList_;
+}
+
 /*
 Function which initialize the list of goals from the goal in param
 */
