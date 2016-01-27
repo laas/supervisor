@@ -22,6 +22,8 @@
 #include "supervisor_msgs/ActionState.h"
 #include "supervisor_msgs/HumanActionSimu.h"
 #include "supervisor_msgs/NewGoal.h"
+#include "supervisor_msgs/GetFactsAgent.h"
+#include "toaster_msgs/Fact.h"
 
 using namespace std;
 
@@ -44,6 +46,8 @@ private Q_SLOTS:
     void on_pushButtonSendHumanAction_clicked();
 
     void on_pushButtonExecuteGoal_clicked();
+
+    void on_pushButtonPrintKnowledge_clicked();
 
 private:
     Ui::MainWindowDesign ui;

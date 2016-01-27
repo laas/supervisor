@@ -25,6 +25,7 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
         if(*it != robotName_){
             ui.comboBoxHumanAgent->addItem(it->c_str());
         }
+        ui.comboBoxAgentKnowName->addItem(it->c_str());
     }
 
     //we retrieve the possible objects from param of the .yaml file
@@ -197,6 +198,64 @@ void MainWindow::on_pushButtonExecuteGoal_clicked()
     srv.request.goal = goal;
     if (!new_goal.call(srv)) {
        ROS_ERROR("Failed to call service goal_manager/new_goal");
+       return;
+    }
+
+}
+
+
+
+/*************************************
+ * Knowledge tab
+ *************************************/
+
+
+void MainWindow::on_pushButtonPrintKnowledge_clicked()
+{
+    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetFactsAgent>("mental_state/get_facts_agents");
+
+    //get the agent name
+    string agent = ui.comboBoxAgentKnowName->currentText().toStdString();
+
+    //get all the facts for the agent
+    supervisor_msgs::GetFactsAgent srv;
+    srv.request.agent = agent;
+    if (client.call(srv)) {
+        //We sort the facts by type
+        vector<toaster_msgs::Fact> envFacts, actionFacts, planFacts, goalFacts;
+        for(vector<toaster_msgs::Fact>::iterator it = srv.response.facts.begin(); it != srv.response.facts.end(); it++){
+            if(it->property == "actionState"){
+                 actionFacts.push_back(*it);
+            }else if(it->property == "planState"){
+                planFacts.push_back(*it);
+           }else if(it->property == "goalState"){
+                goalFacts.push_back(*it);
+           }else{
+                envFacts.push_back(*it);
+           }
+        }
+        //and we print all the facts
+        string toPrint = "---Environment---\n";
+        for(vector<toaster_msgs::Fact>::iterator it = envFacts.begin(); it != envFacts.end(); it++){
+            toPrint = toPrint + it->subjectId + " " + it->property + " " + it->targetId + "\n";
+        }
+        toPrint = toPrint + "---Goals---\n";
+        for(vector<toaster_msgs::Fact>::iterator it = goalFacts.begin(); it != goalFacts.end(); it++){
+            toPrint = toPrint + it->subjectId + " " + it->property + " " + it->targetId + "\n";
+        }
+        toPrint = toPrint + "---Plans---\n";
+        for(vector<toaster_msgs::Fact>::iterator it = planFacts.begin(); it != planFacts.end(); it++){
+            toPrint = toPrint + it->subjectId + " " + it->property + " " + it->targetId + "\n";
+        }
+        toPrint = toPrint + "---Actions---\n";
+        for(vector<toaster_msgs::Fact>::iterator it = actionFacts.begin(); it != actionFacts.end(); it++){
+            toPrint = toPrint + it->subjectId + " " + it->property + " " + it->targetId + "\n";
+        }
+        ROS_ERROR("To print: %s", toPrint.c_str());
+        ui.textBrowserKnowledge->setText(QString::fromStdString(toPrint));
+
+    }else{
+       ROS_ERROR("Failed to call service mental_state/get_facts_agents");
        return;
     }
 
