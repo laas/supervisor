@@ -36,6 +36,7 @@ public:
 	int getAgentIdPlan(string agent);
 	void removeActionsState(string agent, string state);
 	string getActionState(string agent, supervisor_msgs::ActionMS action);
+	string getGoalState(string agent, supervisor_msgs::GoalMS goal);
 	vector<string> getAgentGoals(string agent, string state);
 	vector<string> getAgentsWhoSee(string agent);
 	void addFacts(vector<toaster_msgs::Fact> facts, string agent);

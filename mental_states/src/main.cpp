@@ -181,13 +181,12 @@ bool actionState(supervisor_msgs::ActionState::Request  &req, supervisor_msgs::A
 Service call to abort a goal for an agent
 */
 bool abortGoal(supervisor_msgs::AbortGoal::Request  &req, supervisor_msgs::AbortGoal::Response &res){
-	
 	supervisor_msgs::GoalMS* goal = NULL;
 	//Get the goal by its name
 	goal = ms->getGoalByName(req.goal);
 	if(!goal){
 		ROS_ERROR("[mental_state] Unknown goal");
-		return false;
+		return true;
 	}
 
 	db->addGoalState(*goal, req.agent, "ABORTED");
@@ -505,7 +504,7 @@ int main (int argc, char **argv)
   ROS_INFO("[mental_state] mental_state ready");
   
   boost::thread_group g;
-  while(true){
+  while(node.ok()){
     for(vector<string>::iterator it = allAgents.begin(); it != allAgents.end(); it++){
 	      g.create_thread(boost::bind(update, ms, *it));
     }

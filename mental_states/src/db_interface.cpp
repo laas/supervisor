@@ -510,3 +510,27 @@ void DBInterface::cleanDB(){
 	}
 }
 
+/*
+Function which return the state of a goal
+	@agent: the agent for who we want the goal state
+	@goal: the goal 
+*/
+string DBInterface::getGoalState(string agent, supervisor_msgs::GoalMS goal){
+
+   ros::NodeHandle node;
+  	ros::ServiceClient client = node.serviceClient<toaster_msgs::ExecuteSQL>("database/execute_SQL");
+
+	//we ask to the database the ids of the action of the given state
+	string SQLOrder = "SELECT target_id FROM fact_table_" + agent + " WHERE predicate = 'goalState' AND subject_id = '" + goal.name + "'";
+	toaster_msgs::ExecuteSQL srv;
+	srv.request.order = SQLOrder;
+	if (client.call(srv)){
+	   if(srv.response.results.size() > 0)
+	      return srv.response.results[0];
+	}else{
+	 ROS_ERROR("[mental_state] Failed to call service database/execute_SQL");
+	}
+
+   return "NULL";
+}
+

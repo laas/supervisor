@@ -14,6 +14,7 @@
 #include "toaster_msgs/FactList.h"
 #include "supervisor_msgs/NewPlan.h"
 #include "supervisor_msgs/NewGoal.h"
+#include "supervisor_msgs/EndPlan.h"
 #include "supervisor_msgs/StartGoal.h"
 #include "supervisor_msgs/AbortPlan.h"
 #include "supervisor_msgs/SharePlan.h"
