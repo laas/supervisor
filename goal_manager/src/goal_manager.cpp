@@ -8,34 +8,43 @@ author Sandra Devin
 
 GoalManager::GoalManager(){
    currentGoal_ = "NONE";
+   hasPlan_ = false;
 }
 
 /*
 New goal to manage
 */
 void GoalManager::addGoal(string goal){
+   
+      waitingGoals_.push(goal);
+}
+/*
+When a goal is over, look if there is another goal to execute
+*/
+void GoalManager::chooseGoal(){
 
    ros::NodeHandle node;
    ros::ServiceClient client = node.serviceClient<supervisor_msgs::NewGoal>("mental_state/start_goal");
 
-   if(currentGoal_ == "NONE"){//if there is no current goal, we execute the goal
-      //We say to the mental state manager that we start the goal
+   if(currentGoal_ != "NONE" && !hasPlan_){
+      executeGoal(currentGoal_);
+   }else if(currentGoal_ == "NONE" && waitingGoals_.size() >0){//there at least one waiting goal and no current goal
+      string newGoal = waitingGoals_.front();
+      waitingGoals_.pop();
       supervisor_msgs::NewGoal srv;
-	   srv.request.goal = goal;
+	   srv.request.goal = newGoal;
 	   if (!client.call(srv)){
 	   ROS_ERROR("[goal_manager] Failed to call service mental_state/start_goal");
 	   }
 	   //And we execute it
-      currentGoal_ = goal;
-      ROS_INFO("[goal_manager] Executing the goal %s", goal.c_str());
-      executeGoal(goal);
-   }else{//else we put it in the waiting queue
-      waitingGoals_.push(goal);
+      currentGoal_ = newGoal;
+      ROS_INFO("[goal_manager] Executing the goal %s", newGoal.c_str());
+      executeGoal(newGoal);
    }
 }
 
 /*
-Executes a goal: compute facts, look for a plan and execute it if found, else failed the goal.
+Executes a goal: look for a plan and execute it if found, else failed the goal.
 */
 void GoalManager::executeGoal(string goal){
 
@@ -70,6 +79,7 @@ void GoalManager::executeGoal(string goal){
 	if(client.call(service)){
 	   //we convert the plan in the supervisor format
 	   if(service.response.solution.report == "OK"){
+	      hasPlan_ = true;
 	      supervisor_msgs::Plan newPlan = convertPlan(service.response.solution, goal);
 	      //we send him to the mental state manager
 	      serviceNP.request.plan = newPlan;
@@ -80,7 +90,7 @@ void GoalManager::executeGoal(string goal){
 	      if(!clientSP.call(serviceSP)){
 		      ROS_ERROR("Failed to call service mental_state/share_plan");
 	      }
-	  }else{//the robot aborts the goal
+	   }else{//the robot aborts the goal
 	      string robotName;
          node.getParam("/robot/name", robotName);
 	      serviceAG.request.agent = robotName;
@@ -88,6 +98,7 @@ void GoalManager::executeGoal(string goal){
 	      if(!clientAG.call(serviceAG)){
 		      ROS_ERROR("Failed to call service mental_state/abort_goal");
 	      }
+	      currentGoal_ = "NONE";
 	  }
 	}else{
 		ROS_ERROR("Failed to call service 'Planner'");
@@ -126,4 +137,15 @@ supervisor_msgs::Plan GoalManager::convertPlan(hatp_msgs::Plan plan, string goal
 	}
 	
 	return newPlan;
+}
+
+/*
+Function call when the plan ends
+*/
+void GoalManager::endPlan(bool report){
+
+   hasPlan_ = false;
+   if(report){//the goal is achieved too, no need to get a new plan
+      currentGoal_ = "NONE";
+   }
 }

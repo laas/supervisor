@@ -10,6 +10,7 @@
 #include <boost/thread/locks.hpp>
 
 #include "supervisor_msgs/NewGoal.h"
+#include "supervisor_msgs/EndPlan.h"
 #include "supervisor_msgs/StartGoal.h"
 #include "supervisor_msgs/NewPlan.h"
 #include "supervisor_msgs/SharePlan.h"
@@ -28,10 +29,13 @@ public:
 	GoalManager();
 	~GoalManager() {};
 	void addGoal(string goal);
+	void endPlan(bool report);
+	void chooseGoal();
 protected:
 
 private:
    string currentGoal_;
+   bool hasPlan_;
    queue<string> waitingGoals_; 
 	void executeGoal(string goal);
 	supervisor_msgs::Plan convertPlan(hatp_msgs::Plan plan, string goal);

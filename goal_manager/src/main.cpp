@@ -31,20 +31,34 @@ bool newGoal(supervisor_msgs::NewGoal::Request  &req, supervisor_msgs::NewGoal::
 
 	return true;
 }
+/*
+Service call when the plan is over
+*/
+bool endPlan(supervisor_msgs::EndPlan::Request  &req, supervisor_msgs::EndPlan::Response &res){
+   
+   gm->endPlan(req.report);
+
+	return true;
+}
 
 int main (int argc, char **argv)
 {
   ros::init(argc, argv, "goal_manager");
   ros::NodeHandle node;
+  	ros::Rate loop_rate(30);
 
   ROS_INFO("[goal_manager] Init goal_manager");
  
   //Services declarations
   ros::ServiceServer service_goal = node.advertiseService("goal_manager/new_goal", newGoal); //new goal to execute
+  ros::ServiceServer end_plan = node.advertiseService("goal_manager/end_plan", endPlan); //the plan is over
 
   ROS_INFO("[goal_manager] goal_manager ready");
-
-  ros::spin();
+  while(node.ok()){
+   gm->chooseGoal();
+   ros::spinOnce();
+  	loop_rate.sleep();
+  }
 
   return 0;
 }
