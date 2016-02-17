@@ -12,6 +12,12 @@
 #include "supervisor_msgs/HumanActionSimu.h"
 #include "supervisor_msgs/ActionState.h"
 #include "toaster_msgs/FactList.h"
+#include "toaster_msgs/PutInHand.h"
+#include "toaster_msgs/RemoveFromHand.h"
+#include "toaster_msgs/SetEntityPose.h"
+#include "toaster_msgs/ObjectList.h"
+#include "toaster_msgs/Object.h"
+#include "toaster_msgs/Entity.h"
 
 
 using namespace std;
