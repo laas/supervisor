@@ -56,5 +56,10 @@ bool Place::exec(){
 }
 
 bool Place::post(){
+
+   //TODO: to remove when real execution
+   RemoveFromHand(object_);
+   PutInSupport(object_, support_);
+
 	return true;
 }

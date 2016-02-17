@@ -48,5 +48,10 @@ bool Pick::exec(){
 }
 
 bool Pick::post(){
+
+   //TODO: to remove when real execution
+   string hand = "right";
+   PutInHand(object_, hand);
+
 	return true;
 }
