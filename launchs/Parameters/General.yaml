@@ -1,4 +1,7 @@
 ---
 robot:
     name: 'PR2_ROBOT'
+    hands:
+        right: 'r_gripper_joint'
+        left: 'l_gripper_joint'
 simu: true
