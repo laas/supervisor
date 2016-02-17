@@ -1,4 +1,6 @@
-rosservice call /pdg/manage_stream "{morseHuman: false, niutHuman: false, groupHuman: false, mocapHuman: false, adreamMocapHuman: false, pr2Robot: false, spencerRobot: false}"
+rosservice call /pdg/manage_stream "{morseHuman: false, niutHuman: false, groupHuman: false, mocapHuman: false, adreamMocapHuman: false, toasterSimuHuman: true, pr2Robot: true, spencerRobot: false, toasterSimuRobot: false, toasterSimuObject: true}" 
+
+rosservice call /database/empty_database
 
 rosservice call /toaster_simu/add_entity "{id: 'TABLE_4', name: 'TABLE_4', type: 'object', ownerId: ''}"
 rosservice call /toaster_simu/set_entity_pose "{id: 'TABLE_4', ownerId: '', type: 'object', x: 0.8, y: 0.1, z: -0.1, roll: 0.0, pitch: 0.0, yaw: 0.0}"
@@ -21,8 +23,11 @@ rosservice call /toaster_simu/set_entity_pose "{id: 'PLACEMAT_RED', ownerId: '',
 rosservice call /toaster_simu/add_entity "{id: 'HERAKLES_HUMAN1', name: 'HERAKLES_HUMAN1', type: 'human', ownerId: ''}"
 rosservice call /toaster_simu/set_entity_pose "{id: 'HERAKLES_HUMAN1', ownerId: '', type: 'human', x: 2.0, y: 0.1, z: 0.0, roll: 0.0, pitch: 0.0, yaw: 3.14}"
 
-rosservice call /toaster_simu/add_entity "{id: 'rHand', name: 'rHand', type: 'joint', ownerId: 'HERAKLES_HUMAN1'}"
+rosservice call /toaster_simu/add_entity "{id: 'rHand', name: 'rightHand', type: 'joint', ownerId: 'HERAKLES_HUMAN1'}"
 rosservice call /toaster_simu/set_entity_pose "{id: 'rHand', ownerId: 'HERAKLES_HUMAN1', type: 'joint', x: 2.1, y: 0.45, z: 1.0, roll: 0.0, pitch: 0.0, yaw: 3.14}"
+
+rosservice call /toaster_simu/add_entity "{id: 'rHand', name: 'base', type: 'joint', ownerId: 'HERAKLES_HUMAN1'}"
+rosservice call /toaster_simu/set_entity_pose "{id: 'rHand', ownerId: 'HERAKLES_HUMAN1', type: 'joint', x: 2.0, y: 0.1, z: 0.0, roll: 0.0, pitch: 0.0, yaw: 3.14}"
 
 
 
