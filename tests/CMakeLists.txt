@@ -106,7 +106,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES tests
-  CATKIN_DEPENDS actionlib actionlib_msgs roscpp rospy std_msgs supervisor_msgs
+  CATKIN_DEPENDS actionlib actionlib_msgs roscpp rospy std_msgs supervisor_msgs gtp_ros_msgs
 #  DEPENDS system_lib
 )
 
@@ -120,6 +120,7 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  $ENV{ROBOTPKG_BASE}/include/
 )
 
 ## Declare a C++ library
@@ -192,6 +193,13 @@ target_link_libraries(
   ${catkin_LIBRARIES}
 )
 add_dependencies(ms_test supervisor_msgs_generate_messages_cpp)
+
+add_executable(test_pick src/test_pick.cpp)
+target_link_libraries( 
+  test_pick
+  ${catkin_LIBRARIES}
+)
+add_dependencies(test_pick supervisor_msgs_generate_messages_cpp)
 
 #############
 ## Testing ##
