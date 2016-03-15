@@ -53,7 +53,7 @@ private Q_SLOTS:
 
     void on_pushButtonSeeActions_clicked();
 
-private:
+public:
     Ui::MainWindowDesign ui;
     ros::NodeHandle node_;
     Client actionClient_;
