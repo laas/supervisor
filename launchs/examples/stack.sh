@@ -23,11 +23,11 @@ rosservice call /toaster_simu/set_entity_pose "{id: 'PLACEMAT_RED', ownerId: '',
 rosservice call /toaster_simu/add_entity "{id: 'HERAKLES_HUMAN1', name: 'HERAKLES_HUMAN1', type: 'human', ownerId: ''}"
 rosservice call /toaster_simu/set_entity_pose "{id: 'HERAKLES_HUMAN1', ownerId: '', type: 'human', x: 2.0, y: 0.1, z: 0.0, roll: 0.0, pitch: 0.0, yaw: 3.14}"
 
-rosservice call /toaster_simu/add_entity "{id: 'rHand', name: 'rightHand', type: 'joint', ownerId: 'HERAKLES_HUMAN1'}"
-rosservice call /toaster_simu/set_entity_pose "{id: 'rHand', ownerId: 'HERAKLES_HUMAN1', type: 'joint', x: 2.1, y: 0.45, z: 1.0, roll: 0.0, pitch: 0.0, yaw: 3.14}"
+rosservice call /toaster_simu/add_entity "{id: 'rightHand', name: 'rightHand', type: 'joint', ownerId: 'HERAKLES_HUMAN1'}"
+rosservice call /toaster_simu/set_entity_pose "{id: 'rightHand', ownerId: 'HERAKLES_HUMAN1', type: 'joint', x: 2.1, y: 0.45, z: 1.0, roll: 0.0, pitch: 0.0, yaw: 3.14}"
 
-rosservice call /toaster_simu/add_entity "{id: 'rHand', name: 'base', type: 'joint', ownerId: 'HERAKLES_HUMAN1'}"
-rosservice call /toaster_simu/set_entity_pose "{id: 'rHand', ownerId: 'HERAKLES_HUMAN1', type: 'joint', x: 2.0, y: 0.1, z: 0.0, roll: 0.0, pitch: 0.0, yaw: 3.14}"
+rosservice call /toaster_simu/add_entity "{id: 'base', name: 'base', type: 'joint', ownerId: 'HERAKLES_HUMAN1'}"
+rosservice call /toaster_simu/set_entity_pose "{id: 'base', ownerId: 'HERAKLES_HUMAN1', type: 'joint', x: 2.0, y: 0.1, z: 0.0, roll: 0.0, pitch: 0.0, yaw: 3.14}"
 
 
 
