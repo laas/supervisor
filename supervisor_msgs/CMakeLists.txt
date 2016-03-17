@@ -80,7 +80,7 @@ catkin_package(
 
 include_directories(
   include
-${catkin_INCLUDE_DIRS}
+#${catkin_INCLUDE_DIRS}
   $ENV{TOASTER_DIR}/devel/include
 )
 
