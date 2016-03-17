@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(tests)
 
+find_package(PkgConfig)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -16,7 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
-
+pkg_check_modules(pr2motion-genom3 REQUIRED pr2motion-genom3)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -120,7 +121,8 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
-  $ENV{ROBOTPKG_BASE}/include/
+  ${pr2motion-genom3_INCLUDE_DIRS}
+  $ENV{ROBOTPKG_BASE}/include
 )
 
 ## Declare a C++ library
@@ -132,6 +134,7 @@ include_directories(
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
 # add_dependencies(tests ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+link_directories(${pr2motion-genom3_LIBRARY_DIRS})
 
 ## Declare a C++ executable
 # add_executable(tests_node src/tests_node.cpp)
@@ -144,6 +147,7 @@ include_directories(
 # target_link_libraries(tests_node
 #   ${catkin_LIBRARIES}
 # )
+
 
 #############
 ## Install ##
@@ -200,6 +204,15 @@ target_link_libraries(
   ${catkin_LIBRARIES}
 )
 add_dependencies(test_pick supervisor_msgs_generate_messages_cpp)
+
+add_executable(pr2motion_test src/pr2motion_test.cpp)
+target_link_libraries( 
+  pr2motion_test
+  ${catkin_LIBRARIES}
+   ${pr2motion-genom3_LIBRARIES}
+)
+add_dependencies(pr2motion_test supervisor_msgs_generate_messages_cpp ${pr2motion-genom3_EXPORTED_TARGETS})
+
 
 #############
 ## Testing ##
