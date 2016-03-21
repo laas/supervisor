@@ -170,11 +170,48 @@ VirtualAction* ActionExecutor::initializeAction(supervisor_msgs::Action action) 
 }
 
 
+void initializePr2motion() {
+ 
+  ros::NodeHandle n;
+  actionlib::SimpleActionClient<pr2motion::InitAction> init("pr2motion/Init", true);
+  ros::ServiceClient connect = n.serviceClient<pr2motion::connect_port>("pr2motion/connect_port");
+
+  ROS_INFO("Waiting for pr2motion action server to start.");
+  // wait for the action server to start
+  init.waitForServer(); 
+
+  ROS_INFO("pr2motion Action server started, initialization.");
+  
+  //init
+  pr2motion::InitGoal goal_init;
+  init.sendGoal(goal_init);
+  
+  pr2motion::connect_port srv;
+  srv.request.local = "joint_state";
+  srv.request.remote = "joint_states";
+  if (!connect.call(srv)){
+    ROS_ERROR("[mental_state] Failed to call service pr2motion/connect_port");
+  }
+  srv.request.local = "head_controller_state";
+  srv.request.remote = "/head_traj_controller/state";
+  if (!connect.call(srv)){
+    ROS_ERROR("[mental_state] Failed to call service pr2motion/connect_port");
+  }
+  srv.request.local = "traj";
+  srv.request.remote = "gtp_trajectory";
+  if (!connect.call(srv)){
+    ROS_ERROR("[mental_state] Failed to call service pr2motion/connect_port");
+  }
+}
+
+
 int main (int argc, char **argv)
 {
   ros::init(argc, argv, "action_executor");
 
   ROS_INFO("[action_executor] Init action_executor");
+  
+  initializePr2motion();
 
   ActionExecutor executor("supervisor/action_executor");
 

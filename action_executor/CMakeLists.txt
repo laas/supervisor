@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(action_executor)
 
+find_package(PkgConfig)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -15,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
+pkg_check_modules(pr2motion-genom3 REQUIRED pr2motion-genom3)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -119,12 +121,15 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  ${pr2motion-genom3_INCLUDE_DIRS}
+  $ENV{ROBOTPKG_BASE}/include
 )
 
 ## Declare a C++ library
 # add_library(action_executor
 #   src/${PROJECT_NAME}/action_executor.cpp
 # )
+link_directories(${pr2motion-genom3_LIBRARY_DIRS})
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -183,6 +188,7 @@ add_executable(action_executor src/action_executor.cpp src/virtual_action.cpp sr
 target_link_libraries( 
   action_executor
   ${catkin_LIBRARIES}
+   ${pr2motion-genom3_LIBRARIES}
 )
 add_dependencies(action_executor supervisor_msgs_generate_messages_cpp)
 

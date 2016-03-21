@@ -6,7 +6,12 @@
 #include "action_executor/virtual_action.h"
 #include "action_executor/Actions/action_pkg.h"
 
+#include <pr2motion/InitAction.h>
+#include <pr2motion/connect_port.h>
+#include <pr2motion/Torso_MoveAction.h>
+
 #include <actionlib/server/simple_action_server.h>
+#include <actionlib/client/simple_action_client.h>
 #include <actionlib/client/terminal_state.h>
 
 #include <iostream>
