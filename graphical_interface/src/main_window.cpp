@@ -55,6 +55,14 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     }
 
 
+    //we retrieve the possible positions from param of the .yaml file
+    vector<string> positions;
+    node_.getParam("/moveToPositions/names", positions);
+    for(vector<string>::iterator it = positions.begin(); it != positions.end(); it++){
+        ui.comboBoxActionPosition->addItem(it->c_str());
+    }
+
+
     //we retrieve the possible goals from param of the .yaml file
     vector<string> goals;
     node_.getParam("/goals/names", goals);
@@ -85,6 +93,7 @@ void MainWindow::on_pushButtonExecuteAction_clicked()
     string actionObject = ui.comboBoxActionObject->currentText().toStdString();
     string actionSupport = ui.comboBoxActionSupport->currentText().toStdString();
     string actionContainer = ui.comboBoxActionContainer->currentText().toStdString();
+    string position = ui.comboBoxActionPosition->currentText().toStdString();
 
     //creating the action with the good parameters coming from higl level actions
     supervisor_msgs::ActionExecutorGoal goal;
@@ -102,6 +111,8 @@ void MainWindow::on_pushButtonExecuteAction_clicked()
             goal.action.parameters.push_back(actionSupport);
        }else if(*it == "containerObject"){
             goal.action.parameters.push_back(actionContainer);
+       }else if(*it == "position"){
+            goal.action.parameters.push_back(position);
        }
     }
 
@@ -119,6 +130,7 @@ void MainWindow::on_pushButtonAskAction_clicked()
     string actionObject = ui.comboBoxActionObject->currentText().toStdString();
     string actionSupport = ui.comboBoxActionSupport->currentText().toStdString();
     string actionContainer = ui.comboBoxActionContainer->currentText().toStdString();
+    string position = ui.comboBoxActionPosition->currentText().toStdString();
 
     //creating the action
     ros::ServiceClient action_state = node_.serviceClient<supervisor_msgs::ActionState>("mental_state/action_state");
@@ -137,6 +149,8 @@ void MainWindow::on_pushButtonAskAction_clicked()
             srv_astate.request.action.parameters.push_back(actionSupport);
        }else if(*it == "containerObject"){
             srv_astate.request.action.parameters.push_back(actionContainer);
+       }else if(*it == "position"){
+            srv_astate.request.action.parameters.push_back(position);
        }
     }
 

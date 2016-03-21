@@ -1,6 +1,6 @@
 ---
 highLevelActions:
-        names: ['pick', 'place', 'pickandplace', 'drop', 'pickanddrop']
+        names: ['pick', 'place', 'pickandplace', 'drop', 'pickanddrop', 'moveTo']
         pick_param: ['mainObject']
         pick_actors: ['mainAgent']
         pick_prec: ['mainObject, isReachableBy, mainAgent', 'NULL, isHoldBy, mainAgent', 'mainObject, isHoldBy, NULL']
@@ -21,3 +21,7 @@ highLevelActions:
         pickanddrop_actors: ['mainAgent']
         pickanddrop_prec: ['mainObject, isReachableBy, mainAgent', 'containerObject, isReachableBy, mainAgent']
         pickanddrop_effects: ['mainObject, isIn, containerObject']
+        moveTo_param: ['position']
+        moveTo_actors: ['mainAgent']
+        moveTo_prec: []
+        moveTo_effects: []

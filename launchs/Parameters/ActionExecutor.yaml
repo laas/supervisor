@@ -1,0 +1,5 @@
+---
+moveToPositions:
+    names: ['initRight', 'initLeft']
+    initRight: 'manipulationPoseRight'
+    initLeft: 'manipulationPoseLeft'
