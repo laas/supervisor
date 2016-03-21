@@ -14,7 +14,8 @@ TODO: placereachable (+pickandplacereachable), give/grab, moveTo, goTo (+engage/
 
 #include <action_executor/action_executor.h>
 
-
+ros::NodeHandle* node_;
+Connector* connector_;
 
 ActionExecutor::ActionExecutor(string name):
 action_server_(node_, name, 
@@ -53,7 +54,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 	//send the fact that the action is in progress to the MS Manager
 	srv.request.state = "PROGRESS";
 	if (!client.call(srv)){
-	 ROS_ERROR("[state_machines] Failed to call service mental_state/action_state");
+	 ROS_ERROR("[action_executor] Failed to call service mental_state/action_state");
 	}
 
 	//Checking preconditions
@@ -62,7 +63,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 	if(!act->preconditions()){
 		srv.request.state = "FAILED";
 		if (!client.call(srv)){
-		 ROS_ERROR("[state_machines] Failed to call service mental_state/action_state");
+		 ROS_ERROR("[action_executor] Failed to call service mental_state/action_state");
 		}
 		result_.report = false;
 		if(!action_server_.isPreemptRequested()){
@@ -82,7 +83,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 	if(!act->plan()){
 		srv.request.state = "FAILED";
 		if (!client.call(srv)){
-		 ROS_ERROR("[state_machines] Failed to call service mental_state/action_state");
+		 ROS_ERROR("[action_executor] Failed to call service mental_state/action_state");
 		}
 		result_.report = false;
 		if(!action_server_.isPreemptRequested()){
@@ -95,7 +96,6 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 		}
 		return;
 	}
-	
 
 	//Execution of the action
 	feedback_.state = "EXEC";
@@ -103,7 +103,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 	if(!act->exec()){
 		srv.request.state = "FAILED";
 		if (!client.call(srv)){
-		 ROS_ERROR("[state_machines] Failed to call service mental_state/action_state");
+		 ROS_ERROR("[action_executor] Failed to call service mental_state/action_state");
 		}
 		result_.report = false;
 		if(!action_server_.isPreemptRequested()){
@@ -123,7 +123,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 	if(!act->post()){
 		srv.request.state = "FAILED";
 		if (!client.call(srv)){
-		 ROS_ERROR("[state_machines] Failed to call service mental_state/action_state");
+		 ROS_ERROR("[action_executor] Failed to call service mental_state/action_state");
 		}
 		result_.report = false;
 		if(!action_server_.isPreemptRequested()){
@@ -139,7 +139,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 	
 	srv.request.state = "DONE";
 	if (!client.call(srv)){
-	 ROS_ERROR("[state_machines] Failed to call service mental_state/action_state");
+	 ROS_ERROR("[action_executor] Failed to call service mental_state/action_state");
 	}
 	result_.report = true;
 	result_.state = "OK";
@@ -151,17 +151,17 @@ VirtualAction* ActionExecutor::initializeAction(supervisor_msgs::Action action) 
 	VirtualAction* act = NULL;
 
 	if(action.name == "pick"){
-		act = new Pick(action);
+		act = new Pick(action, connector_);
 	}else if(action.name == "place"){
-		act = new Place(action);
+		act = new Place(action, connector_);
 	}else if(action.name == "pickandplace"){
-		act = new PickAndPlace(action);
+		act = new PickAndPlace(action, connector_);
 	}else if(action.name == "drop"){
-		act = new Drop(action);
+		act = new Drop(action, connector_);
 	}else if(action.name == "pickanddrop"){
-		act = new PickAndDrop(action);
+		act = new PickAndDrop(action, connector_);
 	}else if(action.name == "moveTo"){
-		act = new MoveTo(action);
+		act = new MoveTo(action, connector_);
 	}else{
 		ROS_WARN("[action_executor] Unknown action");
 	}	
@@ -170,48 +170,17 @@ VirtualAction* ActionExecutor::initializeAction(supervisor_msgs::Action action) 
 }
 
 
-void initializePr2motion() {
- 
-  ros::NodeHandle n;
-  actionlib::SimpleActionClient<pr2motion::InitAction> init("pr2motion/Init", true);
-  ros::ServiceClient connect = n.serviceClient<pr2motion::connect_port>("pr2motion/connect_port");
-
-  ROS_INFO("Waiting for pr2motion action server to start.");
-  // wait for the action server to start
-  init.waitForServer(); 
-
-  ROS_INFO("pr2motion Action server started, initialization.");
-  
-  //init
-  pr2motion::InitGoal goal_init;
-  init.sendGoal(goal_init);
-  
-  pr2motion::connect_port srv;
-  srv.request.local = "joint_state";
-  srv.request.remote = "joint_states";
-  if (!connect.call(srv)){
-    ROS_ERROR("[mental_state] Failed to call service pr2motion/connect_port");
-  }
-  srv.request.local = "head_controller_state";
-  srv.request.remote = "/head_traj_controller/state";
-  if (!connect.call(srv)){
-    ROS_ERROR("[mental_state] Failed to call service pr2motion/connect_port");
-  }
-  srv.request.local = "traj";
-  srv.request.remote = "gtp_trajectory";
-  if (!connect.call(srv)){
-    ROS_ERROR("[mental_state] Failed to call service pr2motion/connect_port");
-  }
-}
-
 
 int main (int argc, char **argv)
 {
   ros::init(argc, argv, "action_executor");
+  ros::NodeHandle node;
+  node_ = &node;
+   
+  Connector connector;
+  connector_ = &connector;
 
   ROS_INFO("[action_executor] Init action_executor");
-  
-  initializePr2motion();
 
   ActionExecutor executor("supervisor/action_executor");
 

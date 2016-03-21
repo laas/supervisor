@@ -7,10 +7,13 @@ Virtual class to represent an action, contain general function for the execution
 
 #include <action_executor/virtual_action.h>
 
-VirtualAction::VirtualAction(){
+VirtualAction::VirtualAction(Connector* connector){
 
+   node_.getParam("/simu", simu_);
    node_.getParam("/robot/name", robotName_);
-
+   node_.getParam("/waitActionServer", waitActionServer_);
+   node_.getParam("/nbPlanMaxGTP", nbPlanMax_);
+   connector_ = connector;
 }
 
 /*
@@ -89,7 +92,7 @@ bool VirtualAction::ArePreconditionsChecked(vector<toaster_msgs::Fact> precs){
 	if (client.call(srv)){
 		return srv.response.result;
 	}else{
-	   ROS_ERROR("[mental_state] Failed to call service mental_states/facts_are_in");
+	   ROS_ERROR("[action_executor] Failed to call service mental_states/facts_are_in");
 	}
    return false;
 }
@@ -113,7 +116,7 @@ void VirtualAction::PutInHand(string object, string hand){
    srv.request.agentId = robotName_;
    srv.request.jointName = robotHand;
    if (!client.call(srv)){
-   	 ROS_ERROR("Failed to call service pdg/put_in_hand");
+   	 ROS_ERROR("[action_executor] Failed to call service pdg/put_in_hand");
  	}
    
 }
@@ -130,7 +133,7 @@ void VirtualAction::RemoveFromHand(string object){
 	toaster_msgs::RemoveFromHand srv;
    srv.request.objectId = object;
    if (!client.call(srv)){
-   	 ROS_ERROR("Failed to call service pdg/remove_from_hand");
+   	 ROS_ERROR("[action_executor] Failed to call service pdg/remove_from_hand");
  	}
    
 }
@@ -179,9 +182,69 @@ void VirtualAction::PutInSupport(string object, string support){
     	 }
    }
    catch(const std::exception & e){
-       ROS_WARN("Failed to read %s pose from toaster", support.c_str());
+       ROS_WARN("[action_executor] Failed to read %s pose from toaster", support.c_str());
    }
    
+}
+
+/*
+Function which update GTP world state with TOASTER
+*/
+bool VirtualAction::updateGTP(){
+   
+  // send goal to GTP
+  gtp_ros_msg::requestGoal goal;
+  goal.req.requestType = "update";
+  connector_->acGTP_->sendGoal(goal);
+
+  //wait for the action to return
+  bool finishedBeforeTimeout = connector_->acGTP_->waitForResult(ros::Duration(waitActionServer_));
+
+  if (!finishedBeforeTimeout){
+    ROS_INFO("[action_executor] GTP Action did not finish before the time out.");
+    return false;
+  }
+   
+   return true;
+}
+
+/*
+Function which ask a plan to GTP and return the id of the solution (-1 if no solution)
+*/
+int VirtualAction::planGTP(string actionName, vector<gtp_ros_msg::Ag> agents, vector<gtp_ros_msg::Obj> objects, vector<gtp_ros_msg::Data> datas, vector<gtp_ros_msg::Points> points){
+  
+  updateGTP();
+  
+  gtp_ros_msg::requestGoal goal;
+  goal.req.requestType = "planning";
+  goal.req.actionName = actionName;
+  goal.req.involvedAgents = agents;
+  goal.req.involvedObjects = objects;
+  goal.req.data = datas;
+  goal.req.points = points;
+  goal.req.predecessorId.actionId = connector_->previousId_;
+  goal.req.predecessorId.alternativeId = 0;
+  
+  int nbTry = 0;
+  while(nbTry < nbPlanMax_){
+     connector_->acGTP_->sendGoal(goal);
+     bool finishedBeforeTimeout = connector_->acGTP_->waitForResult(ros::Duration(waitActionServer_));
+
+     if (finishedBeforeTimeout)
+     {
+       if(connector_->acGTP_->getResult()->ans.success){
+           return connector_->acGTP_->getResult()->ans.identifier.actionId;
+       }
+     }
+     else{
+         ROS_INFO("GTP Action did not finish before the time out.");
+         return -1;
+     }
+       
+      nbTry++;
+   }
+   
+   return -1;
 }
 
 

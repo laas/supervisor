@@ -5,3 +5,4 @@ robot:
         right: 'r_gripper_joint'
         left: 'l_gripper_joint'
 simu: true
+waitActionServer: 30.0
