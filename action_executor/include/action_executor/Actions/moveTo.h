@@ -16,7 +16,7 @@ using namespace std;
 
 class MoveTo: public VirtualAction{
 public:
-	MoveTo(supervisor_msgs::Action action);
+	MoveTo(supervisor_msgs::Action action, Connector* connector);
 	virtual bool preconditions();
 	virtual bool plan();
 	virtual bool exec();
@@ -24,7 +24,8 @@ public:
 protected:
 
 private:
-	string position_;
+    string position_;
+    string arm_;
 
 
 };
