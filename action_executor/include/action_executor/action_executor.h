@@ -22,12 +22,12 @@ using namespace std;
 
 class ActionExecutor{
 public:
-	ActionExecutor(string name);
+    ActionExecutor(string name);
 protected:
 	ros::NodeHandle node_;
 	supervisor_msgs::ActionExecutorFeedback feedback_;
-	supervisor_msgs::ActionExecutorResult result_;
-	Server action_server_;
+    supervisor_msgs::ActionExecutorResult result_;
+    Server action_server_;
 
 private:
 	void execute(const supervisor_msgs::ActionExecutorGoalConstPtr& goal);

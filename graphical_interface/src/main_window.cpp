@@ -164,6 +164,15 @@ void MainWindow::on_pushButtonAskAction_clicked()
     }
 }
 
+/*
+Stop the action execution
+*/
+void MainWindow::on_pushButtonStopAction_clicked()
+{
+    actionClient_.cancelGoal();
+}
+
+
 
 /*************************************
  * Human Simu tab

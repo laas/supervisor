@@ -52,13 +52,11 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 		return;
 	}
 
-    ROS_ERROR("[action_executor] Send service");
 	//send the fact that the action is in progress to the MS Manager
 	srv.request.state = "PROGRESS";
 	if (!client.call(srv)){
 	 ROS_ERROR("[action_executor] Failed to call service mental_state/action_state");
     }
-    ROS_ERROR("[action_executor] Answer service");
 
 	//Checking preconditions
 	feedback_.state = "PREC";
@@ -105,7 +103,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 	//Execution of the action
 	feedback_.state = "EXEC";
 	action_server_.publishFeedback(feedback_);
-	if(!act->exec()){
+    if(!act->exec(&action_server_)){
 		srv.request.state = "FAILED";
 		if (!client.call(srv)){
 		 ROS_ERROR("[action_executor] Failed to call service mental_state/action_state");

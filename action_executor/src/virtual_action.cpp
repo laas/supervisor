@@ -252,7 +252,7 @@ int VirtualAction::planGTP(string actionName, vector<gtp_ros_msg::Ag> agents, ve
 /*
 Function which execute an action based on its GTP id
 */
-bool VirtualAction::execAction(int actionId, bool shouldOpen){
+bool VirtualAction::execAction(int actionId, bool shouldOpen, Server* action_server){
   
   gtp_ros_msg::requestGoal goal;
   goal.req.requestType = "details";
@@ -265,12 +265,15 @@ bool VirtualAction::execAction(int actionId, bool shouldOpen){
   if (finishedBeforeTimeout){
      vector<gtp_ros_msg::SubTraj> subTrajs = connector_->acGTP_->getResult()->ans.subTrajs;
      if(shouldOpen && ((subTrajs[0].armId== 0 && !connector_->gripperRightOpen_) || (subTrajs[0].armId== 1 && !connector_->gripperLeftOpen_))){//the robot should have the gripper open to execute the trajectory
-        openGripper(subTrajs[0].armId);
+        openGripper(subTrajs[0].armId, action_server);
      }
      for(vector<gtp_ros_msg::SubTraj>::iterator it = subTrajs.begin(); it != subTrajs.end(); it++){
+         if(action_server->isPreemptRequested()){
+            return false;
+         }
          if(it->agent == robotName_){
             if(it->subTrajName == "grasp"){
-                openGripper(it->armId);
+                openGripper(it->armId, action_server);
                 string hand;
                 if(it->armId == 0){
                     hand = "right";
@@ -279,10 +282,10 @@ bool VirtualAction::execAction(int actionId, bool shouldOpen){
                 }
                 PutInHand(object_, hand);
             }else if(it->subTrajName == "release"){
-                closeGripper(it->armId);
+                closeGripper(it->armId, action_server);
                 RemoveFromHand(object_);
             }else{//this is a trajectory
-                executeTrajectory(actionId, it->subTrajId, it->armId);
+                executeTrajectory(actionId, it->subTrajId, it->armId, action_server);
             }
          }
      }
@@ -300,7 +303,7 @@ bool VirtualAction::execAction(int actionId, bool shouldOpen){
 /*
 Function which execute a trajectory
 */
-bool VirtualAction::executeTrajectory(int actionId, int actionSubId, int armId){
+bool VirtualAction::executeTrajectory(int actionId, int actionSubId, int armId, Server* action_server){
 
    gtp_ros_msg::requestGoal goal;
    goal.req.requestType = "load";
@@ -316,18 +319,31 @@ bool VirtualAction::executeTrajectory(int actionId, int actionSubId, int armId){
         pr2motion::Arm_Right_MoveGoal arm_goal_right;
         arm_goal_right.traj_mode.value=pr2motion::pr2motion_TRAJ_MODE::pr2motion_TRAJ_GATECH;
         arm_goal_right.path_mode.value=pr2motion::pr2motion_PATH_MODE::pr2motion_PATH_PORT;
-        connector_->PR2motion_arm_right_->sendGoal(arm_goal_right);
-        finishedBeforeTimeout = connector_->PR2motion_arm_right_->waitForResult(ros::Duration(waitActionServer_));
+        connector_->rightArmMoving_ = true;
+        connector_->PR2motion_arm_right_->sendGoal(arm_goal_right,  boost::bind(&VirtualAction::moveRightArm, this, _1, _2),
+                                                   Client_Right_Arm::SimpleActiveCallback(),  Client_Right_Arm::SimpleFeedbackCallback());
+        while(connector_->rightArmMoving_ == true){
+            //wait for preempted request or end of the action
+            if(action_server->isPreemptRequested()){
+                connector_->PR2motion_arm_right_->cancelGoal();
+                return false;
+            }
+        }
      }else{
         pr2motion::Arm_Left_MoveGoal arm_goal_left;
         arm_goal_left.traj_mode.value=pr2motion::pr2motion_TRAJ_MODE::pr2motion_TRAJ_GATECH;
         arm_goal_left.path_mode.value=pr2motion::pr2motion_PATH_MODE::pr2motion_PATH_PORT;
-        connector_->PR2motion_arm_left_->sendGoal(arm_goal_left);
-        finishedBeforeTimeout = connector_->PR2motion_arm_left_->waitForResult(ros::Duration(waitActionServer_));
-     }
-     if(!finishedBeforeTimeout){
-       ROS_INFO("[action_executor] PR2motion Action did not finish before the time out.");
-       return false;
+        connector_->leftArmMoving_ = true;
+        connector_->PR2motion_arm_left_->sendGoal(arm_goal_left,  boost::bind(&VirtualAction::moveLeftArm, this, _1, _2),
+                                                   Client_Left_Arm::SimpleActiveCallback(),  Client_Left_Arm::SimpleFeedbackCallback());
+        while(connector_->leftArmMoving_ == true){
+            //wait for preempted request or end of the action
+            if(action_server->isPreemptRequested()){
+                connector_->PR2motion_arm_left_->cancelGoal();
+                return false;
+            }
+        }
+
      }
    }
    else{
@@ -343,29 +359,35 @@ bool VirtualAction::executeTrajectory(int actionId, int actionSubId, int armId){
 /*
 Function which close a gripper
 */
-bool VirtualAction::closeGripper(int armId){
+bool VirtualAction::closeGripper(int armId, Server* action_server){
 
     bool finishedBeforeTimeout;
     if(armId == 0){//right arm
        pr2motion::Gripper_Right_OperateGoal gripper_goal;
        gripper_goal.goal_mode.value=pr2motion::pr2motion_GRIPPER_MODE::pr2motion_GRIPPER_CLOSE;
-       connector_->PR2motion_gripper_right_->sendGoal(gripper_goal);
-       finishedBeforeTimeout = connector_->PR2motion_gripper_right_->waitForResult(ros::Duration(waitActionServer_));
-       if(!finishedBeforeTimeout){
-         ROS_INFO("[action_executor] PR2motion Action did not finish before the time out.");
-         return false;
+       connector_->rightGripperMoving_ = true;
+       connector_->PR2motion_gripper_right_->sendGoal(gripper_goal,  boost::bind(&VirtualAction::moveRightGripper, this, _1, _2),
+                                                  Client_Right_Gripper::SimpleActiveCallback(),  Client_Right_Gripper::SimpleFeedbackCallback());
+       while(connector_->rightGripperMoving_ == true){
+           //wait for preempted request or end of the action
+           if(action_server->isPreemptRequested()){
+               connector_->PR2motion_gripper_right_->cancelGoal();
+               return false;
+           }
        }
-       connector_->gripperRightOpen_= false;
     }else{
        pr2motion::Gripper_Left_OperateGoal gripper_goal;
        gripper_goal.goal_mode.value=pr2motion::pr2motion_GRIPPER_MODE::pr2motion_GRIPPER_CLOSE;
-       connector_->PR2motion_gripper_left_->sendGoal(gripper_goal);
-       finishedBeforeTimeout = connector_->PR2motion_gripper_left_->waitForResult(ros::Duration(waitActionServer_));
-       if(!finishedBeforeTimeout){
-         ROS_INFO("[action_executor] PR2motion Action did not finish before the time out.");
-         return false;
+       connector_->leftGripperMoving_ = true;
+       connector_->PR2motion_gripper_left_->sendGoal(gripper_goal,  boost::bind(&VirtualAction::moveLeftGripper, this, _1, _2),
+                                                  Client_Left_Gripper::SimpleActiveCallback(),  Client_Left_Gripper::SimpleFeedbackCallback());
+       while(connector_->leftGripperMoving_ == true){
+           //wait for preempted request or end of the action
+           if(action_server->isPreemptRequested()){
+               connector_->PR2motion_gripper_left_->cancelGoal();
+               return false;
+           }
        }
-       connector_->gripperLeftOpen_= false;
     }
 
 
@@ -377,14 +399,16 @@ bool VirtualAction::closeGripper(int armId){
 /*
 Function which open a gripper
 */
-bool VirtualAction::openGripper(int armId){
+bool VirtualAction::openGripper(int armId, Server* action_server){
 
     bool finishedBeforeTimeout;
     if(armId == 0){//right arm
        pr2motion::Gripper_Right_OperateGoal gripper_goal;
        gripper_goal.goal_mode.value=pr2motion::pr2motion_GRIPPER_MODE::pr2motion_GRIPPER_OPEN;
+       connector_->rightGripperMoving_ = true;
        connector_->PR2motion_gripper_right_->sendGoal(gripper_goal);
        finishedBeforeTimeout = connector_->PR2motion_gripper_right_->waitForResult(ros::Duration(waitActionServer_));
+       connector_->rightGripperMoving_ = false;
        if(!finishedBeforeTimeout){
          ROS_INFO("[action_executor] PR2motion Action did not finish before the time out.");
          return false;
@@ -393,8 +417,10 @@ bool VirtualAction::openGripper(int armId){
     }else{
        pr2motion::Gripper_Left_OperateGoal gripper_goal;
        gripper_goal.goal_mode.value=pr2motion::pr2motion_GRIPPER_MODE::pr2motion_GRIPPER_OPEN;
+       connector_->leftGripperMoving_ = true;
        connector_->PR2motion_gripper_left_->sendGoal(gripper_goal);
        finishedBeforeTimeout = connector_->PR2motion_gripper_left_->waitForResult(ros::Duration(waitActionServer_));
+       connector_->leftGripperMoving_ = false;
        if(!finishedBeforeTimeout){
          ROS_INFO("[action_executor] PR2motion Action did not finish before the time out.");
          return false;
@@ -404,5 +430,37 @@ bool VirtualAction::openGripper(int armId){
 
    return true;
 
+}
+
+/*
+Called once when the goal of the right arm action client completes
+*/
+void VirtualAction::moveRightArm(const actionlib::SimpleClientGoalState& state, const pr2motion::Arm_Right_MoveResultConstPtr& result){
+
+        connector_->rightArmMoving_ = false;
+}
+
+/*
+Called once when the goal of the left arm action client completes
+*/
+void VirtualAction::moveLeftArm(const actionlib::SimpleClientGoalState& state, const pr2motion::Arm_Left_MoveResultConstPtr& result){
+
+        connector_->leftArmMoving_ = false;
+}
+
+/*
+Called once when the goal of the right gripper action client completes
+*/
+void VirtualAction::moveRightGripper(const actionlib::SimpleClientGoalState& state, const pr2motion::Gripper_Right_OperateResultConstPtr& result){
+
+        connector_->rightGripperMoving_ = false;
+}
+
+/*
+Called once when the goal of the left gripper action client completes
+*/
+void VirtualAction::moveLeftGripper(const actionlib::SimpleClientGoalState& state, const pr2motion::Gripper_Left_OperateResultConstPtr& result){
+
+        connector_->leftGripperMoving_ = false;
 }
 
