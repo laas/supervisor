@@ -49,12 +49,18 @@ protected:
    void PutInSupport(string object, string support);
    bool updateGTP();
    int  planGTP(string actionName, vector<gtp_ros_msg::Ag> agents, vector<gtp_ros_msg::Obj> objects, vector<gtp_ros_msg::Data> datas, vector<gtp_ros_msg::Points> points);
+   bool execAction(int actionId, bool shouldOpen);
+   bool executeTrajectory(int actionId, int actionSubId, int armId);
+   bool openGripper(int armId);
+   bool closeGripper(int armId);
 
+   string object_;
+   int actionId_;
    string robotName_;
    double waitActionServer_;
    Connector* connector_;
-	bool simu_;
-	int nbPlanMax_;
+   bool simu_;
+   int nbPlanMax_;
 
 private:
 

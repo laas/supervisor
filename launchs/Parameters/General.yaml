@@ -1,8 +1,9 @@
 ---
 robot:
     name: 'PR2_ROBOT'
+    toasterName: 'pr2'
     hands:
-        right: 'r_gripper_joint'
-        left: 'l_gripper_joint'
+        right: 'r_gripper_palm_link'
+        left: 'l_gripper_palm_link'
 simu: true
 waitActionServer: 30.0

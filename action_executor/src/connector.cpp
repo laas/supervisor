@@ -11,6 +11,8 @@ Connector::Connector(){
 
    node_.getParam("/simu", simu_);
    previousId_ = -1;
+   gripperRightOpen_ = false;
+   gripperLeftOpen_ = false;
 
    //Init action clients
    acGTP_ = new actionlib::SimpleActionClient<gtp_ros_msg::requestAction>("gtp_ros_server", true);
@@ -19,6 +21,14 @@ Connector::Connector(){
    PR2motion_init_->waitForServer();
    PR2motion_torso_ = new actionlib::SimpleActionClient<pr2motion::Torso_MoveAction>("pr2motion/Torso_Move", true);
    PR2motion_torso_->waitForServer();
+   PR2motion_arm_right_ = new actionlib::SimpleActionClient<pr2motion::Arm_Right_MoveAction>("pr2motion/Arm_Right_Move",true);
+   PR2motion_arm_right_->waitForServer();
+   PR2motion_arm_left_ = new actionlib::SimpleActionClient<pr2motion::Arm_Left_MoveAction>("pr2motion/Arm_Left_Move",true);
+   PR2motion_arm_left_->waitForServer();
+   PR2motion_gripper_right_ = new actionlib::SimpleActionClient<pr2motion::Gripper_Right_OperateAction>("pr2motion/Gripper_Right_Operate",true);
+   PR2motion_gripper_right_->waitForServer();
+   PR2motion_gripper_left_ = new actionlib::SimpleActionClient<pr2motion::Gripper_Left_OperateAction>("pr2motion/Gripper_Left_Operate",true);
+   PR2motion_gripper_left_->waitForServer();
    ROS_INFO("[action_executor] Action clients started.");
    
    //Init PR2motion
