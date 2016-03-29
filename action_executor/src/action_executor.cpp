@@ -47,15 +47,17 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 		result_.report = false;
 		result_.state = "NON_VALID";
 		action_server_.setAborted(result_);
+	   ROS_INFO("[action_executor] Action failed at creation");
 		return;
 	}
 
-
+    ROS_ERROR("[action_executor] Send service");
 	//send the fact that the action is in progress to the MS Manager
 	srv.request.state = "PROGRESS";
 	if (!client.call(srv)){
 	 ROS_ERROR("[action_executor] Failed to call service mental_state/action_state");
-	}
+    }
+    ROS_ERROR("[action_executor] Answer service");
 
 	//Checking preconditions
 	feedback_.state = "PREC";
@@ -74,6 +76,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 			action_server_.setPreempted(result_);
 
 		}
+	   ROS_INFO("[action_executor] Action failed in preconditions");
 		return;
 	}
 
@@ -94,6 +97,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 			action_server_.setPreempted(result_);
 
 		}
+	   ROS_INFO("[action_executor] Action failed in planning");
 		return;
 	}
 
@@ -114,6 +118,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 			action_server_.setPreempted(result_);
 
 		}
+	   ROS_INFO("[action_executor] Action failed in execution");
 		return;
 	}
 
@@ -134,6 +139,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 			action_server_.setPreempted(result_);
 
 		}
+	   ROS_INFO("[action_executor] Action failed in post conditions");
 		return;
 	}
 	
@@ -144,6 +150,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 	result_.report = true;
 	result_.state = "OK";
 	action_server_.setSucceeded(result_);
+	ROS_INFO("[action_executor] Action succeed");
 }
 
 
