@@ -28,6 +28,8 @@ class DBInterface{
 public:
 	DBInterface() {};
 	vector<string> getAgents();
+    void addFactToAdd(toaster_msgs::Fact fact, string agent);
+    void addFactToRemove(toaster_msgs::Fact fact, string agent);
 	void addGoalState(supervisor_msgs::GoalMS goal, string agent, string state);
 	void addPlanState(supervisor_msgs::PlanMS plan, string agent, string state);
 	void addActionsState(vector<supervisor_msgs::ActionMS> actions, string agent, string state);
@@ -40,12 +42,18 @@ public:
 	vector<string> getAgentGoals(string agent, string state);
 	vector<string> getAgentsWhoSee(string agent);
 	void addFacts(vector<toaster_msgs::Fact> facts, string agent);
+    void removeFacts(vector<toaster_msgs::Fact> facts, string agent);
 	void addEffects(vector<toaster_msgs::Fact> facts, string agent);
 	vector<toaster_msgs::Fact> getFactsAgent(string agent);
 	void cleanDB();
+    void updateKnowledge();
+    void initKnowledge(vector<string> agents);
 protected:
 
 private:
+    vector<pair<string, vector<toaster_msgs::Fact> > > knowledge_;
+    vector<pair<string, vector<toaster_msgs::Fact> > > toAdd_;
+    vector<pair<string, vector<toaster_msgs::Fact> > > toRemove_;
 
 
 };

@@ -124,17 +124,19 @@ Function which updates the mental state of an agent
 	@agent: the name of the agent
 */
 void MSManager::update(string agent){
-	
+
 	//We check if the agent can deduce an action from its effects.
  	checkEffects(agent);
 	//We check if the precondition and links of the planned action.
-   computePreconditions(agent);
+    computePreconditions(agent);
 	//We check if the agent still think that the current goal is still feasible (and not achieved too).
-   checkGoals(agent);
+    checkGoals(agent);
 	//We check if the agent still think that the current plan is still feasible (and not achieved too).
-   planFeasibility(agent);
+    planFeasibility(agent);
 
 }
+
+
 
 /*
 Function which checks if an agent can deduce an action from its effects.
@@ -142,16 +144,14 @@ Function which checks if an agent can deduce an action from its effects.
 */
 void MSManager::checkEffects(string agent){
 
-	DBInterface db;
-
 	//We get all the actions either READY, in PROGRESS, NEEDED or ASKED in the agent knowledge.
-	vector<int> readyIds = db.getActionsIdFromState(agent, "READY");
+    vector<int> readyIds = db_.getActionsIdFromState(agent, "READY");
 	vector<supervisor_msgs::ActionMS> readyActions = getActionsFromIds(readyIds);
-	vector<int> progressIds = db.getActionsIdFromState(agent, "PROGRESS");
+    vector<int> progressIds = db_.getActionsIdFromState(agent, "PROGRESS");
 	vector<supervisor_msgs::ActionMS> progressActions = getActionsFromIds(progressIds);
-	vector<int> neededIds = db.getActionsIdFromState(agent, "NEEDED");
+    vector<int> neededIds = db_.getActionsIdFromState(agent, "NEEDED");
 	vector<supervisor_msgs::ActionMS> neededActions = getActionsFromIds(neededIds);
-	vector<int> askedIds = db.getActionsIdFromState(agent, "ASKED");
+    vector<int> askedIds = db_.getActionsIdFromState(agent, "ASKED");
 	vector<supervisor_msgs::ActionMS> askedActions = getActionsFromIds(askedIds);
 
 	vector<supervisor_msgs::ActionMS> toCheckActions;
@@ -163,14 +163,14 @@ void MSManager::checkEffects(string agent){
 	//For each of these actions we look if its effects are in the knowledge of the agent, if they are, the action becomes DONE in the agent knowledge
 	vector<supervisor_msgs::ActionMS> toDone;
 	for(vector<supervisor_msgs::ActionMS>::iterator it = toCheckActions.begin(); it != toCheckActions.end(); it++){
-		if(db.factsAreIn(agent, it->effects)){
+        if(db_.factsAreIn(agent, it->effects)){
 			toDone.push_back(*it);
 		}
 	}
 
 	//TODO: for all in PROGRESS action, if the agent see its actors and there are not perfoming it anymore, the agent considers the action DONE
 
-	db.addActionsState(toDone, agent, "DONE");
+    db_.addActionsState(toDone, agent, "DONE");
 }
 
 /*
@@ -179,23 +179,21 @@ Function which checks the precondition and links of the planned action.
 */
 void MSManager::computePreconditions(string agent){
 
-	DBInterface db;
-
 	pair<bool, supervisor_msgs::PlanMS> agentPlan = getAgentPlan(agent);
 	if(agentPlan.first){
 		//Check if the READY actions are still READY
-		vector<int> readyIds = db.getActionsIdFromState(agent, "READY");
+        vector<int> readyIds = db_.getActionsIdFromState(agent, "READY");
 		vector<supervisor_msgs::ActionMS> readyActions = getActionsFromIds(readyIds);
 		vector<supervisor_msgs::ActionMS> toNeeded;
 		vector<supervisor_msgs::ActionMS> toReady;
 		for(vector<supervisor_msgs::ActionMS>::iterator it = readyActions.begin(); it != readyActions.end(); it++){
-			if(!db.factsAreIn(agent, it->prec)){ //if the preconditions are not respected anymore, the action goes back to NEEDED
+            if(!db_.factsAreIn(agent, it->prec)){ //if the preconditions are not respected anymore, the action goes back to NEEDED
 				toNeeded.push_back(*it);
 			}
 		}
 
 		//Check causaul links of PLANNED actions
-		vector<int> plannedIds = db.getActionsIdFromState(agent, "PLANNED");
+        vector<int> plannedIds = db_.getActionsIdFromState(agent, "PLANNED");
 		vector<int> linksOkIds;
 		vector<supervisor_msgs::ActionMS> linksOk;
 		if(plannedIds.size() != 0){
@@ -215,7 +213,7 @@ void MSManager::computePreconditions(string agent){
 					}
 				}
 				//we check the agent thinks all these actions are DONE
-				if(db.factsAreIn(agent, toCheck)){
+                if(db_.factsAreIn(agent, toCheck)){
 					linksOkIds.push_back(*it);
 				}
 			}
@@ -223,23 +221,23 @@ void MSManager::computePreconditions(string agent){
 		}
 
 		//Check preconditions of remaining actions + NEEDED actions
-		vector<int> neededIds = db.getActionsIdFromState(agent, "NEEDED");
+        vector<int> neededIds = db_.getActionsIdFromState(agent, "NEEDED");
 		vector<supervisor_msgs::ActionMS> neededActions = getActionsFromIds(neededIds);
 		for(vector<supervisor_msgs::ActionMS>::iterator it = linksOk.begin(); it != linksOk.end(); it++){
-			if(db.factsAreIn(agent, it->prec)){ //if the preconditions are respected the action becomes READY, else it goes to NEEDED
+            if(db_.factsAreIn(agent, it->prec)){ //if the preconditions are respected the action becomes READY, else it goes to NEEDED
 				toReady.push_back(*it);
 			}else{
 				toNeeded.push_back(*it);
 			}
 		}
 		for(vector<supervisor_msgs::ActionMS>::iterator it = neededActions.begin(); it != neededActions.end(); it++){
-			if(db.factsAreIn(agent, it->prec)){ //if the preconditions are respected the action becomes READY, else it remains to NEEDED
+            if(db_.factsAreIn(agent, it->prec)){ //if the preconditions are respected the action becomes READY, else it remains to NEEDED
 				toReady.push_back(*it);
 			}
 		}
 
-		db.addActionsState(toNeeded, agent, "NEEDED");
-		db.addActionsState(toReady, agent, "READY");
+        db_.addActionsState(toNeeded, agent, "NEEDED");
+        db_.addActionsState(toReady, agent, "READY");
 	}
 }
 
@@ -249,7 +247,6 @@ Function which checks if an agent still think that the current plan is still fea
 */
 void MSManager::planFeasibility(string agent){
 
-	DBInterface db;
 	ros::NodeHandle node;
   	ros::ServiceClient client = node.serviceClient<supervisor_msgs::EndPlan>("goal_manager/end_plan");
   	supervisor_msgs::EndPlan srv;
@@ -259,7 +256,7 @@ void MSManager::planFeasibility(string agent){
 	if(agentPlan.first){
 	
 	   //if the goal is achieved, we abort the plan
-	   string goalState = db.getGoalState(agent, agentPlan.second.goal);
+       string goalState = db_.getGoalState(agent, agentPlan.second.goal);
 	   if(goalState == "DONE"){
 	      abortPlan(agent);
 	      srv.request.report = true;//as the goal is achieved
@@ -269,15 +266,15 @@ void MSManager::planFeasibility(string agent){
 	   }
 	
 		//We get all the actions either READY, in PROGRESS, NEEDED, ASKED and PLANNED in the agent knowledge.
-		vector<int> readyIds = db.getActionsIdFromState(agent, "READY");
+        vector<int> readyIds = db_.getActionsIdFromState(agent, "READY");
 		vector<supervisor_msgs::ActionMS> readyActions = getActionsFromIds(readyIds);
-		vector<int> progressIds = db.getActionsIdFromState(agent, "PROGRESS");
+        vector<int> progressIds = db_.getActionsIdFromState(agent, "PROGRESS");
 		vector<supervisor_msgs::ActionMS> progressActions = getActionsFromIds(progressIds);
-		vector<int> neededIds = db.getActionsIdFromState(agent, "NEEDED");
+        vector<int> neededIds = db_.getActionsIdFromState(agent, "NEEDED");
 		vector<supervisor_msgs::ActionMS> neededActions = getActionsFromIds(neededIds);
-		vector<int> plannedIds = db.getActionsIdFromState(agent, "PLANNED");
+        vector<int> plannedIds = db_.getActionsIdFromState(agent, "PLANNED");
 		vector<supervisor_msgs::ActionMS> plannedActions = getActionsFromIds(plannedIds);
-		vector<int> askedIds = db.getActionsIdFromState(agent, "ASKED");
+        vector<int> askedIds = db_.getActionsIdFromState(agent, "ASKED");
 		vector<supervisor_msgs::ActionMS> askedActions = getActionsFromIds(askedIds);
 
 		//if there is no actions, the plan is done
@@ -288,8 +285,8 @@ void MSManager::planFeasibility(string agent){
 		allActions.insert(allActions.end(), plannedActions.begin(), plannedActions.end() );
 		allActions.insert(allActions.end(), readyActions.begin(), readyActions.end() );
 		if(allActions.size() == 0){
-			db.addPlanState(agentPlan.second, agent, "DONE");
-			string goalState = db.getGoalState(agent, agentPlan.second.goal);
+            db_.addPlanState(agentPlan.second, agent, "DONE");
+            string goalState = db_.getGoalState(agent, agentPlan.second.goal);
 	      if(goalState == "DONE"){
 	         srv.request.report = true;//as the goal is achieved
 	      }else{
@@ -307,7 +304,7 @@ void MSManager::planFeasibility(string agent){
 				//TODO: if a human is not here and the robot has already tried to computes an other plan, it waits the human to come back
 				//TODO: should failed when an action of the plan fails
 				abortPlan(agent);
-				string goalState = db.getGoalState(agent, agentPlan.second.goal);
+                string goalState = db_.getGoalState(agent, agentPlan.second.goal);
 	         if(goalState == "DONE"){
 	            srv.request.report = true;//as the goal is achieved
 	         }else{
@@ -329,23 +326,21 @@ Function which checks if an agent still think that the current goal is still fea
 */
 void MSManager::checkGoals(string agent){
 
-	DBInterface db;
-
 	//We first get all goals in PROGRESS or PENDING in the knowledge of the agent
-	vector<string> pendingGoals = db.getAgentGoals(agent, "PENDING");
-	vector<string> progressGoals = db.getAgentGoals(agent, "PROGRESS");
+    vector<string> pendingGoals = db_.getAgentGoals(agent, "PENDING");
+    vector<string> progressGoals = db_.getAgentGoals(agent, "PROGRESS");
 
 	//Then we check if objectives of the goal are in the agent knowledge
 	for(vector<string>::iterator it = pendingGoals.begin(); it != pendingGoals.end(); it++){
 		supervisor_msgs::GoalMS* goal = getGoalByName(*it);
-		if(db.factsAreIn(agent, goal->objective)){ 
-			db.addGoalState(*goal, agent, "DONE");
+        if(db_.factsAreIn(agent, goal->objective)){
+            db_.addGoalState(*goal, agent, "DONE");
 		}
 	}
 	for(vector<string>::iterator it = progressGoals.begin(); it != progressGoals.end(); it++){
 		supervisor_msgs::GoalMS* goal = getGoalByName(*it);
-		if(db.factsAreIn(agent, goal->objective)){ 
-			db.addGoalState(*goal, agent, "DONE");
+        if(db_.factsAreIn(agent, goal->objective)){
+            db_.addGoalState(*goal, agent, "DONE");
 			abortPlan(agent);//for the current goal, we abort the current plan as it is over
 		}
 	}
@@ -493,9 +488,8 @@ Function which return the plan an agent think in PROGRESS (bool is at true if th
 	@agent: the agent name
 */
 pair<bool, supervisor_msgs::PlanMS> MSManager::getAgentPlan(string agent){
-	
-	DBInterface db;
-	int planId = db.getAgentIdPlan(agent);// we get the id of the plan
+
+    int planId = db_.getAgentIdPlan(agent);// we get the id of the plan
 	pair<bool, supervisor_msgs::PlanMS> answer;
 	boost::unique_lock<boost::mutex> lock(planListMutex_);
 	//we return the corresponding plan
@@ -515,14 +509,12 @@ Function which aborts the current plan in the knowledge of the agent (and remove
 */
 void MSManager::abortPlan(string agent){
 	
-	DBInterface db;
-	
 	pair<bool, supervisor_msgs::PlanMS> agentPlan = getAgentPlan(agent);
 	if(agentPlan.first){
-		db.addPlanState(agentPlan.second, agent, "ABORTED");
-		db.removeActionsState(agent, "PLANNED");
-		db.removeActionsState(agent, "NEEDED");
-		db.removeActionsState(agent, "READY");
+        db_.addPlanState(agentPlan.second, agent, "ABORTED");
+        db_.removeActionsState(agent, "PLANNED");
+        db_.removeActionsState(agent, "NEEDED");
+        db_.removeActionsState(agent, "READY");
 	}
 }
 

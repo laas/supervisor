@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <ros/ros.h>
+#include <ros/callback_queue.h>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/thread.hpp>
@@ -43,6 +44,8 @@ public:
 	MSManager();
 	vector<supervisor_msgs::ActionMS> getActionList();
 	void update(string agent);
+    void updateKnowledge();
+    void initKnowledge(vector<string> agents);
 	void initGoals();
 	void initHighLevelActions();
 	supervisor_msgs::GoalMS* getGoalByName(string name);
@@ -56,6 +59,8 @@ public:
 	pair<bool, supervisor_msgs::PlanMS> getPlanFromId(int id);
 	supervisor_msgs::Action convertActionMStoAction(supervisor_msgs::ActionMS actionMS);
 	vector<supervisor_msgs::ActionMS> getActionsFromIds(vector<int> ids);
+
+    DBInterface db_;
 protected:
 
 private:

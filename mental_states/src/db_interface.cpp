@@ -31,6 +31,90 @@ vector<string> DBInterface::getAgents(){
   	return agents;
 }
 
+/*
+Function which add a fact to the list to add
+    @fact: the fact to add
+    @agent: the agent which goes with the fact
+*/
+void DBInterface::addFactToAdd(toaster_msgs::Fact fact, string agent){
+
+    //We look if the agent already exist in the list to add
+    bool find = false;
+    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = toAdd_.begin(); it != toAdd_.end(); it++){
+        if(it->first == agent){//if it exist we add the fact to the list
+            it->second.push_back(fact);
+            find = true;
+        }
+    }
+    if(!find){//if it does not exist we add it
+        pair<string, vector<toaster_msgs::Fact> > toAddAgent;
+        toAddAgent.first = agent;
+        toAddAgent.second.push_back(fact);
+        toAdd_.push_back(toAddAgent);
+    }
+
+}
+
+/*
+Function which add a fact to the list to remove
+    @fact: the fact to add
+    @agent: the agent which goes with the fact
+*/
+void DBInterface::addFactToRemove(toaster_msgs::Fact fact, string agent){
+
+    //We look if the agent already exist in the list to add
+    bool find = false;
+    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = toRemove_.begin(); it != toRemove_.end(); it++){
+        if(it->first == agent){//if it exist we add the fact to the list
+            it->second.push_back(fact);
+            find = true;
+        }
+    }
+    if(!find){//if it does not exist we add it
+        pair<string, vector<toaster_msgs::Fact> > toRemoveAgent;
+        toRemoveAgent.first = agent;
+        toRemoveAgent.second.push_back(fact);
+        toRemove_.push_back(toRemoveAgent);
+    }
+
+}
+
+
+/*
+Function which init the knowledge of agent with the database
+*/
+void DBInterface::initKnowledge(vector<string> agents){
+
+    for(vector<string>::iterator it = agents.begin(); it != agents.end(); it++){
+        pair<string, vector<toaster_msgs::Fact> > agentKnowledge;
+        agentKnowledge.first = *it;
+        agentKnowledge.second = getFactsAgent(*it);
+        knowledge_.push_back(agentKnowledge);
+    }
+}
+
+/*
+Function which send update to the database and update the mental states.
+*/
+void DBInterface::updateKnowledge(){
+
+    //we send to the database the last update
+    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = toRemove_.begin(); it != toRemove_.end(); it++){
+        removeFacts(it->second, it->first);
+    }
+    toRemove_.clear();
+    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = toAdd_.begin(); it != toAdd_.end(); it++){
+        addFacts(it->second, it->first);
+    }
+    toAdd_.clear();
+
+    //we get the last update from the database
+    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        it->second = getFactsAgent(it->first);
+    }
+
+}
+
 
 /*
 Function which add the state of a goal in an agent knowledge
@@ -38,6 +122,30 @@ Function which add the state of a goal in an agent knowledge
 	@agent: the agent name 
 	@state: the state we want to put
 */
+void DBInterface::addGoalState(supervisor_msgs::GoalMS goal, string agent, string state){
+
+    //we create the fact to remove and add it to the list
+    toaster_msgs::Fact factRm;
+    factRm.subjectId = goal.name;
+    factRm.property = "goalState";
+    factRm.propertyType = "state";
+    factRm.targetId = "NULL";
+    addFactToRemove(factRm, agent);
+
+    //Then we create the fact to add and add it to the list
+    toaster_msgs::Fact factAdd;
+    factAdd.subjectId = goal.name;
+    factAdd.property = "goalState";
+    factAdd.propertyType = "state";
+    factAdd.targetId = state;
+    addFactToAdd(factAdd, agent);
+
+
+
+}
+
+
+/*  //Old version wich use the database
 void DBInterface::addGoalState(supervisor_msgs::GoalMS goal, string agent, string state){
 
 	ros::NodeHandle node;
@@ -71,7 +179,7 @@ void DBInterface::addGoalState(supervisor_msgs::GoalMS goal, string agent, strin
   	if (!client.call(srv)){
    	 ROS_ERROR("[mental_state] Failed to call service database/add_fact_to_agent");
   	}
-}
+}*/
 
 /*
 Function which add the state of a plan in an agent knowledge
@@ -79,6 +187,31 @@ Function which add the state of a plan in an agent knowledge
 	@agent: the agent name 
 	@state: the state we want to put
 */
+void DBInterface::addPlanState(supervisor_msgs::PlanMS plan, string agent, string state){
+
+    //we get the plan id
+    ostringstream toString;
+    toString << plan.id;
+    string planId = toString.str();
+    //we remove previous state
+    toaster_msgs::Fact factRm;
+    factRm.subjectId = planId;
+    factRm.property = "planState";
+    factRm.propertyType = "state";
+    factRm.targetId = "NULL";
+    addFactToRemove(factRm, agent);
+
+    //then we add the new state
+    toaster_msgs::Fact fact;
+    fact.subjectId = planId;
+    fact.property = "planState";
+    fact.propertyType = "state";
+    fact.targetId = state;
+    addFactToAdd(fact, agent);
+
+}
+
+/*  //Old version wich use the database
 void DBInterface::addPlanState(supervisor_msgs::PlanMS plan, string agent, string state){
 
 	ros::NodeHandle node;
@@ -116,7 +249,7 @@ void DBInterface::addPlanState(supervisor_msgs::PlanMS plan, string agent, strin
   	if (!client.call(srv)){
    	 ROS_ERROR("[mental_state] Failed to call service database/add_fact_to_agent");
   	}
-}
+}*/
 
 /*
 Function which add the state of actions in an agent knowledge
@@ -124,6 +257,31 @@ Function which add the state of actions in an agent knowledge
 	@agent: the agent name 
 	@state: the state we want to put
 */
+void DBInterface::addActionsState(vector<supervisor_msgs::ActionMS> actions, string agent, string state){
+
+    for(vector<supervisor_msgs::ActionMS>::iterator it = actions.begin(); it != actions.end(); it++){
+        //we remove previous state
+        ostringstream toString;
+        toString << it->id;
+        string actionId = toString.str();
+        toaster_msgs::Fact factRm;
+        factRm.subjectId = actionId;
+        factRm.property = "actionState";
+        factRm.propertyType = "state";
+        factRm.targetId = "NULL";
+        addFactToRemove(factRm, agent);
+        //then we add the new state
+        toaster_msgs::Fact factAdd;
+        factAdd.subjectId = actionId;
+        factAdd.property = "actionState";
+        factAdd.propertyType = "state";
+        factAdd.targetId = state;
+        addFactToAdd(factAdd, agent);
+    }
+
+}
+
+/*  //Old version wich use the database
 void DBInterface::addActionsState(vector<supervisor_msgs::ActionMS> actions, string agent, string state){
 
 	ros::NodeHandle node;
@@ -164,12 +322,33 @@ void DBInterface::addActionsState(vector<supervisor_msgs::ActionMS> actions, str
    	 ROS_ERROR("[mental_state] Failed to call service database/add_facts_to_agent");
   	}
 }
+*/
 
 /*
 Function which return all the actions id with an action state in the knowledge of an agent
 	@agent: the agent name 
 	@state: the state we are looking for
 */
+vector<int> DBInterface::getActionsIdFromState(string agent, string state){
+
+    vector<int> toReturn;
+    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->first == agent){
+            for(vector<toaster_msgs::Fact>::iterator itk = it->second.begin(); itk != it->second.end(); itk++){
+                if(itk->property == "actionState" && itk->targetId == state){
+                    istringstream buffer(itk->subjectId);
+                    int id;
+                    buffer >> id;
+                    toReturn.push_back(id);
+                }
+            }
+        }
+    }
+
+    return toReturn;
+}
+
+/*  //Old version wich use the database
 vector<int> DBInterface::getActionsIdFromState(string agent, string state){
 
 	ros::NodeHandle node;
@@ -192,13 +371,50 @@ vector<int> DBInterface::getActionsIdFromState(string agent, string state){
 	}
 
 	return ids;
-}
+}*/
 
 /*
 Function which return true if all the facts given are in the agent knowledge
 	@agent: the agent name 
 	@facts: the facts we are looking for
 */
+bool DBInterface::factsAreIn(string agent, vector<toaster_msgs::Fact> facts){
+
+    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->first == agent){
+            for(vector<toaster_msgs::Fact>::iterator itf = facts.begin(); itf != facts.end(); itf++){
+                if(itf->subjectId == "NULL"){
+                    for(vector<toaster_msgs::Fact>::iterator itk = it->second.begin(); itk != it->second.end(); itk++){
+                        if(itk->property == itf->property && itk->targetId == itf->targetId){
+                            return false;
+                        }
+                    }
+                }else if(itf->targetId == "NULL"){
+                    for(vector<toaster_msgs::Fact>::iterator itk = it->second.begin(); itk != it->second.end(); itk++){
+                        if(itk->property == itf->property && itk->subjectId == itf->subjectId){
+                            return false;
+                        }
+                    }
+                }else{
+                    bool find = false;
+                    for(vector<toaster_msgs::Fact>::iterator itk = it->second.begin(); itk != it->second.end(); itk++){
+                        if(itk->property == itf->property && itk->subjectId == itf->subjectId && itk->targetId == itf->targetId){
+                            find = true;
+                            break;
+                        }
+                    }
+                    if(!find){
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+    }
+    return false; //there is no knowledge concerning this agent
+}
+
+/*  //Old version wich use the database
 bool DBInterface::factsAreIn(string agent, vector<toaster_msgs::Fact> facts){
 
 	ros::NodeHandle node;
@@ -255,13 +471,30 @@ bool DBInterface::factsAreIn(string agent, vector<toaster_msgs::Fact> facts){
 	}
 	
 	return false;
-}
+}*/
 
 /*
-Function which return true if all the facts given are in the agent knowledge
-	@agent: the agent name 
-	@facts: the facts we are looking for
+Function which return the id of the plan in PROGRESS fo the agent
+    @agent: the agent name
 */
+int DBInterface::getAgentIdPlan(string agent){
+
+    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->first == agent){
+            for(vector<toaster_msgs::Fact>::iterator itk = it->second.begin(); itk != it->second.end(); itk++){
+                if(itk->property == "planState" && itk->targetId == "PROGRESS"){
+                    istringstream buffer(itk->subjectId);
+                    int id;
+                    buffer >> id;
+                    return id;
+                }
+            }
+        }
+    }
+    return -1;
+}
+
+/*  //Old version wich use the database
 int DBInterface::getAgentIdPlan(string agent){
 
 	ros::NodeHandle node;
@@ -283,13 +516,25 @@ int DBInterface::getAgentIdPlan(string agent){
 	}
 
 	return -1;
-}
+}*/
 
 /*
 Function which remove all knowledge of an agent about actions with a specific state
 	@agent: the agent name 
 	@state: the state of the actions we want to remove
 */
+void DBInterface::removeActionsState(string agent, string state){
+
+    toaster_msgs::Fact factRm;
+    factRm.subjectId = "NULL";
+    factRm.property = "actionState";
+    factRm.propertyType = "state";
+    factRm.targetId = state;
+    addFactToRemove(factRm, agent);
+
+}
+
+/*  //Old version wich use the database
 void DBInterface::removeActionsState(string agent, string state){
 
 	ros::NodeHandle node;
@@ -308,13 +553,31 @@ void DBInterface::removeActionsState(string agent, string state){
 	if (!client_rm.call(srv_rm)){
 	 ROS_ERROR("[mental_state] Failed to call service database/remove_facts_to_agent");
 	}
-}
+}*/
 
 /*
 Function which return the state of an action in the knowledge of an agent
 	@agent: the agent name 
-	@state: the action we want the state
+    @action: the action we want the state
 */
+string DBInterface::getActionState(string agent, supervisor_msgs::ActionMS action){
+
+    stringstream toString;
+    toString << action.id;
+    string actionId = toString.str();
+    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->first == agent){
+            for(vector<toaster_msgs::Fact>::iterator itk = it->second.begin(); itk != it->second.end(); itk++){
+                if(itk->property == "actionState" && itk->subjectId == actionId){
+                    return itk->targetId;
+                }
+            }
+        }
+    }
+    return "UNKNOWN";
+}
+
+/*  //Old version wich use the database
 string DBInterface::getActionState(string agent, supervisor_msgs::ActionMS action){
 
 	ros::NodeHandle node;
@@ -337,13 +600,29 @@ string DBInterface::getActionState(string agent, supervisor_msgs::ActionMS actio
 	 ROS_ERROR("[mental_state] Failed to call service database/execute_SQL");
 	}
 		return "UNKNOWN";
-}
+}*/
 
 /*
-Function which remove all knowledge of an agent about actions with a specific state
+Function which return all the goals with a specific state
 	@agent: the agent name 
-	@state: the state of the actions we want to remove
+    @state: the state of the goals wanted
 */
+vector<string> DBInterface::getAgentGoals(string agent, string state){
+
+    vector<string> goals;
+    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->first == agent){
+            for(vector<toaster_msgs::Fact>::iterator itk = it->second.begin(); itk != it->second.end(); itk++){
+                if(itk->property == "goalState" && itk->targetId == state){
+                    goals.push_back(itk->subjectId);
+                }
+            }
+        }
+    }
+    return goals;
+}
+
+/*  //Old version wich use the database
 vector<string> DBInterface::getAgentGoals(string agent, string state){
 
 	ros::NodeHandle node;
@@ -363,12 +642,30 @@ vector<string> DBInterface::getAgentGoals(string agent, string state){
 
 	return goals;
 
-}
+}*/
 
 /*
 Function which return all the agents who can see an agent
 	@agent: the agent name 
 */
+vector<string> DBInterface::getAgentsWhoSee(string agent){
+    ros::NodeHandle node;
+    vector<string> agents;
+    string robotName;
+    node.getParam("/robot/name", robotName);
+    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->first == robotName){
+            for(vector<toaster_msgs::Fact>::iterator itk = it->second.begin(); itk != it->second.end(); itk++){
+                if(itk->property == "isVisibleBy" && itk->subjectId == agent){
+                    agents.push_back(itk->targetId);
+                }
+            }
+        }
+    }
+    return agents;
+}
+
+/*  //Old version wich use the database
 vector<string> DBInterface::getAgentsWhoSee(string agent){
 
 	ros::NodeHandle node;
@@ -389,7 +686,8 @@ vector<string> DBInterface::getAgentsWhoSee(string agent){
 
 
   	return agents;
-}
+}*/
+
 
 /*
 Function which add facts to the knowledge of an agent
@@ -410,10 +708,41 @@ void DBInterface::addFacts(vector<toaster_msgs::Fact> facts, string agent){
 }
 
 /*
+Function which remove facts to the knowledge of an agent
+    @facts: the facts to remove
+    @agent: the agent name
+*/
+void DBInterface::removeFacts(vector<toaster_msgs::Fact> facts, string agent){
+
+    ros::NodeHandle node;
+    ros::ServiceClient client = node.serviceClient<toaster_msgs::AddFactsToAgent>("database/remove_facts_to_agent");
+
+    toaster_msgs::AddFactsToAgent srv;
+    srv.request.agentId = agent;
+    srv.request.facts = facts;
+    if (!client.call(srv)){
+     ROS_ERROR("[mental_state] Failed to call service database/remove_facts_to_agent");
+    }
+}
+
+/*
 Function which add effects of an actions to the knowledge of an agent
 	@facts: the effects to add
 	@agent: the agent name 
 */
+void DBInterface::addEffects(vector<toaster_msgs::Fact> facts, string agent){
+
+    for(vector<toaster_msgs::Fact>::iterator it = facts.begin(); it != facts.end(); it++){
+        if(it->subjectId == "NULL" || it->targetId == "NULL"){
+            //if there is NULL in the description of the effect, we remove all facts of this type on the knowledge of the agent
+            addFactToRemove(*it, agent);
+        }else{
+            addFactToAdd(*it, agent);
+        }
+    }
+}
+
+/*  //Old version wich use the database
 void DBInterface::addEffects(vector<toaster_msgs::Fact> facts, string agent){
 
 	ros::NodeHandle node;
@@ -448,7 +777,7 @@ void DBInterface::addEffects(vector<toaster_msgs::Fact> facts, string agent){
 	   	 ROS_ERROR("[mental_state] Failed to call service database/add_facts_to_agent");
 	  	}
 	}
-}
+}*/
 
 /*
 Function which return all the knowledge of an agent
@@ -470,7 +799,7 @@ vector<toaster_msgs::Fact> DBInterface::getFactsAgent(string agent){
 }
 
 /*
-Function which return all the knowledge of an agent
+Function which remove all knowledge from the database
 	@agent: the agent name 
 */
 void DBInterface::cleanDB(){
@@ -517,6 +846,21 @@ Function which return the state of a goal
 */
 string DBInterface::getGoalState(string agent, supervisor_msgs::GoalMS goal){
 
+    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->first == agent){
+            for(vector<toaster_msgs::Fact>::iterator itk = it->second.begin(); itk != it->second.end(); itk++){
+                if(itk->property == "goalState" && itk->subjectId == goal.name){
+                    return itk->targetId;
+                }
+            }
+        }
+    }
+    return "NULL";
+}
+
+/*  //Old version wich use the database
+string DBInterface::getGoalState(string agent, supervisor_msgs::GoalMS goal){
+
    ros::NodeHandle node;
   	ros::ServiceClient client = node.serviceClient<toaster_msgs::ExecuteSQL>("database/execute_SQL");
 
@@ -532,5 +876,5 @@ string DBInterface::getGoalState(string agent, supervisor_msgs::GoalMS goal){
 	}
 
    return "NULL";
-}
+}*/
 
