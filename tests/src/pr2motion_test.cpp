@@ -46,7 +46,7 @@ int main (int argc, char **argv)
   
   // send a goal to the action
   pr2motion::Torso_MoveGoal goal;
-  goal.torso_position = 0.1;
+  goal.torso_position = 0.2;
   ac.sendGoal(goal);
 
   //wait for the action to return

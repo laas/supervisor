@@ -1,5 +1,6 @@
 #include <ros/ros.h>
 #include <vector>
+#include <ctime>
 #include "toaster_msgs/Fact.h"
 #include "toaster_msgs/FactList.h"
 #include "toaster_msgs/AddFactsToAgent.h"
@@ -29,6 +30,26 @@ int main (int argc, char **argv)
   ros::ServiceClient action_state = n.serviceClient<supervisor_msgs::ActionState>("mental_state/action_state");
 
 
+	supervisor_msgs::ActionState srv;
+	
+	supervisor_msgs::Action action;
+   action.name = "pick";
+   action.id = 0;
+   action.parameters.push_back("RED_CUBE");
+   action.actors.push_back("PR2_ROBOT");
+	srv.request.action = action;
+   srv.request.state = "PROGRESS";
+   
+   double tbegin,tend;
+   tbegin=clock();
+   
+   ROS_ERROR("[action_executor] Before exec");
+	if (!action_state.call(srv)){
+	 ROS_ERROR("[action_executor] Failed to call service mental_state/action_state");
+	}
+    tend=clock();
+    double texec=(tend - tbegin)/(CLOCKS_PER_SEC) * 1000;
+   ROS_ERROR("[action_executor] Exec time: %f", texec);
 
   vector<toaster_msgs::Fact> toAdd;
   
@@ -59,41 +80,41 @@ int main (int argc, char **argv)
   toaster_msgs::AddFactsToAgent srvAdd;
   srvAdd.request.agentId = "PR2_ROBOT";
   srvAdd.request.facts = toAdd;
-  if (!add_fact.call(srvAdd)){
-    ROS_ERROR("[mental_state] Failed to call service database/add_facts_to_agent");
-  }
+  //if (!add_fact.call(srvAdd)){
+  //  ROS_ERROR("[mental_state] Failed to call service database/add_facts_to_agent");
+  //}
 
   srvAdd.request.agentId = "HERAKLES_HUMAN1";
   srvAdd.request.facts = toAdd;
-  if (!add_fact.call(srvAdd)){
-    ROS_ERROR("[mental_state] Failed to call service database/add_facts_to_agent");
-  }
+  //if (!add_fact.call(srvAdd)){
+  //  ROS_ERROR("[mental_state] Failed to call service database/add_facts_to_agent");
+  //}
 
   supervisor_msgs::NewGoal srv_ngoal;
   srv_ngoal.request.goal = "TEST";
 
-  if (new_goal.call(srv_ngoal))
-  {
-    ROS_INFO("Goal CLEAN added");
-  }
-  else
-  {
-    ROS_ERROR("Failed to call service mental_state/new_goal");
-    return 1;
-  }
+  //if (new_goal.call(srv_ngoal))
+  //{
+  //  ROS_INFO("Goal CLEAN added");
+  //}
+  //else
+  //{
+  //  ROS_ERROR("Failed to call service mental_state/new_goal");
+  //  return 1;
+  //}
 
   supervisor_msgs::StartGoal srv_sgoal;
   srv_sgoal.request.goal = "TEST";
 
-  if (start_goal.call(srv_sgoal))
-  {
-    ROS_INFO("Goal CLEAN started");
-  }
-  else
-  {
-    ROS_ERROR("Failed to call service mental_state/start_goal");
-    return 1;
-  }
+  //if (start_goal.call(srv_sgoal))
+  //{
+  //  ROS_INFO("Goal CLEAN started");
+  //}
+  //else
+  //{
+  //  ROS_ERROR("Failed to call service mental_state/start_goal");
+  //  return 1;
+  //}
 
   supervisor_msgs::NewPlan srv_plan;
   supervisor_msgs::Plan plan;
@@ -116,31 +137,31 @@ int main (int argc, char **argv)
   link.following = 1;
   plan.links.push_back(link);
   srv_plan.request.plan = plan;
-  if (new_plan.call(srv_plan))
-  {
-    ROS_INFO("Plan started");
-  }
-  else
-  {
-    ROS_ERROR("Failed to call service mental_state/new_plan");
-    return 1;
-  }
+  //if (new_plan.call(srv_plan))
+  //{
+  //  ROS_INFO("Plan started");
+  //}
+  //else
+  //{
+  //  ROS_ERROR("Failed to call service mental_state/new_plan");
+  //  return 1;
+  //}
 
 
  supervisor_msgs::SharePlan srv_splan;
 
-  if (share_plan.call(srv_splan))
-  {
-    ROS_INFO("Plan Shared");
-  }
-  else
-  {
-    ROS_ERROR("Failed to call service mental_state/share_plan");
-    return 1;
-  }
+  //if (share_plan.call(srv_splan))
+  //{
+   // ROS_INFO("Plan Shared");
+  //}
+  //else
+  //{
+  //  ROS_ERROR("Failed to call service mental_state/share_plan");
+  //  return 1;
+  //}
 
 
-   ros::Duration(2).sleep();
+   //ros::Duration(2).sleep();
 
 
  supervisor_msgs::ActionState srv_astate;
