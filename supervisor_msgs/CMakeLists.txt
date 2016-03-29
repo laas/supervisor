@@ -30,22 +30,10 @@ add_message_files(
 # Generate services in the 'srv' folder
 add_service_files(
   FILES
-  NewPlan.srv
   NewGoal.srv
-  StartGoal.srv
-  AbortPlan.srv
-  SharePlan.srv
-  ActionState.srv
-  AbortGoal.srv
   InfoGiven.srv
   HumanActionSimu.srv
-  GetActionTodo.srv
-  GetAllAgents.srv
-  GetActionState.srv
   SolveDivergentBelief.srv
-  FactsAreIn.srv
-  GetFactsAgent.srv
-  GetActions.srv
   EndPlan.srv
   ChangeState.srv
   GetInfo.srv

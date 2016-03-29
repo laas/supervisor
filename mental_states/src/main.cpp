@@ -489,23 +489,8 @@ int main (int argc, char **argv)
   ROS_INFO("[mental_state] Init mental_state");
 
   //Services declarations
-  /*ros::ServiceServer service_new_goal = node.advertiseService("mental_state/new_goal", newGoal); //to add a new goal (state PENDING)
-  ros::ServiceServer service_start_goal = node.advertiseService("mental_state/start_goal", startGoal); //to start a goal
-  ros::ServiceServer service_new_plan = node.advertiseService("mental_state/new_plan", newPlan); //to add a new plan (in PROGRESS for the robot and UNKNOWN for others)
-  ros::ServiceServer service_abort_plan = node.advertiseService("mental_state/abort_plan", abortPlan); //abort the current plan for an agent
-  ros::ServiceServer service_share_plan = node.advertiseService("mental_state/share_plan", sharePlan); //the robot shares the current plan
-  ros::ServiceServer service_action_state = node.advertiseService("mental_state/action_state", actionState); //to change the state of an action
-  ros::ServiceServer service_abort_goal = node.advertiseService("mental_state/abort_goal", abortGoal); //abort a goal for an agent*/
   ros::ServiceServer service_change_state = node.advertiseService("mental_state/change_state", changeState); //change the state of a goal/plan/action
-
-  /*ros::ServiceServer service_get_action_todo = node.advertiseService("mental_state/get_action_todo", getActionTodo); //get the action an agent thinks it has to do
-  ros::ServiceServer service_get_all_agents = node.advertiseService("mental_state/get_all_agents", getAllAgents); //return all agents name
-  ros::ServiceServer service_get_action_state = node.advertiseService("mental_state/get_action_state", getActionState); //return the state of an action in the knowledge
-  ros::ServiceServer service_get_facts_agents = node.advertiseService("mental_state/get_facts_agents", getFactsAgents); //return all knowledge of an agent
-  ros::ServiceServer service_get_actions = node.advertiseService("mental_state/get_actions", getActions); //return all actions
-  ros::ServiceServer service_facts_are_in = node.advertiseService("mental_state/facts_are_in", factsAreIn); //say if a set of fact is in the mental state of an agent*/
   ros::ServiceServer service_get_info = node.advertiseService("mental_state/get_info", getInfo); //get diverse information
-
   ros::ServiceServer service_info_given = node.advertiseService("mental_state/info_given", infoGiven); //when an agent informs an other agent about something
   ros::ServiceServer service_solve_divergent_belief = node.advertiseService("mental_state/solve_divergent_belief", solveDivergentBelief); //solve a divergent belief concerning an action
 

@@ -1,5 +1,0 @@
-string agent
-string actor
----
-Action action
-string state
