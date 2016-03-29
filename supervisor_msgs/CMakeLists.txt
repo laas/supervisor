@@ -47,6 +47,8 @@ add_service_files(
   GetFactsAgent.srv
   GetActions.srv
   EndPlan.srv
+  ChangeState.srv
+  GetInfo.srv
 )
 
  add_action_files(

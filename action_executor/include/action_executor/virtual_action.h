@@ -5,7 +5,7 @@
 #include "action_executor/connector.h"
 
 #include <actionlib/server/simple_action_server.h>
-#include "supervisor_msgs/FactsAreIn.h"
+#include "supervisor_msgs/GetInfo.h"
 #include "toaster_msgs/Fact.h"
 #include "toaster_msgs/PutInHand.h"
 #include "toaster_msgs/RemoveFromHand.h"

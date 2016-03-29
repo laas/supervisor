@@ -24,17 +24,19 @@ When a goal is over, look if there is another goal to execute
 void GoalManager::chooseGoal(){
 
    ros::NodeHandle node;
-   ros::ServiceClient client = node.serviceClient<supervisor_msgs::NewGoal>("mental_state/start_goal");
+   ros::ServiceClient client = node.serviceClient<supervisor_msgs::ChangeState>("mental_state/change_state");
 
    if(currentGoal_ != "NONE" && !hasPlan_){
       executeGoal(currentGoal_);
    }else if(currentGoal_ == "NONE" && waitingGoals_.size() >0){//there at least one waiting goal and no current goal
       string newGoal = waitingGoals_.front();
       waitingGoals_.pop();
-      supervisor_msgs::NewGoal srv;
+      supervisor_msgs::ChangeState srv;
+      srv.request.type = "goal";
+      srv.request.state = "PROGRESS";
 	   srv.request.goal = newGoal;
 	   if (!client.call(srv)){
-	   ROS_ERROR("[goal_manager] Failed to call service mental_state/start_goal");
+       ROS_ERROR("[goal_manager] Failed to call service mental_state/change_state");
 	   }
 	   //And we execute it
       currentGoal_ = newGoal;
@@ -50,13 +52,9 @@ void GoalManager::executeGoal(string goal){
 
    ros::NodeHandle node;
    ros::ServiceClient client = node.serviceClient<hatp_msgs::PlanningRequest>("Planner");
-   ros::ServiceClient clientNP = node.serviceClient<supervisor_msgs::NewPlan>("mental_state/new_plan");
-   ros::ServiceClient clientSP = node.serviceClient<supervisor_msgs::SharePlan>("mental_state/share_plan");
-   ros::ServiceClient clientAG = node.serviceClient<supervisor_msgs::AbortGoal>("mental_state/abort_goal");
+   ros::ServiceClient clientCS = node.serviceClient<supervisor_msgs::ChangeState>("mental_state/change_state");
 	hatp_msgs::PlanningRequest service;
-	supervisor_msgs::NewPlan serviceNP;
-	supervisor_msgs::SharePlan serviceSP;
-	supervisor_msgs::AbortGoal serviceAG;
+    supervisor_msgs::ChangeState serviceCS;
 	
 	//We look for the HATP method name to call
 	string methodTopic = "HATP_domains/";
@@ -82,23 +80,29 @@ void GoalManager::executeGoal(string goal){
 	      hasPlan_ = true;
 	      supervisor_msgs::Plan newPlan = convertPlan(service.response.solution, goal);
 	      //we send him to the mental state manager
-	      serviceNP.request.plan = newPlan;
-	      if(!clientNP.call(serviceNP)){
-		      ROS_ERROR("Failed to call service mental_state/new_plan");
+          serviceCS.request.type = "plan";
+          serviceCS.request.state = "PROGRESS";
+          serviceCS.request.plan = newPlan;
+          if(!clientCS.call(serviceCS)){
+              ROS_ERROR("Failed to call service mental_state/change_state");
 	      }
 	      //For now, we consider the plan automatically shared
-	      if(!clientSP.call(serviceSP)){
-		      ROS_ERROR("Failed to call service mental_state/share_plan");
+          serviceCS.request.type = "plan";
+          serviceCS.request.state = "SHARE";
+          if(!clientCS.call(serviceCS)){
+              ROS_ERROR("Failed to call service mental_state/change_state");
 	      }
 	   }else{//the robot aborts the goal
 	      string robotName;
-         node.getParam("/robot/name", robotName);
-	      serviceAG.request.agent = robotName;
-	      serviceAG.request.goal = goal;
-	      if(!clientAG.call(serviceAG)){
-		      ROS_ERROR("Failed to call service mental_state/abort_goal");
-	      }
-	      currentGoal_ = "NONE";
+          node.getParam("/robot/name", robotName);
+          serviceCS.request.type = "goal";
+          serviceCS.request.state = "ABORT";
+          serviceCS.request.agent = robotName;
+          serviceCS.request.goal = goal;
+          currentGoal_ = "NONE";
+          if(!clientCS.call(serviceCS)){
+              ROS_ERROR("Failed to call service mental_state/change_state");
+          }
 	  }
 	}else{
 		ROS_ERROR("Failed to call service 'Planner'");

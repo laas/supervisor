@@ -15,7 +15,7 @@ void HumanMonitor::humanPick(string agent, string object){
 	ROS_INFO("[human_monitor] %s has picked %s", agent.c_str(), object.c_str());
 	
 	ros::NodeHandle node;
-	ros::ServiceClient action_state = node.serviceClient<supervisor_msgs::ActionState>("mental_state/action_state");
+    ros::ServiceClient action_state = node.serviceClient<supervisor_msgs::ChangeState>("mental_state/change_state");
 	ros::ServiceClient put_in_hand = node.serviceClient<toaster_msgs::PutInHand>("pdg/put_in_hand");
 
 	//put the object in the hand of the agent
@@ -36,11 +36,12 @@ void HumanMonitor::humanPick(string agent, string object){
 	action.actors.push_back(agent);
 
 	//send the action to the mental state manager
-	supervisor_msgs::ActionState srv_astate;
- 	srv_astate.request.action = action;
+    supervisor_msgs::ChangeState srv_astate;
+    srv_astate.request.type = "action";
+    srv_astate.request.action = action;
  	srv_astate.request.state = "DONE";
   	if (!action_state.call(srv_astate)){
-   	 ROS_ERROR("Failed to call service mental_state/action_state");
+     ROS_ERROR("Failed to call service mental_state/change_state");
  	}
 
 }
@@ -56,7 +57,7 @@ void HumanMonitor::humanPlace(string agent, string object, string support){
 	ROS_INFO("[human_monitor] %s has placed %s on %s", agent.c_str(), object.c_str(), support.c_str());
 	
 	ros::NodeHandle node;
-	ros::ServiceClient action_state = node.serviceClient<supervisor_msgs::ActionState>("mental_state/action_state");
+    ros::ServiceClient action_state = node.serviceClient<supervisor_msgs::ChangeState>("mental_state/change_state");
 	ros::ServiceClient remove_from_hand = node.serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
 	ros::ServiceClient set_entity_pose = node.serviceClient<toaster_msgs::SetEntityPose>("toaster_simu/set_entity_pose");
 
@@ -114,11 +115,12 @@ void HumanMonitor::humanPlace(string agent, string object, string support){
 	action.actors.push_back(agent);
 
 	//send the action to the mental state manager
-	supervisor_msgs::ActionState srv_astate;
+    supervisor_msgs::ChangeState srv_astate;
+    srv_astate.request.type = "action";
  	srv_astate.request.action = action;
  	srv_astate.request.state = "DONE";
   	if (!action_state.call(srv_astate)){
-   	 ROS_ERROR("Failed to call service mental_state/action_state");
+     ROS_ERROR("Failed to call service mental_state/change_state");
  	}
 
 	//we also consider a pick and place action
@@ -132,7 +134,7 @@ void HumanMonitor::humanPlace(string agent, string object, string support){
  	srv_astate.request.action = action2;
  	srv_astate.request.state = "DONE";
   	if (!action_state.call(srv_astate)){
-   	 ROS_ERROR("Failed to call service mental_state/action_state");
+     ROS_ERROR("Failed to call service mental_state/change_state");
  	}
 }
 
@@ -147,7 +149,7 @@ void HumanMonitor::humanDrop(string agent, string object, string container){
 	ROS_INFO("[human_monitor] %s has droped %s in %s", agent.c_str(), object.c_str(), container.c_str());
 	
 	ros::NodeHandle node;
-	ros::ServiceClient action_state = node.serviceClient<supervisor_msgs::ActionState>("mental_state/action_state");
+    ros::ServiceClient action_state = node.serviceClient<supervisor_msgs::ChangeState>("mental_state/change_state");
 	ros::ServiceClient remove_from_hand = node.serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
 	ros::ServiceClient set_entity_pose = node.serviceClient<toaster_msgs::SetEntityPose>("toaster_simu/set_entity_pose");
 
@@ -196,11 +198,12 @@ void HumanMonitor::humanDrop(string agent, string object, string container){
 	action.actors.push_back(agent);
 
 	//send the action to the mental state manager
-	supervisor_msgs::ActionState srv_astate;
+    supervisor_msgs::ChangeState srv_astate;
+    srv_astate.request.type = "action";
  	srv_astate.request.action = action;
  	srv_astate.request.state = "DONE";
   	if (!action_state.call(srv_astate)){
-   	 ROS_ERROR("Failed to call service mental_state/action_state");
+     ROS_ERROR("Failed to call service mental_state/change_state");
  	}
 
 	//we also consider a pick and drop action
@@ -214,7 +217,7 @@ void HumanMonitor::humanDrop(string agent, string object, string container){
  	srv_astate.request.action = action2;
  	srv_astate.request.state = "DONE";
   	if (!action_state.call(srv_astate)){
-   	 ROS_ERROR("Failed to call service mental_state/action_state");
+     ROS_ERROR("Failed to call service mental_state/change_state");
  	}
 }
 

@@ -20,10 +20,12 @@
 #include "supervisor_msgs/AbortPlan.h"
 #include "supervisor_msgs/SharePlan.h"
 #include "supervisor_msgs/ActionState.h"
+#include "supervisor_msgs/ChangeState.h"
 #include "supervisor_msgs/InfoGiven.h"
 #include "supervisor_msgs/GetActionTodo.h"
 #include "supervisor_msgs/GetAllAgents.h"
 #include "supervisor_msgs/GetActionState.h"
+#include "supervisor_msgs/GetInfo.h"
 #include "supervisor_msgs/SolveDivergentBelief.h"
 #include "supervisor_msgs/FactsAreIn.h"
 #include "supervisor_msgs/GetFactsAgent.h"
@@ -43,9 +45,7 @@ class MSManager{
 public:
 	MSManager();
 	vector<supervisor_msgs::ActionMS> getActionList();
-	void update(string agent);
-    void updateKnowledge();
-    void initKnowledge(vector<string> agents);
+    void update(string agent);
 	void initGoals();
 	void initHighLevelActions();
 	supervisor_msgs::GoalMS* getGoalByName(string name);

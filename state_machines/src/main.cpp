@@ -9,7 +9,7 @@ The state machines manager keeps trace of the activity of each agent.
 
 #include <state_machines/robot_sm.h>
 #include <state_machines/human_sm.h>
-#include "supervisor_msgs/GetAllAgents.h"
+#include "supervisor_msgs/GetInfo.h"
 
 string robotState;
 
@@ -80,9 +80,10 @@ int main (int argc, char **argv)
   vector<string> allAgents;
   string robotName;
   node.getParam("/robot/name", robotName);
-  ros::service::waitForService("mental_state/get_all_agents", -1);
-  ros::ServiceClient client = node.serviceClient<supervisor_msgs::GetAllAgents>("mental_state/get_all_agents");
-  supervisor_msgs::GetAllAgents srv;
+  ros::service::waitForService("mental_state/get_info", -1);
+  ros::ServiceClient client = node.serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
+  supervisor_msgs::GetInfo srv;
+  srv.request.info = "AGENTS";
   if (client.call(srv)){
 	 allAgents = srv.response.agents;
   }else{

@@ -133,8 +133,9 @@ void MainWindow::on_pushButtonAskAction_clicked()
     string position = ui.comboBoxActionPosition->currentText().toStdString();
 
     //creating the action
-    ros::ServiceClient action_state = node_.serviceClient<supervisor_msgs::ActionState>("mental_state/action_state");
-    supervisor_msgs::ActionState srv_astate;
+    ros::ServiceClient action_state = node_.serviceClient<supervisor_msgs::ChangeState>("mental_state/change_state");
+    supervisor_msgs::ChangeState srv_astate;
+    srv_astate.request.type = "action";
     srv_astate.request.action.name = actionName;
     srv_astate.request.action.id = -1;
     srv_astate.request.action.actors.push_back(robotName_);
@@ -158,7 +159,7 @@ void MainWindow::on_pushButtonAskAction_clicked()
 
     //Sending the action
     if (!action_state.call(srv_astate)) {
-       ROS_ERROR("Failed to call service mental_state/action_state");
+       ROS_ERROR("Failed to call service mental_state/change_state");
        return;
     }
 }
@@ -226,13 +227,14 @@ void MainWindow::on_pushButtonExecuteGoal_clicked()
 
 void MainWindow::on_pushButtonPrintKnowledge_clicked()
 {
-    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetFactsAgent>("mental_state/get_facts_agents");
+    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
 
     //get the agent name
     string agent = ui.comboBoxAgentKnowName->currentText().toStdString();
 
     //get all the facts for the agent
-    supervisor_msgs::GetFactsAgent srv;
+    supervisor_msgs::GetInfo srv;
+    srv.request.info = "ALL_FACTS";
     srv.request.agent = agent;
     if (client.call(srv)) {
         //We sort the facts by type
@@ -268,14 +270,15 @@ void MainWindow::on_pushButtonPrintKnowledge_clicked()
         ui.textBrowserKnowledge->setText(QString::fromStdString(toPrint));
 
     }else{
-       ROS_ERROR("Failed to call service mental_state/get_facts_agents");
+       ROS_ERROR("Failed to call service mental_state/get_info");
     }
 
 }
 void MainWindow::on_pushButtonSeeActions_clicked()
 {
-    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetActions>("mental_state/get_actions");
-    supervisor_msgs::GetActions srv;
+    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
+    supervisor_msgs::GetInfo srv;
+    srv.request.info = "ACTIONS";
     ui.textBrowserActions->setText("");
     if (client.call(srv)) {
         string toPrint;
@@ -292,6 +295,6 @@ void MainWindow::on_pushButtonSeeActions_clicked()
         }
         ui.textBrowserActions->setText(QString::fromStdString(toPrint));
     }else{
-        ROS_ERROR("Failed to call service mental_state/get_actions");
+        ROS_ERROR("Failed to call service mental_state/get_info");
    }
 }

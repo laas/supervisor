@@ -31,8 +31,9 @@ State where the robot is IDLE
 string RobotSM::idleState(){
 
 	//We look if the robot has an action to do
-  	ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetActionTodo>("mental_state/get_action_todo");
-	supervisor_msgs::GetActionTodo srv;
+    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
+    supervisor_msgs::GetInfo srv;
+    srv.request.info ="ACTIONS_TODO";
 	srv.request.agent = robotName_;
 	srv.request.actor = robotName_;
 	if (client.call(srv)){
@@ -48,7 +49,7 @@ string RobotSM::idleState(){
 		return "WAITING";
 	 }
 	}else{
-	 ROS_ERROR("[state_machines] Failed to call service mental_state/get_action_todo");
+     ROS_ERROR("[state_machines] Failed to call service mental_state/get_info");
 	}
 
 	return "IDLE";
@@ -74,8 +75,9 @@ State where the robot is WAITING
 string RobotSM::waitingState(){
 
 	//We look if the robot has an action to do
-  	ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetActionTodo>("mental_state/get_action_todo");
-	supervisor_msgs::GetActionTodo srv;
+    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
+    supervisor_msgs::GetInfo srv;
+    srv.request.info ="ACTIONS_TODO";
 	srv.request.agent = robotName_;
 	srv.request.actor = robotName_;
 	if (client.call(srv)){
@@ -93,7 +95,7 @@ string RobotSM::waitingState(){
 		return "IDLE";
 	  }
 	}else{
-	 ROS_ERROR("[state_machines] Failed to call service mental_state/get_action_todo");
+     ROS_ERROR("[state_machines] Failed to call service mental_state/get_info");
 	}
 	
 	return "WAITING";

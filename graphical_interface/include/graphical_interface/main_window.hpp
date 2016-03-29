@@ -19,11 +19,10 @@
 #include "supervisor_msgs/ActionExecutorAction.h"
 #include "supervisor_msgs/ActionExecutorActionResult.h"
 #include "supervisor_msgs/ActionExecutorActionFeedback.h"
-#include "supervisor_msgs/ActionState.h"
+#include "supervisor_msgs/ChangeState.h"
 #include "supervisor_msgs/HumanActionSimu.h"
+#include "supervisor_msgs/GetInfo.h"
 #include "supervisor_msgs/NewGoal.h"
-#include "supervisor_msgs/GetFactsAgent.h"
-#include "supervisor_msgs/GetActions.h"
 #include "toaster_msgs/Fact.h"
 #include "supervisor_msgs/ActionMS.h"
 

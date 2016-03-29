@@ -85,12 +85,12 @@ Function which check if the preconditions are in the knowledge of the robot
 */
 bool VirtualAction::ArePreconditionsChecked(vector<toaster_msgs::Fact> precs){
 
-   ros::ServiceClient client = node_.serviceClient<supervisor_msgs::FactsAreIn>("mental_state/facts_are_in");
-   supervisor_msgs::FactsAreIn srv;
+   ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
+   supervisor_msgs::GetInfo srv;
 	srv.request.agent = robotName_;
 	srv.request.facts = precs;
 	if (client.call(srv)){
-		return srv.response.result;
+        return srv.response.answer;
 	}else{
 	   ROS_ERROR("[action_executor] Failed to call service mental_states/facts_are_in");
 	}

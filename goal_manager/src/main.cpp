@@ -17,13 +17,15 @@ Service call to execute a new goal
 bool newGoal(supervisor_msgs::NewGoal::Request  &req, supervisor_msgs::NewGoal::Response &res){
 	
 	ros::NodeHandle node;
-   ros::ServiceClient client = node.serviceClient<supervisor_msgs::NewGoal>("mental_state/new_goal");
+   ros::ServiceClient client = node.serviceClient<supervisor_msgs::ChangeState>("mental_state/change_state");
    
 	//We say to the mental state manager that we have a new goal
-   supervisor_msgs::NewGoal srv;
+   supervisor_msgs::ChangeState srv;
+   srv.request.type = "goal";
+   srv.request.state = "NEW";
 	srv.request.goal = req.goal;
 	if (!client.call(srv)){
-	 ROS_ERROR("[goal_manager] Failed to call service mental_state/new_goal");
+     ROS_ERROR("[goal_manager] Failed to call service mental_state/change_state");
 	}
 		
 	//Then we manage the goal

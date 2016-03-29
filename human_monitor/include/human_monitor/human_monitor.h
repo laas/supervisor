@@ -10,7 +10,7 @@
 
 #include "supervisor_msgs/Action.h"
 #include "supervisor_msgs/HumanActionSimu.h"
-#include "supervisor_msgs/ActionState.h"
+#include "supervisor_msgs/ChangeState.h"
 #include "toaster_msgs/FactList.h"
 #include "toaster_msgs/PutInHand.h"
 #include "toaster_msgs/RemoveFromHand.h"

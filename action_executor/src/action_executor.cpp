@@ -27,8 +27,9 @@ action_server_(node_, name,
 
 
 void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& goal) {
-  	ros::ServiceClient client = node_.serviceClient<supervisor_msgs::ActionState>("mental_state/action_state");
-	supervisor_msgs::ActionState srv;
+    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::ChangeState>("mental_state/change_state");
+    supervisor_msgs::ChangeState srv;
+    srv.request.type= "action";
 	srv.request.action = goal->action;
 
 	//Getting action informations

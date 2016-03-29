@@ -1,0 +1,12 @@
+string info
+string agent
+Action action
+string actor
+toaster_msgs/Fact[] facts
+---
+ActionMS[] actions
+string state
+Action action
+string[] agents
+toaster_msgs/Fact[] facts
+bool answer

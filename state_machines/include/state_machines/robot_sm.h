@@ -11,7 +11,7 @@
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/client/terminal_state.h>
 
-#include "supervisor_msgs/GetActionTodo.h"
+#include "supervisor_msgs/GetInfo.h"
 #include "supervisor_msgs/Action.h"
 #include "supervisor_msgs/ActionExecutorAction.h"
 #include "supervisor_msgs/ActionExecutorActionResult.h"
