@@ -7,7 +7,7 @@ Class allowing the execution of a pick and place action
 
 #include "action_executor/Actions/pickandplace.h"
 
-PickAndPlace::PickAndPlace(supervisor_msgs::Action action) : VirtualAction(){
+PickAndPlace::PickAndPlace(supervisor_msgs::Action action, Connector* connector) : VirtualAction(connector){
 	if(action.parameters.size() == 2){
 		object_ = action.parameters[0];
 		support_ = action.parameters[1];
@@ -49,7 +49,7 @@ bool PickAndPlace::plan(){
 	return true;
 }
 
-bool PickAndPlace::exec(){
+bool PickAndPlace::exec(Server* action_server){
 	return true;
 }
 

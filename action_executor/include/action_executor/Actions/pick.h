@@ -16,15 +16,14 @@ using namespace std;
 
 class Pick: public VirtualAction{
 public:
-	Pick(supervisor_msgs::Action action);
+	Pick(supervisor_msgs::Action action, Connector* connector);
 	virtual bool preconditions();
 	virtual bool plan();
-	virtual bool exec();
+    virtual bool exec(Server* action_server);
 	virtual bool post();
 protected:
 
 private:
-	string object_;
 
 
 };

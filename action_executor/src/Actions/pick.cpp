@@ -7,8 +7,8 @@ Class allowing the execution of a pick action
 
 #include "action_executor/Actions/pick.h"
 
-Pick::Pick(supervisor_msgs::Action action) : VirtualAction(){
-	if(action.parameters.size() != 0){
+Pick::Pick(supervisor_msgs::Action action, Connector* connector) : VirtualAction(connector){
+	if(action.parameters.size() == 1){
 		object_ = action.parameters[0];
 	}else{
 		ROS_WARN("[action_executor] Missing parameter: object to pick");
@@ -40,18 +40,39 @@ bool Pick::preconditions(){
 }
 
 bool Pick::plan(){
+
+   vector<gtp_ros_msg::Ag> agents;
+   gtp_ros_msg::Ag agent;
+   agent.actionKey = "mainAgent";
+   agent.agentName = "PR2_ROBOT";
+   agents.push_back(agent);
+   vector<gtp_ros_msg::Obj> objects;
+   gtp_ros_msg::Obj object;
+   object.actionKey = "mainObject";
+   object.objectName = object_;
+   objects.push_back(object);
+   vector<gtp_ros_msg::Points> points;
+   vector<gtp_ros_msg::Data> datas;
+   
+   actionId_ = planGTP("pick", agents, objects, datas, points);
+   
+   if(actionId_ == -1){
+	   return false;
+	}else{
+	   return true;
+	}
+
 	return true;
 }
 
-bool Pick::exec(){
+bool Pick::exec(Server* action_server){
+
+   execAction(actionId_, true, action_server);
+   
 	return true;
 }
 
 bool Pick::post(){
-
-   //TODO: to remove when real execution
-   string hand = "right";
-   PutInHand(object_, hand);
 
 	return true;
 }

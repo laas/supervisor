@@ -61,7 +61,7 @@ bool MoveTo::plan(){
 	}
 }
 
-bool MoveTo::exec(){
+bool MoveTo::exec(Server* action_server){
 
     int armId;
     if(arm_ == "right"){
@@ -70,9 +70,8 @@ bool MoveTo::exec(){
         armId = 1;
     }
 
-    executeTrajectory(actionId_, 0, armId);
+    return executeTrajectory(actionId_, 0, armId, action_server);
 
-	return true;
 }
 
 bool MoveTo::post(){

@@ -16,15 +16,14 @@ using namespace std;
 
 class Drop: public VirtualAction{
 public:
-	Drop(supervisor_msgs::Action action);
+	Drop(supervisor_msgs::Action action, Connector* connector);
 	virtual bool preconditions();
 	virtual bool plan();
-	virtual bool exec();
+    virtual bool exec(Server* action_server);
 	virtual bool post();
 protected:
 
 private:
-	string object_;
 	string container_;
 
 

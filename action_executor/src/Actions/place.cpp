@@ -7,7 +7,7 @@ Class allowing the execution of a place action
 
 #include "action_executor/Actions/place.h"
 
-Place::Place(supervisor_msgs::Action action) : VirtualAction(){
+Place::Place(supervisor_msgs::Action action, Connector* connector) : VirtualAction(connector){
 	if(action.parameters.size() == 2){
 		object_ = action.parameters[0];
 		support_ = action.parameters[1];
@@ -51,15 +51,13 @@ bool Place::plan(){
 	return true;
 }
 
-bool Place::exec(){
+bool Place::exec(Server* action_server){
 	return true;
 }
 
 bool Place::post(){
 
-   //TODO: to remove when real execution
-   RemoveFromHand(object_);
-   PutInSupport(object_, support_);
+   //PutInSupport(object_, support_);
 
 	return true;
 }

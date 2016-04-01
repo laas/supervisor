@@ -7,7 +7,7 @@ Class allowing the execution of a place action
 
 #include "action_executor/Actions/pickanddrop.h"
 
-PickAndDrop::PickAndDrop(supervisor_msgs::Action action) : VirtualAction(){
+PickAndDrop::PickAndDrop(supervisor_msgs::Action action, Connector* connector) : VirtualAction(connector){
 	if(action.parameters.size() == 2){
 		object_ = action.parameters[0];
 		container_ = action.parameters[1];
@@ -49,7 +49,7 @@ bool PickAndDrop::plan(){
 	return true;
 }
 
-bool PickAndDrop::exec(){
+bool PickAndDrop::exec(Server* action_server){
 	return true;
 }
 

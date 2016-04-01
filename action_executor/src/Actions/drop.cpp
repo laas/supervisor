@@ -7,7 +7,7 @@ Class allowing the execution of a place action
 
 #include "action_executor/Actions/drop.h"
 
-Drop::Drop(supervisor_msgs::Action action) : VirtualAction(){
+Drop::Drop(supervisor_msgs::Action action, Connector* connector) : VirtualAction(connector){
 	if(action.parameters.size() == 2){
 		object_ = action.parameters[0];
 		container_ = action.parameters[1];
@@ -49,7 +49,7 @@ bool Drop::plan(){
 	return true;
 }
 
-bool Drop::exec(){
+bool Drop::exec(Server* action_server){
 	return true;
 }
 
