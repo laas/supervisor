@@ -6,7 +6,6 @@ Main class of the mental_state manager.
 The mental state manager estimates and maintains the mental states of each agent concerning goals, plans and actions.
 
 TODO: - notion of agent present to give info (interaction Area?)
-      - similar actions: ignore DONE and FAILED actions in actionState: changeActionStateFunction?
       - do not send to times the same info to give (variable waiting info to give)
 
 **/
@@ -164,6 +163,11 @@ bool actionState(supervisor_msgs::Action action, string state){
     supervisor_msgs::ActionMS actionMS;
     if(actionFind.first){
         actionMS = actionFind.second;
+        //if this action is already consider DONE or FAILED, so it is another new action
+        string actionState = ms->db_.getActionState(robotName, actionMS);
+        if(actionState == "DONE" || actionState == "FAILED"){
+            actionMS = ms->createActionFromHighLevel(action);
+        }
     }else {
         actionMS = ms->createActionFromHighLevel(action);
     }
