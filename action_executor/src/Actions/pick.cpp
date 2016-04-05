@@ -73,5 +73,7 @@ bool Pick::exec(Server* action_server){
 
 bool Pick::post(){
 
+    //TODO: check gripper position (completly close or not)
+
 	return true;
 }

@@ -89,6 +89,7 @@ bool PickAndDrop::exec(Server* action_server){
     bool firstTask = execAction(actionId_, true, action_server);
 
     if(firstTask){
+        //TODO: check gripper position (completly close or not)
         return execAction(nextActionId_, true, action_server);
     }else{
         return false;
