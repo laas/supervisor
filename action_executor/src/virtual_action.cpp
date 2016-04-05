@@ -102,11 +102,11 @@ Function which puts an object in the hand of the robot
 	@object: the object to put
 	@hand: the hand to attach to (right or left)
 */
-void VirtualAction::PutInHand(string object, string hand){
+void VirtualAction::PutInHand(string object, string hand, int gtpId){
 
    ros::ServiceClient client = node_.serviceClient<toaster_msgs::PutInHand>("pdg/put_in_hand");
 
-	//put the object in the hand of the agent
+    //put the object in the hand of the robot
 	string robotHand;
 	string handTopic = "/robot/hands/";
 	handTopic = handTopic + hand;
@@ -120,6 +120,8 @@ void VirtualAction::PutInHand(string object, string hand){
    if (!client.call(srv)){
    	 ROS_ERROR("[action_executor] Failed to call service pdg/put_in_hand");
  	}
+   //remember the gtp id of the grasp
+   connector_->idGrasp_ = gtpId;
    
 }
 
@@ -131,7 +133,7 @@ void VirtualAction::RemoveFromHand(string object){
 
    ros::ServiceClient client = node_.serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
 
-	//remove the object from the hand of the agent
+    //remove the object from the hand of the robot
 	toaster_msgs::RemoveFromHand srv;
    srv.request.objectId = object;
    if (!client.call(srv)){
@@ -142,11 +144,11 @@ void VirtualAction::RemoveFromHand(string object){
 
 
 /*
-Function which puts an object in the hand of the robot
+Function which puts an object on a support
 	@object: the object to put
-	@hand: the hand to attach to (right or left)
+    @support
 */
-void VirtualAction::PutInSupport(string object, string support){
+void VirtualAction::PutOnSupport(string object, string support){
 
    ros::ServiceClient client = node_.serviceClient<toaster_msgs::SetEntityPose>("toaster_simu/set_entity_pose");
 
@@ -187,6 +189,46 @@ void VirtualAction::PutInSupport(string object, string support){
        ROS_WARN("[action_executor] Failed to read %s pose from toaster", support.c_str());
    }
    
+}
+
+/*
+Function which puts an object in a container
+    @object: the object to put
+    @container
+*/
+void VirtualAction::PutInContainer(string object, string container){
+
+   ros::ServiceClient client = node_.serviceClient<toaster_msgs::SetEntityPose>("toaster_simu/set_entity_pose");
+
+    toaster_msgs::ObjectList objectList;
+    double x,y,z;
+   try{
+       objectList  = *(ros::topic::waitForMessage<toaster_msgs::ObjectList>("pdg/objectList",ros::Duration(1)));
+       for(vector<toaster_msgs::Object>::iterator it = objectList.objectList.begin(); it != objectList.objectList.end(); it++){
+         if(it->meEntity.id == container){
+            x = it->meEntity.positionX;
+            y = it->meEntity.positionY;
+            z = it->meEntity.positionZ;
+            break;
+         }
+       }
+       toaster_msgs::SetEntityPose srv;
+       srv.request.id = object;
+       srv.request.type = "object";
+       srv.request.x = x;
+       srv.request.y = y;
+       srv.request.z = z;
+       srv.request.roll = 0.0;
+       srv.request.pitch = 0.0;
+       srv.request.yaw = 0.0;
+       if (!client.call(srv)){
+         ROS_ERROR("Failed to call service toaster_simu/set_entity_pose");
+         }
+   }
+   catch(const std::exception & e){
+       ROS_WARN("[action_executor] Failed to read %s pose from toaster", container.c_str());
+   }
+
 }
 
 /*
@@ -280,7 +322,7 @@ bool VirtualAction::execAction(int actionId, bool shouldOpen, Server* action_ser
                 }else{
                     hand = "left";
                 }
-                PutInHand(object_, hand);
+                PutInHand(object_, hand, actionId);
             }else if(it->subTrajName == "release"){
                 closeGripper(it->armId, action_server);
                 RemoveFromHand(object_);

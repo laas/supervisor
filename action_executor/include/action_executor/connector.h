@@ -38,6 +38,7 @@ public:
 
 	
     int previousId_;
+    int idGrasp_;
     actionlib::SimpleActionClient<gtp_ros_msg::requestAction>* acGTP_;
     actionlib::SimpleActionClient<pr2motion::InitAction>* PR2motion_init_;
     actionlib::SimpleActionClient<pr2motion::Torso_MoveAction>* PR2motion_torso_;
@@ -46,16 +47,12 @@ public:
     actionlib::SimpleActionClient<pr2motion::Gripper_Right_OperateAction>* PR2motion_gripper_right_;
     actionlib::SimpleActionClient<pr2motion::Gripper_Left_OperateAction>* PR2motion_gripper_left_;
    
-    void moveRightArm(const actionlib::SimpleClientGoalState& state, const pr2motion::Arm_Right_MoveResultConstPtr& result);
-    void moveLeftArm(const actionlib::SimpleClientGoalState& state, const pr2motion::Arm_Left_MoveResultConstPtr& result);
-    void moveRightGripper(const actionlib::SimpleClientGoalState& state, const pr2motion::Gripper_Right_OperateResultConstPtr& result);
-    void moveLeftGripper(const actionlib::SimpleClientGoalState& state, const pr2motion::Gripper_Left_OperateResultConstPtr& result);
 protected:
 
 private:
    ros::NodeHandle node_;
    double waitActionServer_;
-    bool simu_;
+   bool simu_;
 
 };
 

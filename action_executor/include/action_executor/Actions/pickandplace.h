@@ -25,6 +25,7 @@ protected:
 
 private:
 	string support_;
+    int nextActionId_;
 
 
 };

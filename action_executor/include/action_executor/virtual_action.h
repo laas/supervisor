@@ -59,9 +59,10 @@ protected:
    bool isSupportObject(string support);
    bool isContainerObject(string container);
    bool ArePreconditionsChecked(vector<toaster_msgs::Fact> precs);
-   void PutInHand(string object, string hand);
+   void PutInHand(string object, string hand, int gtpId);
    void RemoveFromHand(string object);
-   void PutInSupport(string object, string support);
+   void PutOnSupport(string object, string support);
+   void PutInContainer(string object, string container);
    bool updateGTP();
    int  planGTP(string actionName, vector<gtp_ros_msg::Ag> agents, vector<gtp_ros_msg::Obj> objects, vector<gtp_ros_msg::Data> datas, vector<gtp_ros_msg::Points> points);
    bool execAction(int actionId, bool shouldOpen, Server* action_server);

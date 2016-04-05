@@ -11,6 +11,7 @@ Connector::Connector(){
 
    node_.getParam("/simu", simu_);
    previousId_ = -1;
+   idGrasp_ = -1;
    gripperRightOpen_ = false;
    gripperLeftOpen_ = false;
    rightArmMoving_ = false;
@@ -70,39 +71,5 @@ Connector::Connector(){
          ROS_INFO("Action PR2Torso did not finish before the time out.");
       }
    }
-}
-
-/*
-Called once when the goal of the right arm action client completes
-*/
-void Connector::moveRightArm(const actionlib::SimpleClientGoalState& state, const pr2motion::Arm_Right_MoveResultConstPtr& result){
-
-    ROS_INFO("End of right arm movement.");
-        rightArmMoving_ = false;
-}
-
-/*
-Called once when the goal of the left arm action client completes
-*/
-void Connector::moveLeftArm(const actionlib::SimpleClientGoalState& state, const pr2motion::Arm_Left_MoveResultConstPtr& result){
-
-    ROS_INFO("End of left arm movement.");
-        leftArmMoving_ = false;
-}
-
-/*
-Called once when the goal of the right gripper action client completes
-*/
-void Connector::moveRightGripper(const actionlib::SimpleClientGoalState& state, const pr2motion::Gripper_Right_OperateResultConstPtr& result){
-
-        rightGripperMoving_ = false;
-}
-
-/*
-Called once when the goal of the left gripper action client completes
-*/
-void Connector::moveLeftGripper(const actionlib::SimpleClientGoalState& state, const pr2motion::Gripper_Left_OperateResultConstPtr& result){
-
-        leftGripperMoving_ = false;
 }
 

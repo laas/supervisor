@@ -44,7 +44,7 @@ bool Pick::plan(){
    vector<gtp_ros_msg::Ag> agents;
    gtp_ros_msg::Ag agent;
    agent.actionKey = "mainAgent";
-   agent.agentName = "PR2_ROBOT";
+   agent.agentName = robotName_;
    agents.push_back(agent);
    vector<gtp_ros_msg::Obj> objects;
    gtp_ros_msg::Obj object;
@@ -67,9 +67,8 @@ bool Pick::plan(){
 
 bool Pick::exec(Server* action_server){
 
-   execAction(actionId_, true, action_server);
-   
-	return true;
+   return execAction(actionId_, true, action_server);
+
 }
 
 bool Pick::post(){
