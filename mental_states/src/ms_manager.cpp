@@ -144,6 +144,10 @@ Function which checks if an agent can deduce an action from its effects.
 */
 void MSManager::checkEffects(string agent){
 
+    ros::NodeHandle node;
+    string robotName;
+    node.getParam("/robot/name", robotName);
+
 	//We get all the actions either READY, in PROGRESS, NEEDED or ASKED in the agent knowledge.
     vector<int> readyIds = db_.getActionsIdFromState(agent, "READY");
 	vector<supervisor_msgs::ActionMS> readyActions = getActionsFromIds(readyIds);
@@ -168,7 +172,23 @@ void MSManager::checkEffects(string agent){
 		}
 	}
 
-	//TODO: for all in PROGRESS action, if the agent see its actors and there are not perfoming it anymore, the agent considers the action DONE
+    //For all in PROGRESS action, if the agent see its actors and there are not perfoming it anymore (the action is not in PROGRESS for the robot),
+    //the agent considers the action DONE
+    for(vector<supervisor_msgs::ActionMS>::iterator it = progressActions.begin(); it != progressActions.end(); it++){
+        string robotActionState = db_.getActionState(robotName, *it);
+        if(robotActionState != "PROGRESS"){
+            bool seeActors = true;
+            for(vector<string>::iterator ita = it->actors.begin(); ita != it->actors.end(); ita++){
+                if(!db_.isAgentSeeing(agent, *ita)){
+                    seeActors = false;
+                    break;
+                }
+            }
+            if(seeActors){
+                toDone.push_back(*it);
+            }
+        }
+    }
 
     db_.addActionsState(toDone, agent, "DONE");
 }
