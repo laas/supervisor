@@ -39,8 +39,10 @@ public:
 	void removeActionsState(string agent, string state);
 	string getActionState(string agent, supervisor_msgs::ActionMS action);
 	string getGoalState(string agent, supervisor_msgs::GoalMS goal);
+    string getPlanState(string agent, supervisor_msgs::PlanMS plan);
 	vector<string> getAgentGoals(string agent, string state);
 	vector<string> getAgentsWhoSee(string agent);
+    bool isAgentSeeing(string agentTested, string agentToSee);
 	void addFacts(vector<toaster_msgs::Fact> facts, string agent);
     void removeFacts(vector<toaster_msgs::Fact> facts, string agent);
 	void addEffects(vector<toaster_msgs::Fact> facts, string agent);

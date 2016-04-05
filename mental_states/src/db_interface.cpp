@@ -370,6 +370,28 @@ vector<string> DBInterface::getAgentsWhoSee(string agent){
 }
 
 /*
+Function which return true if an agent can see another agent
+    @agentTested: the agent who should see the other
+    @agentToSee: the agent who needs to be seen
+*/
+bool DBInterface::isAgentSeeing(string agentTested, string agentToSee){
+    ros::NodeHandle node;
+    string robotName;
+    node.getParam("/robot/name", robotName);
+    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->first == robotName){
+            for(vector<toaster_msgs::Fact>::iterator itk = it->second.begin(); itk != it->second.end(); itk++){
+                if(itk->property == "isVisibleBy" && itk->subjectId == agentToSee && itk->targetId == agentTested){
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+
+}
+
+/*
 Function which add facts to the knowledge of an agent
 	@facts: the facts to add
 	@agent: the agent name 
@@ -501,3 +523,24 @@ string DBInterface::getGoalState(string agent, supervisor_msgs::GoalMS goal){
     return "NULL";
 }
 
+/*
+Function which return the state of a plan
+    @agent: the agent for who we want the plan state
+    @plan: the plan
+*/
+string DBInterface::getPlanState(string agent, supervisor_msgs::PlanMS plan){
+
+    stringstream toString;
+    toString << plan.id;
+    string planId = toString.str();
+    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->first == agent){
+            for(vector<toaster_msgs::Fact>::iterator itk = it->second.begin(); itk != it->second.end(); itk++){
+                if(itk->property == "planState" && itk->subjectId == planId){
+                    return itk->targetId;
+                }
+            }
+        }
+    }
+    return "NULL";
+}

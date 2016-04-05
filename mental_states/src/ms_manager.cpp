@@ -249,15 +249,17 @@ void MSManager::planFeasibility(string agent){
 
 	ros::NodeHandle node;
   	ros::ServiceClient client = node.serviceClient<supervisor_msgs::EndPlan>("goal_manager/end_plan");
-  	supervisor_msgs::EndPlan srv;
+    supervisor_msgs::EndPlan srv;
+    string robotName;
+    node.getParam("/robot/name", robotName);
 	
 	
 	pair<bool, supervisor_msgs::PlanMS> agentPlan = getAgentPlan(agent);
 	if(agentPlan.first){
 	
-	   //if the goal is achieved, we abort the plan
+       //if the goal is achieved or ABORTED, we abort the plan
        string goalState = db_.getGoalState(agent, agentPlan.second.goal);
-	   if(goalState == "DONE"){
+       if(goalState == "DONE" || goalState == "ABORTED"){
 	      abortPlan(agent);
 	      srv.request.report = true;//as the goal is achieved
 	      if (!client.call(srv)){
@@ -313,7 +315,13 @@ void MSManager::planFeasibility(string agent){
 	         if (!client.call(srv)){
 	            ROS_ERROR("[mental_state] Failed to call service goal_manager/end_plan");
 	         }
-			}
+            }else if(agent != robotName && db_.isAgentSeeing(agent, robotName)){
+                //TODO: to replace by agent in interaction area?
+                string robotPlanState = db_.getPlanState(robotName, agentPlan.second);
+                if(robotPlanState != "PROGRESS"){
+                    //TODO: inform change plan state
+                }
+            }
 		}
 	}
 
@@ -326,23 +334,42 @@ Function which checks if an agent still think that the current goal is still fea
 */
 void MSManager::checkGoals(string agent){
 
+    ros::NodeHandle node;
+    string robotName;
+    node.getParam("/robot/name", robotName);
+
 	//We first get all goals in PROGRESS or PENDING in the knowledge of the agent
     vector<string> pendingGoals = db_.getAgentGoals(agent, "PENDING");
     vector<string> progressGoals = db_.getAgentGoals(agent, "PROGRESS");
 
-	//Then we check if objectives of the goal are in the agent knowledge
+    //Then we check if objectives of the goal are in the agent knowledge (here for PENDING goals)
 	for(vector<string>::iterator it = pendingGoals.begin(); it != pendingGoals.end(); it++){
 		supervisor_msgs::GoalMS* goal = getGoalByName(*it);
         if(db_.factsAreIn(agent, goal->objective)){
             db_.addGoalState(*goal, agent, "DONE");
-		}
+        }else if(agent != robotName && db_.isAgentSeeing(agent, robotName)){
+            //TODO: to replace by agent in interaction area?
+            string robotGoalState = db_.getGoalState(robotName, *goal);
+            if(robotGoalState != "PENDING"){
+                //TODO: inform change goal state
+            }
+        }
 	}
+
+    //We do the same for PROGRESS goals
 	for(vector<string>::iterator it = progressGoals.begin(); it != progressGoals.end(); it++){
 		supervisor_msgs::GoalMS* goal = getGoalByName(*it);
         if(db_.factsAreIn(agent, goal->objective)){
             db_.addGoalState(*goal, agent, "DONE");
 			abortPlan(agent);//for the current goal, we abort the current plan as it is over
 		}
+        else if(agent != robotName && db_.isAgentSeeing(agent, robotName)){
+            //TODO: to replace by agent in interaction area?
+            string robotGoalState = db_.getGoalState(robotName, *goal);
+            if(robotGoalState != "DONE"){
+                //TODO: inform change goal state
+            }
+        }
 	}
 
 

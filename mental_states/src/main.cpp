@@ -5,8 +5,9 @@ Main class of the mental_state manager.
 
 The mental state manager estimates and maintains the mental states of each agent concerning goals, plans and actions.
 
-TODO: - weak achievement goal and plan
+TODO: - notion of agent present to give info (interaction Area?)
       - similar actions: ignore DONE and FAILED actions in actionState: changeActionStateFunction?
+      - do not send to times the same info to give (variable waiting info to give)
 
 **/
 
@@ -510,7 +511,7 @@ int main (int argc, char **argv)
     for(vector<string>::iterator it = allAgents.begin(); it != allAgents.end(); it++){
           g.create_thread(boost::bind(update, ms, *it));
     }
-   g.join_all();
+    g.join_all();
     ros::spinOnce();
     loop_rate.sleep();
   }
