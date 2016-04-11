@@ -189,8 +189,29 @@ void MSManager::checkEffects(string agent){
             }
         }
     }
-
     db_.addActionsState(toDone, agent, "DONE");
+
+    //In a same way, for all in progress action for the robot, if the agent (not robot) can see the actors, it knows the action is in progress
+    vector<int> progressRobotIds = db_.getActionsIdFromState(robotName, "PROGRESS");
+    vector<supervisor_msgs::ActionMS> progressRobotActions = getActionsFromIds(progressRobotIds);
+    vector<supervisor_msgs::ActionMS> toProgress;
+    for(vector<supervisor_msgs::ActionMS>::iterator it = progressRobotActions.begin(); it != progressRobotActions.end(); it++){
+        string agentActionState = db_.getActionState(agent, *it);
+        if(agentActionState != "PROGRESS"){
+            bool seeActors = true;
+            for(vector<string>::iterator ita = it->actors.begin(); ita != it->actors.end(); ita++){
+                if(!db_.isAgentSeeing(agent, *ita)){
+                    seeActors = false;
+                    break;
+                }
+            }
+            if(seeActors){
+                toProgress.push_back(*it);
+            }
+        }
+    }
+    db_.addActionsState(toProgress, agent, "PROGRESS");
+
 }
 
 /*
@@ -323,8 +344,7 @@ void MSManager::planFeasibility(string agent){
 			possibleActions.insert(possibleActions.end(), askedActions.begin(), askedActions.end() );
 			possibleActions.insert(possibleActions.end(), readyActions.begin(), readyActions.end() );
 			if(possibleActions.size() == 0){
-				//TODO: if a human is not here and the robot has already tried to computes an other plan, it waits the human to come back
-				//TODO: should failed when an action of the plan fails
+                //TODO: if a human is not here and the robot has already tried to computes an other plan, it waits the human to come back
 				abortPlan(agent);
                 string goalState = db_.getGoalState(agent, agentPlan.second.goal);
 	         if(goalState == "DONE"){
@@ -670,6 +690,24 @@ supervisor_msgs::Action MSManager::convertActionMStoAction(supervisor_msgs::Acti
 	action.actors = actionMS.actors;
 
 	return action;
+}
+
+/*
+Function which return true if an action come from the current plan of an agent
+    @actionMS: the action to test
+*/
+bool MSManager::isFromCurrentPlan(supervisor_msgs::ActionMS actionMS, string agent){
+
+    pair<bool, supervisor_msgs::PlanMS> agentPlan = getAgentPlan(agent);
+    if(agentPlan.first){
+        for(vector<supervisor_msgs::ActionMS>::iterator it = agentPlan.second.actions.begin(); it != agentPlan.second.actions.end(); it++){
+            if(it->id == actionMS.id){
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 

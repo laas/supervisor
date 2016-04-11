@@ -7,6 +7,7 @@ The mental state manager estimates and maintains the mental states of each agent
 
 TODO: - notion of agent present to give info (interaction Area?)
       - do not send to times the same info to give (variable waiting info to give)
+      - add IN PROGRESS when an agent can see the actor in the middle of the execution
 
 **/
 

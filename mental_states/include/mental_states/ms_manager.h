@@ -46,6 +46,7 @@ public:
 	pair<bool, supervisor_msgs::PlanMS> getPlanFromId(int id);
 	supervisor_msgs::Action convertActionMStoAction(supervisor_msgs::ActionMS actionMS);
 	vector<supervisor_msgs::ActionMS> getActionsFromIds(vector<int> ids);
+    bool isFromCurrentPlan(supervisor_msgs::ActionMS actionMS, string agent);
 
     DBInterface db_;
 protected:
