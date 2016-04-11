@@ -195,6 +195,13 @@ bool actionState(supervisor_msgs::Action action, string state){
         vector<supervisor_msgs::ActionMS> actions;
         actions.push_back(actionMS);
         ms->db_.addActionsState(actions, *it, state);
+        //if it is a failed action (from the plan), we abort the plan for all agent who can see
+        if(state == "FAILED"){
+            if(ms->isFromCurrentPlan(actionMS, *it)){
+                ms->abortPlan(*it);
+            }
+
+        }
     }
 
     return true;
@@ -466,7 +473,69 @@ bool solveDivergentBelief(supervisor_msgs::SolveDivergentBelief::Request  &req, 
 				}
 			}
 		}else if(humanState == "READY" && robotState != "READY"){
-			//TODO
+            //we first look if the agent has the same plan as the robot
+            pair<bool, supervisor_msgs::PlanMS> robotPlan = ms->getAgentPlan(robotName);
+            if(robotPlan.first){
+                pair<bool, supervisor_msgs::PlanMS> humanPlan = ms->getAgentPlan(req.agent);
+                if(!humanPlan.first){
+                    if(simu){
+                        ms->db_.addActionsState(robotPlan.second.actions, req.agent, "PLANNED");
+                        ms->db_.addPlanState(robotPlan.second, req.agent, "PROGRESS");
+                    }else{
+                        //TODO: share plan
+                    }
+                    return true;
+                }else{
+                    if(robotPlan.second.id != humanPlan.second.id){
+                        if(simu){
+                            ms->db_.addActionsState(robotPlan.second.actions, req.agent, "PLANNED");
+                            ms->db_.addPlanState(robotPlan.second, req.agent, "PROGRESS");
+                        }else{
+                            //TODO: share plan
+                        }
+                        return true;
+                    }
+                    //If the robot thinks the action is NEEDED, the problem comes from the preconditions
+                    if(robotState == "NEEDED"){
+                        for(vector<toaster_msgs::Fact>::iterator it = actionFind.second.prec.begin(); it != actionFind.second.prec.end(); it++){
+                            vector<toaster_msgs::Fact> toTest;
+                            toTest.push_back(*it);
+                            if(!ms->db_.factsAreIn(req.agent, toTest)){
+                                if(simu){
+                                    ms->db_.addFacts(toTest, req.agent);
+                                }else{
+                                    //TODO: give info
+                                }
+                            }
+                        }
+                    }else if(robotState == "PLANNED"){//If the agent thinks the action is PLANNED, the problem comes from the previous actions
+                        //we get all actions id with a link to the action
+                        for(vector<supervisor_msgs::Link>::iterator itl = robotPlan.second.links.begin(); itl != robotPlan.second.links.end(); itl++){
+                            if(itl->following == actionFind.second.id){
+                                toaster_msgs::Fact fact;
+                                vector<toaster_msgs::Fact> toCheck;
+                                ostringstream toString;
+                                toString << itl->origin;
+                                fact.subjectId = toString.str();
+                                fact.property = "actionState";
+                                pair<bool, supervisor_msgs::ActionMS> actionLink = ms->getActionFromId(itl->origin);
+                                string actionState = ms->db_.getActionState(req.agent, actionLink.second);
+                                fact.targetId = actionState;
+                                toCheck.push_back(fact);
+                                if(!ms->db_.factsAreIn(req.agent, toCheck)){
+                                    if(simu){
+                                    vector<supervisor_msgs::ActionMS> actions;
+                                    actions.push_back(actionFind.second);
+                                    ms->db_.addActionsState(actions, req.agent, actionState);
+                                    }else{
+                                        //TODO: give action state
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 		}
 	}else {
 		ROS_ERROR("[mental_states] No such action");
