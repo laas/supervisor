@@ -29,9 +29,14 @@ public:
 	void humanPick(string agent, string object);
 	void humanPlace(string agent, string object, string support);
 	void humanDrop(string agent, string object, string container);
+    pair<bool, string> hasInHand(string agent);
+    bool isManipulableObject(string object);
+    bool isSupportObject(string support);
+    bool isContainerObject(string container);
 protected:
 
 private:
+    vector<pair<string, string> > attachments;
 
 };
 

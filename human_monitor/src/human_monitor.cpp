@@ -11,6 +11,12 @@ Function to call when a human picks an object
 	@object: the object picked
 */
 void HumanMonitor::humanPick(string agent, string object){
+
+    pair<bool, string> previousAttachment = hasInHand(agent);
+    if(previousAttachment.first){
+        ROS_WARN("[human_monitor] %s has already %s in hand", agent.c_str(), previousAttachment.second.c_str());
+        return;
+    }
 	
 	ROS_INFO("[human_monitor] %s has picked %s", agent.c_str(), object.c_str());
 	
@@ -22,12 +28,18 @@ void HumanMonitor::humanPick(string agent, string object){
 	string humanHand;
 	node.getParam("/humanRightHand", humanHand);
 	toaster_msgs::PutInHand srv_putInHand;
-   srv_putInHand.request.objectId = object;
-   srv_putInHand.request.agentId = agent;
-   srv_putInHand.request.jointName = humanHand;
-   if (!put_in_hand.call(srv_putInHand)){
+    srv_putInHand.request.objectId = object;
+    srv_putInHand.request.agentId = agent;
+    srv_putInHand.request.jointName = humanHand;
+    if (!put_in_hand.call(srv_putInHand)){
    	 ROS_ERROR("Failed to call service pdg/put_in_hand");
- 	}
+    }
+
+    //we add the attachment
+    pair<string, string> attach;
+    attach.first = agent;
+    attach.second = object;
+    attachments.push_back(attach);
  	
 	//we create the corresponding action
 	supervisor_msgs::Action action;
@@ -54,6 +66,17 @@ Function to call when a human place an object
 */
 void HumanMonitor::humanPlace(string agent, string object, string support){
 	
+    pair<bool, string> previousAttachment = hasInHand(agent);
+    if(!previousAttachment.first){
+        ROS_WARN("[human_monitor] %s has no object in hand", agent.c_str());
+        return;
+    }else{
+        if(previousAttachment.second != object){
+            ROS_WARN("[human_monitor] %s has %s in hand, not %s", agent.c_str(), previousAttachment.second.c_str(), object.c_str());
+            return;
+        }
+    }
+
 	ROS_INFO("[human_monitor] %s has placed %s on %s", agent.c_str(), object.c_str(), support.c_str());
 	
 	ros::NodeHandle node;
@@ -67,6 +90,14 @@ void HumanMonitor::humanPlace(string agent, string object, string support){
    if (!remove_from_hand.call(srv_rmFromHand)){
    	 ROS_ERROR("Failed to call service pdg/remove_from_hand");
  	}
+
+   //we remove the corresponding attachment
+   for(vector<pair<string, string> >::iterator it = attachments.begin(); it != attachments.end(); it++){
+       if(it->first == agent){
+           attachments.erase(it);
+           break;
+       }
+   }
 
 	//put the object on the placement
 	double objectHeight, supportHeight;
@@ -146,6 +177,17 @@ Function to call when a human drop an object
 */
 void HumanMonitor::humanDrop(string agent, string object, string container){
 	
+    pair<bool, string> previousAttachment = hasInHand(agent);
+    if(!previousAttachment.first){
+        ROS_WARN("[human_monitor] %s has no object in hand", agent.c_str());
+        return;
+    }else{
+        if(previousAttachment.second != object){
+            ROS_WARN("[human_monitor] %s has %s in hand, not %s", agent.c_str(), previousAttachment.second.c_str(), object.c_str());
+            return;
+        }
+    }
+
 	ROS_INFO("[human_monitor] %s has droped %s in %s", agent.c_str(), object.c_str(), container.c_str());
 	
 	ros::NodeHandle node;
@@ -159,6 +201,14 @@ void HumanMonitor::humanDrop(string agent, string object, string container){
    if (!remove_from_hand.call(srv_rmFromHand)){
    	 ROS_ERROR("Failed to call service pdg/remove_from_hand");
  	}
+
+   //we remove the corresponding attachment
+   for(vector<pair<string, string> >::iterator it = attachments.begin(); it != attachments.end(); it++){
+       if(it->first == agent){
+           attachments.erase(it);
+           break;
+       }
+   }
 
 	//put the object in the container
 	toaster_msgs::ObjectList objectList;
@@ -221,3 +271,84 @@ void HumanMonitor::humanDrop(string agent, string object, string container){
  	}
 }
 
+/*
+Function which return true if an agent has already an object in hand
+*/
+pair<bool, string> HumanMonitor::hasInHand(string agent){
+    pair<bool, string> answer;
+    for(vector<pair<string, string> >::iterator it = attachments.begin(); it != attachments.end(); it++){
+        if(it->first == agent){
+            answer.first = true;
+            answer.second = it->second;
+            return answer;
+        }
+    }
+    answer.first = false;
+    return answer;
+}
+
+/*
+Function which return true if an object is a manipulable object (based on parameters)
+    @object: the tested object
+*/
+bool HumanMonitor::isManipulableObject(string object){
+
+   //first we get the manipulable objects from parameters
+   vector<string> manipulableObjects;
+   ros::NodeHandle node;
+   node.getParam("/entities/objects", manipulableObjects);
+
+   //Then we check if the object is in the list
+   for(vector<string>::iterator it = manipulableObjects.begin(); it != manipulableObjects.end(); it++){
+      if(*it == object){
+         return true;
+      }
+   }
+
+   return false;
+
+}
+
+/*
+Function which return true if an object is a support object (based on parameters)
+    @support: the tested object
+*/
+bool HumanMonitor::isSupportObject(string support){
+
+   //first we get the support objects from parameters
+   vector<string> supportObjects;
+   ros::NodeHandle node;
+   node.getParam("/entities/supports", supportObjects);
+
+   //Then we check if the object is in the list
+   for(vector<string>::iterator it = supportObjects.begin(); it != supportObjects.end(); it++){
+      if(*it == support){
+         return true;
+      }
+   }
+
+   return false;
+
+}
+
+/*
+Function which return true if an object is a container object (based on parameters)
+    @container: the tested object
+*/
+bool HumanMonitor::isContainerObject(string container){
+
+   //first we get the container objects from parameters
+   vector<string> containerObjects;
+   ros::NodeHandle node;
+   node.getParam("/entities/containers", containerObjects);
+
+   //Then we check if the object is in the list
+   for(vector<string>::iterator it = containerObjects.begin(); it != containerObjects.end(); it++){
+      if(*it == container){
+         return true;
+      }
+   }
+
+   return false;
+
+}

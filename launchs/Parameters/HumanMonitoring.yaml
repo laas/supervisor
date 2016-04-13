@@ -1,3 +1,7 @@
 ---
 timeNoAction: 3.0
 humanRightHand: 'rightHand'
+threshold:
+    pick: 20.0
+    place: 30.0
+    drop: 40.0
