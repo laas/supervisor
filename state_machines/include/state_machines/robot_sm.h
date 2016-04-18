@@ -31,7 +31,7 @@ public:
 protected:
 
 private:
-	ros::NodeHandle node_;
+    ros::NodeHandle node_;
 	string robotName_;
 	Client actionClient_;
 	bool isActing_;

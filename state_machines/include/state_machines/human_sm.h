@@ -18,6 +18,8 @@
 #include "supervisor_msgs/ActionExecutorAction.h"
 #include "supervisor_msgs/ActionExecutorActionResult.h"
 #include "supervisor_msgs/ActionExecutorActionFeedback.h"
+#include <toaster_msgs/Fact.h>
+#include <toaster_msgs/FactList.h>
 
 
 using namespace std;
@@ -31,6 +33,7 @@ public:
 	string waitingState();
 	string shouldActState();
 	string absentState();
+    void areaFactListCallback(const toaster_msgs::FactList::ConstPtr& msg);
 protected:
 
 private:
@@ -41,6 +44,9 @@ private:
 	double timeToWait_;
 	bool timerStarted_;
 	clock_t start_;
+    bool present_;
+
+    ros::Subscriber subArea_;
 
 };
 

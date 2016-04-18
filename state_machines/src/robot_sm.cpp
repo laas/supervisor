@@ -60,7 +60,6 @@ State where the robot is ACTING
 */
 string RobotSM::actingState(){
 
-	//TODO stop order and interference
 	if(!isActing_){
 		ROS_INFO("[state_machines] Robot goes to IDLE");
 		return "IDLE";

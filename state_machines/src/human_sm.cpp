@@ -15,6 +15,25 @@ HumanSM::HumanSM(string humanName)
 	node_.getParam("/timeNoAction", timeToWait_);
   	node_.getParam("/simu", simu_);
 	timerStarted_ = false;
+    present_ = true;
+
+    subArea_ = node_.subscribe("area_manager/factList", 1000, &HumanSM::areaFactListCallback, this);
+}
+
+void HumanSM::areaFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
+
+    string area;
+    node_.getParam("/areaPresence", area);
+    bool found = false;
+    vector<toaster_msgs::Fact> areaFacts = msg->factList;
+    for(vector<toaster_msgs::Fact>::iterator it = areaFacts.begin(); it != areaFacts.end(); it++){
+        if(it->subjectId == humanName_ && it->property == "IsInArea" && it->targetId == area){
+            found = true;
+            break;
+        }
+    }
+    present_ = found;
+
 }
 
 /*
@@ -22,8 +41,10 @@ State where the human is IDLE
 */
 string HumanSM::idleState(){
 
-	//TODO if human ACTING
-	//TODO if human PRESENT
+    if(!present_){
+        ROS_INFO("[state_machines] %s goes to ABSENT", humanName_.c_str());
+        return "ABSENT";
+    }
 	//We look if the human thinks he has an action to do
     ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
   	ros::ServiceClient client_db = node_.serviceClient<supervisor_msgs::SolveDivergentBelief>("mental_state/solve_divergent_belief");
@@ -97,10 +118,11 @@ State where the human is ACTING
 */
 string HumanSM::actingState(){
 
-	//TODO sill ACTING?
-	//TODO if human PRESENT
+    if(!present_){
+        ROS_INFO("[state_machines] %s goes to ABSENT", humanName_.c_str());
+        return "ABSENT";
+    }
 	
-
 	return "ACTING";
 }
 
@@ -109,9 +131,11 @@ State where the human is WAITING
 */
 string HumanSM::absentState(){
 
-	//TODO if human PRESENT
-	
-	
+    if(present_){
+        ROS_INFO("[state_machines] %s goes to IDLE", humanName_.c_str());
+        return "IDLE";
+    }
+
 	return "ABSENT";
 }
 
@@ -120,8 +144,10 @@ State where the human is WAITING
 */
 string HumanSM::waitingState(){
 
-	//TODO if human ACTING
-	//TODO if human PRESENT
+    if(!present_){
+        ROS_INFO("[state_machines] %s goes to ABSENT", humanName_.c_str());
+        return "ABSENT";
+    }
 	
 	//We look if the human still thinks he has an action to do
     ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
@@ -168,9 +194,11 @@ string HumanSM::waitingState(){
 State where the human SHOULD ACT
 */
 string HumanSM::shouldActState(){
-	
-	//TODO if human ACTING
-	//TODO if human PRESENT
+
+    if(!present_){
+        ROS_INFO("[state_machines] %s goes to ABSENT", humanName_.c_str());
+        return "ABSENT";
+    }
 
     ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
     ros::ServiceClient action_state = node_.serviceClient<supervisor_msgs::ChangeState>("mental_state/change_state");
