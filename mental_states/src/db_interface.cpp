@@ -130,6 +130,7 @@ void DBInterface::addGoalState(supervisor_msgs::GoalMS goal, string agent, strin
     factRm.property = "goalState";
     factRm.propertyType = "state";
     factRm.targetId = "NULL";
+    factRm.factObservability = 0.0;
     addFactToRemove(factRm, agent);
 
     //Then we create the fact to add and add it to the list
@@ -138,6 +139,7 @@ void DBInterface::addGoalState(supervisor_msgs::GoalMS goal, string agent, strin
     factAdd.property = "goalState";
     factAdd.propertyType = "state";
     factAdd.targetId = state;
+    factAdd.factObservability = 0.0;
     addFactToAdd(factAdd, agent);
 
 
@@ -162,6 +164,7 @@ void DBInterface::addPlanState(supervisor_msgs::PlanMS plan, string agent, strin
     factRm.property = "planState";
     factRm.propertyType = "state";
     factRm.targetId = "NULL";
+    factRm.factObservability = 0.0;
     addFactToRemove(factRm, agent);
 
     //then we add the new state
@@ -170,6 +173,7 @@ void DBInterface::addPlanState(supervisor_msgs::PlanMS plan, string agent, strin
     fact.property = "planState";
     fact.propertyType = "state";
     fact.targetId = state;
+    fact.factObservability = 0.0;
     addFactToAdd(fact, agent);
 
 }
@@ -192,6 +196,7 @@ void DBInterface::addActionsState(vector<supervisor_msgs::ActionMS> actions, str
         factRm.property = "actionState";
         factRm.propertyType = "state";
         factRm.targetId = "NULL";
+        factRm.factObservability = 0.0;
         addFactToRemove(factRm, agent);
         //then we add the new state
         toaster_msgs::Fact factAdd;
@@ -199,6 +204,7 @@ void DBInterface::addActionsState(vector<supervisor_msgs::ActionMS> actions, str
         factAdd.property = "actionState";
         factAdd.propertyType = "state";
         factAdd.targetId = state;
+        factAdd.factObservability = 0.0;
         addFactToAdd(factAdd, agent);
     }
 
@@ -302,6 +308,7 @@ void DBInterface::removeActionsState(string agent, string state){
     factRm.property = "actionState";
     factRm.propertyType = "state";
     factRm.targetId = state;
+    factRm.factObservability = 0.0;
     addFactToRemove(factRm, agent);
 
 }
@@ -437,8 +444,10 @@ void DBInterface::addEffects(vector<toaster_msgs::Fact> facts, string agent){
     for(vector<toaster_msgs::Fact>::iterator it = facts.begin(); it != facts.end(); it++){
         if(it->subjectId == "NULL" || it->targetId == "NULL"){
             //if there is NULL in the description of the effect, we remove all facts of this type on the knowledge of the agent
+            it->factObservability = 1.0;
             addFactToRemove(*it, agent);
         }else{
+            it->factObservability = 1.0;
             addFactToAdd(*it, agent);
         }
     }
@@ -481,18 +490,21 @@ void DBInterface::cleanDB(){
 	factAct.property = "actionState";
 	factAct.propertyType = "state";
 	factAct.targetId = "NULL";
+    factAct.factObservability = 0.0;
 	toRemove.push_back(factAct);
 	toaster_msgs::Fact factPlan;
 	factPlan.subjectId = "NULL";
 	factPlan.property = "planState";
 	factPlan.propertyType = "state";
 	factPlan.targetId = "NULL";
+    factPlan.factObservability = 0.0;
 	toRemove.push_back(factPlan);
 	toaster_msgs::Fact factGoal;
 	factGoal.subjectId = "NULL";
 	factGoal.property = "goalState";
 	factGoal.propertyType = "state";
 	factGoal.targetId = "NULL";
+    factGoal.factObservability = 0.0;
 	toRemove.push_back(factGoal);
 	srv_rm.request.facts = toRemove;
 	   
