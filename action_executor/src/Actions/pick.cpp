@@ -73,7 +73,11 @@ bool Pick::exec(Server* action_server){
 
 bool Pick::post(){
 
-    //TODO: check gripper position (completly close or not)
+    //Check gripper position (completly close or not)
+    if(gripperEmpty_  && !simu_){
+        ROS_WARN("[action_executor] Robot failed to pick (gripper empty)");
+        return false;
+    }
 
 	return true;
 }

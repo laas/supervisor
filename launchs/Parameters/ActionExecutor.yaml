@@ -7,5 +7,9 @@ moveToPositions:
 armPositions:
     manipRight: 'right'
     manipLeft: 'left'
+gripperJoint:
+    right: 'pr2r_gripper_joint'
+    left: 'pr2l_gripper_joint'
+gripperThreshold: 0.01
 
 

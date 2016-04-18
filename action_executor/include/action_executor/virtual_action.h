@@ -12,6 +12,8 @@
 #include "toaster_msgs/SetEntityPose.h"
 #include "toaster_msgs/ObjectList.h"
 #include "toaster_msgs/Object.h"
+#include "toaster_msgs/RobotList.h"
+#include "toaster_msgs/Robot.h"
 #include "toaster_msgs/Entity.h"
 #include <gtp_ros_msg/requestAction.h>
 #include <gtp_ros_msg/Req.h>
@@ -69,6 +71,7 @@ protected:
    bool executeTrajectory(int actionId, int actionSubId, int armId, Server* action_server);
    bool openGripper(int armId, Server* action_server);
    bool closeGripper(int armId, Server* action_server);
+   bool isGripperEmpty(string arm);
 
    string object_;
    int actionId_;
@@ -77,6 +80,7 @@ protected:
    Connector* connector_;
    bool simu_;
    int nbPlanMax_;
+   bool gripperEmpty_;
 
 private:
 

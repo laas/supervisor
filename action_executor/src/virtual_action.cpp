@@ -14,6 +14,7 @@ VirtualAction::VirtualAction(Connector* connector){
    node_.getParam("/waitActionServer", waitActionServer_);
    node_.getParam("/nbPlanMaxGTP", nbPlanMax_);
    connector_ = connector;
+   gripperEmpty_ = false;
 }
 
 /*
@@ -140,6 +141,37 @@ void VirtualAction::RemoveFromHand(string object){
    	 ROS_ERROR("[action_executor] Failed to call service pdg/remove_from_hand");
  	}
    
+}
+
+bool VirtualAction::isGripperEmpty(string arm){
+
+    string gripperJoint;
+    double gripperThreshold;
+    string gripperTopic = "/gripperJoint/";
+    gripperTopic = gripperTopic + arm;
+    node_.getParam(gripperTopic, gripperJoint);
+    node_.getParam("/gripperThreshold", gripperThreshold);
+    toaster_msgs::RobotList list;
+    try{
+        list  = *(ros::topic::waitForMessage<toaster_msgs::RobotList>("pdg/robotList",ros::Duration(1)));
+        for(vector<toaster_msgs::Robot>::iterator it = list.robotList.begin(); it != list.robotList.end(); it++){
+          if(it->meAgent.meEntity.id == robotName_){
+              for(vector<toaster_msgs::Joint>::iterator itj = it->meAgent.skeletonJoint.begin(); itj != it->meAgent.skeletonJoint.end(); itj++){
+                  if(itj->meEntity.id == gripperJoint){
+                      if(itj->position < gripperThreshold){
+                          return true;
+                      }else{
+                          return false;
+                      }
+                  }
+              }
+          }
+        }
+    }
+    catch(const std::exception & e){
+        ROS_WARN("[action_executor] Failed to read robot pose from toaster");
+    }
+    return true;
 }
 
 
@@ -417,6 +449,7 @@ bool VirtualAction::closeGripper(int armId, Server* action_server){
                return false;
            }
        }
+       gripperEmpty_  = isGripperEmpty("right");
     }else{
        pr2motion::Gripper_Left_OperateGoal gripper_goal;
        gripper_goal.goal_mode.value=pr2motion::pr2motion_GRIPPER_MODE::pr2motion_GRIPPER_CLOSE;
@@ -430,6 +463,7 @@ bool VirtualAction::closeGripper(int armId, Server* action_server){
                return false;
            }
        }
+       gripperEmpty_  = isGripperEmpty("left");
     }
 
 
