@@ -79,19 +79,14 @@ void GoalManager::executeGoal(string goal){
 	   if(service.response.solution.report == "OK"){
 	      hasPlan_ = true;
 	      supervisor_msgs::Plan newPlan = convertPlan(service.response.solution, goal);
-	      //we send him to the mental state manager
+          //we send him to the mental state manager
+          //For now, we consider the plan automatically shared
           serviceCS.request.type = "plan";
-          serviceCS.request.state = "PROGRESS";
+          serviceCS.request.state = "PROGRESS_SHARE";
           serviceCS.request.plan = newPlan;
           if(!clientCS.call(serviceCS)){
               ROS_ERROR("Failed to call service mental_state/change_state");
-	      }
-	      //For now, we consider the plan automatically shared
-          serviceCS.request.type = "plan";
-          serviceCS.request.state = "SHARE";
-          if(!clientCS.call(serviceCS)){
-              ROS_ERROR("Failed to call service mental_state/change_state");
-	      }
+          }
 	   }else{//the robot aborts the goal
 	      string robotName;
           node.getParam("/robot/name", robotName);

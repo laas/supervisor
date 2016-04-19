@@ -53,6 +53,13 @@ void DBInterface::addFactToAdd(toaster_msgs::Fact fact, string agent){
         toAdd_.push_back(toAddAgent);
     }
 
+    //update knowledge
+    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->first == agent){
+            it->second.push_back(fact);
+        }
+    }
+
 }
 
 /*
@@ -75,6 +82,24 @@ void DBInterface::addFactToRemove(toaster_msgs::Fact fact, string agent){
         toRemoveAgent.first = agent;
         toRemoveAgent.second.push_back(fact);
         toRemove_.push_back(toRemoveAgent);
+    }
+
+    //update knowledge
+    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->first == agent){
+             vector<toaster_msgs::Fact> tmp;
+            for(vector<toaster_msgs::Fact>::iterator itf = it->second.begin(); itf != it->second.end(); itf++){
+                if((fact.subjectId == itf->subjectId && fact.property == itf->property && fact.targetId == itf->targetId)
+                        || (fact.subjectId == "NULL" && fact.property == itf->property && fact.targetId == itf->targetId)
+                        || (fact.subjectId == itf->subjectId && fact.property == itf->property && fact.targetId == "NULL")
+                        || (fact.subjectId == "NULL" && fact.property == itf->property && fact.targetId == "NULL")){
+
+                }else{
+                    tmp.push_back(*itf);
+                }
+            }
+            it->second = tmp;
+        }
     }
 
 }
@@ -410,7 +435,7 @@ void DBInterface::addFacts(vector<toaster_msgs::Fact> facts, string agent){
 
 	toaster_msgs::AddFactsToAgent srv;
 	srv.request.agentId = agent;
-	srv.request.facts = facts;
+    srv.request.facts = facts;
   	if (!client.call(srv)){
    	 ROS_ERROR("[mental_state] Failed to call service database/add_facts_to_agent");
   	}

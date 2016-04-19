@@ -221,6 +221,9 @@ bool changeState(supervisor_msgs::ChangeState::Request  &req, supervisor_msgs::C
             return newPlan(req.plan);
         }else if(req.state == "SHARE"){
             return sharePlan();
+        }else if(req.state == "PROGRESS_SHARE"){
+            newPlan(req.plan);
+            return sharePlan();
         }else if(req.state == "ABORT"){
             return abortPlan(req.agent);
         }
@@ -349,6 +352,8 @@ bool getInfo(supervisor_msgs::GetInfo::Request  &req, supervisor_msgs::GetInfo::
     }else if(req.info == "ACTIONS"){
         res.actions = ms->getActionList();
     }
+
+    return true;
 
 }
 

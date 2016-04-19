@@ -126,7 +126,7 @@ Function which updates the mental state of an agent
 void MSManager::update(string agent){
 
 	//We check if the agent can deduce an action from its effects.
- 	checkEffects(agent);
+    checkEffects(agent);
 	//We check if the precondition and links of the planned action.
     computePreconditions(agent);
 	//We check if the agent still think that the current goal is still feasible (and not achieved too).
@@ -293,7 +293,7 @@ void MSManager::planFeasibility(string agent){
     supervisor_msgs::EndPlan srv;
     string robotName;
     node.getParam("/robot/name", robotName);
-	
+
 	
 	pair<bool, supervisor_msgs::PlanMS> agentPlan = getAgentPlan(agent);
 	if(agentPlan.first){
@@ -306,7 +306,7 @@ void MSManager::planFeasibility(string agent){
 	      if (!client.call(srv)){
 	         ROS_ERROR("[mental_state] Failed to call service goal_manager/end_plan");
 	      }
-	   }
+       }
 	
 		//We get all the actions either READY, in PROGRESS, NEEDED, ASKED and PLANNED in the agent knowledge.
         vector<int> readyIds = db_.getActionsIdFromState(agent, "READY");
@@ -338,14 +338,14 @@ void MSManager::planFeasibility(string agent){
 	      if (!client.call(srv)){
 	         ROS_ERROR("[mental_state] Failed to call service goal_manager/end_plan");
 	      }
-		}else{ //else, if there is no action in progress or possible the plan is aborted
+        }else{ //else, if there is no action in progress or possible the plan is aborted
 			vector<supervisor_msgs::ActionMS> possibleActions;
 			possibleActions.insert(possibleActions.end(), progressActions.begin(), progressActions.end() );
 			possibleActions.insert(possibleActions.end(), askedActions.begin(), askedActions.end() );
 			possibleActions.insert(possibleActions.end(), readyActions.begin(), readyActions.end() );
-			if(possibleActions.size() == 0){
+            if(possibleActions.size() == 0){
                 //TODO: if a human is not here and the robot has already tried to computes an other plan, it waits the human to come back
-				abortPlan(agent);
+                abortPlan(agent);
                 string goalState = db_.getGoalState(agent, agentPlan.second.goal);
 	         if(goalState == "DONE"){
 	            srv.request.report = true;//as the goal is achieved
@@ -354,7 +354,7 @@ void MSManager::planFeasibility(string agent){
 	         }
 	         if (!client.call(srv)){
 	            ROS_ERROR("[mental_state] Failed to call service goal_manager/end_plan");
-	         }
+             }
             }else if(agent != robotName && db_.isAgentSeeing(agent, robotName)){
                 //TODO: to replace by agent in interaction area?
                 string robotPlanState = db_.getPlanState(robotName, agentPlan.second);
@@ -363,7 +363,7 @@ void MSManager::planFeasibility(string agent){
                 }
             }
 		}
-	}
+    }
 
 }
 
