@@ -57,7 +57,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 	//send the fact that the action is in progress to the MS Manager
 	srv.request.state = "PROGRESS";
 	if (!client.call(srv)){
-	 ROS_ERROR("[action_executor] Failed to call service mental_state/action_state");
+     ROS_ERROR("[action_executor] Failed to call service mental_state/change_state");
     }
 
 	//Checking preconditions
@@ -66,7 +66,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 	if(!act->preconditions()){
 		srv.request.state = "FAILED";
 		if (!client.call(srv)){
-		 ROS_ERROR("[action_executor] Failed to call service mental_state/action_state");
+         ROS_ERROR("[action_executor] Failed to call service mental_state/change_state");
 		}
 		result_.report = false;
 		if(!action_server_.isPreemptRequested()){
@@ -94,7 +94,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 	if(!act->plan()){
 		srv.request.state = "FAILED";
 		if (!client.call(srv)){
-		 ROS_ERROR("[action_executor] Failed to call service mental_state/action_state");
+         ROS_ERROR("[action_executor] Failed to call service mental_state/change_state");
 		}
 		result_.report = false;
 		if(!action_server_.isPreemptRequested()){
@@ -122,7 +122,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
     if(!act->exec(&action_server_)){
 		srv.request.state = "FAILED";
 		if (!client.call(srv)){
-		 ROS_ERROR("[action_executor] Failed to call service mental_state/action_state");
+         ROS_ERROR("[action_executor] Failed to call service mental_state/change_state");
 		}
 		result_.report = false;
 		if(!action_server_.isPreemptRequested()){
@@ -143,7 +143,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 	if(!act->post()){
 		srv.request.state = "FAILED";
 		if (!client.call(srv)){
-		 ROS_ERROR("[action_executor] Failed to call service mental_state/action_state");
+         ROS_ERROR("[action_executor] Failed to call service mental_state/change_state");
 		}
 		result_.report = false;
 		if(!action_server_.isPreemptRequested()){
@@ -160,7 +160,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 	
 	srv.request.state = "DONE";
 	if (!client.call(srv)){
-	 ROS_ERROR("[action_executor] Failed to call service mental_state/action_state");
+     ROS_ERROR("[action_executor] Failed to call service mental_state/change_state");
 	}
 	result_.report = true;
 	result_.state = "OK";

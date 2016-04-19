@@ -87,6 +87,42 @@ bool Place::plan(){
          points.push_back(point);
     }else{
         actionName = "place";
+        string xParamTopic = "/points/";
+        string yParamTopic = "/points/";
+        string zParamTopic = "/points/";
+        xParamTopic = xParamTopic + support_ + "/" + object_ + "/x";
+        yParamTopic = xParamTopic + support_ + "/" + object_ + "/y";
+        zParamTopic = xParamTopic + support_ + "/" + object_ + "/z";
+        if(node_.hasParam(xParamTopic)){
+            double pointX, pointY, pointZ;
+            node_.getParam(xParamTopic, pointX);
+            node_.getParam(yParamTopic, pointY);
+            node_.getParam(zParamTopic, pointZ);
+            double x, y, z;
+            try{
+                toaster_msgs::ObjectList objectList  = *(ros::topic::waitForMessage<toaster_msgs::ObjectList>("pdg/objectList",ros::Duration(1)));
+                for(vector<toaster_msgs::Object>::iterator it = objectList.objectList.begin(); it != objectList.objectList.end(); it++){
+                  if(it->meEntity.id == support_){
+                     x = it->meEntity.positionX;
+                     y = it->meEntity.positionY;
+                     z = it->meEntity.positionZ;
+                     break;
+                  }
+                }
+                x = x + pointX;
+                y = y + pointY;
+                z = z + pointZ;
+                gtp_ros_msg::Points point;
+                point.pointKey = "target";
+                point.value.x = x;
+                point.value.y = y;
+                point.value.z = z;
+                points.push_back(point);
+            }
+            catch(const std::exception & e){
+                ROS_WARN("[action_executor] Failed to read %s pose from toaster", support_.c_str());
+            }
+       }
     }
 
     actionId_ = planGTP(actionName, agents, objects, datas, points);
