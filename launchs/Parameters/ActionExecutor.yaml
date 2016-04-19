@@ -11,5 +11,7 @@ gripperJoint:
     right: 'pr2r_gripper_joint'
     left: 'pr2l_gripper_joint'
 gripperThreshold: 0.01
+humanSafetyJoint: 'rightHand'
+safetyThreshold: 0.5
 
 

@@ -23,6 +23,7 @@
 #include "supervisor_msgs/HumanActionSimu.h"
 #include "supervisor_msgs/GetInfo.h"
 #include "supervisor_msgs/NewGoal.h"
+#include "supervisor_msgs/Empty.h"
 #include "toaster_msgs/Fact.h"
 #include "supervisor_msgs/ActionMS.h"
 

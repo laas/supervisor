@@ -36,6 +36,8 @@ public:
     bool leftGripperMoving_;
     bool torsoMoving_;
 
+    bool stopOrder_;
+
 	
     int previousId_;
     int idGrasp_;

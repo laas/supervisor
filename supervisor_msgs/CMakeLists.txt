@@ -37,6 +37,7 @@ add_service_files(
   EndPlan.srv
   ChangeState.srv
   GetInfo.srv
+  Empty.srv
 )
 
  add_action_files(

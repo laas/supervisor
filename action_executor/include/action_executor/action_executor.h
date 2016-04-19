@@ -3,9 +3,12 @@
 
 #include "supervisor_msgs/ActionExecutorAction.h"
 #include "supervisor_msgs/ChangeState.h"
+#include "supervisor_msgs/Empty.h"
 #include "action_executor/virtual_action.h"
 #include "action_executor/connector.h"
 #include "action_executor/Actions/action_pkg.h"
+#include <toaster_msgs/Fact.h>
+#include <toaster_msgs/FactList.h>
 
 #include <actionlib/server/simple_action_server.h>
 #include <actionlib/client/simple_action_client.h>

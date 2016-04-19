@@ -169,7 +169,12 @@ Stop the action execution
 */
 void MainWindow::on_pushButtonStopAction_clicked()
 {
-    actionClient_.cancelGoal();
+    ros::ServiceClient stop = node_.serviceClient<supervisor_msgs::Empty>("action_executor/stop");
+    supervisor_msgs::Empty srv;
+    if (!stop.call(srv)) {
+       ROS_ERROR("Failed to call service action_executor/stop");
+       return;
+    }
 }
 
 

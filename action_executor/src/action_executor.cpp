@@ -16,6 +16,8 @@ TODO: placereachable (+pickandplacereachable), give/grab, moveTo, goTo (+engage/
 
 ros::NodeHandle* node_;
 Connector* connector_;
+string humanSafetyJoint, robotToaster;
+double safetyThreshold;
 
 ActionExecutor::ActionExecutor(string name):
 action_server_(node_, name, 
@@ -79,6 +81,13 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 		return;
 	}
 
+    if(action_server_.isPreemptRequested() || connector_->stopOrder_){
+        result_.state = "PREEMPTED";
+        action_server_.setPreempted(result_);
+        ROS_INFO("[action_executor] Action stoped");
+        return;
+    }
+
 	//Plan for the action
 	feedback_.state = "PLAN";
 	action_server_.publishFeedback(feedback_);
@@ -99,6 +108,13 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 	   ROS_INFO("[action_executor] Action failed in planning");
 		return;
 	}
+
+    if(action_server_.isPreemptRequested() || connector_->stopOrder_){
+        result_.state = "PREEMPTED";
+        action_server_.setPreempted(result_);
+        ROS_INFO("[action_executor] Action stoped");
+        return;
+    }
 
 	//Execution of the action
 	feedback_.state = "EXEC";
@@ -156,10 +172,12 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 VirtualAction* ActionExecutor::initializeAction(supervisor_msgs::Action action) {
 	VirtualAction* act = NULL;
 
+    connector_->stopOrder_ = false;
+
 	if(action.name == "pick"){
 		act = new Pick(action, connector_);
 	}else if(action.name == "place"){
-		act = new Place(action, connector_);
+        act = new Place(action, connector_);
 	}else if(action.name == "pickandplace"){
 		act = new PickAndPlace(action, connector_);
 	}else if(action.name == "drop"){
@@ -175,13 +193,41 @@ VirtualAction* ActionExecutor::initializeAction(supervisor_msgs::Action action) 
 	return act;
 }
 
+/*
+Service call when the plan is over
+*/
+bool stopOrder(supervisor_msgs::Empty::Request  &req, supervisor_msgs::Empty::Response &res){
 
+   connector_->stopOrder_ = true;
+
+    return true;
+}
+
+void agentFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
+
+    vector<toaster_msgs::Fact> distanceFacts = msg->factList;
+
+    for(vector<toaster_msgs::Fact>::iterator it = distanceFacts.begin(); it != distanceFacts.end(); it++){
+        if(it->property == "Distance"){
+            if(it->subjectId == humanSafetyJoint && it->targetId == robotToaster){
+                if(it->doubleValue < safetyThreshold){
+                    connector_->stopOrder_ = true;
+                }else{
+                    connector_->stopOrder_ = false;
+                }
+            }
+        }
+    }
+}
 
 int main (int argc, char **argv)
 {
   ros::init(argc, argv, "action_executor");
   ros::NodeHandle node;
   node_ = &node;
+  node.getParam("humanSafetyJoint", humanSafetyJoint);
+  node.getParam("safetyThreshold", safetyThreshold);
+  node.getParam("robot/toasterName", robotToaster);
    
   Connector connector;
   connector_ = &connector;
@@ -189,6 +235,10 @@ int main (int argc, char **argv)
   ROS_INFO("[action_executor] Init action_executor");
 
   ActionExecutor executor("supervisor/action_executor");
+
+  ros::Subscriber sub = node.subscribe("agent_monitor/factList", 1000, agentFactListCallback);
+
+  ros::ServiceServer service_stop = node.advertiseService("action_executor/stop", stopOrder); //stop the execution
 
   ros::spin();
 
