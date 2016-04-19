@@ -12,7 +12,6 @@ The state machines manager keeps trace of the activity of each agent.
 #include "supervisor_msgs/GetInfo.h"
 
 string robotState;
-string humanState;
 
 
 /*
@@ -33,8 +32,7 @@ void robotStateMachine(){
 			robotState = rsm.waitingState();
 		}else{
 			ROS_ERROR("[state_machines] Wrong robot state");	
-		}
-		ros::spinOnce();
+        }
   		loop_rate.sleep();
 	}
 
@@ -45,10 +43,11 @@ Main function of the human state machine
 */
 void humanStateMachine(string human_name){
   	ros::Rate loop_rate(30);
-    humanState = "IDLE";
+    string humanState = "IDLE";
 	HumanSM* hsm = new HumanSM(human_name);
+
 	
-	while(true){
+    while(true){
 		if(humanState == "IDLE"){
 			humanState = hsm->idleState();
 		}else if(humanState == "ACTING"){
@@ -61,8 +60,7 @@ void humanStateMachine(string human_name){
 			humanState = hsm->absentState();
 		}else{
 			ROS_ERROR("[state_machines] Wrong human state");	
-		}
-		ros::spinOnce();
+        }
   		loop_rate.sleep();
 	}
 
@@ -92,11 +90,12 @@ int main (int argc, char **argv)
 
   ROS_INFO("[state_machines] state_machines ready");
 
+  boost::thread_group g;
   for(vector<string>::iterator it = allAgents.begin(); it != allAgents.end(); it++){
-	if(*it == robotName){
-		boost::thread robotThread(robotStateMachine);
-	}else{
-  		boost::thread humanThread(boost::bind(humanStateMachine, *it));
+    if(*it == robotName){
+        g.create_thread(robotStateMachine);
+    }else{
+        g.create_thread(boost::bind(humanStateMachine, *it));
 	}
   }
 

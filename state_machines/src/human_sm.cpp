@@ -127,7 +127,7 @@ string HumanSM::actingState(){
 }
 
 /*
-State where the human is WAITING
+State where the human is ABSENT
 */
 string HumanSM::absentState(){
 
