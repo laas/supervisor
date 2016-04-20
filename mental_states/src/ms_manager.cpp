@@ -167,7 +167,7 @@ void MSManager::checkEffects(string agent){
 	//For each of these actions we look if its effects are in the knowledge of the agent, if they are, the action becomes DONE in the agent knowledge
 	vector<supervisor_msgs::ActionMS> toDone;
 	for(vector<supervisor_msgs::ActionMS>::iterator it = toCheckActions.begin(); it != toCheckActions.end(); it++){
-        if(db_.factsAreIn(agent, it->effects)){
+        if(db_.factsAreIn(agent, it->effects) && it->effects.size() > 0){
 			toDone.push_back(*it);
 		}
 	}
