@@ -288,8 +288,8 @@ Function which checks if an agent still think that the current plan is still fea
 */
 void MSManager::planFeasibility(string agent){
 
-	ros::NodeHandle node;
-  	ros::ServiceClient client = node.serviceClient<supervisor_msgs::EndPlan>("goal_manager/end_plan");
+    ros::NodeHandle node;
+    ros::ServiceClient client = node.serviceClient<supervisor_msgs::EndPlan>("goal_manager/end_plan");
     supervisor_msgs::EndPlan srv;
     string robotName;
     node.getParam("/robot/name", robotName);
@@ -301,11 +301,7 @@ void MSManager::planFeasibility(string agent){
        //if the goal is achieved or ABORTED, we abort the plan
        string goalState = db_.getGoalState(agent, agentPlan.second.goal);
        if(goalState == "DONE" || goalState == "ABORTED"){
-	      abortPlan(agent);
-	      srv.request.report = true;//as the goal is achieved
-	      if (!client.call(srv)){
-	         ROS_ERROR("[mental_state] Failed to call service goal_manager/end_plan");
-	      }
+          abortPlan(agent);
        }
 	
 		//We get all the actions either READY, in PROGRESS, NEEDED, ASKED and PLANNED in the agent knowledge.
@@ -346,15 +342,6 @@ void MSManager::planFeasibility(string agent){
             if(possibleActions.size() == 0){
                 //TODO: if a human is not here and the robot has already tried to computes an other plan, it waits the human to come back
                 abortPlan(agent);
-                string goalState = db_.getGoalState(agent, agentPlan.second.goal);
-	         if(goalState == "DONE"){
-	            srv.request.report = true;//as the goal is achieved
-	         }else{
-	            srv.request.report = false;
-	         }
-	         if (!client.call(srv)){
-	            ROS_ERROR("[mental_state] Failed to call service goal_manager/end_plan");
-             }
             }else if(agent != robotName && db_.isAgentSeeing(agent, robotName)){
                 //TODO: to replace by agent in interaction area?
                 string robotPlanState = db_.getPlanState(robotName, agentPlan.second);
@@ -575,14 +562,33 @@ Function which aborts the current plan in the knowledge of the agent (and remove
 	@agent: the name of the agent
 */
 void MSManager::abortPlan(string agent){
-	
+
+    ros::NodeHandle node;
+    ros::ServiceClient client = node.serviceClient<supervisor_msgs::EndPlan>("goal_manager/end_plan");
+    supervisor_msgs::EndPlan srv;
+    string robotName;
+    node.getParam("/robot/name", robotName);
+
 	pair<bool, supervisor_msgs::PlanMS> agentPlan = getAgentPlan(agent);
 	if(agentPlan.first){
         db_.addPlanState(agentPlan.second, agent, "ABORTED");
         db_.removeActionsState(agent, "PLANNED");
         db_.removeActionsState(agent, "NEEDED");
         db_.removeActionsState(agent, "READY");
+
+        if(agent == robotName){
+            string goalState = db_.getGoalState(agent, agentPlan.second.goal);
+            if(goalState == "DONE"){
+                srv.request.report = true;//as the goal is achieved
+            }else{
+                srv.request.report = false;
+            }
+            if (!client.call(srv)){
+                ROS_ERROR("[mental_state] Failed to call service goal_manager/end_plan");
+            }
+        }
 	}
+
 }
 
 /*

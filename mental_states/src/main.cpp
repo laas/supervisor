@@ -165,8 +165,9 @@ bool actionState(supervisor_msgs::Action action, string state){
     if(actionFind.first){
         actionMS = actionFind.second;
         //if this action is already consider DONE or FAILED, so it is another new action
+        //if the action has no state, it is an old plan action, we ignore it
         string actionState = ms->db_.getActionState(robotName, actionMS);
-        if(actionState == "DONE" || actionState == "FAILED"){
+        if(actionState == "DONE" || actionState == "FAILED" || actionState == "UNKNOWN"){
             actionMS = ms->createActionFromHighLevel(action);
         }
     }else {
@@ -198,7 +199,7 @@ bool actionState(supervisor_msgs::Action action, string state){
         //if it is a failed action (from the plan), we abort the plan for all agent who can see
         if(state == "FAILED"){
             if(ms->isFromCurrentPlan(actionMS, *it)){
-                ms->abortPlan(*it);
+                abortPlan(*it);
             }
 
         }
@@ -353,7 +354,7 @@ bool getInfo(supervisor_msgs::GetInfo::Request  &req, supervisor_msgs::GetInfo::
         res.actions = ms->getActionList();
     }
 
-    return true;
+    return true; 
 
 }
 
