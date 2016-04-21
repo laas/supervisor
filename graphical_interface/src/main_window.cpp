@@ -65,6 +65,14 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     }
 
 
+    //we retrieve the possible positions from param of the .yaml file
+    vector<string> goals;
+    node_.getParam("/goals/names", goals);
+    for(vector<string>::iterator it = goals.begin(); it != goals.end(); it++){
+        ui.comboBoxGoalName->addItem(it->c_str());
+    }
+
+
     //we retrieve the possible goals from param of the .yaml file
     node_.getParam("/toIgnorePrint", toIgnoreFacts);
 
