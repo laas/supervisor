@@ -2,6 +2,8 @@
  **/
 #include "../include/graphical_interface/main_window.hpp"
 
+vector<string> toIgnoreFacts;
+
 MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     : QMainWindow(parent),
       actionClient_("supervisor/action_executor", true)
@@ -64,11 +66,7 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
 
 
     //we retrieve the possible goals from param of the .yaml file
-    vector<string> goals;
-    node_.getParam("/goals/names", goals);
-    for(vector<string>::iterator it = goals.begin(); it != goals.end(); it++){
-        ui.comboBoxGoalName->addItem(it->c_str());
-    }
+    node_.getParam("/toIgnorePrint", toIgnoreFacts);
 
 
     actionClient_.waitForServer();
@@ -238,6 +236,15 @@ void MainWindow::on_pushButtonExecuteGoal_clicked()
  * Knowledge tab
  *************************************/
 
+bool MainWindow::toIgnore(string fact){
+    for(vector<string>::iterator it = toIgnoreFacts.begin(); it != toIgnoreFacts.end(); it++){
+        if(fact == *it){
+            return true;
+        }
+    }
+    return false;
+}
+
 
 void MainWindow::on_pushButtonPrintKnowledge_clicked()
 {
@@ -260,7 +267,7 @@ void MainWindow::on_pushButtonPrintKnowledge_clicked()
                 planFacts.push_back(*it);
            }else if(it->property == "goalState"){
                 goalFacts.push_back(*it);
-           }else{
+           }else if(!toIgnore(it->property)){
                 envFacts.push_back(*it);
            }
         }

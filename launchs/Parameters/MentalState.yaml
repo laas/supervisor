@@ -1,0 +1,7 @@
+---
+observableFacts:
+   isReachableBy: true
+   isVisibleBy: true
+   isOn: true
+   isIn: true
+   isHoldBy: true

@@ -466,13 +466,25 @@ Function which add effects of an actions to the knowledge of an agent
 */
 void DBInterface::addEffects(vector<toaster_msgs::Fact> facts, string agent){
 
+    ros::NodeHandle node;
     for(vector<toaster_msgs::Fact>::iterator it = facts.begin(); it != facts.end(); it++){
+        string obsTopic = "observableFacts/";
+        obsTopic = obsTopic + it->property;
+        bool isObservable;
+        if(node.hasParam(obsTopic)){
+            node.getParam(obsTopic, isObservable);
+        }else{
+            isObservable = false;
+        }
+        if(isObservable){
+            it->factObservability = 1.0;
+        }else{
+            it->factObservability = 0.0;
+        }
         if(it->subjectId == "NULL" || it->targetId == "NULL"){
             //if there is NULL in the description of the effect, we remove all facts of this type on the knowledge of the agent
-            it->factObservability = 1.0;
             addFactToRemove(*it, agent);
         }else{
-            it->factObservability = 1.0;
             addFactToAdd(*it, agent);
         }
     }

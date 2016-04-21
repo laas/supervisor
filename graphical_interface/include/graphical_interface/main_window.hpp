@@ -55,6 +55,8 @@ private Q_SLOTS:
 
     void on_pushButtonStopAction_clicked();
 
+    bool toIgnore(string fact);
+
 public:
     Ui::MainWindowDesign ui;
     ros::NodeHandle node_;
