@@ -2,6 +2,7 @@
 timeNoAction: 3.0
 humanRightHand: 'rightHand'
 threshold:
-    pick: 20.0
-    place: 30.0
-    drop: 40.0
+    pick: 0.20
+    place: 0.30
+    drop: 0.40
+areaPresence: 'interaction'
