@@ -25,6 +25,8 @@ add_message_files(
    PlanMS.msg
    GoalMS.msg
    Link.msg
+   AgentActivity.msg
+   Focus.msg
 )
 
 # Generate services in the 'srv' folder
@@ -38,6 +40,7 @@ add_service_files(
   ChangeState.srv
   GetInfo.srv
   Empty.srv
+  HumanAction.srv
 )
 
  add_action_files(

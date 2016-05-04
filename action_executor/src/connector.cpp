@@ -20,6 +20,11 @@ Connector::Connector(){
    leftGripperMoving_ = false;
    torsoMoving_ = false;
    stopOrder_ = false;
+   rightArmPose_ = "unknown";
+   leftArmPose_ = "unknown";
+   node_.getParam("/restPosition/right", rightArmRestPose_);
+   node_.getParam("/restPosition/left", leftArmRestPose_);
+   weightFocus_ = 0.0;
 
    //Init action clients
    acGTP_ = new actionlib::SimpleActionClient<gtp_ros_msg::requestAction>("gtp_ros_server", true);

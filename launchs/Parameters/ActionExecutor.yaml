@@ -1,5 +1,8 @@
 ---
 nbPlanMaxGTP: 2
+restPosition:
+    right: 'manipRight'
+    left: 'manipLeft'
 moveToPositions:
     names: ['manipRight', 'manipLeft']
     manipRight: 'manipulationPoseRight'

@@ -14,6 +14,9 @@ Drop::Drop(supervisor_msgs::Action action, Connector* connector) : VirtualAction
 	}else{
 		ROS_WARN("[action_executor] Wrong parameter numbers, should be: object, container");
 	}
+    connector->objectsFocus_.clear();
+    connector->objectsFocus_.push_back(container_);
+    connector->weightFocus_ = 0.8;
 }
 
 bool Drop::preconditions(){

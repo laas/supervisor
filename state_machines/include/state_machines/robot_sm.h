@@ -26,7 +26,7 @@ public:
 	RobotSM();
 	~RobotSM() {};
 	string idleState();
-	string actingState();
+    string actingState();
 	string waitingState();
 protected:
 
@@ -35,6 +35,8 @@ private:
 	string robotName_;
 	Client actionClient_;
 	bool isActing_;
+    bool shouldRetractRight_;
+    bool shouldRetractLeft_;
 
 	void doneCb(const actionlib::SimpleClientGoalState& state, const supervisor_msgs::ActionExecutorResultConstPtr& result);
 

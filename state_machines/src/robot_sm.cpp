@@ -14,6 +14,8 @@ actionClient_("supervisor/action_executor", true)
 	node_.getParam("/robot/name", robotName_);
 	actionClient_.waitForServer();
 	isActing_ = false;
+    shouldRetractRight_ = true;
+    shouldRetractLeft_ = true;
 }
 
 
@@ -23,6 +25,8 @@ Called once when the goal of the action client completes
 void RobotSM::doneCb(const actionlib::SimpleClientGoalState& state, const supervisor_msgs::ActionExecutorResultConstPtr& result){
 
 		isActing_ = false;
+        shouldRetractRight_ = result->shouldRetractRight;
+        shouldRetractLeft_ = result->shouldRetractLeft;
 }
 
 /*
@@ -52,6 +56,33 @@ string RobotSM::idleState(){
      ROS_ERROR("[state_machines] Failed to call service mental_state/get_info");
 	}
 
+    //if no more action to do we retract if needed
+    if(shouldRetractRight_){
+        //retract right arm if needed
+        supervisor_msgs::ActionExecutorGoal goal;
+        goal.action.name = "moveTo";
+        string rightArmRestPose_;
+        node_.getParam("/restPosition/right", rightArmRestPose_);
+        goal.action.parameters.push_back(rightArmRestPose_);
+        goal.action.actors.push_back(robotName_);
+        actionClient_.sendGoal(goal,  boost::bind(&RobotSM::doneCb, this, _1, _2), Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
+        isActing_ = true;
+        ROS_INFO("[state_machines] Robot goes to ACTING");
+        return "ACTING";
+    }
+    if(shouldRetractLeft_){
+        //retract left arm if needed
+        supervisor_msgs::ActionExecutorGoal goal;
+        goal.action.name = "moveTo";
+        string leftArmRestPose_;
+        node_.getParam("/restPosition/left", leftArmRestPose_);
+        goal.action.parameters.push_back(leftArmRestPose_);
+        goal.action.actors.push_back(robotName_);
+        actionClient_.sendGoal(goal,  boost::bind(&RobotSM::doneCb, this, _1, _2), Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
+        isActing_ = true;
+        ROS_INFO("[state_machines] Robot goes to ACTING");
+        return "ACTING";
+    }
 	return "IDLE";
 }
 
@@ -59,6 +90,9 @@ string RobotSM::idleState(){
 State where the robot is ACTING
 */
 string RobotSM::actingState(){
+
+    //get objects and weight from action_executor topic
+
 
 	if(!isActing_){
 		ROS_INFO("[state_machines] Robot goes to IDLE");

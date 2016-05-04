@@ -18,6 +18,7 @@ ros::NodeHandle* node_;
 Connector* connector_;
 string humanSafetyJoint, robotToaster;
 double safetyThreshold;
+ros::Publisher focus_pub;
 
 ActionExecutor::ActionExecutor(string name):
 action_server_(node_, name, 
@@ -48,7 +49,9 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 	if(!act){
 		ROS_WARN("Aborted");
 		result_.report = false;
-		result_.state = "NON_VALID";
+        result_.state = "NON_VALID";
+        result_.shouldRetractRight = false;
+        result_.shouldRetractLeft = false;
 		action_server_.setAborted(result_);
 	   ROS_INFO("[action_executor] Action failed at creation");
 		return;
@@ -68,7 +71,11 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 		if (!client.call(srv)){
          ROS_ERROR("[action_executor] Failed to call service mental_state/change_state");
 		}
-		result_.report = false;
+        result_.report = false;
+        result_.shouldRetractRight = false;
+        result_.shouldRetractLeft = false;
+        connector_->objectsFocus_.clear();
+        connector_->weightFocus_ = 0.0;
 		if(!action_server_.isPreemptRequested()){
 			result_.state = feedback_.state;
 			action_server_.setAborted(result_);
@@ -83,6 +90,11 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 
     if(action_server_.isPreemptRequested() || connector_->stopOrder_){
         result_.state = "PREEMPTED";
+        result_.report = false;
+        result_.shouldRetractRight = false;
+        result_.shouldRetractLeft = false;
+        connector_->objectsFocus_.clear();
+        connector_->weightFocus_ = 0.0;
         action_server_.setPreempted(result_);
         ROS_INFO("[action_executor] Action stoped");
         return;
@@ -96,7 +108,11 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 		if (!client.call(srv)){
          ROS_ERROR("[action_executor] Failed to call service mental_state/change_state");
 		}
-		result_.report = false;
+        result_.report = false;
+        result_.shouldRetractRight = false;
+        result_.shouldRetractLeft = false;
+        connector_->objectsFocus_.clear();
+        connector_->weightFocus_ = 0.0;
 		if(!action_server_.isPreemptRequested()){
 			result_.state = feedback_.state;
 			action_server_.setAborted(result_);
@@ -107,10 +123,15 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 		}
 	   ROS_INFO("[action_executor] Action failed in planning");
 		return;
-	}
+    }
 
     if(action_server_.isPreemptRequested() || connector_->stopOrder_){
         result_.state = "PREEMPTED";
+        result_.report = false;
+        result_.shouldRetractRight = false;
+        result_.shouldRetractLeft = false;
+        connector_->objectsFocus_.clear();
+        connector_->weightFocus_ = 0.0;
         action_server_.setPreempted(result_);
         ROS_INFO("[action_executor] Action stoped");
         return;
@@ -124,7 +145,19 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 		if (!client.call(srv)){
          ROS_ERROR("[action_executor] Failed to call service mental_state/change_state");
 		}
-		result_.report = false;
+        result_.report = false;
+        connector_->objectsFocus_.clear();
+        connector_->weightFocus_ = 0.0;
+        if(connector_->rightArmRestPose_ != connector_->rightArmPose_){
+            result_.shouldRetractRight = true;
+        }else{
+            result_.shouldRetractRight = false;
+        }
+        if(connector_->leftArmRestPose_ != connector_->leftArmPose_){
+            result_.shouldRetractLeft = true;
+        }else{
+            result_.shouldRetractLeft = false;
+        }
 		if(!action_server_.isPreemptRequested()){
 			result_.state = feedback_.state;
 			action_server_.setAborted(result_);
@@ -146,6 +179,18 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
          ROS_ERROR("[action_executor] Failed to call service mental_state/change_state");
 		}
 		result_.report = false;
+        connector_->objectsFocus_.clear();
+        connector_->weightFocus_ = 0.0;
+        if(connector_->rightArmRestPose_ != connector_->rightArmPose_){
+            result_.shouldRetractRight = true;
+        }else{
+            result_.shouldRetractRight = false;
+        }
+        if(connector_->leftArmRestPose_ != connector_->leftArmPose_){
+            result_.shouldRetractLeft = true;
+        }else{
+            result_.shouldRetractLeft = false;
+        }
 		if(!action_server_.isPreemptRequested()){
 			result_.state = feedback_.state;
 			action_server_.setAborted(result_);
@@ -161,10 +206,22 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 	srv.request.state = "DONE";
 	if (!client.call(srv)){
      ROS_ERROR("[action_executor] Failed to call service mental_state/change_state");
-	}
+    }
+    if(connector_->rightArmRestPose_ != connector_->rightArmPose_){
+        result_.shouldRetractRight = true;
+    }else{
+        result_.shouldRetractRight = false;
+    }
+    if(connector_->leftArmRestPose_ != connector_->leftArmPose_){
+        result_.shouldRetractLeft = true;
+    }else{
+        result_.shouldRetractLeft = false;
+    }
 	result_.report = true;
+    connector_->objectsFocus_.clear();
+    connector_->weightFocus_ = 0.0;
 	result_.state = "OK";
-	action_server_.setSucceeded(result_);
+    action_server_.setSucceeded(result_);
 	ROS_INFO("[action_executor] Action succeed");
 }
 
@@ -194,7 +251,7 @@ VirtualAction* ActionExecutor::initializeAction(supervisor_msgs::Action action) 
 }
 
 /*
-Service call when the plan is over
+Service call when a stop order arrives
 */
 bool stopOrder(supervisor_msgs::Empty::Request  &req, supervisor_msgs::Empty::Response &res){
 
@@ -220,6 +277,19 @@ void agentFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
     }
 }
 
+void publishFocus(){
+    ros::Rate loop_rate(30);
+
+    while (true) {
+        supervisor_msgs::Focus msg;
+        msg.objects = connector_->objectsFocus_;
+        msg.weight = connector_->weightFocus_;
+        focus_pub.publish(msg);
+        loop_rate.sleep();
+    }
+
+}
+
 int main (int argc, char **argv)
 {
   ros::init(argc, argv, "action_executor");
@@ -239,6 +309,10 @@ int main (int argc, char **argv)
   ros::Subscriber sub = node.subscribe("agent_monitor/factList", 1000, agentFactListCallback);
 
   ros::ServiceServer service_stop = node.advertiseService("action_executor/stop", stopOrder); //stop the execution
+
+  focus_pub = node.advertise<supervisor_msgs::Focus>("action_executor/focus", 1000);
+
+  boost::thread pubThread(publishFocus);
 
   ros::spin();
 

@@ -1,6 +1,8 @@
 Action action
 ---
 bool report
+bool shouldRetractRight
+bool shouldRetractLeft
 string state
 ---
 string state

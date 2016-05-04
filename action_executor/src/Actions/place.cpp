@@ -14,6 +14,9 @@ Place::Place(supervisor_msgs::Action action, Connector* connector) : VirtualActi
 	}else{
 		ROS_WARN("[action_executor] Wrong parameter numbers, should be: object, support");
 	}
+    connector->objectsFocus_.clear();
+    connector->objectsFocus_.push_back(support_);
+    connector->weightFocus_ = 0.8;
 }
 
 bool Place::preconditions(){
@@ -77,7 +80,7 @@ bool Place::plan(){
     string actionName;
     if(isManipulableObject(support_)){
         //if the support is also a manipulable object, this is a stack action
-         actionName = "stack";
+         actionName = "stackObj";
          //we add a point in order the objects to be align
          gtp_ros_msg::Points point;
          point.pointKey = "target";
@@ -124,7 +127,6 @@ bool Place::plan(){
             }
        }
     }
-
     actionId_ = planGTP(actionName, agents, objects, datas, points);
 
     if(actionId_ == -1){

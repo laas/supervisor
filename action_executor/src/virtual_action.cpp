@@ -301,7 +301,7 @@ int VirtualAction::planGTP(string actionName, vector<gtp_ros_msg::Ag> agents, ve
   goal.req.points = points;
   goal.req.predecessorId.actionId = connector_->previousId_;
   goal.req.predecessorId.alternativeId = 0;
-  
+
   int nbTry = 0;
   while(nbTry < nbPlanMax_){
      connector_->acGTP_->sendGoal(goal);
@@ -404,6 +404,7 @@ bool VirtualAction::executeTrajectory(int actionId, int actionSubId, int armId, 
                 return false;
             }
         }
+        connector_->rightArmPose_ = "unknown";
      }else{
         pr2motion::Arm_Left_MoveGoal arm_goal_left;
         arm_goal_left.traj_mode.value=pr2motion::pr2motion_TRAJ_MODE::pr2motion_TRAJ_GATECH;
@@ -418,6 +419,7 @@ bool VirtualAction::executeTrajectory(int actionId, int actionSubId, int armId, 
                 return false;
             }
         }
+        connector_->leftArmPose_ = "unknown";
 
      }
    }

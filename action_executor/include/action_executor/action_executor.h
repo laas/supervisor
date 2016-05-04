@@ -4,6 +4,7 @@
 #include "supervisor_msgs/ActionExecutorAction.h"
 #include "supervisor_msgs/ChangeState.h"
 #include "supervisor_msgs/Empty.h"
+#include "supervisor_msgs/Focus.h"
 #include "action_executor/virtual_action.h"
 #include "action_executor/connector.h"
 #include "action_executor/Actions/action_pkg.h"
@@ -18,6 +19,7 @@
 #include <string>
 #include <vector>
 #include <ros/ros.h>
+#include <boost/thread.hpp>
 
 
 typedef actionlib::SimpleActionServer<supervisor_msgs::ActionExecutorAction> Server;

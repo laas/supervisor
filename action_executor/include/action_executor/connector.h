@@ -38,6 +38,14 @@ public:
 
     bool stopOrder_;
 
+    string rightArmPose_;
+    string leftArmPose_;
+    string rightArmRestPose_;
+    string leftArmRestPose_;
+
+    vector<string> objectsFocus_;
+    double weightFocus_;
+
 	
     int previousId_;
     int idGrasp_;

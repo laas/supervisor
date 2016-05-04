@@ -14,6 +14,9 @@ PickAndPlace::PickAndPlace(supervisor_msgs::Action action, Connector* connector)
 	}else{
 		ROS_WARN("[action_executor] Wrong parameter numbers, should be: object, support");
 	}
+    connector->objectsFocus_.clear();
+    connector->objectsFocus_.push_back(object_);
+    connector->weightFocus_ = 0.8;
 }
 
 bool PickAndPlace::preconditions(){
@@ -143,7 +146,8 @@ bool PickAndPlace::exec(Server* action_server){
             ROS_WARN("[action_executor] Robot failed to pick (gripper empty)");
             return false;
         }
-        //TODO: check gripper position (completly close or not)
+        connector_->objectsFocus_.clear();
+        connector_->objectsFocus_.push_back(support_);
         return execAction(nextActionId_, true, action_server);
     }else{
         return false;

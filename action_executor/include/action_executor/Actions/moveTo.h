@@ -24,6 +24,7 @@ public:
 protected:
 
 private:
+    string posName_;
     string position_;
     string arm_;
 

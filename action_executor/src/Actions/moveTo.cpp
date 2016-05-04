@@ -9,7 +9,7 @@ Class allowing the execution of a pick action
 
 MoveTo::MoveTo(supervisor_msgs::Action action, Connector* connector) : VirtualAction(connector){
 	if(action.parameters.size() == 1){
-		position_ = action.parameters[0];
+        posName_ = action.parameters[0];
 	}else{
 		ROS_WARN("[action_executor] Wrong parameters number, should be: position");
 	}
@@ -17,20 +17,20 @@ MoveTo::MoveTo(supervisor_msgs::Action action, Connector* connector) : VirtualAc
 
 bool MoveTo::preconditions(){
 
+
    //We check if the position is valid
    string posTopic = "moveToPositions/";
-   posTopic = posTopic + position_;
+   posTopic = posTopic + posName_;
    if(node_.hasParam(posTopic)){
        //we get the arm id
        string armTopic = "armPositions/";
-       armTopic = armTopic + position_;
+       armTopic = armTopic + posName_;
        node_.getParam(armTopic, arm_);
        //we replace the position by the GTP name
        node_.getParam(posTopic, position_);
    }else{
       ROS_WARN("[action_executor] Wrong position name");
       return false;
-   
    }
 	
 	return true;
@@ -38,7 +38,13 @@ bool MoveTo::preconditions(){
 }
 
 bool MoveTo::plan(){
-   
+
+    if(arm_ == "right" && connector_->rightArmPose_ == posName_){
+            return true;
+    }else if(connector_->leftArmPose_ == posName_){
+            return true;
+    }
+
    vector<gtp_ros_msg::Ag> agents;
    gtp_ros_msg::Ag agent;
    agent.actionKey = "mainAgent";
@@ -63,6 +69,12 @@ bool MoveTo::plan(){
 
 bool MoveTo::exec(Server* action_server){
 
+    if(arm_ == "right" && connector_->rightArmPose_ == posName_){
+            return true;
+    }else if(connector_->leftArmPose_ == posName_){
+            return true;
+    }
+
     int armId;
     if(arm_ == "right"){
         armId = 0;
@@ -76,5 +88,10 @@ bool MoveTo::exec(Server* action_server){
 
 bool MoveTo::post(){
 
+    if(arm_ == "right"){
+        connector_->rightArmPose_ = posName_;
+    }else{
+        connector_->leftArmPose_ = posName_;
+    }
 	return true;
 }
