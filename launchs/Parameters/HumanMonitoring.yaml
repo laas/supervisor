@@ -1,5 +1,5 @@
 ---
-timeNoAction: 3.0
+timeNoAction: 300.0
 humanRightHand: 'rightHand'
 threshold:
     pick: 0.20
