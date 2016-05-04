@@ -3,7 +3,7 @@
 #include <ctime>
 #include "toaster_msgs/Fact.h"
 #include "toaster_msgs/FactList.h"
-#include "toaster_msgs/AddFactsToAgent.h"
+#include "toaster_msgs/SetInfoDB.h"
 #include "supervisor_msgs/ChangeState.h"
 #include "supervisor_msgs/GetInfo.h"
 #include "supervisor_msgs/Link.h"
@@ -17,7 +17,7 @@ int main (int argc, char **argv)
   ros::init(argc, argv, "test_action");
 
   ros::NodeHandle n;
-  ros::ServiceClient add_fact = n.serviceClient<toaster_msgs::AddFactsToAgent>("database/add_facts_to_agent");
+  ros::ServiceClient add_fact = n.serviceClient<toaster_msgs::SetInfoDB>("database/set_info");
   ros::ServiceClient change_state = n.serviceClient<supervisor_msgs::ChangeState>("mental_state/change_state");
 
 
@@ -69,7 +69,9 @@ int main (int argc, char **argv)
   fact2.targetId = "PR2_ROBOT";
   toAdd.push_back(fact2);
 
-  toaster_msgs::AddFactsToAgent srvAdd;
+  toaster_msgs::SetInfoDB srvAdd;
+  srvAdd.request.infoType = "FACT";
+  srvAdd.request.add = true;
   srvAdd.request.agentId = "PR2_ROBOT";
   srvAdd.request.facts = toAdd;
   //if (!add_fact.call(srvAdd)){

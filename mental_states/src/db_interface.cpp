@@ -13,8 +13,9 @@ Return all the agents present in the database
 vector<string> DBInterface::getAgents(){
 
 	ros::NodeHandle node;
-  	ros::ServiceClient client = node.serviceClient<toaster_msgs::GetAgents>("database/get_agents");
-	toaster_msgs::GetAgents srv;
+    ros::ServiceClient client = node.serviceClient<toaster_msgs::GetInfoDB>("database/get_info");
+    toaster_msgs::GetInfoDB srv;
+    srv.request.type = "AGENT";
 	vector<string> agents;
   	if (client.call(srv))
   	{
@@ -26,7 +27,7 @@ vector<string> DBInterface::getAgents(){
   	}
   	else
   	{
-   	 ROS_ERROR("[mental_state] Failed to call service database/get_agents");
+     ROS_ERROR("[mental_state] Failed to call service database/get_info");
   	}
   	return agents;
 }
@@ -431,14 +432,17 @@ Function which add facts to the knowledge of an agent
 void DBInterface::addFacts(vector<toaster_msgs::Fact> facts, string agent){
 
 	ros::NodeHandle node;
-  	ros::ServiceClient client = node.serviceClient<toaster_msgs::AddFactsToAgent>("database/add_facts_to_agent");
+    ros::ServiceClient client = node.serviceClient<toaster_msgs::SetInfoDB>("database/set_info");
 
-	toaster_msgs::AddFactsToAgent srv;
+    toaster_msgs::SetInfoDB srv;
 	srv.request.agentId = agent;
     srv.request.facts = facts;
+    srv.request.infoType = "FACT";
+    srv.request.add = true;
   	if (!client.call(srv)){
-   	 ROS_ERROR("[mental_state] Failed to call service database/add_facts_to_agent");
+     ROS_ERROR("[mental_state] Failed to call service database/set_info");
   	}
+
 }
 
 /*
@@ -449,14 +453,17 @@ Function which remove facts to the knowledge of an agent
 void DBInterface::removeFacts(vector<toaster_msgs::Fact> facts, string agent){
 
     ros::NodeHandle node;
-    ros::ServiceClient client = node.serviceClient<toaster_msgs::AddFactsToAgent>("database/remove_facts_to_agent");
+    ros::ServiceClient client = node.serviceClient<toaster_msgs::SetInfoDB>("database/set_info");
 
-    toaster_msgs::AddFactsToAgent srv;
+    toaster_msgs::SetInfoDB srv;
     srv.request.agentId = agent;
     srv.request.facts = facts;
+    srv.request.infoType = "FACT";
+    srv.request.add = false;
     if (!client.call(srv)){
-     ROS_ERROR("[mental_state] Failed to call service database/remove_facts_to_agent");
+     ROS_ERROR("[mental_state] Failed to call service database/set_info");
     }
+
 }
 
 /*
@@ -497,16 +504,19 @@ Function which return all the knowledge of an agent
 vector<toaster_msgs::Fact> DBInterface::getFactsAgent(string agent){
 
    ros::NodeHandle node;
-  	ros::ServiceClient client = node.serviceClient<toaster_msgs::GetFacts>("database/get_current_facts_from_agent");
-	toaster_msgs::GetFacts srv;
+    ros::ServiceClient client = node.serviceClient<toaster_msgs::GetInfoDB>("database/get_info");
+    toaster_msgs::GetInfoDB srv;
 	
 	
 	srv.request.agentId = agent;
-	if (client.call(srv)){
+    srv.request.type = "FACT";
+    srv.request.subType = "CURRENT";
+    if (client.call(srv)){
 	   return srv.response.resFactList.factList;
 	}else{
 	   ROS_ERROR("[mental_state] Failed to call service database/get_current_facts_from_agent");
 	}
+
 }
 
 /*
@@ -516,8 +526,10 @@ Function which remove all knowledge from the database
 void DBInterface::cleanDB(){
 
    ros::NodeHandle node;
-  	ros::ServiceClient client_rm = node.serviceClient<toaster_msgs::AddFactsToAgent>("database/remove_facts_to_agent");
-	toaster_msgs::AddFactsToAgent srv_rm;
+    ros::ServiceClient client_rm = node.serviceClient<toaster_msgs::SetInfoDB>("database/set_info");
+    toaster_msgs::SetInfoDB srv_rm;
+    srv_rm.request.infoType = "FACT";
+    srv_rm.request.add = false;
 	vector<toaster_msgs::Fact> toRemove;
 	
 	vector<string> allAgents = getAgents();

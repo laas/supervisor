@@ -6,13 +6,9 @@
 #include <vector>
 #include <ros/ros.h>
 
-#include "toaster_msgs/GetAgents.h"
-#include "toaster_msgs/AddFactToAgent.h"
-#include "toaster_msgs/AddFactsToAgent.h"
-#include "toaster_msgs/RemoveFactToAgent.h"
-#include "toaster_msgs/ExecuteSQL.h"
-#include "toaster_msgs/AreInTable.h"
-#include "toaster_msgs/GetFacts.h"
+#include "toaster_msgs/GetInfoDB.h"
+#include "toaster_msgs/SetInfoDB.h"
+#include "toaster_msgs/ExecuteDB.h"
 #include "toaster_msgs/Fact.h"
 #include "toaster_msgs/FactList.h"
 #include "supervisor_msgs/ActionMS.h"

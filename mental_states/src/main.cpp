@@ -84,7 +84,7 @@ bool abortGoal(string goal, string agent){
 /*
 Function call when a plan is computed by the robot
 */
-bool newPlan(supervisor_msgs::Plan plan){
+bool newPlan(supervisor_msgs::Plan plan, bool shared){
 
     //Transform the plan into a PlanMS
     supervisor_msgs::PlanMS planMS;
@@ -111,12 +111,22 @@ bool newPlan(supervisor_msgs::Plan plan){
         if(*it == robotName){
             ms->db_.addActionsState(planMS.actions, *it, "PLANNED");
             ms->db_.addPlanState(planMS, *it, "PROGRESS");
-        }else{
+        }else if(!shared){
             ms->db_.addActionsState(planMS.actions, *it, "UNKNOWN");
             ms->db_.addPlanState(planMS, *it, "UNKNOWN");
         }
     }
 
+    if(shared){
+        //we get all the agents which can see the robot
+        vector<string> presentAgents = ms->db_.getAgentsWhoSee(robotName);
+
+        //For all these agents, the plan is now in PROGRESS and its actions PLANNED
+        for(vector<string>::iterator it = presentAgents.begin(); it != presentAgents.end(); it++){
+            ms->db_.addActionsState(planMS.actions, *it, "PLANNED");
+            ms->db_.addPlanState(planMS, *it, "PROGRESS");
+        }
+    }
 
     return true;
 }
@@ -219,12 +229,11 @@ bool changeState(supervisor_msgs::ChangeState::Request  &req, supervisor_msgs::C
         return actionState(req.action, req.state);
     }else if(req.type == "plan"){
         if(req.state == "PROGRESS"){
-            return newPlan(req.plan);
+            return newPlan(req.plan, false);
         }else if(req.state == "SHARE"){
             return sharePlan();
         }else if(req.state == "PROGRESS_SHARE"){
-            newPlan(req.plan);
-            return sharePlan();
+            return newPlan(req.plan, true);
         }else if(req.state == "ABORT"){
             return abortPlan(req.agent);
         }
