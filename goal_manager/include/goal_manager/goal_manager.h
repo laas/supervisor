@@ -23,19 +23,17 @@ using namespace std;
 
 class GoalManager {
 public:
-	GoalManager();
+    GoalManager(ros::NodeHandle* node);
 	~GoalManager() {};
 	void addGoal(string goal);
-	void endPlan(bool report);
+    void endGoal(bool report);
 	void chooseGoal();
 protected:
 
 private:
    string currentGoal_;
-   bool hasPlan_;
-   queue<string> waitingGoals_; 
-	void executeGoal(string goal);
-	supervisor_msgs::Plan convertPlan(hatp_msgs::Plan plan, string goal);
+   queue<string> waitingGoals_;
+   ros::NodeHandle* node_;
 
 };
 

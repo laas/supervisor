@@ -3,13 +3,13 @@ author Sandra Devin
 
 Main class of the goal_manager.
 
-The goal manager allows to choose a goal to execute and find a plan to execute it
+The goal manager allows to choose a goal to execute
 
 **/
 
 #include <goal_manager/goal_manager.h>
 
-GoalManager* gm = new GoalManager();
+GoalManager* gm;
 
 /*
 Service call to execute a new goal
@@ -36,9 +36,9 @@ bool newGoal(supervisor_msgs::NewGoal::Request  &req, supervisor_msgs::NewGoal::
 /*
 Service call when the plan is over
 */
-bool endPlan(supervisor_msgs::EndPlan::Request  &req, supervisor_msgs::EndPlan::Response &res){
+bool endGoal(supervisor_msgs::EndPlan::Request  &req, supervisor_msgs::EndPlan::Response &res){
    
-   gm->endPlan(req.report);
+   gm->endGoal(req.report);
 
 	return true;
 }
@@ -49,11 +49,14 @@ int main (int argc, char **argv)
   ros::NodeHandle node;
   	ros::Rate loop_rate(30);
 
+  GoalManager goalM(&node);
+  gm = &goalM;
+
   ROS_INFO("[goal_manager] Init goal_manager");
  
   //Services declarations
   ros::ServiceServer service_goal = node.advertiseService("goal_manager/new_goal", newGoal); //new goal to execute
-  ros::ServiceServer end_plan = node.advertiseService("goal_manager/end_plan", endPlan); //the plan is over
+  ros::ServiceServer end_goal = node.advertiseService("goal_manager/end_goal", endGoal); //the plan is over
 
   ROS_INFO("[goal_manager] goal_manager ready");
   while(node.ok()){
