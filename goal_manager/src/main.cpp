@@ -51,17 +51,17 @@ int main (int argc, char **argv)
   node = &_node;
   ros::Rate loop_rate(30);
 
-  GoalManager _gm(&node);
+  GoalManager _gm(&_node);
   gm = &_gm;
 
   ROS_INFO("[goal_manager] Init goal_manager");
  
   //Services declarations
-  ros::ServiceServer service_goal = node.advertiseService("goal_manager/new_goal", newGoal); //new goal to execute
-  ros::ServiceServer end_goal = node.advertiseService("goal_manager/end_goal", endGoal); //the plan is over
+  ros::ServiceServer service_goal = _node.advertiseService("goal_manager/new_goal", newGoal); //new goal to execute
+  ros::ServiceServer end_goal = _node.advertiseService("goal_manager/end_goal", endGoal); //the plan is over
 
   ROS_INFO("[goal_manager] goal_manager ready");
-  while(node.ok()){
+  while(_node.ok()){
    gm->chooseGoal();
    ros::spinOnce();
   	loop_rate.sleep();
