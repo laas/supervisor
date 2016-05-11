@@ -24,6 +24,7 @@ When a goal is over, look if there is another goal to execute
 void GoalManager::chooseGoal(){
 
    ros::ServiceClient client = node_->serviceClient<supervisor_msgs::ChangeState>("mental_state/change_state");
+   ros::ServiceClient clientNG = node_->serviceClient<supervisor_msgs::NewGoal>("plan_elaboration/new_goal");
 
    if(currentGoal_ == "NONE" && waitingGoals_.size() >0){//there at least one waiting goal and no current goal
       string newGoal = waitingGoals_.front();
@@ -39,6 +40,11 @@ void GoalManager::chooseGoal(){
       currentGoal_ = newGoal;
       ROS_INFO("[goal_manager] Executing the goal %s", newGoal.c_str());
       //TODO: send goal to plan_elaboration
+      supervisor_msgs::NewGoal srvNG;
+      srvNG.request.goal = currentGoal_;
+      if (!clientNG.call(srvNG)){
+      ROS_ERROR("[goal_manager] Failed to call service plan_elaboration/new_goal");
+      }
    }
 }
 

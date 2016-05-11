@@ -10,14 +10,14 @@ The goal manager allows to choose a goal to execute
 #include <goal_manager/goal_manager.h>
 
 GoalManager* gm;
+ros::NodeHandle* node;
 
 /*
 Service call to execute a new goal
 */
 bool newGoal(supervisor_msgs::NewGoal::Request  &req, supervisor_msgs::NewGoal::Response &res){
-	
-	ros::NodeHandle node;
-   ros::ServiceClient client = node.serviceClient<supervisor_msgs::ChangeState>("mental_state/change_state");
+
+   ros::ServiceClient client = node->serviceClient<supervisor_msgs::ChangeState>("mental_state/change_state");
    
 	//We say to the mental state manager that we have a new goal
    supervisor_msgs::ChangeState srv;
@@ -33,6 +33,7 @@ bool newGoal(supervisor_msgs::NewGoal::Request  &req, supervisor_msgs::NewGoal::
 
 	return true;
 }
+
 /*
 Service call when the plan is over
 */
@@ -46,11 +47,12 @@ bool endGoal(supervisor_msgs::EndPlan::Request  &req, supervisor_msgs::EndPlan::
 int main (int argc, char **argv)
 {
   ros::init(argc, argv, "goal_manager");
-  ros::NodeHandle node;
-  	ros::Rate loop_rate(30);
+  ros::NodeHandle _node;
+  node = &_node;
+  ros::Rate loop_rate(30);
 
-  GoalManager goalM(&node);
-  gm = &goalM;
+  GoalManager _gm(&node);
+  gm = &_gm;
 
   ROS_INFO("[goal_manager] Init goal_manager");
  
