@@ -14,5 +14,6 @@
 	<node name="human_monitor" pkg="human_monitor" type="human_monitor" output="screen" />  <!-- Launch the human monitor -->
 	<node name="state_machines" pkg="state_machines" type="state_machines" output="screen" />  <!-- Launch the state machines -->
 	<node name="goal_manager" pkg="goal_manager" type="goal_manager" output="screen" />  <!-- Launch the goal manager -->
+        <node name="plan_elaboration" pkg="plan_elaboration" type="plan_elaboration" output="screen" />  <!-- Launch the plan elaboration -->
 	<node name="graphical_interface" pkg="graphical_interface" type="graphical_interface" output="screen" />  <!-- Launch the graphical interface -->
 </launch>

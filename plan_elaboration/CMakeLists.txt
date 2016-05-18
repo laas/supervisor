@@ -180,7 +180,7 @@ include_directories(
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
 
-add_executable(plan_elaboration src/main.cpp)
+add_executable(plan_elaboration src/main.cpp src/plan_elaboration.cpp)
 target_link_libraries( 
   plan_elaboration
   ${catkin_LIBRARIES}
