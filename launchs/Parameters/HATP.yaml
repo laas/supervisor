@@ -21,4 +21,5 @@ HATP_actions:
    PickAndPlace: 'pickandplace'
 
 HATP:
-    AgentX: 'AgentX'
+    AgentX: 'AGENTX'
+    Omni: 'OMNI'
