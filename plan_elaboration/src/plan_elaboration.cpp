@@ -7,6 +7,7 @@ PlanElaboration::PlanElaboration(ros::NodeHandle* node)
     node_ = node;
     node_->getParam("/robot/name", robotName_);
     node_->getParam("/HATP/AgentX", agentX_);
+    node_->getParam("/HATP/Omni", omni_);
 
     ros::ServiceClient client = node_->serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
     supervisor_msgs::GetInfo srv;
@@ -79,16 +80,40 @@ pair<bool, supervisor_msgs::Plan> PlanElaboration::findPlan(){
     setPlanningTable(robotName_);
     
     //Ask HATP a plan
-    pair<bool, hatp_msgs::Plan> hatpPlan = GetHATPPlan();
-    if(hatpPlan.first){
-        //Check feasability
+    bool needPlan = true;
+    while(needPlan){
+        pair<bool, hatp_msgs::Plan> hatpPlan = GetHATPPlan();
+        if(hatpPlan.first){
+            //Check feasability
+            string feasible = checkFeasible(hatpPlan.second);
+            if(feasible == "ok"){
+                needPlan = false;
+                //Ask plan for partner + check feasability
+                vector<string> goalActors;
+                string actorsTopic = "/goals/";
+                actorsTopic = actorsTopic + currentGoal_ + "_actors";
+                node_->getParam(actorsTopic, goalActors);
+                for(vector<string>::iterator it = goalActors.begin(); it != goalActors.end(); it++){
+                    if(*it != robotName_){
+                        setPlanningTable(*it);
+                        pair<bool, hatp_msgs::Plan> hatpPartnerPlan = GetHATPPlan();
+                        if(hatpPartnerPlan.first){
+                            checkDivergentBelief(hatpPartnerPlan.second);
+                        }
+                    }
+                }
 
-        //Ask plan for partner + check feasability
-
-        //Apply post-process
-
-    }else{
-        answer.first = false;
+                //Apply post-process
+                answer.second = convertPlan(hatpPlan.second);
+                answer.first = true;
+            }else if(feasible == "failed"){
+                answer.first = false;
+                needPlan = false;
+            }
+        }else{
+            needPlan = false;
+            answer.first = false;
+        }
     }
 
 
@@ -279,4 +304,111 @@ pair<bool, hatp_msgs::Plan> PlanElaboration::GetHATPPlan(){
     return answer;
 }
 
+/*
+Function which check if a given HATP plan is feasible (based on Omni agent action)
+*/
+string PlanElaboration::checkFeasible(hatp_msgs::Plan plan){
 
+   for(vector<hatp_msgs::Task>::iterator it = plan.tasks.begin(); it != plan.tasks.end(); it++){
+      if(it->type){//the task is an action and not a method
+          if(isInVector(it->agents, omni_)){
+              //TODO: ask preconditions
+              //TODO: if new info return new_info
+              return "failed";
+          }
+       }
+    }
+
+    return "ok";
+}
+
+/*
+Function which inform about divergent belief of a given HATP plan (based on Omni agent action)
+*/
+void PlanElaboration::checkDivergentBelief(hatp_msgs::Plan plan){
+
+   for(vector<hatp_msgs::Task>::iterator it = plan.tasks.begin(); it != plan.tasks.end(); it++){
+      if(it->type){//the task is an action and not a method
+          if(isInVector(it->agents, omni_)){
+              //TODO: inform preconditions
+          }
+       }
+    }
+}
+
+/*
+Function which convert a plan from HATP to a supervisor plan and apply post process
+*/
+supervisor_msgs::Plan PlanElaboration::convertPlan(hatp_msgs::Plan plan){
+
+   supervisor_msgs::Plan newPlan;
+   newPlan.goal = currentGoal_;
+   for(vector<hatp_msgs::Task>::iterator it = plan.tasks.begin(); it != plan.tasks.end(); it++){
+      if(it->type){//the task is an action and not a method
+          //TODO: to remove when good HATP domain
+          for(vector<string>::iterator ita = it->agents.begin(); ita != it->agents.end(); ita++){
+               if(*ita == "AGENTX2"){
+                   *ita = "AGENTX";
+               }
+          }
+
+          supervisor_msgs::Action action;
+          string nameTopic = "HATP_actions/";
+          nameTopic = nameTopic + it->name;
+          node_->getParam(nameTopic, action.name);
+          action.id = it->id;
+          action.actors = it->agents;
+          //we replace objects name by higher level name when needed
+          action.parameters = convertParam(it->parameters);
+          newPlan.actions.push_back(action);
+       }
+    }
+    for(vector<hatp_msgs::StreamNode>::iterator it = plan.streams.begin(); it != plan.streams.end(); it++){
+       for(vector<unsigned int>::iterator itt = it->successors.begin(); itt != it->successors.end(); itt++){
+          //TODO: remove useless link when HATP ok
+          supervisor_msgs::Link link;
+          link.origin = it->taskId;
+          link.following = *itt;
+          newPlan.links.push_back(link);
+       }
+    }
+
+    return newPlan;
+}
+
+/*
+Function which takes parameters from HATP and replace objects name by higher level name when needed
+*/
+vector<string> PlanElaboration::convertParam(vector<string> params){
+
+    vector<string> result;
+
+    //the first param is the name of the actor, we remove it
+    //TODO: treat the case where more than one actor?
+    bool flag = false;
+    string tmpParam;
+    for(vector<string>::iterator it = params.begin() + 1; it != params.end(); it++){
+        if(!flag){//the parameter is an object, keep it in memory
+            tmpParam = *it;
+            flag = true;
+        }else{//the parameter is a flag, change the object in memory accordingly
+            if(*it == "FTRUE"){
+                string topic = "/highLevelName/";
+                topic = topic + tmpParam;
+                if(node_->hasParam(topic)){
+                    string higlLevelName;
+                    node_->getParam(topic, higlLevelName);
+                    result.push_back(higlLevelName);
+                }else{
+                    //if no high level name in param we consider the object name to be high level
+                    result.push_back(tmpParam);
+                }
+            }else{
+                result.push_back(tmpParam);
+            }
+            flag = false;
+        }
+    }
+
+    return result;
+}

@@ -33,6 +33,7 @@ private:
     bool needPlan_;
     string robotName_;
     string agentX_;
+    string omni_;
     vector<string> agentList_;
 
     pair<bool, supervisor_msgs::Plan> findPlan();
@@ -42,6 +43,10 @@ private:
     vector<toaster_msgs::Fact> computeAgentXFacts(vector<toaster_msgs::Fact> facts);
     bool isInVectorFact(vector<toaster_msgs::Fact> list, toaster_msgs::Fact element);
     bool isInVector(vector<string> list, string element);
+    string checkFeasible(hatp_msgs::Plan plan);
+    supervisor_msgs::Plan convertPlan(hatp_msgs::Plan plan);
+    void checkDivergentBelief(hatp_msgs::Plan plan);
+    vector<string> convertParam(vector<string> params);
 };
 
 #endif // PLAN_ELABORATION_H
