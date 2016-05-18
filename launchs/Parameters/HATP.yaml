@@ -1,12 +1,24 @@
 ---
 HATP_domains:
-  names: ['STACK']
+  names: ['STACK', 'BLOCKS']
   STACK_method: 'BuildStack'
   STACK_params: ['PLACEMAT_RED',
                     'RED_CUBE',
                     'BLACK_CUBE',
                     'GREEN_CUBE',
                     'BLUE_CUBE']
+  STACK_facts: ['isReachableBy',
+                'isOn',
+                'hasInHand']
+  BLOCKS_method: 'Build'
+  BLOCKS_params: []
+  BLOCKS_facts: ['isReachableBy',
+                'isOn',
+                'hasInHand']
 HATP_actions:
    Pick: 'pick'
    Place: 'place'
+   PickAndPlace: 'pickandplace'
+
+HATP:
+    AgentX: 'AgentX'
