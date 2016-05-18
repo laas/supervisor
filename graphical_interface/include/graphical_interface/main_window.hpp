@@ -26,6 +26,7 @@
 #include "supervisor_msgs/Empty.h"
 #include "toaster_msgs/Fact.h"
 #include "supervisor_msgs/ActionMS.h"
+#include "toaster_msgs/GetInfoDB.h"
 
 using namespace std;
 
