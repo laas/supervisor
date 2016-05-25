@@ -9,12 +9,16 @@ HATP_domains:
                     'BLUE_CUBE']
   STACK_facts: ['isReachableBy',
                 'isOn',
-                'hasInHand']
+                'hasInHand',
+                'type']
   BLOCKS_method: 'Build'
   BLOCKS_params: []
   BLOCKS_facts: ['isReachableBy',
                 'isOn',
-                'hasInHand']
+                'hasInHand',
+                'type',
+                'genericName',
+                'value']
 HATP_actions:
    Pick: 'pick'
    Place: 'place'
