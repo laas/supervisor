@@ -191,21 +191,52 @@ Compute AgentX facts based on a list of facts
 vector<toaster_msgs::Fact> PlanElaboration::computeAgentXFacts(vector<toaster_msgs::Fact> facts){
 
     vector<toaster_msgs::Fact> result;
+    string topic, highLevelIt, highLevelIt2;
+    bool highLevelName;
 
     for(vector<toaster_msgs::Fact>::iterator it = facts.begin(); it != facts.end(); it++){
         result.push_back(*it);
         if(isInVector(agentList_, it->subjectId)){
             bool added = false;
+            //if the other object has an high level name we look for other objects with high level names
+            topic = "/highLevelName/" + it->targetId;
+            if(node_->hasParam(topic)){
+                node_->getParam(topic, highLevelIt);
+            }else{
+                highLevelIt = it->targetId;
+            }
             for(vector<toaster_msgs::Fact>::iterator it2 = it+1; it2 != facts.end(); it2++){
-                if(it2->property == it->property && it2->targetId == it->targetId && isInVector(agentList_, it2->subjectId)){
+                topic = "/highLevelName/" + it2->targetId;
+                if(node_->hasParam(topic)){
+                    node_->getParam(topic, highLevelIt2);
+                    highLevelName = true;
+                }else{
+                    highLevelIt2 = it2->targetId;
+                    highLevelName = false;
+                }
+                if(it2->property == it->property && highLevelIt2 == highLevelIt && isInVector(agentList_, it2->subjectId)){
                     result.push_back(*it2);
                     if(!added){
                         toaster_msgs::Fact toAdd;
                         toAdd.subjectId = agentX_;
                         toAdd.property = it->property;
+                        toAdd.propertyType = "state";
                         toAdd.targetId = it->targetId;
                         result.push_back(toAdd);
+                        //TODO remove when HATP ok
+                        toAdd.subjectId = "AGENTX2";
+                        result.push_back(toAdd);
                         added = true;
+                    }
+                    if(highLevelName){
+                        toaster_msgs::Fact toAdd;
+                        toAdd.subjectId = agentX_;
+                        toAdd.property = it->property;
+                        toAdd.propertyType = "state";
+                        toAdd.targetId = it2->targetId;
+                        result.push_back(toAdd);
+                        toAdd.subjectId = "AGENTX2";
+                        result.push_back(toAdd);
                     }
                     facts.erase(it2);
                     it2--;
@@ -213,16 +244,44 @@ vector<toaster_msgs::Fact> PlanElaboration::computeAgentXFacts(vector<toaster_ms
             }
         }else if(isInVector(agentList_, it->targetId)){
             bool added = false;
+            //if the other object has an high level name we look for other objects with high level names
+            topic = "/highLevelName/" + it->subjectId;
+            if(node_->hasParam(topic)){
+                node_->getParam(topic, highLevelIt);
+            }else{
+                highLevelIt = it->subjectId;
+            }
             for(vector<toaster_msgs::Fact>::iterator it2 = it+1; it2 != facts.end(); it2++){
-                if(it2->property == it->property && it2->subjectId == it->subjectId && isInVector(agentList_, it2->targetId)){
+                topic = "/highLevelName/" + it2->subjectId;
+                if(node_->hasParam(topic)){
+                    node_->getParam(topic, highLevelIt2);
+                    highLevelName = true;
+                }else{
+                    highLevelName = false;
+                    highLevelIt2 = it2->subjectId;
+                }
+                if(it2->property == it->property && highLevelIt2 == highLevelIt && isInVector(agentList_, it2->targetId)){
                     result.push_back(*it2);
                     if(!added){
                         toaster_msgs::Fact toAdd;
                         toAdd.subjectId = it->subjectId;
                         toAdd.property = it->property;
+                        toAdd.propertyType = "state";
                         toAdd.targetId = agentX_;
                         result.push_back(toAdd);
+                        toAdd.targetId = "AGENTX2";
+                        result.push_back(toAdd);
                         added = true;
+                    }
+                    if(highLevelName){
+                        toaster_msgs::Fact toAdd;
+                        toAdd.subjectId = it2->subjectId;
+                        toAdd.property = it->property;
+                        toAdd.propertyType = "state";
+                        toAdd.targetId = agentX_;
+                        result.push_back(toAdd);
+                        toAdd.targetId = "AGENTX2";
+                        result.push_back(toAdd);
                     }
                     facts.erase(it2);
                     it2--;
@@ -249,6 +308,7 @@ vector<toaster_msgs::Fact> PlanElaboration::setAnswerIntoFacts(vector<string> an
             i++;
         }else if(i == 1){
             fact.property = *it;
+            fact.propertyType = "state";
             i++;
         }else if(i == 2){
             fact.targetId = *it;
@@ -312,6 +372,7 @@ string PlanElaboration::checkFeasible(hatp_msgs::Plan plan){
    for(vector<hatp_msgs::Task>::iterator it = plan.tasks.begin(); it != plan.tasks.end(); it++){
       if(it->type){//the task is an action and not a method
           if(isInVector(it->agents, omni_)){
+              ROS_INFO("[DIALOGUE] Not feasible action: %s", it->name.c_str());
               //TODO: ask preconditions
               //TODO: if new info return new_info
               return "failed";
