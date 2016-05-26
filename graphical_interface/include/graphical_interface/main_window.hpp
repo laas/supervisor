@@ -26,6 +26,7 @@
 #include "supervisor_msgs/Empty.h"
 #include "toaster_msgs/Fact.h"
 #include "supervisor_msgs/ActionMS.h"
+#include "supervisor_msgs/Say.h"
 
 using namespace std;
 
@@ -57,11 +58,16 @@ private Q_SLOTS:
 
     bool toIgnore(string fact);
 
+    void on_SpeakButton_clicked();
+
+
 public:
     Ui::MainWindowDesign ui;
     ros::NodeHandle node_;
     Client actionClient_;
     string robotName_;
+
+
 };
 
 

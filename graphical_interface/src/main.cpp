@@ -8,6 +8,9 @@
 #include <QtGui>
 #include <QApplication>
 #include "../include/graphical_interface/main_window.hpp"
+
+
+
 /*****************************************************************************
 ** Main
 *****************************************************************************/
@@ -24,6 +27,7 @@ int main(int argc, char **argv) {
     app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
 
     ROS_INFO("[graphical_interface] graphical_interface ready");
+
 
     int result = app.exec();
     return result;

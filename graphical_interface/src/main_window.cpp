@@ -327,3 +327,19 @@ void MainWindow::on_pushButtonSeeActions_clicked()
         ROS_ERROR("Failed to call service mental_state/get_info");
    }
 }
+
+
+/*************************************
+ * Dialogue tab
+ *************************************/
+
+void MainWindow::on_SpeakButton_clicked()
+{
+    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::Say>("dialogue_node/say");
+    supervisor_msgs::Say srv;
+    string sentence = ui.SpeakSentence->text().toStdString();
+    srv.request.sentence = sentence;
+    if (!client.call(srv)) {
+        ROS_ERROR("Failed to call service dialogue_node/say");
+    }
+}
