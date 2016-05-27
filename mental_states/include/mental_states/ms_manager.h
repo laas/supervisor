@@ -24,6 +24,7 @@
 #include "supervisor_msgs/Link.h"
 #include "supervisor_msgs/Action.h"
 #include "supervisor_msgs/Plan.h"
+#include "supervisor_msgs/GiveInfo.h"
 
 
 using namespace std;
@@ -45,6 +46,7 @@ public:
 	pair<bool, supervisor_msgs::ActionMS> getActionFromId(int id);
 	pair<bool, supervisor_msgs::PlanMS> getPlanFromId(int id);
 	supervisor_msgs::Action convertActionMStoAction(supervisor_msgs::ActionMS actionMS);
+    supervisor_msgs::Plan convertPlanMStoPlan(supervisor_msgs::PlanMS planMS);
 	vector<supervisor_msgs::ActionMS> getActionsFromIds(vector<int> ids);
     bool isFromCurrentPlan(supervisor_msgs::ActionMS actionMS, string agent);
 

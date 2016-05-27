@@ -24,6 +24,7 @@ Connector::Connector(){
    leftArmPose_ = "unknown";
    node_.getParam("/restPosition/right", rightArmRestPose_);
    node_.getParam("/restPosition/left", leftArmRestPose_);
+   node_.getParam("/waitActionServer", waitActionServer_);
    weightFocus_ = 0.0;
 
    //Init action clients

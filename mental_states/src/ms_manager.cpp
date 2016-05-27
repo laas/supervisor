@@ -699,6 +699,25 @@ supervisor_msgs::Action MSManager::convertActionMStoAction(supervisor_msgs::Acti
 }
 
 /*
+Function which convert a PlanMS in Plan
+    @planMS: the action to convert
+*/
+supervisor_msgs::Plan MSManager::convertPlanMStoPlan(supervisor_msgs::PlanMS planMS){
+
+    supervisor_msgs::Plan plan;
+    plan.goal = planMS.goal.name;
+    plan.id = planMS.id;
+    plan.links = planMS.links;
+    vector<supervisor_msgs::Action> actions;
+    for(vector<supervisor_msgs::ActionMS>::iterator it = planMS.actions.begin(); it != planMS.actions.end(); it++){
+        actions.push_back(convertActionMStoAction(*it));
+    }
+    plan.actions = actions;
+
+    return plan;
+}
+
+/*
 Function which return true if an action come from the current plan of an agent
     @actionMS: the action to test
 */
