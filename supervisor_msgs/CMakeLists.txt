@@ -42,6 +42,7 @@ add_service_files(
   Empty.srv
   HumanAction.srv
   Say.srv
+  GiveInfo.srv
 )
 
  add_action_files(
