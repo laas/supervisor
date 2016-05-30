@@ -17,6 +17,8 @@ Simple dialogue node
 #include "supervisor_msgs/Say.h"
 #include "supervisor_msgs/GiveInfo.h"
 #include "supervisor_msgs/InfoGiven.h"
+#include "supervisor_msgs/ChangeState.h"
+
 
 #ifdef ACAPELA
 #include "acapela/InitAction.h"
@@ -120,7 +122,7 @@ void giveInfoFact(toaster_msgs::Fact fact, bool isTrue, string receiver){
     srv.request.receiver = receiver;
     srv.request.sender = robotName;
     if (!client.call(srv)){
-       ROS_ERROR("[mental_state] Failed to call service mental_states/info_given");
+       ROS_ERROR("[dialogue_node] Failed to call service mental_states/info_given");
     }
 }
 
@@ -129,6 +131,121 @@ Give the state of an action
 */
 void giveInfoAction(supervisor_msgs::Action action, string actionState, string receiver){
 
+    //TODO: find a better way to do this
+    string sentence;
+    if(action.name == "pick"){
+        string objectTopic, actorTopic;
+        string objectName, actorName;
+        if(action.actors.size() > 0){
+            if(action.actors[0] == robotName){
+                actorName = "I";
+            }else if(action.actors[0] == receiver){
+                actorName = "you";
+            }else{
+                actorTopic = "/entitiesTranslation/" + action.actors[0];
+                node->getParam(actorTopic, actorName);
+            }
+        }else{
+            ROS_ERROR("[dialogue_node] Missing actor for action");
+            return;
+        }
+        if(action.parameters.size() > 0){
+            objectTopic = "/entitiesTranslation/" + action.parameters[0];
+            node->getParam(objectTopic, objectName);
+        }else{
+            ROS_ERROR("[dialogue_node] Missing object for pick action");
+            return;
+        }
+        if(actionState == "DONE"){
+            sentence = actorName + " picked the " + objectName;
+        }else if(actionState == "FAILED"){
+            sentence = actorName + " can not pick the " + objectName;
+        }else{
+            ROS_ERROR("[dialogue_node] Action state not supported");
+            return;
+        }
+    }else if(action.name == "place" || action.name == "pickandplace"){
+        string objectTopic, supportTopic, actorTopic;
+        string objectName, supportName, actorName;
+        if(action.actors.size() > 0){
+            if(action.actors[0] == robotName){
+                actorName = "I";
+            }else if(action.actors[0] == receiver){
+                actorName = "you";
+            }else{
+                actorTopic = "/entitiesTranslation/" + action.actors[0];
+                node->getParam(actorTopic, actorName);
+            }
+        }else{
+            ROS_ERROR("[dialogue_node] Missing actor for action");
+            return;
+        }
+        if(action.parameters.size() > 1){
+            objectTopic = "/entitiesTranslation/" + action.parameters[0];
+            node->getParam(objectTopic, objectName);
+            supportTopic = "/entitiesTranslation/" + action.parameters[1];
+            node->getParam(supportTopic, supportName);
+        }else{
+            ROS_ERROR("[dialogue_node] Missing object for place action");
+            return;
+        }
+        if(actionState == "DONE"){
+            sentence = actorName + " placed the " + objectName + " on the " + supportName;
+        }else if(actionState == "FAILED"){
+            sentence = actorName + " can not place the " + objectName + " on the " + supportName;
+        }else{
+            ROS_ERROR("[dialogue_node] Action state not supported");
+            return;
+        }
+    }else if(action.name == "drop" || action.name == "pickanddrop"){
+        string objectTopic, containerTopic, actorTopic;
+        string objectName, containerName, actorName;
+        if(action.actors.size() > 0){
+            if(action.actors[0] == robotName){
+                actorName = "I";
+            }else if(action.actors[0] == receiver){
+                actorName = "you";
+            }else{
+                actorTopic = "/entitiesTranslation/" + action.actors[0];
+                node->getParam(actorTopic, actorName);
+            }
+        }else{
+            ROS_ERROR("[dialogue_node] Missing actor for action");
+            return;
+        }
+        if(action.parameters.size() > 1){
+            objectTopic = "/entitiesTranslation/" + action.parameters[0];
+            node->getParam(objectTopic, objectName);
+            containerTopic = "/entitiesTranslation/" + action.parameters[1];
+            node->getParam(containerTopic, containerName);
+        }else{
+            ROS_ERROR("[dialogue_node] Missing object for place action");
+            return;
+        }
+        if(actionState == "DONE"){
+            sentence = actorName + " put the " + objectName + " in the " + containerName;
+        }else if(actionState == "FAILED"){
+            sentence = actorName + " can not put the " + objectName + " in the " + containerName;
+        }else{
+            ROS_ERROR("[dialogue_node] Action state not supported");
+            return;
+        }
+    }
+
+    //We verbalize the sentence
+    saySentence(sentence);
+
+    //We inform the mental state we gave the information
+    ros::ServiceClient client = node->serviceClient<supervisor_msgs::InfoGiven>("mental_states/info_given");
+    supervisor_msgs::InfoGiven srv;
+
+    srv.request.infoType = "actionState";
+    srv.request.actionId = action.id;
+    srv.request.receiver = receiver;
+    srv.request.sender = robotName;
+    if (!client.call(srv)){
+       ROS_ERROR("[dialogue_node] Failed to call service mental_states/info_given");
+    }
 }
 
 /*
@@ -136,6 +253,29 @@ Give the state of an action
 */
 void giveInfoPlan(supervisor_msgs::Plan plan, string planState, string receiver){
 
+    string sentence;
+    if(planState == "DONE"){
+        sentence = "The plan is over";
+    }else if(planState == "FAILED"){
+        sentence = "I aborted the previous plan";
+    }else{
+       ROS_ERROR("[dialogue_node] Plan state not supported");
+    }
+
+    //We verbalize the sentence
+    saySentence(sentence);
+
+    //We inform the mental state we gave the information
+    ros::ServiceClient client = node->serviceClient<supervisor_msgs::InfoGiven>("mental_states/info_given");
+    supervisor_msgs::InfoGiven srv;
+
+    srv.request.infoType = "planState";
+    srv.request.planId = plan.id;
+    srv.request.receiver = receiver;
+    srv.request.sender = robotName;
+    if (!client.call(srv)){
+       ROS_ERROR("[dialogue_node] Failed to call service mental_states/info_given");
+    }
 }
 
 /*
@@ -143,6 +283,22 @@ Share a plan
 */
 void sharePlan(supervisor_msgs::Plan plan, string receiver){
 
+    string sentence;
+    //TODO: add plan verbalization
+    sentence = "The new plan is displayed on the screen";
+
+    //We verbalize the sentence
+    saySentence(sentence);
+
+    //We inform the mental state we gave the information
+    ros::ServiceClient client = node->serviceClient<supervisor_msgs::ChangeState>("mental_states/change_state");
+    supervisor_msgs::ChangeState srv;
+
+    srv.request.type = "plan";
+    srv.request.state = "SHARE";
+    if (!client.call(srv)){
+       ROS_ERROR("[dialogue_node] Failed to call service mental_states/change_state");
+    }
 }
 
 /*
