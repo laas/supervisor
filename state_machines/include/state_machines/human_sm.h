@@ -18,6 +18,7 @@
 #include "supervisor_msgs/ActionExecutorAction.h"
 #include "supervisor_msgs/ActionExecutorActionResult.h"
 #include "supervisor_msgs/ActionExecutorActionFeedback.h"
+#include "supervisor_msgs/Ask.h"
 #include <toaster_msgs/Fact.h>
 #include <toaster_msgs/FactList.h>
 

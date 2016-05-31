@@ -300,16 +300,12 @@ string HumanSM::shouldActState(string robotState, vector<string>* objects){
                     supervisor_msgs::Action actionTodo = srv_info.response.action;
                     if (client.call(srv_info)){
                      if(srv_info.response.state != "ASKED"){//if the action is not already ASKED, the robot asks to do the action
-                          if(simu_){
-                            srv_action.request.type = "action";
-                            srv_action.request.action = actionTodo;
-                            srv_action.request.state = "ASKED";
-                            if (!action_state.call(srv_action)){
-                             ROS_ERROR("Failed to call service mental_state/change_state");
-                            }
-                          }else{
-                            //TODO: ask action
-                          }
+                        ros::ServiceClient client_ask = node_.serviceClient<supervisor_msgs::Ask>("dialogue_node/ask");
+                        supervisor_msgs::Ask srv_ask;
+                        srv_ask.request.type = "ACTION";
+                        srv_ask.request.subType = "CAN";
+                        srv_ask.request.action = actionTodo;
+                        srv_ask.request.receiver = humanName_;
                       }else{//else, we consider the action failed
                          srv_action.request.type = "action";
                          srv_action.request.action = actionTodo;
