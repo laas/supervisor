@@ -24,6 +24,7 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   $ENV{TOASTER_DIR}/devel/include
+  $ENV{ROBOTPKG_BASE}/include
 )
 
 
@@ -35,4 +36,4 @@ target_link_libraries(
 add_dependencies(dialogue_node supervisor_msgs_generate_messages_cpp)
 
 #Line to comment if you dont want dependencies to acapela
-add_definitions("-DACAPELA")
+#add_definitions("-DACAPELA")

@@ -43,6 +43,8 @@ add_service_files(
   HumanAction.srv
   Say.srv
   GiveInfo.srv
+  Ask.srv
+  GetInfoDia.srv
 )
 
  add_action_files(

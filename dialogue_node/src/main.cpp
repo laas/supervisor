@@ -18,6 +18,8 @@ Simple dialogue node
 #include "supervisor_msgs/GiveInfo.h"
 #include "supervisor_msgs/InfoGiven.h"
 #include "supervisor_msgs/ChangeState.h"
+#include "supervisor_msgs/Ask.h"
+#include "supervisor_msgs/GetInfoDia.h"
 
 
 #ifdef ACAPELA
@@ -31,6 +33,8 @@ using namespace std;
 ros::NodeHandle* node;
 bool shoudlSpeak;
 string robotName;
+bool needAnswer;
+string sender;
 vector<pair<string, pair<toaster_msgs::Fact, bool> > > toSayFacts;
 vector<pair<string, pair<supervisor_msgs::Action, string> > > toSayActions;
 vector<pair<string, pair<supervisor_msgs::Plan, string> > > toSayPlans;
@@ -302,12 +306,175 @@ void sharePlan(supervisor_msgs::Plan plan, string receiver){
 }
 
 /*
+Ask to perform an action
+*/
+void askCanAction(supervisor_msgs::Action action, string receiver){
+
+    //TODO: find a better way to do this
+    string sentence;
+    if(action.name == "pick"){
+        string objectTopic, objectName;
+        if(action.parameters.size() > 0){
+            objectTopic = "/entitiesTranslation/" + action.parameters[0];
+            node->getParam(objectTopic, objectName);
+        }else{
+            ROS_ERROR("[dialogue_node] Missing object for pick action");
+            return;
+        }
+        sentence = "Can you pick the " + objectName +  " please?";
+    }else if(action.name == "place" || action.name == "pickandplace"){
+        string objectTopic, supportTopic, objectName, supportName;
+        if(action.parameters.size() > 1){
+            objectTopic = "/entitiesTranslation/" + action.parameters[0];
+            node->getParam(objectTopic, objectName);
+            supportTopic = "/entitiesTranslation/" + action.parameters[1];
+            node->getParam(supportTopic, supportName);
+        }else{
+            ROS_ERROR("[dialogue_node] Missing object for place action");
+            return;
+        }
+        sentence = "Can you place the " + objectName + " on the " + supportName + " please?";
+    }else if(action.name == "drop" || action.name == "pickanddrop"){
+        string objectTopic, containerTopic, objectName, containerName;
+        if(action.parameters.size() > 1){
+            objectTopic = "/entitiesTranslation/" + action.parameters[0];
+            node->getParam(objectTopic, objectName);
+            containerTopic = "/entitiesTranslation/" + action.parameters[1];
+            node->getParam(containerTopic, containerName);
+        }else{
+            ROS_ERROR("[dialogue_node] Missing object for place action");
+            return;
+        }
+        sentence = "Can you put the " + objectName + " in the " + containerName + " please?";
+    }
+
+    //We verbalize the sentence
+    saySentence(sentence);
+}
+
+/*
+Ask if the receiver wants to perform an action
+*/
+void askWantAction(supervisor_msgs::Action action, string receiver){
+
+    //TODO: find a better way to do this
+    string sentence;
+    if(action.name == "pick"){
+        string objectTopic, objectName;
+        if(action.parameters.size() > 0){
+            objectTopic = "/entitiesTranslation/" + action.parameters[0];
+            node->getParam(objectTopic, objectName);
+        }else{
+            ROS_ERROR("[dialogue_node] Missing object for pick action");
+            return;
+        }
+        sentence = "Do you want to pick the " + objectName +  "?";
+    }else if(action.name == "place" || action.name == "pickandplace"){
+        string objectTopic, supportTopic, objectName, supportName;
+        if(action.parameters.size() > 1){
+            objectTopic = "/entitiesTranslation/" + action.parameters[0];
+            node->getParam(objectTopic, objectName);
+            supportTopic = "/entitiesTranslation/" + action.parameters[1];
+            node->getParam(supportTopic, supportName);
+        }else{
+            ROS_ERROR("[dialogue_node] Missing object for place action");
+            return;
+        }
+        sentence = "Do you want to place the " + objectName + " on the " + supportName + "?";
+    }else if(action.name == "drop" || action.name == "pickanddrop"){
+        string objectTopic, containerTopic, objectName, containerName;
+        if(action.parameters.size() > 1){
+            objectTopic = "/entitiesTranslation/" + action.parameters[0];
+            node->getParam(objectTopic, objectName);
+            containerTopic = "/entitiesTranslation/" + action.parameters[1];
+            node->getParam(containerTopic, containerName);
+        }else{
+            ROS_ERROR("[dialogue_node] Missing object for place action");
+            return;
+        }
+        sentence = "Do you want to put the " + objectName + " in the " + containerName + "?";
+    }
+
+    //We verbalize the sentence
+    saySentence(sentence);
+}
+
+/*
+Ask an information (fact)
+*/
+void askFact(toaster_msgs::Fact fact, string receiver){
+
+    //We transform the fact into a sentence
+    string sentence;
+    string subjectTopic, targetTopic, propertyTopic;
+    string subjectName, targetName, propertyName;
+    if(fact.subjectId == robotName){
+        subjectName = "I";
+    }else if(fact.subjectId == receiver){
+        subjectName = "you";
+    }else{
+        subjectTopic = "/entitiesTranslation/" + fact.subjectId;
+        node->getParam(subjectTopic, subjectName);
+    }
+    if(fact.targetId == robotName){
+        targetName = "me";
+    }else if(fact.targetId == receiver){
+        targetName = "you";
+    }else{
+        targetTopic = "/entitiesTranslation/" + fact.targetId;
+        node->getParam(targetTopic, targetName);
+    }
+    propertyTopic = "/properties/translationAsk/" + fact.property;
+    node->getParam(propertyTopic, propertyName);
+    sentence = "Is the " + subjectName + " " + propertyName + " " + targetName + "?";
+
+    //We verbalize the sentence
+    saySentence(sentence);
+}
+
+/*
 Service call to say a sentence
 */
 bool say(supervisor_msgs::Say::Request  &req, supervisor_msgs::Say::Response &res){
 
     saySentence(req.sentence);
 
+    return true;
+}
+
+/*
+Service call when we get an information
+*/
+bool getInfo(supervisor_msgs::GetInfoDia::Request  &req, supervisor_msgs::GetInfoDia::Response &res){
+
+    if(req.type == "FACT"){
+        //We inform the mental state
+        ros::ServiceClient client = node->serviceClient<supervisor_msgs::InfoGiven>("mental_states/info_given");
+        supervisor_msgs::InfoGiven srv;
+
+        srv.request.infoType = "fact";
+        srv.request.fact = req.fact;
+        srv.request.receiver = robotName;
+        srv.request.sender = robotName;
+        if (!client.call(srv)){
+           ROS_ERROR("[dialogue_node] Failed to call service mental_states/info_given");
+        }
+    }else if(req.type == "BOOL"){
+        if(needAnswer){
+            if(sender == "TODO"){
+                //TODO: send the answer to the sender
+            }else{
+                ROS_WARN("[dialogue_node] Unknown sender to return answer");
+            }
+        }
+        needAnswer = false;
+
+    }else{
+        ROS_ERROR("[dialogue_node] Unknown ask type");
+        return false;
+    }
+
+    return true;
 }
 
 /*
@@ -344,6 +511,33 @@ bool giveInfo(supervisor_msgs::GiveInfo::Request  &req, supervisor_msgs::GiveInf
 
     return true;
 }
+
+/*
+Service to ask something
+*/
+bool ask(supervisor_msgs::Ask::Request  &req, supervisor_msgs::Ask::Response &res){
+
+    needAnswer = req.waitForAnswer;
+    if(needAnswer){
+        sender = req.sender;
+    }
+
+    if(req.type == "ACTION"){
+        if(req.subType == "CAN"){
+            askCanAction(req.action, req.receiver);
+        }else if(req.subType == "WANT"){
+            askWantAction(req.action, req.receiver);
+        }
+    }else if(req.type == "FACT"){
+        askFact(req.fact, req.receiver);
+    }else{
+        ROS_ERROR("[dialogue_node] Unknown ask type");
+        return false;
+    }
+
+    return true;
+}
+
 
 #ifdef ACAPELA
 void initAcapela(){
@@ -382,10 +576,13 @@ int main (int argc, char **argv)
   ros::Rate loop_rate(30);
   node->getParam("/shouldSpeak", shoudlSpeak);
   node->getParam("/robot/name", robotName);
+  needAnswer = false;
 
   //Services declarations
   ros::ServiceServer service_say = node->advertiseService("dialogue_node/say", say); //say a sentence
   ros::ServiceServer service_give = node->advertiseService("dialogue_node/give_info", giveInfo); //give an information
+  ros::ServiceServer service_ask = node->advertiseService("dialogue_node/ask", ask); //give an information
+  ros::ServiceServer service_get = node->advertiseService("dialogue_node/get_info", getInfo); //get an information
 
   #ifdef ACAPELA
   initAcapela();

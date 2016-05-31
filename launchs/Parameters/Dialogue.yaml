@@ -29,6 +29,11 @@ properties:
         isIn: 'is not in'
         isReachableBy: 'can not reach'
         isVisibleBy: 'can not see'
+    translationAsk:
+        isOn: 'on the'
+        isIn: 'in the'
+        isReachableBy: 'reachable by'
+        isVisibleBy: 'visible by'
     isReverse:
         isOn: false
         isIn: false
