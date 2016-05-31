@@ -6,7 +6,14 @@ vector<string> toIgnoreFacts;
 
 MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     : QMainWindow(parent),
-      actionClient_("supervisor/action_executor", true)
+      actionClientSup_("supervisor/action_executor", true),
+      actionClientTorso_("pr2motion/Torso_Move", true),
+      actionClientRightArm_("pr2motion/Arm_Right_MoveToQGoal",true),
+      actionClientLeftArm_("pr2motion/Arm_Left_MoveToQGoal",true),
+      actionClientRightGripper_("pr2motion/Gripper_Right_Operate",true),
+      actionClientLeftGripper_("pr2motion/Gripper_Left_Operate",true),
+      actionClientHead_("pr2motion/Head_Move", true),
+      actionClientGetQ_("pr2motion/GetQ", true)
 {
     ui.setupUi(this);
     setWindowTitle("PR2 supervisor");
@@ -75,9 +82,55 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
 
     //we retrieve the possible goals from param of the .yaml file
     node_.getParam("/toIgnorePrint", toIgnoreFacts);
+    node_.getParam("/waitActionServer", waitActionServer_);
+    node_.getParam("/simu", simu_);
 
+    //configure the values for robot control
+    ui.TorsoValue->setRange(0.0, 0.3);
+    ui.TorsoValue->setSingleStep(0.1);
+    ui.Q1Right->setRange(-1.0, 1.0);
+    ui.Q1Right->setSingleStep(0.1);
+    ui.Q2Right->setRange(-1.0, 1.0);
+    ui.Q2Right->setSingleStep(0.1);
+    ui.Q3Right->setRange(-1.0, 1.0);
+    ui.Q3Right->setSingleStep(0.1);
+    ui.Q4Right->setRange(-1.0, 1.0);
+    ui.Q4Right->setSingleStep(0.1);
+    ui.Q5Right->setRange(-1.0, 1.0);
+    ui.Q5Right->setSingleStep(0.1);
+    ui.Q6Right->setRange(-1.0, 1.0);
+    ui.Q6Right->setSingleStep(0.1);
+    ui.Q7Right->setRange(-1.0, 1.0);
+    ui.Q7Right->setSingleStep(0.1);
+    ui.Q1Left->setRange(-1.0, 1.0);
+    ui.Q1Left->setSingleStep(0.1);
+    ui.Q2Left->setRange(-1.0, 1.0);
+    ui.Q2Left->setSingleStep(0.1);
+    ui.Q3Left->setRange(-1.0, 1.0);
+    ui.Q3Left->setSingleStep(0.1);
+    ui.Q4Left->setRange(-1.0, 1.0);
+    ui.Q4Left->setSingleStep(0.1);
+    ui.Q5Left->setRange(-1.0, 1.0);
+    ui.Q5Left->setSingleStep(0.1);
+    ui.Q6Left->setRange(-1.0, 1.0);
+    ui.Q6Left->setSingleStep(0.1);
+    ui.Q7Left->setRange(-1.0, 1.0);
+    ui.Q6Left->setSingleStep(0.1);
+    ui.XHead->setRange(0.0, 9.0);
+    ui.XHead->setSingleStep(0.1);
+    ui.YHead->setRange(0.0, 9.0);
+    ui.YHead->setSingleStep(0.1);
+    ui.ZHead->setRange(0.0, 2.0);
+    ui.ZHead->setSingleStep(0.1);
 
-    actionClient_.waitForServer();
+    actionClientSup_.waitForServer();
+    actionClientTorso_.waitForServer();
+    actionClientRightArm_.waitForServer();
+    actionClientLeftArm_.waitForServer();
+    actionClientRightGripper_.waitForServer();
+    actionClientLeftGripper_.waitForServer();
+    actionClientHead_.waitForServer();
+    actionClientGetQ_.waitForServer();
 
 
 }
@@ -123,7 +176,7 @@ void MainWindow::on_pushButtonExecuteAction_clicked()
     }
 
     //Sending the actions
-    actionClient_.sendGoal(goal);
+    actionClientSup_.sendGoal(goal);
 }
 
 /*
@@ -342,4 +395,169 @@ void MainWindow::on_SpeakButton_clicked()
     if (!client.call(srv)) {
         ROS_ERROR("Failed to call service dialogue_node/say");
     }
+}
+
+
+void MainWindow::on_YesButton_clicked()
+{
+    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetInfoDia>("dialogue_node/get_info");
+    supervisor_msgs::GetInfoDia srv;
+    srv.request.type = "BOOL";
+    srv.request.boolInfo = true;
+    if (!client.call(srv)) {
+        ROS_ERROR("Failed to call service dialogue_node/get_info");
+    }
+}
+
+void MainWindow::on_NoButton_clicked()
+{
+    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetInfoDia>("dialogue_node/get_info");
+    supervisor_msgs::GetInfoDia srv;
+    srv.request.type = "BOOL";
+    srv.request.boolInfo = false;
+    if (!client.call(srv)) {
+        ROS_ERROR("Failed to call service dialogue_node/get_info");
+    }
+}
+
+void MainWindow::on_SendFactButton_clicked()
+{
+    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetInfoDia>("dialogue_node/get_info");
+    supervisor_msgs::GetInfoDia srv;
+    srv.request.type = "FACT";
+    toaster_msgs::Fact fact;
+    fact.subjectId = ui.SubjectFact->text().toStdString();
+    fact.property = ui.PropertyFact->text().toStdString();
+    fact.targetId = ui.TargetFact->text().toStdString();
+    srv.request.fact = fact;
+    if (!client.call(srv)) {
+        ROS_ERROR("Failed to call service dialogue_node/get_info");
+    }
+}
+
+/*************************************
+ * Robot control tab
+ *************************************/
+
+void MainWindow::on_moveTorso_clicked()
+{
+    pr2motion::Torso_MoveGoal goal;
+    goal.torso_position = ui.TorsoValue->value();
+    actionClientTorso_.sendGoal(goal);
+}
+
+void MainWindow::on_stopTorso_clicked()
+{
+    ros::ServiceClient client = node_.serviceClient<pr2motion::Torso_Stop>("pr2motion/Torso_Stop");
+    pr2motion::Torso_Stop srv;
+    if (!client.call(srv)) {
+        ROS_ERROR("Failed to call service pr2motion/Torso_Stop");
+    }
+}
+
+void MainWindow::on_openRightGripper_clicked()
+{
+    if(!simu_){
+        pr2motion::Gripper_Right_OperateGoal goal;
+        goal.goal_mode.value=pr2motion::pr2motion_GRIPPER_MODE::pr2motion_GRIPPER_OPEN;
+        actionClientRightGripper_.sendGoal(goal);
+    }
+}
+
+void MainWindow::on_closeRightGripper_clicked()
+{
+    if(!simu_){
+        pr2motion::Gripper_Right_OperateGoal goal;
+        goal.goal_mode.value=pr2motion::pr2motion_GRIPPER_MODE::pr2motion_GRIPPER_CLOSE;
+        actionClientRightGripper_.sendGoal(goal);
+    }
+}
+
+void MainWindow::on_stopRightGripper_clicked()
+{
+    if(!simu_){
+        ros::ServiceClient client = node_.serviceClient<pr2motion::Gripper_Stop>("pr2motion/Gripper_Stop");
+        pr2motion::Gripper_Stop srv;
+        if (!client.call(srv)) {
+            ROS_ERROR("Failed to call service pr2motion/Gripper_Stop");
+        }
+    }
+}
+
+void MainWindow::on_openLeftGripper_clicked()
+{
+    if(!simu_){
+        pr2motion::Gripper_Left_OperateGoal goal;
+        goal.goal_mode.value=pr2motion::pr2motion_GRIPPER_MODE::pr2motion_GRIPPER_OPEN;
+        actionClientLeftGripper_.sendGoal(goal);
+    }
+}
+
+void MainWindow::on_closeLeftGripper_clicked()
+{
+    if(!simu_){
+        pr2motion::Gripper_Left_OperateGoal goal;
+        goal.goal_mode.value=pr2motion::pr2motion_GRIPPER_MODE::pr2motion_GRIPPER_CLOSE;
+        actionClientLeftGripper_.sendGoal(goal);
+    }
+}
+
+void MainWindow::on_stopLeftGripper_clicked()
+{
+    if(!simu_){
+        ros::ServiceClient client = node_.serviceClient<pr2motion::Gripper_Stop>("pr2motion/Gripper_Stop");
+        pr2motion::Gripper_Stop srv;
+        if (!client.call(srv)) {
+            ROS_ERROR("Failed to call service pr2motion/Gripper_Stop");
+        }
+    }
+}
+
+void MainWindow::on_moveRightArm_clicked()
+{
+    pr2motion::Arm_Right_MoveToQGoalGoal goal;
+    goal.traj_mode.value = pr2motion::pr2motion_TRAJ_MODE::pr2motion_TRAJ_PATH;
+    goal.shoulder_pan_joint = ui.Q1Right->value();
+    goal.shoulder_lift_joint = ui.Q2Right->value();
+    goal.upper_arm_roll_joint = ui.Q3Right->value();
+    goal.elbow_flex_joint = ui.Q4Right->value();
+    goal.forearm_roll_joint = ui.Q5Right->value();
+    goal.wrist_flex_joint = ui.Q6Right->value();
+    goal.wrist_roll_joint = ui.Q7Right->value();
+    actionClientRightArm_.sendGoal(goal);
+}
+
+void MainWindow::on_stopRightArm_clicked()
+{
+    actionClientRightArm_.cancelGoal();
+}
+
+void MainWindow::on_moveLeftArm_clicked()
+{
+    pr2motion::Arm_Left_MoveToQGoalGoal goal;
+    goal.traj_mode.value = pr2motion::pr2motion_TRAJ_MODE::pr2motion_TRAJ_PATH;
+    goal.shoulder_pan_joint = ui.Q1Left->value();
+    goal.shoulder_lift_joint = ui.Q2Left->value();
+    goal.upper_arm_roll_joint = ui.Q3Left->value();
+    goal.elbow_flex_joint = ui.Q4Left->value();
+    goal.forearm_roll_joint = ui.Q5Left->value();
+    goal.wrist_flex_joint = ui.Q6Left->value();
+    goal.wrist_roll_joint = ui.Q7Left->value();
+    actionClientLeftArm_.sendGoal(goal);
+}
+
+void MainWindow::on_stopLeftArm_clicked()
+{
+    actionClientLeftArm_.cancelGoal();
+}
+
+void MainWindow::on_moveHead_clicked()
+{
+    pr2motion::Head_MoveGoal goal;
+    goal.head_mode.value = pr2motion::pr2motion_HEAD_MODE::pr2motion_HEAD_LOOKAT;
+    goal.head_target_frame = "base_link";
+    goal.head_target_x = ui.XHead->value();
+    goal.head_target_y = ui.YHead->value();
+    goal.head_target_z = ui.ZHead->value();
+    actionClientHead_.sendGoal(goal);
 }
