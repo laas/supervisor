@@ -1,0 +1,42 @@
+---
+shouldSpeak: true
+acapelaVoice: 'tracy'
+entitiesTranslation:
+    HERAKLES_HUMAN1: 'Greg'
+    HERAKLES_HUMAN2: 'Bob'
+    RED_CUBE: 'red cube'
+    BLUE_CUBE: 'blue cube'
+    BLACK_CUBE: 'black cube'
+    GREEN_CUBE: 'green cube'
+    GREY_TAPE: 'grey tape'
+    LOTR_TAPE: 'lord of the ring tape'
+    WALLE_TAPE: 'walle tape'
+    TABLE_4: 'table'
+    IKEA_SHELF_LIGHT: 'light shelf'
+    IKEA_SHELF_DARK: 'dark shelf'
+    PLACEMAT_RED: 'placemat'
+    PINK_TRASHBIN: 'pink box'
+    BLUE_TRASHBIN: 'blue box'
+    GREEN_TRASHBIN: 'green box'
+properties:
+    translationTrue:
+        isOn: 'is on'
+        isIn: 'is in'
+        isReachableBy: 'can reach'
+        isVisibleBy: 'can see'
+    translationFalse:
+        isOn: 'is not on'
+        isIn: 'is not in'
+        isReachableBy: 'can not reach'
+        isVisibleBy: 'can not see'
+    translationAsk:
+        isOn: 'on the'
+        isIn: 'in the'
+        isReachableBy: 'reachable by'
+        isVisibleBy: 'visible by'
+    isReverse:
+        isOn: false
+        isIn: false
+        isReachableBy: true
+        isVisibleBy: true
+

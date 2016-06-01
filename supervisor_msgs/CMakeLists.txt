@@ -41,6 +41,10 @@ add_service_files(
   GetInfo.srv
   Empty.srv
   HumanAction.srv
+  Say.srv
+  GiveInfo.srv
+  Ask.srv
+  GetInfoDia.srv
 )
 
  add_action_files(

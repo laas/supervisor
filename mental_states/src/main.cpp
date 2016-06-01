@@ -17,6 +17,8 @@ MSManager* ms = new MSManager();
 string robotName;
 vector<string> allAgents;
 bool simu;
+bool isGivingInfo;
+ros::NodeHandle* node;
 
 
 /*
@@ -375,6 +377,8 @@ Service when an agent informs an other agent about something, it can be:
 	- a fact, @infoType = fact
 */
 bool infoGiven(supervisor_msgs::InfoGiven::Request  &req, supervisor_msgs::InfoGiven::Response &res){
+
+    isGivingInfo = false;
 	
 	if(req.infoType == "goalState"){//we put the state of the goal into the receiver and sender knowledge
 		supervisor_msgs::GoalMS* goal = NULL;
@@ -420,6 +424,15 @@ bool infoGiven(supervisor_msgs::InfoGiven::Request  &req, supervisor_msgs::InfoG
 Service call to get the state of an action
 */
 bool solveDivergentBelief(supervisor_msgs::SolveDivergentBelief::Request  &req, supervisor_msgs::SolveDivergentBelief::Response &res){
+
+    //if we already ask to the dialogue node to give an information, we wait its return beofre giving another
+    //TODO: find a better way to do it
+    if(isGivingInfo){
+        return true;
+    }
+
+    ros::ServiceClient client = node->serviceClient<supervisor_msgs::GiveInfo>("dialogue_node/give_info");
+    supervisor_msgs::GiveInfo srv;
 	
 	pair<bool, supervisor_msgs::ActionMS> actionFind = ms->getActionFromAction(req.action);
 	if(actionFind.first){
@@ -431,21 +444,25 @@ bool solveDivergentBelief(supervisor_msgs::SolveDivergentBelief::Request  &req, 
 			if(robotPlan.first){
 				pair<bool, supervisor_msgs::PlanMS> humanPlan = ms->getAgentPlan(req.agent);
 				if(!humanPlan.first){
-					if(simu){
-                        ms->db_.addActionsState(robotPlan.second.actions, req.agent, "PLANNED");
-                        ms->db_.addPlanState(robotPlan.second, req.agent, "PROGRESS");
-					}else{
-						//TODO: share plan
-					}
+                    isGivingInfo = true;
+                    srv.request.receiver = req.agent;
+                    srv.request.type = "PLAN";
+                    srv.request.planState = "SHARE";
+                    srv.request.plan = ms->convertPlanMStoPlan(robotPlan.second);
+                    if (!client.call(srv)){
+                       ROS_ERROR("[mental_state] Failed to call service dialogue_node/give_info");
+                    }
 					return true;
 				}else{
 					if(robotPlan.second.id != humanPlan.second.id){
-						if(simu){
-                            ms->db_.addActionsState(robotPlan.second.actions, req.agent, "PLANNED");
-                            ms->db_.addPlanState(robotPlan.second, req.agent, "PROGRESS");
-						}else{
-							//TODO: share plan
-						}
+                        isGivingInfo = true;
+                        srv.request.receiver = req.agent;
+                        srv.request.type = "PLAN";
+                        srv.request.planState = "SHARE";
+                        srv.request.plan = ms->convertPlanMStoPlan(robotPlan.second);
+                        if (!client.call(srv)){
+                           ROS_ERROR("[mental_state] Failed to call service dialogue_node/give_info");
+                        }
 						return true;
 					}
 					//If the agent thinks the action is NEEDED, the problem comes from the preconditions
@@ -454,11 +471,15 @@ bool solveDivergentBelief(supervisor_msgs::SolveDivergentBelief::Request  &req, 
 							vector<toaster_msgs::Fact> toTest;
 							toTest.push_back(*it);
                             if(!ms->db_.factsAreIn(req.agent, toTest)){
-								if(simu){
-                                    ms->db_.addFacts(toTest, req.agent);
-								}else{
-									//TODO: give info
-								}
+                                isGivingInfo = true;
+                                srv.request.receiver = req.agent;
+                                srv.request.type = "FACT";
+                                srv.request.isTrue = true;
+                                srv.request.fact = *it;
+                                if (!client.call(srv)){
+                                   ROS_ERROR("[mental_state] Failed to call service dialogue_node/give_info");
+                                }
+                                return true;
 							}	
 						}
 					}else if(humanState == "PLANNED"){//If the agent thinks the action is PLANNED, the problem comes from the previous actions
@@ -474,14 +495,17 @@ bool solveDivergentBelief(supervisor_msgs::SolveDivergentBelief::Request  &req, 
 								fact.targetId = "DONE";
 								toCheck.push_back(fact);
                                 if(!ms->db_.factsAreIn(req.agent, toCheck)){
-									if(simu){
-									vector<supervisor_msgs::ActionMS> actions;
-									actions.push_back(actionFind.second);
-                                    ms->db_.addActionsState(actions, req.agent, "DONE");
-									}else{
-										//TODO: give action state
-									}
-								}
+                                    isGivingInfo = true;
+                                    srv.request.receiver = req.agent;
+                                    srv.request.type = "ACTION";
+                                    srv.request.actionState = "DONE";
+                                    pair<bool, supervisor_msgs::ActionMS> actionToVerbalize = ms->getActionFromId(itl->origin);
+                                    srv.request.action = ms->convertActionMStoAction(actionToVerbalize.second);
+                                    if (!client.call(srv)){
+                                       ROS_ERROR("[mental_state] Failed to call service dialogue_node/give_info");
+                                    }
+                                    return true;
+                                }
 							}
 						}
 					}
@@ -493,20 +517,24 @@ bool solveDivergentBelief(supervisor_msgs::SolveDivergentBelief::Request  &req, 
             if(robotPlan.first){
                 pair<bool, supervisor_msgs::PlanMS> humanPlan = ms->getAgentPlan(req.agent);
                 if(!humanPlan.first){
-                    if(simu){
-                        ms->db_.addActionsState(robotPlan.second.actions, req.agent, "PLANNED");
-                        ms->db_.addPlanState(robotPlan.second, req.agent, "PROGRESS");
-                    }else{
-                        //TODO: share plan
+                    isGivingInfo = true;
+                    srv.request.receiver = req.agent;
+                    srv.request.type = "PLAN";
+                    srv.request.planState = "SHARE";
+                    srv.request.plan = ms->convertPlanMStoPlan(robotPlan.second);
+                    if (!client.call(srv)){
+                       ROS_ERROR("[mental_state] Failed to call service dialogue_node/give_info");
                     }
                     return true;
                 }else{
                     if(robotPlan.second.id != humanPlan.second.id){
-                        if(simu){
-                            ms->db_.addActionsState(robotPlan.second.actions, req.agent, "PLANNED");
-                            ms->db_.addPlanState(robotPlan.second, req.agent, "PROGRESS");
-                        }else{
-                            //TODO: share plan
+                        isGivingInfo = true;
+                        srv.request.receiver = req.agent;
+                        srv.request.type = "PLAN";
+                        srv.request.planState = "SHARE";
+                        srv.request.plan = ms->convertPlanMStoPlan(robotPlan.second);
+                        if (!client.call(srv)){
+                           ROS_ERROR("[mental_state] Failed to call service dialogue_node/give_info");
                         }
                         return true;
                     }
@@ -515,11 +543,17 @@ bool solveDivergentBelief(supervisor_msgs::SolveDivergentBelief::Request  &req, 
                         for(vector<toaster_msgs::Fact>::iterator it = actionFind.second.prec.begin(); it != actionFind.second.prec.end(); it++){
                             vector<toaster_msgs::Fact> toTest;
                             toTest.push_back(*it);
-                            if(!ms->db_.factsAreIn(req.agent, toTest)){
-                                if(simu){
-                                    ms->db_.addFacts(toTest, req.agent);
-                                }else{
-                                    //TODO: give info
+                            if(!ms->db_.factsAreIn(robotName, toTest)){
+                                if(ms->db_.factsAreIn(req.agent, toTest)){
+                                    isGivingInfo = true;
+                                    srv.request.receiver = req.agent;
+                                    srv.request.type = "FACT";
+                                    srv.request.isTrue = false;
+                                    srv.request.fact = *it;
+                                    if (!client.call(srv)){
+                                       ROS_ERROR("[mental_state] Failed to call service dialogue_node/give_info");
+                                    }
+                                    return true;
                                 }
                             }
                         }
@@ -538,13 +572,16 @@ bool solveDivergentBelief(supervisor_msgs::SolveDivergentBelief::Request  &req, 
                                 fact.targetId = actionState;
                                 toCheck.push_back(fact);
                                 if(!ms->db_.factsAreIn(req.agent, toCheck)){
-                                    if(simu){
-                                    vector<supervisor_msgs::ActionMS> actions;
-                                    actions.push_back(actionFind.second);
-                                    ms->db_.addActionsState(actions, req.agent, actionState);
-                                    }else{
-                                        //TODO: give action state
+                                    isGivingInfo = true;
+                                    srv.request.receiver = req.agent;
+                                    srv.request.type = "ACTION";
+                                    srv.request.actionState = actionState;
+                                    pair<bool, supervisor_msgs::ActionMS> actionToVerbalize = ms->getActionFromId(itl->origin);
+                                    srv.request.action = ms->convertActionMStoAction(actionToVerbalize.second);
+                                    if (!client.call(srv)){
+                                       ROS_ERROR("[mental_state] Failed to call service dialogue_node/give_info");
                                     }
+                                    return true;
                                 }
                             }
                         }
@@ -573,29 +610,31 @@ void update(MSManager* ms, string agent){
 int main (int argc, char **argv)
 {
   ros::init(argc, argv, "mental_state");
-  ros::NodeHandle node;
+  ros::NodeHandle _node;
+  node = &_node;
     ros::Rate loop_rate(30);
 
   ROS_INFO("[mental_state] Init mental_state");
 
   //Services declarations
-  ros::ServiceServer service_change_state = node.advertiseService("mental_state/change_state", changeState); //change the state of a goal/plan/action
-  ros::ServiceServer service_get_info = node.advertiseService("mental_state/get_info", getInfo); //get diverse information
-  ros::ServiceServer service_info_given = node.advertiseService("mental_state/info_given", infoGiven); //when an agent informs an other agent about something
-  ros::ServiceServer service_solve_divergent_belief = node.advertiseService("mental_state/solve_divergent_belief", solveDivergentBelief); //solve a divergent belief concerning an action
+  ros::ServiceServer service_change_state = _node.advertiseService("mental_state/change_state", changeState); //change the state of a goal/plan/action
+  ros::ServiceServer service_get_info = _node.advertiseService("mental_state/get_info", getInfo); //get diverse information
+  ros::ServiceServer service_info_given = _node.advertiseService("mental_state/info_given", infoGiven); //when an agent informs an other agent about something
+  ros::ServiceServer service_solve_divergent_belief = _node.advertiseService("mental_state/solve_divergent_belief", solveDivergentBelief); //solve a divergent belief concerning an action
 
-  node.getParam("/simu", simu);
-  node.getParam("/robot/name", robotName);
+  _node.getParam("/simu", simu);
+  _node.getParam("/robot/name", robotName);
   allAgents = ms->db_.getAgents();
   ms->db_.cleanDB();
   ms->db_.initKnowledge(allAgents);
   ms->initGoals();
   ms->initHighLevelActions();
+  isGivingInfo = false;
 
   ROS_INFO("[mental_state] mental_state ready");
   
   boost::thread_group g;
-  while(node.ok()){
+  while(_node.ok()){
     ms->db_.updateKnowledge(); //we get new state from the database
     for(vector<string>::iterator it = allAgents.begin(); it != allAgents.end(); it++){
           g.create_thread(boost::bind(update, ms, *it));
