@@ -27,6 +27,7 @@ add_message_files(
    Link.msg
    AgentActivity.msg
    Focus.msg
+   Bool.msg
 )
 
 # Generate services in the 'srv' folder

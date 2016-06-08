@@ -39,6 +39,7 @@
 #include "toaster_msgs/GetInfoDB.h"
 #include "supervisor_msgs/Say.h"
 #include "supervisor_msgs/GetInfoDia.h"
+#include "supervisor_msgs/Bool.h"
 
 using namespace std;
 
@@ -124,6 +125,7 @@ public:
     ClientHead actionClientHead_;
     ClientGetQ actionClientGetQ_;
     string robotName_;
+    ros::Publisher boolAnswerPub_;
 
 private:
     double waitActionServer_;

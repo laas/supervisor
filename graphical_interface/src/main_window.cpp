@@ -19,6 +19,8 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     setWindowTitle("PR2 supervisor");
     node_.getParam("/robot/name", robotName_);
 
+    boolAnswerPub_ = node_.advertise<supervisor_msgs::Bool>("graphical_interface/boolAnswer", 1000);
+
     //we retrieve the possible actions from param of the .yaml file
     vector<string> actionNames;
     node_.getParam("/highLevelActions/names", actionNames);
@@ -419,24 +421,16 @@ void MainWindow::on_SpeakButton_clicked()
 
 void MainWindow::on_YesButton_clicked()
 {
-    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetInfoDia>("dialogue_node/get_info");
-    supervisor_msgs::GetInfoDia srv;
-    srv.request.type = "BOOL";
-    srv.request.boolInfo = true;
-    if (!client.call(srv)) {
-        ROS_ERROR("Failed to call service dialogue_node/get_info");
-    }
+    supervisor_msgs::Bool msg;
+    msg.boolAnswer = true;
+    boolAnswerPub_.publish(msg);
 }
 
 void MainWindow::on_NoButton_clicked()
 {
-    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetInfoDia>("dialogue_node/get_info");
-    supervisor_msgs::GetInfoDia srv;
-    srv.request.type = "BOOL";
-    srv.request.boolInfo = false;
-    if (!client.call(srv)) {
-        ROS_ERROR("Failed to call service dialogue_node/get_info");
-    }
+    supervisor_msgs::Bool msg;
+    msg.boolAnswer = false;
+    boolAnswerPub_.publish(msg);
 }
 
 void MainWindow::on_SendFactButton_clicked()

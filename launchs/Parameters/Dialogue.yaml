@@ -1,6 +1,7 @@
 ---
 shouldSpeak: true
 acapelaVoice: 'tracy'
+timeWaitAnswer: 300.0
 entitiesTranslation:
     HERAKLES_HUMAN1: 'Greg'
     HERAKLES_HUMAN2: 'Bob'
