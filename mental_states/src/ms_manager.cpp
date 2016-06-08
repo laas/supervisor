@@ -289,7 +289,7 @@ Function which checks if an agent still think that the current plan is still fea
 void MSManager::planFeasibility(string agent){
 
     ros::NodeHandle node;
-    ros::ServiceClient client = node.serviceClient<supervisor_msgs::EndPlan>("goal_manager/end_plan");
+    ros::ServiceClient client = node.serviceClient<supervisor_msgs::EndPlan>("plan_elaboration/end_plan");
     supervisor_msgs::EndPlan srv;
     string robotName;
     node.getParam("/robot/name", robotName);
@@ -332,7 +332,7 @@ void MSManager::planFeasibility(string agent){
 	         srv.request.report = false;
 	      }
 	      if (!client.call(srv)){
-	         ROS_ERROR("[mental_state] Failed to call service goal_manager/end_plan");
+             ROS_ERROR("[mental_state] Failed to call service plan_elaboration/end_plan");
 	      }
         }else{ //else, if there is no action in progress or possible the plan is aborted
 			vector<supervisor_msgs::ActionMS> possibleActions;

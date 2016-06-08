@@ -530,38 +530,38 @@ void DBInterface::cleanDB(){
     toaster_msgs::SetInfoDB srv_rm;
     srv_rm.request.infoType = "FACT";
     srv_rm.request.add = false;
-	vector<toaster_msgs::Fact> toRemove;
-	
-	vector<string> allAgents = getAgents();
-	
-	toaster_msgs::Fact factAct;
-	factAct.subjectId = "NULL";
-	factAct.property = "actionState";
-	factAct.propertyType = "state";
-	factAct.targetId = "NULL";
+    vector<toaster_msgs::Fact> toRemove;
+
+    vector<string> allAgents = getAgents();
+
+    toaster_msgs::Fact factAct;
+    factAct.subjectId = "NULL";
+    factAct.property = "actionState";
+    factAct.propertyType = "state";
+    factAct.targetId = "NULL";
     factAct.factObservability = 0.0;
-	toRemove.push_back(factAct);
-	toaster_msgs::Fact factPlan;
-	factPlan.subjectId = "NULL";
-	factPlan.property = "planState";
-	factPlan.propertyType = "state";
-	factPlan.targetId = "NULL";
+    toRemove.push_back(factAct);
+    toaster_msgs::Fact factPlan;
+    factPlan.subjectId = "NULL";
+    factPlan.property = "planState";
+    factPlan.propertyType = "state";
+    factPlan.targetId = "NULL";
     factPlan.factObservability = 0.0;
-	toRemove.push_back(factPlan);
-	toaster_msgs::Fact factGoal;
-	factGoal.subjectId = "NULL";
-	factGoal.property = "goalState";
-	factGoal.propertyType = "state";
-	factGoal.targetId = "NULL";
+    toRemove.push_back(factPlan);
+    toaster_msgs::Fact factGoal;
+    factGoal.subjectId = "NULL";
+    factGoal.property = "goalState";
+    factGoal.propertyType = "state";
+    factGoal.targetId = "NULL";
     factGoal.factObservability = 0.0;
-	toRemove.push_back(factGoal);
-	srv_rm.request.facts = toRemove;
-	   
-	for(vector<string>::iterator it = allAgents.begin(); it != allAgents.end(); it++){
-	   srv_rm.request.agentId = *it;
-	   if (!client_rm.call(srv_rm)){
-		    ROS_ERROR("[mental_state] Failed to call service database/remove_facts_to_agent");
-	   }
+    toRemove.push_back(factGoal);
+    srv_rm.request.facts = toRemove;
+
+    for(vector<string>::iterator it = allAgents.begin(); it != allAgents.end(); it++){
+       srv_rm.request.agentId = *it;
+       if (!client_rm.call(srv_rm)){
+            ROS_ERROR("[mental_state] Failed to call service database/remove_facts_to_agent");
+       }
 	}
 }
 

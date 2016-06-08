@@ -76,29 +76,34 @@ pair<bool, supervisor_msgs::Plan> PlanElaboration::findPlan(){
 
     pair<bool, supervisor_msgs::Plan> answer;
 
-    //Fill the planning database
-    setPlanningTable(robotName_);
-    
     //Ask HATP a plan
     bool needPlan = true;
     while(needPlan){
+        //Fill the planning database
+        setPlanningTable(robotName_);
         pair<bool, hatp_msgs::Plan> hatpPlan = GetHATPPlan();
         if(hatpPlan.first){
             //Check feasability
+            vector<string> goalActors;
+            string actorsTopic = "/goals/";
+            actorsTopic = actorsTopic + currentGoal_ + "_actors";
+            node_->getParam(actorsTopic, goalActors);
+            for(vector<string>::iterator it = goalActors.begin(); it != goalActors.end(); it++){
+                if(*it != robotName_){
+                    goalPartner_  = *it;
+                    break;
+                }
+            }
             string feasible = checkFeasible(hatpPlan.second);
             if(feasible == "ok"){
                 needPlan = false;
                 //Ask plan for partner + check feasability
-                vector<string> goalActors;
-                string actorsTopic = "/goals/";
-                actorsTopic = actorsTopic + currentGoal_ + "_actors";
-                node_->getParam(actorsTopic, goalActors);
                 for(vector<string>::iterator it = goalActors.begin(); it != goalActors.end(); it++){
                     if(*it != robotName_){
                         setPlanningTable(*it);
                         pair<bool, hatp_msgs::Plan> hatpPartnerPlan = GetHATPPlan();
                         if(hatpPartnerPlan.first){
-                            checkDivergentBelief(hatpPartnerPlan.second);
+                            checkDivergentBelief(hatpPartnerPlan.second, *it);
                         }
                     }
                 }
@@ -157,6 +162,11 @@ void PlanElaboration::setPlanningTable(string agent){
     if (client.call(srv)){
         //we put the answer into facts
         vector<toaster_msgs::Fact> agentFacts = setAnswerIntoFacts(srv.response.results);
+        if(agent == robotName_){
+            robotFacts_ = agentFacts;
+        }else{
+            curAgentFacts_ = agentFacts;
+        }
         //we get the final list of facts containing agentX capabilities
         vector<toaster_msgs::Fact> finalFacts = computeAgentXFacts(agentFacts);
         //we update the planning table with these facts
@@ -369,13 +379,47 @@ Function which check if a given HATP plan is feasible (based on Omni agent actio
 */
 string PlanElaboration::checkFeasible(hatp_msgs::Plan plan){
 
+    ros::ServiceClient client = node_->serviceClient<supervisor_msgs::Ask>("dialogue_node/ask");
+    ros::ServiceClient clientMS = node_->serviceClient<supervisor_msgs::InfoGiven>("mental_state/info_given");
+    supervisor_msgs::InfoGiven srvMS;
+    supervisor_msgs::Ask srv;
+    srv.request.type = "FACT";
+    srv.request.waitForAnswer = true;
+    srv.request.receiver = goalPartner_;
+
    for(vector<hatp_msgs::Task>::iterator it = plan.tasks.begin(); it != plan.tasks.end(); it++){
       if(it->type){//the task is an action and not a method
           if(isInVector(it->agents, omni_)){
-              ROS_INFO("[DIALOGUE] Not feasible action: %s", it->name.c_str());
-              //TODO: ask preconditions
-              //TODO: if new info return new_info
-              return "failed";
+              vector<toaster_msgs::Fact> precs = getPrec(*it);
+              toaster_msgs::Fact missingPrec = getMissingPrec(precs, robotFacts_);
+              //if the fact concerns the omni agent, we replace omi by the receiver in the fact (ask we ask him the question)
+              if(missingPrec.targetId == omni_){
+                  missingPrec.targetId = goalPartner_;
+              }
+              if(missingPrec.subjectId == omni_){
+                  missingPrec.subjectId = goalPartner_;
+              }
+
+              srv.request.fact = missingPrec;
+              if(client.call(srv)){
+                  if(srv.response.boolAnswer){
+                      srvMS.request.infoType = "fact";
+                      srvMS.request.fact = missingPrec;
+                      srvMS.request.receiver = robotName_;
+                      srvMS.request.sender = goalPartner_;
+                      ROS_INFO("receiver: %s sender: %s %s", robotName_.c_str(), goalPartner_.c_str());
+                      if (!clientMS.call(srvMS)){
+                         ROS_ERROR("[plan_elaboration] Failed to call service mental_states/info_given");
+                         return "failed";
+                      }
+                      return "new_info";
+                  }else{
+                      return "failed";
+                  }
+              }else{
+                  ROS_ERROR("[plan_elaboration] Failed to call service dialogue_node/ask");
+                  return "failed";
+              }
           }
        }
     }
@@ -386,12 +430,27 @@ string PlanElaboration::checkFeasible(hatp_msgs::Plan plan){
 /*
 Function which inform about divergent belief of a given HATP plan (based on Omni agent action)
 */
-void PlanElaboration::checkDivergentBelief(hatp_msgs::Plan plan){
+void PlanElaboration::checkDivergentBelief(hatp_msgs::Plan plan, string agent){
+
+   ros::ServiceClient client = node_->serviceClient<supervisor_msgs::GiveInfo>("dialogue_node/give_info");
+   supervisor_msgs::GiveInfo srv;
+   srv.request.type = "FACT";
+   srv.request.isTrue = true;
+   srv.request.receiver = agent;
 
    for(vector<hatp_msgs::Task>::iterator it = plan.tasks.begin(); it != plan.tasks.end(); it++){
       if(it->type){//the task is an action and not a method
           if(isInVector(it->agents, omni_)){
-              //TODO: inform preconditions
+              vector<toaster_msgs::Fact> precs = getPrec(*it);
+              for(vector<toaster_msgs::Fact>::iterator it = precs.begin(); it != precs.end(); it++){
+                  if(!factsIsIn(*it, curAgentFacts_)){
+                      srv.request.fact = *it;
+                      if(!client.call(srv)){
+                          ROS_ERROR("[plan_elaboration] Failed to call service dialogue_node/give_info");
+                      }
+                  }
+              }
+
           }
        }
     }
@@ -472,4 +531,167 @@ vector<string> PlanElaboration::convertParam(vector<string> params){
     }
 
     return result;
+}
+
+/*
+Function which return the preconditions of a hatp task
+*/
+vector<toaster_msgs::Fact> PlanElaboration::getPrec(hatp_msgs::Task task){
+
+    vector<toaster_msgs::Fact> prec;
+
+    //we convert the task into an action
+    supervisor_msgs::Action action;
+    string nameTopic = "HATP_actions/";
+    nameTopic = nameTopic + task.name;
+    node_->getParam(nameTopic, action.name);
+    action.actors = task.agents;
+    action.parameters = convertParam(task.parameters);
+
+    //we get the high level parameters of the action
+    string paramTopic = "highLevelActions/";
+    paramTopic = paramTopic + action.name + "_param";
+    vector<string> params;
+    node_->getParam(paramTopic, params);
+    //we match then with the action param
+    map<string, string> highLevelNames;
+    highLevelNames["NULL"] = "NULL";
+    if(action.parameters.size() == params.size()){
+        vector<string>::iterator it2 = action.parameters.begin();
+        for(vector<string>::iterator it = params.begin(); it != params.end(); it++){
+            highLevelNames[*it] = *it2;
+            it2++;
+        }
+    }else{
+        ROS_ERROR("[plan_elaboration] Incorrect number of parameters");
+        return prec;
+    }
+    string agentTopic = "highLevelActions/";
+    agentTopic = agentTopic + action.name + "_actors";
+    vector<string> agents;
+    node_->getParam(agentTopic, agents);
+    if(action.actors.size() == agents.size()){
+            vector<string>::iterator it2 = action.actors.begin();
+            for(vector<string>::iterator it = agents.begin(); it != agents.end(); it++){
+                highLevelNames[*it] = *it2;
+                it2++;
+            }
+        }else{
+            ROS_ERROR("[plan_elaboration] Incorrect number of actors");
+            return prec;
+        }
+    //we get the preconditions from param
+    string precTopic = "highLevelActions/";
+    precTopic = precTopic + action.name + "_prec";
+    vector<string> precString;
+    node_->getParam(precTopic, precString);
+    //we transform the preconditions into facts
+    for(vector<string>::iterator p = precString.begin(); p != precString.end(); p++){
+        int beg = p->find(',');
+        int end = p->find(',', beg+1);
+        toaster_msgs::Fact fact;
+        fact.subjectId = highLevelNames[p->substr(0, beg)];
+        fact.property = p->substr(beg+2, end - beg - 2);
+        fact.propertyType = "state";
+        fact.targetId = highLevelNames[p->substr(end+2, p->size() - end - 2)];
+        prec.push_back(fact);
+    }
+
+    return prec;
+}
+
+/*
+Find the missing fact into an agent knowledge
+*/
+toaster_msgs::Fact PlanElaboration::getMissingPrec(vector<toaster_msgs::Fact> precs, vector<toaster_msgs::Fact> agentFacts){
+
+    toaster_msgs::Fact fact;
+
+    for(vector<toaster_msgs::Fact>::iterator it = precs.begin(); it != precs.end(); it++){
+        if(!factsIsIn(*it, agentFacts)){
+            return *it;
+        }
+    }
+
+    return fact;
+}
+
+/*
+Function which return true a fact is in a agent knowledge
+*/
+bool PlanElaboration::factsIsIn(toaster_msgs::Fact fact, vector<toaster_msgs::Fact> facts){
+
+    string topicTarget = "/highLevelName/";
+    topicTarget = topicTarget + fact.targetId;
+    string higlLevelNameTarget;
+    if(node_->hasParam(topicTarget)){
+        node_->getParam(topicTarget, higlLevelNameTarget);
+    }else{
+        higlLevelNameTarget = fact.targetId;
+    }
+    string topicSubject = "/highLevelName/";
+    topicSubject = topicSubject + fact.subjectId;
+    string higlLevelNameSubject;
+    if(node_->hasParam(topicSubject)){
+        node_->getParam(topicSubject, higlLevelNameSubject);
+    }else{
+        higlLevelNameSubject = fact.subjectId;
+    }
+    if(fact.subjectId == "NULL"){
+        for(vector<toaster_msgs::Fact>::iterator it = facts.begin(); it != facts.end(); it++){
+            string topic = "/highLevelName/";
+            topic = topic + it->targetId;
+            string higlLevelName;
+            if(node_->hasParam(topic)){
+                node_->getParam(topic, higlLevelName);
+            }else{
+                higlLevelName = it->targetId;
+            }
+            if(it->property == fact.property && higlLevelName == higlLevelNameTarget){
+                return false;
+            }
+        }
+    }else if(fact.targetId == "NULL"){
+        for(vector<toaster_msgs::Fact>::iterator it = facts.begin(); it != facts.end(); it++){
+            string topic = "/highLevelName/";
+            topic = topic + it->subjectId;
+            string higlLevelName;
+            if(node_->hasParam(topic)){
+                node_->getParam(topic, higlLevelName);
+            }else{
+                higlLevelName = it->subjectId;
+            }
+            if(it->property == fact.property && higlLevelName == higlLevelNameSubject){
+                return false;
+            }
+        }
+    }else{
+        bool find = false;
+        for(vector<toaster_msgs::Fact>::iterator it = facts.begin(); it != facts.end(); it++){
+            string topicS = "/highLevelName/";
+            topicS = topicS + it->subjectId;
+            string higlLevelNameS;
+            if(node_->hasParam(topicS)){
+                node_->getParam(topicS, higlLevelNameS);
+            }else{
+                higlLevelNameS = it->subjectId;
+            }
+            string topicT = "/highLevelName/";
+            topicT = topicT + it->targetId;
+            string higlLevelNameT;
+            if(node_->hasParam(topicT)){
+                node_->getParam(topicT, higlLevelNameT);
+            }else{
+                higlLevelNameT = it->targetId;
+            }
+            if(it->property == fact.property && higlLevelNameS == higlLevelNameSubject && higlLevelNameT == higlLevelNameTarget){
+                find = true;
+                break;
+            }
+        }
+        if(!find){
+            return false;
+        }
+    }
+    return true;
 }

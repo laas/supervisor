@@ -16,6 +16,10 @@
 #include "toaster_msgs/ExecuteDB.h"
 #include "toaster_msgs/SetInfoDB.h"
 #include "supervisor_msgs/GetInfo.h"
+#include "supervisor_msgs/GiveInfo.h"
+#include "supervisor_msgs/Ask.h"
+#include "supervisor_msgs/Bool.h"
+#include "supervisor_msgs/InfoGiven.h"
 
 using namespace std;
 
@@ -34,7 +38,11 @@ private:
     string robotName_;
     string agentX_;
     string omni_;
+    string goalPartner_;
     vector<string> agentList_;
+    vector<toaster_msgs::Fact> robotFacts_;
+    vector<toaster_msgs::Fact> curAgentFacts_;
+
 
     pair<bool, supervisor_msgs::Plan> findPlan();
     pair<bool, hatp_msgs::Plan> GetHATPPlan();
@@ -45,8 +53,11 @@ private:
     bool isInVector(vector<string> list, string element);
     string checkFeasible(hatp_msgs::Plan plan);
     supervisor_msgs::Plan convertPlan(hatp_msgs::Plan plan);
-    void checkDivergentBelief(hatp_msgs::Plan plan);
+    void checkDivergentBelief(hatp_msgs::Plan plan, string agent);
     vector<string> convertParam(vector<string> params);
+    vector<toaster_msgs::Fact> getPrec(hatp_msgs::Task task);
+    toaster_msgs::Fact getMissingPrec(vector<toaster_msgs::Fact> precs, vector<toaster_msgs::Fact> agentFacts);
+    bool factsIsIn(toaster_msgs::Fact fact, vector<toaster_msgs::Fact> facts);
 };
 
 #endif // PLAN_ELABORATION_H
