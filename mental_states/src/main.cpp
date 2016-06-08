@@ -406,6 +406,7 @@ bool infoGiven(supervisor_msgs::InfoGiven::Request  &req, supervisor_msgs::InfoG
 
 	}else if(req.infoType == "fact"){//we put the fact into the receiver and sender knowledge
 		vector<toaster_msgs::Fact> facts;
+        req.fact.propertyType == "dialogue";
 		facts.push_back(req.fact);
         ms->db_.addFacts(facts, req.receiver);
         ms->db_.addFacts(facts, req.sender);

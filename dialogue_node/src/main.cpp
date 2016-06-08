@@ -20,6 +20,7 @@ Simple dialogue node
 #include "supervisor_msgs/ChangeState.h"
 #include "supervisor_msgs/Ask.h"
 #include "supervisor_msgs/GetInfoDia.h"
+#include "supervisor_msgs/Bool.h"
 
 
 #ifdef ACAPELA
@@ -32,9 +33,8 @@ using namespace std;
 
 ros::NodeHandle* node;
 bool shoudlSpeak;
-string robotName;
-bool needAnswer;
-string sender;
+string robotName, omni;
+double timeToWait;
 vector<pair<string, pair<toaster_msgs::Fact, bool> > > toSayFacts;
 vector<pair<string, pair<supervisor_msgs::Action, string> > > toSayActions;
 vector<pair<string, pair<supervisor_msgs::Plan, string> > > toSayPlans;
@@ -418,7 +418,7 @@ void askFact(toaster_msgs::Fact fact, string receiver){
     }
     if(fact.targetId == robotName){
         targetName = "me";
-    }else if(fact.targetId == receiver){
+    }else if(fact.targetId == receiver ){
         targetName = "you";
     }else{
         targetTopic = "/entitiesTranslation/" + fact.targetId;
@@ -459,16 +459,6 @@ bool getInfo(supervisor_msgs::GetInfoDia::Request  &req, supervisor_msgs::GetInf
         if (!client.call(srv)){
            ROS_ERROR("[dialogue_node] Failed to call service mental_states/info_given");
         }
-    }else if(req.type == "BOOL"){
-        if(needAnswer){
-            if(sender == "TODO"){
-                //TODO: send the answer to the sender
-            }else{
-                ROS_WARN("[dialogue_node] Unknown sender to return answer");
-            }
-        }
-        needAnswer = false;
-
     }else{
         ROS_ERROR("[dialogue_node] Unknown ask type");
         return false;
@@ -517,11 +507,6 @@ Service to ask something
 */
 bool ask(supervisor_msgs::Ask::Request  &req, supervisor_msgs::Ask::Response &res){
 
-    needAnswer = req.waitForAnswer;
-    if(needAnswer){
-        sender = req.sender;
-    }
-
     if(req.type == "ACTION"){
         if(req.subType == "CAN"){
             askCanAction(req.action, req.receiver);
@@ -533,6 +518,17 @@ bool ask(supervisor_msgs::Ask::Request  &req, supervisor_msgs::Ask::Response &re
     }else{
         ROS_ERROR("[dialogue_node] Unknown ask type");
         return false;
+    }
+
+    if(req.waitForAnswer){
+        try{
+            supervisor_msgs::Bool answer = *(ros::topic::waitForMessage<supervisor_msgs::Bool>("graphical_interface/boolAnswer",ros::Duration(timeToWait)));
+            res.boolAnswer = answer.boolAnswer;
+            ROS_INFO("[dialogue_node] ANSWER: %s", (res.boolAnswer)?"yes":"no");
+        }catch(const std::exception & e){
+            ROS_WARN("[dialogue_node] Failed to read answer topic");
+            res.boolAnswer = false;
+        }
     }
 
     return true;
@@ -576,7 +572,8 @@ int main (int argc, char **argv)
   ros::Rate loop_rate(30);
   node->getParam("/shouldSpeak", shoudlSpeak);
   node->getParam("/robot/name", robotName);
-  needAnswer = false;
+  node->getParam("/timeWaitAnswer", timeToWait);
+  node->getParam("/HATP/Omni", omni);
 
   //Services declarations
   ros::ServiceServer service_say = node->advertiseService("dialogue_node/say", say); //say a sentence
