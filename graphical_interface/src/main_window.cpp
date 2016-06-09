@@ -12,7 +12,7 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
       actionClientLeftArm_("pr2motion/Arm_Left_MoveToQGoal",true),
       actionClientRightGripper_("pr2motion/Gripper_Right_Operate",true),
       actionClientLeftGripper_("pr2motion/Gripper_Left_Operate",true),
-      actionClientHead_("pr2motion/Head_Move", true),
+      actionClientHead_("pr2motion/Head_Move_Target", true),
       actionClientGetQ_("pr2motion/GetQ", true)
 {
     ui.setupUi(this);
@@ -547,7 +547,7 @@ void MainWindow::on_stopLeftArm_clicked()
 
 void MainWindow::on_moveHead_clicked()
 {
-    pr2motion::Head_MoveGoal goal;
+    pr2motion::Head_Move_TargetGoal goal;
     goal.head_mode.value = pr2motion::pr2motion_HEAD_MODE::pr2motion_HEAD_LOOKAT;
     goal.head_target_frame = "base_link";
     goal.head_target_x = ui.XHead->value();
