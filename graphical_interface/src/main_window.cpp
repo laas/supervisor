@@ -37,6 +37,7 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
             ui.comboBoxHumanAgent->addItem(it->c_str());
         }
         ui.comboBoxAgentKnowName->addItem(it->c_str());
+        ui.comboBoxAgents->addItem(it->c_str());
     }
 
     //we retrieve the possible objects from param of the .yaml file
@@ -44,6 +45,7 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     node_.getParam("/entities/objects", objects);
     for(vector<string>::iterator it = objects.begin(); it != objects.end(); it++){
         ui.comboBoxActionObject->addItem(it->c_str());
+        ui.comboBoxActionObject2->addItem(it->c_str());
         ui.comboBoxHumanActionObject->addItem(it->c_str());
     }
 
@@ -236,6 +238,44 @@ void MainWindow::on_pushButtonStopAction_clicked()
        ROS_ERROR("Failed to call service action_executor/stop");
        return;
     }
+}
+
+/*
+Detach an object fro the hand of the agent
+*/
+void MainWindow::on_pushButtonDetachFromHand_clicked()
+{
+    string object = ui.comboBoxActionObject2->currentText().toStdString();
+    string agent = ui.comboBoxAgents->currentText().toStdString();
+
+    //detach in toaster
+    ros::ServiceClient client = node_.serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
+    toaster_msgs::RemoveFromHand srv;
+    srv.request.objectId = object;
+    if (!client.call(srv)) {
+       ROS_ERROR("Failed to call service pdg/remove_from_hand");
+       return;
+    }
+
+    //remove fact in database
+    toaster_msgs::Fact fact;
+    fact.subjectId = object;
+    fact.property = "isHoldBy";
+    fact.targetId = agent;
+    fact.propertyType = "state";
+
+    ros::ServiceClient clientDB = node_.serviceClient<toaster_msgs::SetInfoDB>("database/set_info");
+    toaster_msgs::SetInfoDB srvDB;
+    srvDB.request.add = false;
+    srvDB.request.infoType = "FACT";
+    srvDB.request.agentId = robotName_;
+    srvDB.request.facts.push_back(fact);
+    if (!clientDB.call(srvDB)) {
+       ROS_ERROR("Failed to call service database/set_info");
+       return;
+    }
+
+
 }
 
 
@@ -555,3 +595,4 @@ void MainWindow::on_moveHead_clicked()
     goal.head_target_z = ui.ZHead->value();
     actionClientHead_.sendGoal(goal);
 }
+

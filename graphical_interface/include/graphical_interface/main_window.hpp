@@ -35,6 +35,8 @@
 #include "supervisor_msgs/NewGoal.h"
 #include "supervisor_msgs/Empty.h"
 #include "toaster_msgs/Fact.h"
+#include "toaster_msgs/RemoveFromHand.h"
+#include "toaster_msgs/SetInfoDB.h"
 #include "supervisor_msgs/ActionMS.h"
 #include "supervisor_msgs/Say.h"
 #include "supervisor_msgs/GetInfoDia.h"
@@ -111,6 +113,8 @@ private Q_SLOTS:
     void on_NoButton_clicked();
 
     void on_SendFactButton_clicked();
+
+    void on_pushButtonDetachFromHand_clicked();
 
 public:
     Ui::MainWindowDesign ui;
