@@ -348,16 +348,18 @@ bool VirtualAction::execAction(int actionId, bool shouldOpen, Server* action_ser
          }
          if(it->agent == robotName_){
             if(it->subTrajName == "grasp"){
-                openGripper(it->armId, action_server);
+                closeGripper(it->armId, action_server);
                 string hand;
                 if(it->armId == 0){
                     hand = "right";
                 }else{
                     hand = "left";
                 }
-                PutInHand(object_, hand, actionId);
+                if(!gripperEmpty_  || simu_){
+                    PutInHand(object_, hand, actionId);
+                }
             }else if(it->subTrajName == "release"){
-                closeGripper(it->armId, action_server);
+                openGripper(it->armId, action_server);
                 RemoveFromHand(object_);
             }else{//this is a trajectory
                 executeTrajectory(actionId, it->subTrajId, it->armId, action_server);
