@@ -38,6 +38,8 @@ public:
 
     bool stopOrder_;
 
+    bool shouldUseRightHand_;
+
     string rightArmPose_;
     string leftArmPose_;
     string rightArmRestPose_;

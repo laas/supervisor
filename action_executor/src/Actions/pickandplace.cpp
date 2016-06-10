@@ -50,6 +50,9 @@ bool PickAndPlace::preconditions(){
 
 bool PickAndPlace::plan(){
 
+    //TO CHANGE
+    connector_->previousId_ = -1;
+
     vector<gtp_ros_msg::Ag> agents;
     gtp_ros_msg::Ag agent;
     agent.actionKey = "mainAgent";
@@ -66,6 +69,14 @@ bool PickAndPlace::plan(){
     objects.push_back(support);
     vector<gtp_ros_msg::Points> points;
     vector<gtp_ros_msg::Data> datas;
+
+    if(connector_->shouldUseRightHand_){
+        gtp_ros_msg::Data data;
+        data.dataKey = "hand";
+        data.dataValue = "right";
+        datas.push_back(data);
+    }
+
     string actionName;
     if(isManipulableObject(support_)){
         //if the support is also a manipulable object, this is a stack action

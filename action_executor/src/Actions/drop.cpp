@@ -77,6 +77,13 @@ bool Drop::plan(){
     vector<gtp_ros_msg::Points> points;
     vector<gtp_ros_msg::Data> datas;
 
+    if(connector_->shouldUseRightHand_){
+        gtp_ros_msg::Data data;
+        data.dataKey = "hand";
+        data.dataValue = "right";
+        datas.push_back(data);
+    }
+
     actionId_ = planGTP("drop", agents, objects, datas, points);
 
     if(actionId_ == -1){
