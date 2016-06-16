@@ -50,6 +50,9 @@ bool PickAndDrop::preconditions(){
 
 bool PickAndDrop::plan(){
 
+    //TO CHANGE
+    connector_->previousId_ = -1;
+
     vector<gtp_ros_msg::Ag> agents;
     gtp_ros_msg::Ag agent;
     agent.actionKey = "mainAgent";
@@ -66,6 +69,13 @@ bool PickAndDrop::plan(){
     objects.push_back(container);
     vector<gtp_ros_msg::Points> points;
     vector<gtp_ros_msg::Data> datas;
+
+    if(connector_->shouldUseRightHand_){
+        gtp_ros_msg::Data data;
+        data.dataKey = "hand";
+        data.dataValue = "right";
+        datas.push_back(data);
+    }
 
     int nbTry = 0;
     while(nbTry < nbPlanMax_){

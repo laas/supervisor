@@ -44,6 +44,9 @@ bool Pick::preconditions(){
 
 bool Pick::plan(){
 
+   //TO CHANGE
+   connector_->previousId_ = -1;
+
    vector<gtp_ros_msg::Ag> agents;
    gtp_ros_msg::Ag agent;
    agent.actionKey = "mainAgent";
@@ -56,6 +59,13 @@ bool Pick::plan(){
    objects.push_back(object);
    vector<gtp_ros_msg::Points> points;
    vector<gtp_ros_msg::Data> datas;
+
+   if(connector_->shouldUseRightHand_){
+       gtp_ros_msg::Data data;
+       data.dataKey = "hand";
+       data.dataValue = "right";
+       datas.push_back(data);
+   }
    
    actionId_ = planGTP("pick", agents, objects, datas, points);
    

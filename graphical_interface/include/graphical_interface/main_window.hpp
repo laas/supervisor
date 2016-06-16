@@ -20,7 +20,7 @@
 #include <pr2motion/Gripper_Right_OperateAction.h>
 #include <pr2motion/Gripper_Left_OperateAction.h>
 #include <pr2motion/Torso_MoveAction.h>
-#include <pr2motion/Head_MoveAction.h>
+#include <pr2motion/Head_Move_TargetAction.h>
 #include <pr2motion/GetQAction.h>
 #include <pr2motion/Torso_Stop.h>
 #include <pr2motion/Gripper_Stop.h>
@@ -35,6 +35,8 @@
 #include "supervisor_msgs/NewGoal.h"
 #include "supervisor_msgs/Empty.h"
 #include "toaster_msgs/Fact.h"
+#include "toaster_msgs/RemoveFromHand.h"
+#include "toaster_msgs/SetInfoDB.h"
 #include "supervisor_msgs/ActionMS.h"
 #include "toaster_msgs/GetInfoDB.h"
 #include "supervisor_msgs/Say.h"
@@ -49,7 +51,7 @@ typedef actionlib::SimpleActionClient<pr2motion::Arm_Right_MoveToQGoalAction> Cl
 typedef actionlib::SimpleActionClient<pr2motion::Arm_Left_MoveToQGoalAction> ClientLeftArm;
 typedef actionlib::SimpleActionClient<pr2motion::Gripper_Right_OperateAction> ClientRightGripper;
 typedef actionlib::SimpleActionClient<pr2motion::Gripper_Left_OperateAction> ClientLeftGripper;
-typedef actionlib::SimpleActionClient<pr2motion::Head_MoveAction> ClientHead;
+typedef actionlib::SimpleActionClient<pr2motion::Head_Move_TargetAction> ClientHead;
 typedef actionlib::SimpleActionClient<pr2motion::GetQAction> ClientGetQ;
 
 class MainWindow : public QMainWindow {
@@ -112,6 +114,8 @@ private Q_SLOTS:
     void on_NoButton_clicked();
 
     void on_SendFactButton_clicked();
+
+    void on_pushButtonDetachFromHand_clicked();
 
 public:
     Ui::MainWindowDesign ui;

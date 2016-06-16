@@ -1,5 +1,6 @@
 ---
 nbPlanMaxGTP: 2
+shouldUseRightHand: true
 restPosition:
     right: 'manipRight'
     left: 'manipLeft'
