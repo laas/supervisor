@@ -25,6 +25,7 @@
 #include "supervisor_msgs/Action.h"
 #include "supervisor_msgs/Plan.h"
 #include "supervisor_msgs/GiveInfo.h"
+#include "supervisor_msgs/Knowledge.h"
 
 
 using namespace std;

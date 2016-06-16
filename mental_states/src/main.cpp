@@ -623,6 +623,8 @@ int main (int argc, char **argv)
   ros::ServiceServer service_info_given = _node.advertiseService("mental_state/info_given", infoGiven); //when an agent informs an other agent about something
   ros::ServiceServer service_solve_divergent_belief = _node.advertiseService("mental_state/solve_divergent_belief", solveDivergentBelief); //solve a divergent belief concerning an action
 
+  ros::Publisher knowledge_pub = node->advertise<supervisor_msgs::Knowledge>("/mental_states/agents_knowledge", 1000);
+
   _node.getParam("/simu", simu);
   _node.getParam("/robot/name", robotName);
   allAgents = ms->db_.getAgents();
@@ -641,6 +643,9 @@ int main (int argc, char **argv)
           g.create_thread(boost::bind(update, ms, *it));
     }
     g.join_all();
+    supervisor_msgs::Knowledge msg;
+    msg.agentsKnowledge = ms->db_.knowledge_;
+    knowledge_pub.publish(msg);
     ros::spinOnce();
     loop_rate.sleep();
   }

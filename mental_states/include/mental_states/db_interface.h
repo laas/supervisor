@@ -17,6 +17,7 @@
 #include "supervisor_msgs/Link.h"
 #include "supervisor_msgs/Action.h"
 #include "supervisor_msgs/Plan.h"
+#include "supervisor_msgs/AgentKnowledge.h"
 
 using namespace std;
 
@@ -46,12 +47,13 @@ public:
 	void cleanDB();
     void updateKnowledge();
     void initKnowledge(vector<string> agents);
+
+    vector<supervisor_msgs::AgentKnowledge> knowledge_;
 protected:
 
 private:
-    vector<pair<string, vector<toaster_msgs::Fact> > > knowledge_;
-    vector<pair<string, vector<toaster_msgs::Fact> > > toAdd_;
-    vector<pair<string, vector<toaster_msgs::Fact> > > toRemove_;
+    vector<supervisor_msgs::AgentKnowledge> toAdd_;
+    vector<supervisor_msgs::AgentKnowledge> toRemove_;
 
 
 };
