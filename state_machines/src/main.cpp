@@ -13,6 +13,7 @@ The state machines manager keeps trace of the activity of each agent.
 #include "supervisor_msgs/AgentActivity.h"
 #include "supervisor_msgs/Focus.h"
 #include "supervisor_msgs/HumanAction.h"
+#include "supervisor_msgs/Knowledge.h"
 
 string robotState;
 string robotName;
@@ -23,6 +24,8 @@ double weightRobot_ = 0.0;
 bool actionPerformed = false;
 supervisor_msgs::Action performedAction;
 string agentAction;
+
+vector<supervisor_msgs::AgentKnowledge> knowledge;
 
 /*
 Main function of the robot state machine
@@ -125,6 +128,11 @@ void focusCallback(const supervisor_msgs::Focus::ConstPtr& msg){
     weightRobot_ = msg->weight;
 }
 
+void knowledgeCallback(const supervisor_msgs::Knowledge::ConstPtr& msg){
+
+    knowledge = msg->agentsKnowledge;
+}
+
 /*
 Service call to tell that a human performed an action
 */
@@ -147,6 +155,7 @@ int main (int argc, char **argv)
 
   ros::ServiceServer service = node_.advertiseService("state_machines/human_action", humanAction);
   ros::Subscriber sub = node_.subscribe("action_executor/focus", 1000, focusCallback);
+  ros::Subscriber subKnow = node_.subscribe("mental_states/agents_knowledge", 1000, knowledgeCallback);
 
   vector<string> allAgents;
   node_.getParam("/robot/name", robotName);

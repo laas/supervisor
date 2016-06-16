@@ -41,23 +41,23 @@ void DBInterface::addFactToAdd(toaster_msgs::Fact fact, string agent){
 
     //We look if the agent already exist in the list to add
     bool find = false;
-    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = toAdd_.begin(); it != toAdd_.end(); it++){
-        if(it->first == agent){//if it exist we add the fact to the list
-            it->second.push_back(fact);
+    for(vector<supervisor_msgs::AgentKnowledge>::iterator it = toAdd_.begin(); it != toAdd_.end(); it++){
+        if(it->agentName == agent){//if it exist we add the fact to the list
+            it->knowledge.push_back(fact);
             find = true;
         }
     }
     if(!find){//if it does not exist we add it
-        pair<string, vector<toaster_msgs::Fact> > toAddAgent;
-        toAddAgent.first = agent;
-        toAddAgent.second.push_back(fact);
+        supervisor_msgs::AgentKnowledge toAddAgent;
+        toAddAgent.agentName = agent;
+        toAddAgent.knowledge.push_back(fact);
         toAdd_.push_back(toAddAgent);
     }
 
     //update knowledge
-    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
-        if(it->first == agent){
-            it->second.push_back(fact);
+    for(vector<supervisor_msgs::AgentKnowledge>::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->agentName == agent){
+            it->knowledge.push_back(fact);
         }
     }
 
@@ -72,24 +72,24 @@ void DBInterface::addFactToRemove(toaster_msgs::Fact fact, string agent){
 
     //We look if the agent already exist in the list to add
     bool find = false;
-    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = toRemove_.begin(); it != toRemove_.end(); it++){
-        if(it->first == agent){//if it exist we add the fact to the list
-            it->second.push_back(fact);
+    for(vector<supervisor_msgs::AgentKnowledge>::iterator it = toRemove_.begin(); it != toRemove_.end(); it++){
+        if(it->agentName == agent){//if it exist we add the fact to the list
+            it->knowledge.push_back(fact);
             find = true;
         }
     }
     if(!find){//if it does not exist we add it
-        pair<string, vector<toaster_msgs::Fact> > toRemoveAgent;
-        toRemoveAgent.first = agent;
-        toRemoveAgent.second.push_back(fact);
+        supervisor_msgs::AgentKnowledge toRemoveAgent;
+        toRemoveAgent.agentName = agent;
+        toRemoveAgent.knowledge.push_back(fact);
         toRemove_.push_back(toRemoveAgent);
     }
 
     //update knowledge
-    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
-        if(it->first == agent){
+    for(vector<supervisor_msgs::AgentKnowledge>::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->agentName == agent){
              vector<toaster_msgs::Fact> tmp;
-            for(vector<toaster_msgs::Fact>::iterator itf = it->second.begin(); itf != it->second.end(); itf++){
+            for(vector<toaster_msgs::Fact>::iterator itf = it->knowledge.begin(); itf != it->knowledge.end(); itf++){
                 if((fact.subjectId == itf->subjectId && fact.property == itf->property && fact.targetId == itf->targetId)
                         || (fact.subjectId == "NULL" && fact.property == itf->property && fact.targetId == itf->targetId)
                         || (fact.subjectId == itf->subjectId && fact.property == itf->property && fact.targetId == "NULL")
@@ -99,7 +99,7 @@ void DBInterface::addFactToRemove(toaster_msgs::Fact fact, string agent){
                     tmp.push_back(*itf);
                 }
             }
-            it->second = tmp;
+            it->knowledge = tmp;
         }
     }
 
@@ -112,9 +112,9 @@ Function which init the knowledge of agent with the database
 void DBInterface::initKnowledge(vector<string> agents){
 
     for(vector<string>::iterator it = agents.begin(); it != agents.end(); it++){
-        pair<string, vector<toaster_msgs::Fact> > agentKnowledge;
-        agentKnowledge.first = *it;
-        agentKnowledge.second = getFactsAgent(*it);
+        supervisor_msgs::AgentKnowledge agentKnowledge;
+        agentKnowledge.agentName = *it;
+        agentKnowledge.knowledge = getFactsAgent(*it);
         knowledge_.push_back(agentKnowledge);
     }
 }
@@ -125,18 +125,18 @@ Function which send update to the database and update the mental states.
 void DBInterface::updateKnowledge(){
 
     //we send to the database the last update
-    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = toRemove_.begin(); it != toRemove_.end(); it++){
-        removeFacts(it->second, it->first);
+    for(vector<supervisor_msgs::AgentKnowledge>::iterator it = toRemove_.begin(); it != toRemove_.end(); it++){
+        removeFacts(it->knowledge, it->agentName);
     }
     toRemove_.clear();
-    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = toAdd_.begin(); it != toAdd_.end(); it++){
-        addFacts(it->second, it->first);
+    for(vector<supervisor_msgs::AgentKnowledge>::iterator it = toAdd_.begin(); it != toAdd_.end(); it++){
+        addFacts(it->knowledge, it->agentName);
     }
     toAdd_.clear();
 
     //we get the last update from the database
-    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
-        it->second = getFactsAgent(it->first);
+    for(vector<supervisor_msgs::AgentKnowledge>::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        it->knowledge = getFactsAgent(it->agentName);
     }
 
 }
@@ -244,9 +244,9 @@ Function which return all the actions id with an action state in the knowledge o
 vector<int> DBInterface::getActionsIdFromState(string agent, string state){
 
     vector<int> toReturn;
-    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
-        if(it->first == agent){
-            for(vector<toaster_msgs::Fact>::iterator itk = it->second.begin(); itk != it->second.end(); itk++){
+    for(vector<supervisor_msgs::AgentKnowledge>::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->agentName == agent){
+            for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
                 if(itk->property == "actionState" && itk->targetId == state){
                     istringstream buffer(itk->subjectId);
                     int id;
@@ -267,24 +267,24 @@ Function which return true if all the facts given are in the agent knowledge
 */
 bool DBInterface::factsAreIn(string agent, vector<toaster_msgs::Fact> facts){
 
-    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
-        if(it->first == agent){
+    for(vector<supervisor_msgs::AgentKnowledge>::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->agentName == agent){
             for(vector<toaster_msgs::Fact>::iterator itf = facts.begin(); itf != facts.end(); itf++){
                 if(itf->subjectId == "NULL"){
-                    for(vector<toaster_msgs::Fact>::iterator itk = it->second.begin(); itk != it->second.end(); itk++){
+                    for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
                         if(itk->property == itf->property && itk->targetId == itf->targetId){
                             return false;
                         }
                     }
                 }else if(itf->targetId == "NULL"){
-                    for(vector<toaster_msgs::Fact>::iterator itk = it->second.begin(); itk != it->second.end(); itk++){
+                    for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
                         if(itk->property == itf->property && itk->subjectId == itf->subjectId){
                             return false;
                         }
                     }
                 }else{
                     bool find = false;
-                    for(vector<toaster_msgs::Fact>::iterator itk = it->second.begin(); itk != it->second.end(); itk++){
+                    for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
                         if(itk->property == itf->property && itk->subjectId == itf->subjectId && itk->targetId == itf->targetId){
                             find = true;
                             break;
@@ -307,9 +307,9 @@ Function which return the id of the plan in PROGRESS fo the agent
 */
 int DBInterface::getAgentIdPlan(string agent){
 
-    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
-        if(it->first == agent){
-            for(vector<toaster_msgs::Fact>::iterator itk = it->second.begin(); itk != it->second.end(); itk++){
+    for(vector<supervisor_msgs::AgentKnowledge>::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->agentName == agent){
+            for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
                 if(itk->property == "planState" && itk->targetId == "PROGRESS"){
                     istringstream buffer(itk->subjectId);
                     int id;
@@ -349,9 +349,9 @@ string DBInterface::getActionState(string agent, supervisor_msgs::ActionMS actio
     stringstream toString;
     toString << action.id;
     string actionId = toString.str();
-    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
-        if(it->first == agent){
-            for(vector<toaster_msgs::Fact>::iterator itk = it->second.begin(); itk != it->second.end(); itk++){
+    for(vector<supervisor_msgs::AgentKnowledge>::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->agentName == agent){
+            for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
                 if(itk->property == "actionState" && itk->subjectId == actionId){
                     return itk->targetId;
                 }
@@ -369,9 +369,9 @@ Function which return all the goals with a specific state
 vector<string> DBInterface::getAgentGoals(string agent, string state){
 
     vector<string> goals;
-    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
-        if(it->first == agent){
-            for(vector<toaster_msgs::Fact>::iterator itk = it->second.begin(); itk != it->second.end(); itk++){
+    for(vector<supervisor_msgs::AgentKnowledge>::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->agentName == agent){
+            for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
                 if(itk->property == "goalState" && itk->targetId == state){
                     goals.push_back(itk->subjectId);
                 }
@@ -390,9 +390,9 @@ vector<string> DBInterface::getAgentsWhoSee(string agent){
     vector<string> agents;
     string robotName;
     node.getParam("/robot/name", robotName);
-    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
-        if(it->first == robotName){
-            for(vector<toaster_msgs::Fact>::iterator itk = it->second.begin(); itk != it->second.end(); itk++){
+    for(vector<supervisor_msgs::AgentKnowledge>::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->agentName == robotName){
+            for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
                 if(itk->property == "isVisibleBy" && itk->subjectId == agent){
                     agents.push_back(itk->targetId);
                 }
@@ -411,9 +411,9 @@ bool DBInterface::isAgentSeeing(string agentTested, string agentToSee){
     ros::NodeHandle node;
     string robotName;
     node.getParam("/robot/name", robotName);
-    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
-        if(it->first == robotName){
-            for(vector<toaster_msgs::Fact>::iterator itk = it->second.begin(); itk != it->second.end(); itk++){
+    for(vector<supervisor_msgs::AgentKnowledge>::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->agentName == robotName){
+            for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
                 if(itk->property == "isVisibleBy" && itk->subjectId == agentToSee && itk->targetId == agentTested){
                     return true;
                 }
@@ -572,9 +572,9 @@ Function which return the state of a goal
 */
 string DBInterface::getGoalState(string agent, supervisor_msgs::GoalMS goal){
 
-    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
-        if(it->first == agent){
-            for(vector<toaster_msgs::Fact>::iterator itk = it->second.begin(); itk != it->second.end(); itk++){
+    for(vector<supervisor_msgs::AgentKnowledge>::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->agentName == agent){
+            for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
                 if(itk->property == "goalState" && itk->subjectId == goal.name){
                     return itk->targetId;
                 }
@@ -594,9 +594,9 @@ string DBInterface::getPlanState(string agent, supervisor_msgs::PlanMS plan){
     stringstream toString;
     toString << plan.id;
     string planId = toString.str();
-    for(vector<pair<string, vector<toaster_msgs::Fact> > >::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
-        if(it->first == agent){
-            for(vector<toaster_msgs::Fact>::iterator itk = it->second.begin(); itk != it->second.end(); itk++){
+    for(vector<supervisor_msgs::AgentKnowledge>::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->agentName == agent){
+            for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
                 if(itk->property == "planState" && itk->subjectId == planId){
                     return itk->targetId;
                 }
