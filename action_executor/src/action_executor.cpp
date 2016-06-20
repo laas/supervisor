@@ -295,6 +295,9 @@ int main (int argc, char **argv)
   ros::init(argc, argv, "action_executor");
   ros::NodeHandle node;
   node_ = &node;
+
+  ROS_INFO("[action_executor] Init action_executor");
+
   node.getParam("humanSafetyJoint", humanSafetyJoint);
   node.getParam("safetyThreshold", safetyThreshold);
   node.getParam("robot/toasterName", robotToaster);
@@ -302,7 +305,6 @@ int main (int argc, char **argv)
   Connector connector;
   connector_ = &connector;
 
-  ROS_INFO("[action_executor] Init action_executor");
 
   ActionExecutor executor("supervisor/action_executor");
 

@@ -40,13 +40,16 @@ int main (int argc, char **argv)
   node = &_node;
   ros::Rate loop_rate(30);
 
+  ROS_INFO("[plan_elaboration] Init plan_elaboration");
+
   PlanElaboration _pe(node);
   pe = &_pe;
 
   ros::ServiceServer service_goal = node->advertiseService("plan_elaboration/new_goal", newGoal); //new goal to execute
   ros::ServiceServer service_end = node->advertiseService("plan_elaboration/endPlan", endPlan); //new goal to execute
 
-  ROS_INFO("[goal_manager] Init plan_elaboration");
+  ROS_INFO("[plan_elaboration] Plan_elaboration ready");
+
   while(_node.ok()){
     pe->checkPlan();
     ros::spinOnce();
