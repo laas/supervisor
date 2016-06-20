@@ -14,6 +14,7 @@ The state machines manager keeps trace of the activity of each agent.
 #include "supervisor_msgs/Focus.h"
 #include "supervisor_msgs/HumanAction.h"
 #include "supervisor_msgs/Knowledge.h"
+#include "supervisor_msgs/ActionMSList.h"
 
 string robotState;
 string robotName;
@@ -27,6 +28,7 @@ supervisor_msgs::Action performedAction;
 string agentAction;
 
 vector<supervisor_msgs::AgentKnowledge> knowledge;
+vector<supervisor_msgs::ActionMS> actions;
 
 /*
 Main function of the robot state machine
@@ -41,13 +43,15 @@ void robotStateMachine(){
     ros::Publisher robot_pub = node->advertise<supervisor_msgs::AgentActivity>(topicName, 1000);
 	
 	while(true){
+        rsm.knowledge_ = knowledge;
+        rsm.actions_ = actions;
         supervisor_msgs::AgentActivity msg;
         string object;
         double weight = 0.0;
         bool stopable = true;
         string previousState = robotState;
 		if(robotState == "IDLE"){
-			robotState = rsm.idleState();
+            robotState = rsm.idleState();
 		}else if(robotState == "ACTING"){
             robotState = rsm.actingState();
             object = objectRobot_;
@@ -140,6 +144,12 @@ void knowledgeCallback(const supervisor_msgs::Knowledge::ConstPtr& msg){
     knowledge = msg->agentsKnowledge;
 }
 
+void actionsCallback(const supervisor_msgs::ActionMSList::ConstPtr& msg){
+
+    actions = msg->actionsList;
+}
+
+
 /*
 Service call to tell that a human performed an action
 */
@@ -163,6 +173,7 @@ int main (int argc, char **argv)
   ros::ServiceServer service = node_.advertiseService("state_machines/human_action", humanAction);
   ros::Subscriber sub = node_.subscribe("action_executor/focus", 1000, focusCallback);
   ros::Subscriber subKnow = node_.subscribe("mental_states/agents_knowledge", 1000, knowledgeCallback);
+  ros::Subscriber subAct = node_.subscribe("mental_states/actions", 1000, actionsCallback);
 
   vector<string> allAgents;
   node_.getParam("/robot/name", robotName);
