@@ -19,6 +19,7 @@
 #include "supervisor_msgs/GetInfo.h"
 #include "supervisor_msgs/SolveDivergentBelief.h"
 #include "supervisor_msgs/ActionMS.h"
+#include "supervisor_msgs/ActionMSList.h"
 #include "supervisor_msgs/PlanMS.h"
 #include "supervisor_msgs/GoalMS.h"
 #include "supervisor_msgs/Link.h"
@@ -32,7 +33,7 @@ using namespace std;
 
 class MSManager{
 public:
-	MSManager();
+    MSManager(ros::NodeHandle* node);
 	vector<supervisor_msgs::ActionMS> getActionList();
     void update(string agent);
 	void initGoals();
@@ -55,21 +56,24 @@ public:
 protected:
 
 private:
-	vector<supervisor_msgs::ActionMS> actionList_;
 	vector<supervisor_msgs::PlanMS> planList_;
 	vector<supervisor_msgs::GoalMS> goalList_;
 	vector<supervisor_msgs::ActionMS> highLevelActions_;
+    vector<supervisor_msgs::ActionMS> actionList_;
 	int actionId_;
 	int planId_;
 	boost::mutex actionListMutex_;
 	boost::mutex planListMutex_;
 	boost::mutex goalListMutex_;
+    string agentX_;
+    ros::NodeHandle* node_;
 
 	void checkEffects(string agent);
 	void computePreconditions(string agent);
 	void planFeasibility(string agent);
 	void checkGoals(string agent);
 	supervisor_msgs::ActionMS getHighLevelActionByName(string name);
+    bool isInActor(string agent, supervisor_msgs::ActionMS action);
 
 };
 

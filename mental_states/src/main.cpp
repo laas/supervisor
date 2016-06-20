@@ -13,7 +13,7 @@ TODO: - notion of agent present to give info (interaction Area?)
 
 #include <mental_states/ms_manager.h>
 
-MSManager* ms = new MSManager();
+MSManager* ms;
 string robotName;
 vector<string> allAgents;
 bool simu;
@@ -615,6 +615,9 @@ int main (int argc, char **argv)
   node = &_node;
     ros::Rate loop_rate(30);
 
+  MSManager _ms(node);
+  ms = &_ms;
+
   ROS_INFO("[mental_state] Init mental_state");
 
   //Services declarations
@@ -624,6 +627,7 @@ int main (int argc, char **argv)
   ros::ServiceServer service_solve_divergent_belief = _node.advertiseService("mental_state/solve_divergent_belief", solveDivergentBelief); //solve a divergent belief concerning an action
 
   ros::Publisher knowledge_pub = node->advertise<supervisor_msgs::Knowledge>("/mental_states/agents_knowledge", 1000);
+  ros::Publisher actions_pub = node->advertise<supervisor_msgs::ActionMSList>("/mental_states/actions", 1000);
 
   _node.getParam("/simu", simu);
   _node.getParam("/robot/name", robotName);
@@ -646,6 +650,9 @@ int main (int argc, char **argv)
     supervisor_msgs::Knowledge msg;
     msg.agentsKnowledge = ms->db_.knowledge_;
     knowledge_pub.publish(msg);
+    supervisor_msgs::ActionMSList msg_act;
+    msg_act.actionsList = ms->getActionList();
+    actions_pub.publish(msg_act);
     ros::spinOnce();
     loop_rate.sleep();
   }

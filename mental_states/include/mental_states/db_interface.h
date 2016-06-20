@@ -23,7 +23,7 @@ using namespace std;
 
 class DBInterface{
 public:
-	DBInterface() {};
+    DBInterface() {};
 	vector<string> getAgents();
     void addFactToAdd(toaster_msgs::Fact fact, string agent);
     void addFactToRemove(toaster_msgs::Fact fact, string agent);
@@ -47,6 +47,7 @@ public:
 	void cleanDB();
     void updateKnowledge();
     void initKnowledge(vector<string> agents);
+    void setNode(ros::NodeHandle* node);
 
     vector<supervisor_msgs::AgentKnowledge> knowledge_;
 protected:
@@ -54,6 +55,7 @@ protected:
 private:
     vector<supervisor_msgs::AgentKnowledge> toAdd_;
     vector<supervisor_msgs::AgentKnowledge> toRemove_;
+    ros::NodeHandle* node_;
 
 
 };

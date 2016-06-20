@@ -6,9 +6,12 @@ Class which allows to maintain mental states of the agents
 
 #include <mental_states/ms_manager.h>
 
-MSManager::MSManager(){
+MSManager::MSManager(ros::NodeHandle* node){
 	actionId_ = 0;
 	planId_ = 0;
+    node_ = node;
+    node_->getParam("/HATP/AgentX", agentX_);
+    db_.setNode(node);
 }
 
 vector<supervisor_msgs::ActionMS> MSManager::getActionList(){
@@ -21,20 +24,19 @@ vector<supervisor_msgs::ActionMS> MSManager::getActionList(){
 Function which initialize the list of goals from the goal in param
 */
 void MSManager::initGoals(){
-	ros::NodeHandle node;
 	//we retrieve the possible goals from param of the .yaml file
 	vector<string> names;
-	node.getParam("/goals/names", names);
+    node_->getParam("/goals/names", names);
 	for(vector<string>::iterator it = names.begin(); it != names.end(); it++){
 		//for each goal we retreive its actors and objective
 		string actorsTopic = "goals/";
 		actorsTopic = actorsTopic + *it + "_actors";
 		vector<string> actors;
-		node.getParam(actorsTopic, actors);
+        node_->getParam(actorsTopic, actors);
 		string objectiveTopic = "goals/";
 		objectiveTopic = objectiveTopic + *it + "_objective";
 		vector<string> objective;
-		node.getParam(objectiveTopic, objective);
+        node_->getParam(objectiveTopic, objective);
 		//we transform the objective into facts
 		vector<toaster_msgs::Fact> obj;
 		for(vector<string>::iterator ob = objective.begin(); ob != objective.end(); ob++){
@@ -61,24 +63,24 @@ void MSManager::initGoals(){
 Function which initialize the list of high level actions from param
 */
 void MSManager::initHighLevelActions(){
-	ros::NodeHandle node;
+
 	//we retrieve the high level actions from param of the .yaml file
 	vector<string> names;
-	node.getParam("/highLevelActions/names", names);
+    node_->getParam("/highLevelActions/names", names);
 	for(vector<string>::iterator it = names.begin(); it != names.end(); it++){
 		//for each high level action we retreive its composition
 		string paramTopic = "highLevelActions/";
 		paramTopic = paramTopic + *it + "_param";
 		vector<string> params;
-		node.getParam(paramTopic, params);
+        node_->getParam(paramTopic, params);
 		string actorsTopic = "highLevelActions/";
 		actorsTopic = actorsTopic + *it + "_actors";
 		vector<string> actors;
-		node.getParam(actorsTopic, actors);
+        node_->getParam(actorsTopic, actors);
 		string precTopic = "highLevelActions/";
 		precTopic = precTopic + *it + "_prec";
 		vector<string> prec;
-		node.getParam(precTopic, prec);
+        node_->getParam(precTopic, prec);
 		//we transform the preconditions into facts
 		vector<toaster_msgs::Fact> precFact;
 		for(vector<string>::iterator p = prec.begin(); p != prec.end(); p++){
@@ -94,7 +96,7 @@ void MSManager::initHighLevelActions(){
 		string effectsTopic = "highLevelActions/";
 		effectsTopic = effectsTopic + *it + "_effects";
 		vector<string> effects;
-		node.getParam(effectsTopic, effects);
+        node_->getParam(effectsTopic, effects);
 		//we transform the effects into facts
 		vector<toaster_msgs::Fact> effectsFact;
 		for(vector<string>::iterator e = effects.begin(); e != effects.end(); e++){
@@ -144,9 +146,8 @@ Function which checks if an agent can deduce an action from its effects.
 */
 void MSManager::checkEffects(string agent){
 
-    ros::NodeHandle node;
     string robotName;
-    node.getParam("/robot/name", robotName);
+    node_->getParam("/robot/name", robotName);
 
 	//We get all the actions either READY, in PROGRESS, NEEDED or ASKED in the agent knowledge.
     vector<int> readyIds = db_.getActionsIdFromState(agent, "READY");
@@ -228,7 +229,7 @@ void MSManager::computePreconditions(string agent){
 		vector<supervisor_msgs::ActionMS> toNeeded;
 		vector<supervisor_msgs::ActionMS> toReady;
 		for(vector<supervisor_msgs::ActionMS>::iterator it = readyActions.begin(); it != readyActions.end(); it++){
-            if(!db_.factsAreIn(agent, it->prec)){ //if the preconditions are not respected anymore, the action goes back to NEEDED
+            if(!db_.factsAreIn(agent, it->prec) && !isInActor(agentX_, *it)){ //if the preconditions are not respected anymore, the action goes back to NEEDED
 				toNeeded.push_back(*it);
 			}
 		}
@@ -265,14 +266,14 @@ void MSManager::computePreconditions(string agent){
         vector<int> neededIds = db_.getActionsIdFromState(agent, "NEEDED");
 		vector<supervisor_msgs::ActionMS> neededActions = getActionsFromIds(neededIds);
 		for(vector<supervisor_msgs::ActionMS>::iterator it = linksOk.begin(); it != linksOk.end(); it++){
-            if(db_.factsAreIn(agent, it->prec)){ //if the preconditions are respected the action becomes READY, else it goes to NEEDED
+            if(db_.factsAreIn(agent, it->prec) || isInActor(agentX_, *it)){ //if the preconditions are respected the action becomes READY, else it goes to NEEDED
 				toReady.push_back(*it);
 			}else{
 				toNeeded.push_back(*it);
 			}
 		}
 		for(vector<supervisor_msgs::ActionMS>::iterator it = neededActions.begin(); it != neededActions.end(); it++){
-            if(db_.factsAreIn(agent, it->prec)){ //if the preconditions are respected the action becomes READY, else it remains to NEEDED
+            if(db_.factsAreIn(agent, it->prec) || isInActor(agentX_, *it)){ //if the preconditions are respected the action becomes READY, else it remains to NEEDED
 				toReady.push_back(*it);
 			}
 		}
@@ -288,11 +289,10 @@ Function which checks if an agent still think that the current plan is still fea
 */
 void MSManager::planFeasibility(string agent){
 
-    ros::NodeHandle node;
-    ros::ServiceClient client = node.serviceClient<supervisor_msgs::EndPlan>("plan_elaboration/end_plan");
+    ros::ServiceClient client = node_->serviceClient<supervisor_msgs::EndPlan>("plan_elaboration/end_plan");
     supervisor_msgs::EndPlan srv;
     string robotName;
-    node.getParam("/robot/name", robotName);
+    node_->getParam("/robot/name", robotName);
 
 	
 	pair<bool, supervisor_msgs::PlanMS> agentPlan = getAgentPlan(agent);
@@ -361,9 +361,8 @@ Function which checks if an agent still think that the current goal is still fea
 */
 void MSManager::checkGoals(string agent){
 
-    ros::NodeHandle node;
     string robotName;
-    node.getParam("/robot/name", robotName);
+    node_->getParam("/robot/name", robotName);
 
 	//We first get all goals in PROGRESS or PENDING in the knowledge of the agent
     vector<string> pendingGoals = db_.getAgentGoals(agent, "PENDING");
@@ -563,11 +562,10 @@ Function which aborts the current plan in the knowledge of the agent (and remove
 */
 void MSManager::abortPlan(string agent){
 
-    ros::NodeHandle node;
-    ros::ServiceClient client = node.serviceClient<supervisor_msgs::EndPlan>("goal_manager/end_plan");
+    ros::ServiceClient client = node_->serviceClient<supervisor_msgs::EndPlan>("plan_negotiation/end_plan");
     supervisor_msgs::EndPlan srv;
     string robotName;
-    node.getParam("/robot/name", robotName);
+    node_->getParam("/robot/name", robotName);
 
 	pair<bool, supervisor_msgs::PlanMS> agentPlan = getAgentPlan(agent);
 	if(agentPlan.first){
@@ -735,4 +733,16 @@ bool MSManager::isFromCurrentPlan(supervisor_msgs::ActionMS actionMS, string age
     return false;
 }
 
+/*
+Function which return true if an agent is in the actor of an action
+*/
+bool MSManager::isInActor(string agent, supervisor_msgs::ActionMS action){
 
+    for(vector<string>::iterator it = action.actors.begin(); it != action.actors.end(); it++){
+        if(*it == agent){
+            return true;
+        }
+    }
+
+    return false;
+}

@@ -7,13 +7,16 @@ Allows to make the link with the database of toaster
 
 #include <mental_states/db_interface.h>
 
+void DBInterface::setNode(ros::NodeHandle* node){
+    node_ = node;
+}
+
 /*
 Return all the agents present in the database
 */
 vector<string> DBInterface::getAgents(){
 
-	ros::NodeHandle node;
-    ros::ServiceClient client = node.serviceClient<toaster_msgs::GetInfoDB>("database/get_info");
+    ros::ServiceClient client = node_->serviceClient<toaster_msgs::GetInfoDB>("database/get_info");
     toaster_msgs::GetInfoDB srv;
     srv.request.type = "AGENT";
 	vector<string> agents;
@@ -386,10 +389,10 @@ Function which return all the agents who can see an agent
 	@agent: the agent name 
 */
 vector<string> DBInterface::getAgentsWhoSee(string agent){
-    ros::NodeHandle node;
+
     vector<string> agents;
     string robotName;
-    node.getParam("/robot/name", robotName);
+    node_->getParam("/robot/name", robotName);
     for(vector<supervisor_msgs::AgentKnowledge>::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
         if(it->agentName == robotName){
             for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
@@ -408,9 +411,9 @@ Function which return true if an agent can see another agent
     @agentToSee: the agent who needs to be seen
 */
 bool DBInterface::isAgentSeeing(string agentTested, string agentToSee){
-    ros::NodeHandle node;
+
     string robotName;
-    node.getParam("/robot/name", robotName);
+    node_->getParam("/robot/name", robotName);
     for(vector<supervisor_msgs::AgentKnowledge>::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
         if(it->agentName == robotName){
             for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
@@ -431,8 +434,7 @@ Function which add facts to the knowledge of an agent
 */
 void DBInterface::addFacts(vector<toaster_msgs::Fact> facts, string agent){
 
-	ros::NodeHandle node;
-    ros::ServiceClient client = node.serviceClient<toaster_msgs::SetInfoDB>("database/set_info");
+    ros::ServiceClient client = node_->serviceClient<toaster_msgs::SetInfoDB>("database/set_info");
 
     toaster_msgs::SetInfoDB srv;
 	srv.request.agentId = agent;
@@ -452,8 +454,7 @@ Function which remove facts to the knowledge of an agent
 */
 void DBInterface::removeFacts(vector<toaster_msgs::Fact> facts, string agent){
 
-    ros::NodeHandle node;
-    ros::ServiceClient client = node.serviceClient<toaster_msgs::SetInfoDB>("database/set_info");
+    ros::ServiceClient client = node_->serviceClient<toaster_msgs::SetInfoDB>("database/set_info");
 
     toaster_msgs::SetInfoDB srv;
     srv.request.agentId = agent;
@@ -473,13 +474,12 @@ Function which add effects of an actions to the knowledge of an agent
 */
 void DBInterface::addEffects(vector<toaster_msgs::Fact> facts, string agent){
 
-    ros::NodeHandle node;
     for(vector<toaster_msgs::Fact>::iterator it = facts.begin(); it != facts.end(); it++){
         string obsTopic = "observableFacts/";
         obsTopic = obsTopic + it->property;
         bool isObservable;
-        if(node.hasParam(obsTopic)){
-            node.getParam(obsTopic, isObservable);
+        if(node_->hasParam(obsTopic)){
+            node_->getParam(obsTopic, isObservable);
         }else{
             isObservable = false;
         }
@@ -503,8 +503,7 @@ Function which return all the knowledge of an agent
 */
 vector<toaster_msgs::Fact> DBInterface::getFactsAgent(string agent){
 
-   ros::NodeHandle node;
-    ros::ServiceClient client = node.serviceClient<toaster_msgs::GetInfoDB>("database/get_info");
+    ros::ServiceClient client = node_->serviceClient<toaster_msgs::GetInfoDB>("database/get_info");
     toaster_msgs::GetInfoDB srv;
 	
 	
@@ -525,8 +524,7 @@ Function which remove all knowledge from the database
 */
 void DBInterface::cleanDB(){
 
-   ros::NodeHandle node;
-    ros::ServiceClient client_rm = node.serviceClient<toaster_msgs::SetInfoDB>("database/set_info");
+    ros::ServiceClient client_rm = node_->serviceClient<toaster_msgs::SetInfoDB>("database/set_info");
     toaster_msgs::SetInfoDB srv_rm;
     srv_rm.request.infoType = "FACT";
     srv_rm.request.add = false;

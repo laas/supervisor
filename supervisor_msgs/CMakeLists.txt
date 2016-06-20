@@ -22,6 +22,7 @@ add_message_files(
    Action.msg
    Plan.msg
    ActionMS.msg
+   ActionMSList.msg
    PlanMS.msg
    GoalMS.msg
    Link.msg
