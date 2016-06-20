@@ -12,6 +12,7 @@ RobotSM::RobotSM():
 actionClient_("supervisor/action_executor", true)
  {
 	node_.getParam("/robot/name", robotName_);
+    node_.getParam("/HATP/AgentX", agentX_);
 	actionClient_.waitForServer();
 	isActing_ = false;
     shouldRetractRight_ = true;
@@ -34,7 +35,7 @@ State where the robot is IDLE
 */
 string RobotSM::idleState(){
 
-	//We look if the robot has an action to do
+    /*//We look if the robot has an action to do
     ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
     supervisor_msgs::GetInfo srv;
     srv.request.info ="ACTIONS_TODO";
@@ -55,6 +56,19 @@ string RobotSM::idleState(){
 	}else{
      ROS_ERROR("[state_machines] Failed to call service mental_state/get_info");
 	}
+    */
+
+    vector<supervisor_msgs::ActionMS> actionsR = getActionReady(robotName_, robotName_);
+    if(actionsR.size()){
+        supervisor_msgs::ActionExecutorGoal goal;
+        goal.action = convertActionMStoAction(actionsR[0]);
+        actionClient_.sendGoal(goal,  boost::bind(&RobotSM::doneCb, this, _1, _2), Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
+        isActing_ = true;
+        ROS_INFO("[state_machines] Robot goes to ACTING");
+        return "ACTING";
+    }else{
+
+    }
 
     //if no more action to do we retract if needed
     if(shouldRetractRight_){
@@ -132,4 +146,114 @@ string RobotSM::waitingState(){
 	}
 	
 	return "WAITING";
+}
+
+/*
+Get the actions ready for an agent in another agent knowledge
+    - @actor: the agent we look the actions
+    - @agent: the agent in which knowledge we look
+ */
+vector<supervisor_msgs::ActionMS> RobotSM::getActionReady(string actor, string agent){
+
+    vector<supervisor_msgs::ActionMS> answer;
+    for(vector<supervisor_msgs::AgentKnowledge>::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->agentName == agent){
+            for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
+                if(itk->property == "actionState" && (itk->targetId == "READY" || itk->targetId == "ASKED")){
+                    //we got a ready action, now we need to check the actors
+                    istringstream buffer(itk->subjectId);
+                    int id;
+                    buffer >> id;
+                    supervisor_msgs::ActionMS action = getActionFromId(id);
+                    for(vector<string>::iterator ita = action.actors.begin(); ita != action.actors.end(); ita++){
+                        if(*ita == actor){
+                            //if it is an asked action, we chek if the action is feasible
+                            if(itk->targetId == "ASKED"){
+                                if(factsAreIn(agent, action.prec)){
+                                    answer.push_back(action);
+                                }
+                            }
+                            else{
+                                answer.push_back(action);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return answer;
+
+}
+
+/*
+Return an action from an id
+ */
+supervisor_msgs::ActionMS RobotSM::getActionFromId(int id){
+
+    for(vector<supervisor_msgs::ActionMS>::iterator it = actions_.begin(); it != actions_.end(); it++){
+        if(it->id == id){
+            return *it;
+        }
+    }
+
+    supervisor_msgs::ActionMS answer;
+    return answer;
+}
+
+/*
+Convert an action in the ActionMS format to Action format
+ */
+supervisor_msgs::Action RobotSM::convertActionMStoAction(supervisor_msgs::ActionMS actionMS){
+
+    supervisor_msgs::Action action;
+    action.name = actionMS.name;
+    action.id = actionMS.id;
+    action.parameters = actionMS.parameters;
+    action.actors = actionMS.actors;
+
+    return action;
+}
+
+/*
+Function which return true if all the facts given are in the agent knowledge
+    @agent: the agent name
+    @facts: the facts we are looking for
+*/
+bool RobotSM::factsAreIn(string agent, vector<toaster_msgs::Fact> facts){
+
+    for(vector<supervisor_msgs::AgentKnowledge>::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->agentName == agent){
+            for(vector<toaster_msgs::Fact>::iterator itf = facts.begin(); itf != facts.end(); itf++){
+                if(itf->subjectId == "NULL"){
+                    for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
+                        if(itk->property == itf->property && itk->targetId == itf->targetId){
+                            return false;
+                        }
+                    }
+                }else if(itf->targetId == "NULL"){
+                    for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
+                        if(itk->property == itf->property && itk->subjectId == itf->subjectId){
+                            return false;
+                        }
+                    }
+                }else{
+                    bool find = false;
+                    for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
+                        if(itk->property == itf->property && itk->subjectId == itf->subjectId && itk->targetId == itf->targetId){
+                            find = true;
+                            break;
+                        }
+                    }
+                    if(!find){
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+    }
+    return false; //there is no knowledge concerning this agent
 }
