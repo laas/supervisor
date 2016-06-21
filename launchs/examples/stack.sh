@@ -3,34 +3,124 @@ rosservice call /pdg/manage_stream "{morseHuman: false, niutHuman: false, groupH
 rosservice call /database/execute "{command: 'EMPTY', type: 'ALL', facts: [], agent: '', order: '', areaTopic: false ,agentTopic: false ,move3dTopic: false ,pdgTopic: false}"
 
 rosservice call /toaster_simu/add_entity "{id: 'TABLE_4', name: 'TABLE_4', type: 'object', ownerId: ''}"
-rosservice call /toaster_simu/set_entity_pose "{id: 'TABLE_4', ownerId: '', type: 'object', x: 4.8, y: 4.1, z: -0.1, roll: 0.0, pitch: 0.0, yaw: 0.0}"
+rosservice call /toaster_simu/set_entity_pose "{id: 'TABLE_4', ownerId: '', type: 'object', pose:
+{position:
+  {x: 4.8,
+  y: 4.1,
+  z: -0.1},
+orientation:
+  {x: 0.0,
+  y: 0.0,
+  z: 0.0,
+  w: 1.0}}}"
 
 rosservice call /toaster_simu/add_entity "{id: 'RED_CUBE', name: 'RED_CUBE', type: 'object', ownerId: ''}"
-rosservice call /toaster_simu/set_entity_pose "{id: 'RED_CUBE', ownerId: '', type: 'object', x: 4.6, y: 3.6, z: 0.7, roll: 0.0, pitch: 0.0, yaw: 0.0}"
+rosservice call /toaster_simu/set_entity_pose "{id: 'RED_CUBE', ownerId: '', type: 'object', pose:
+{position:
+  {x: 4.6,
+  y: 3.6,
+  z: 0.7},
+orientation:
+  {x: 0.0,
+  y: 0.0,
+  z: 0.0,
+  w: 1.0}}}"
 
 rosservice call /toaster_simu/add_entity "{id: 'GREEN_CUBE', name: 'GREEN_CUBE', type: 'object', ownerId: ''}"
-rosservice call /toaster_simu/set_entity_pose "{id: 'GREEN_CUBE', ownerId: '', type: 'object', x: 4.7, y: 3.7, z: 0.7, roll: 0.0, pitch: 0.0, yaw: 0.0}"
+rosservice call /toaster_simu/set_entity_pose "{id: 'GREEN_CUBE', ownerId: '', type: 'object', pose:
+{position:
+  {x: 4.7,
+  y: 3.7,
+  z: 0.7},
+orientation:
+  {x: 0.0,
+  y: 0.0,
+  z: 0.0,
+  w: 1.0}}}"
 
 rosservice call /toaster_simu/add_entity "{id: 'BLUE_CUBE', name: 'BLUE_CUBE', type: 'object', ownerId: ''}"
-rosservice call /toaster_simu/set_entity_pose "{id: 'BLUE_CUBE', ownerId: '', type: 'object', x: 5.1, y: 4.5, z: 0.7, roll: 0.0, pitch: 0.0, yaw: 0.0}"
+rosservice call /toaster_simu/set_entity_pose "{id: 'BLUE_CUBE', ownerId: '', type: 'object', pose:
+{position:
+  {x: 5.1,
+  y: 4.5,
+  z: 0.7},
+orientation:
+  {x: 0.0,
+  y: 0.0,
+  z: 0.0,
+  w: 1.0}}}"
 
 rosservice call /toaster_simu/add_entity "{id: 'BLACK_CUBE', name: 'BLACK_CUBE', type: 'object', ownerId: ''}"
-rosservice call /toaster_simu/set_entity_pose "{id: 'BLACK_CUBE', ownerId: '', type: 'object', x: 5.2, y: 4.6, z: 0.7, roll: 0.0, pitch: 0.0, yaw: 0.0}"
+rosservice call /toaster_simu/set_entity_pose "{id: 'BLACK_CUBE', ownerId: '', type: 'object', pose:
+{position:
+  {x: 5.2,
+  y: 4.6,
+  z: 0.7},
+orientation:
+  {x: 0.0,
+  y: 0.0,
+  z: 0.0,
+  w: 1.0}}}"
 
 rosservice call /toaster_simu/add_entity "{id: 'PLACEMAT_RED', name: 'PLACEMAT_RED', type: 'object', ownerId: ''}"
-rosservice call /toaster_simu/set_entity_pose "{id: 'PLACEMAT_RED', ownerId: '', type: 'object', x: 4.8, y: 4.1, z: 0.7, roll: 0.0, pitch: 0.0, yaw: 0.0}"
+rosservice call /toaster_simu/set_entity_pose "{id: 'PLACEMAT_RED', ownerId: '', type: 'object', pose:
+{position:
+  {x: 4.8,
+  y: 4.1,
+  z: 0.7},
+orientation:
+  {x: 0.0,
+  y: 0.0,
+  z: 0.0,
+  w: 1.0}}}"
 
 rosservice call /toaster_simu/add_entity "{id: 'HERAKLES_HUMAN1', name: 'HERAKLES_HUMAN1', type: 'human', ownerId: ''}"
-rosservice call /toaster_simu/set_entity_pose "{id: 'HERAKLES_HUMAN1', ownerId: '', type: 'human', x: 6.0, y: 4.1, z: 0.0, roll: 0.0, pitch: 0.0, yaw: 3.14}"
+rosservice call /toaster_simu/set_entity_pose "{id: 'HERAKLES_HUMAN1', ownerId: '', type: 'human', pose:
+{position:
+  {x: 6.0,
+  y: 4.1,
+  z: 0.0},
+orientation:
+  {x: 0.0,
+  y: 0.0,
+  z: 1.0,
+  w: 0.0}}}"
 
 rosservice call /toaster_simu/add_entity "{id: 'rightHand', name: 'rightHand', type: 'joint', ownerId: 'HERAKLES_HUMAN1'}"
-rosservice call /toaster_simu/set_entity_pose "{id: 'rightHand', ownerId: 'HERAKLES_HUMAN1', type: 'joint', x: 6.1, y: 4.45, z: 1.0, roll: 0.0, pitch: 0.0, yaw: 3.14}"
+rosservice call /toaster_simu/set_entity_pose "{id: 'rightHand', ownerId: 'HERAKLES_HUMAN1', type: 'joint', pose:
+{position:
+  {x: 6.1,
+  y: 4.45,
+  z: 1.0},
+orientation:
+  {x: 0.0,
+  y: 0.0,
+  z: 1.0,
+  w: 0.0}}}"
 
 rosservice call /toaster_simu/add_entity "{id: 'base', name: 'base', type: 'joint', ownerId: 'HERAKLES_HUMAN1'}"
-rosservice call /toaster_simu/set_entity_pose "{id: 'base', ownerId: 'HERAKLES_HUMAN1', type: 'joint', x: 6.0, y: 4.1, z: 0.0, roll: 0.0, pitch: 0.0, yaw: 3.14}"
+rosservice call /toaster_simu/set_entity_pose "{id: 'base', ownerId: 'HERAKLES_HUMAN1', type: 'joint', pose:
+{position:
+  {x: 6.0,
+  y: 4.1,
+  z: 0.0},
+orientation:
+  {x: 0.0,
+  y: 0.0,
+  z: 1.0,
+  w: 0.0}}}"
 
 rosservice call /toaster_simu/add_entity "{id: 'head', name: 'head', type: 'joint', ownerId: 'HERAKLES_HUMAN1'}"
-rosservice call /toaster_simu/set_entity_pose "{id: 'head', ownerId: 'HERAKLES_HUMAN1', type: 'joint', x: 6.0, y: 4.1, z: 1.5, roll: 0.0, pitch: 0.0, yaw: 3.14}"
+rosservice call /toaster_simu/set_entity_pose "{id: 'head', ownerId: 'HERAKLES_HUMAN1', type: 'joint', pose:
+{position:
+  {x: 6.0,
+  y: 4.1,
+  z: 1.5},
+orientation:
+  {x: 0.0,
+  y: 0.0,
+  z: 1.0,
+  w: 0.0}}}"
 
 rosservice call /agent_monitor/monitor_all_agents "monitorAll: true"
 
