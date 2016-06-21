@@ -116,15 +116,15 @@ void HumanMonitor::humanPlace(string agent, string object, string support){
 	supportHeightTopic = supportHeightTopic + support;
 	node.getParam(objectHeightTopic, objectHeight);
 	node.getParam(supportHeightTopic, supportHeight);
-	toaster_msgs::ObjectList objectList;
+    toaster_msgs::ObjectListStamped objectList;
 	double x,y,z;
    try{
-       objectList  = *(ros::topic::waitForMessage<toaster_msgs::ObjectList>("pdg/objectList",ros::Duration(1)));
+       objectList  = *(ros::topic::waitForMessage<toaster_msgs::ObjectListStamped>("pdg/objectList",ros::Duration(1)));
        for(vector<toaster_msgs::Object>::iterator it = objectList.objectList.begin(); it != objectList.objectList.end(); it++){
          if(it->meEntity.id == support){
-            x = it->meEntity.positionX;
-            y = it->meEntity.positionY;
-            z = it->meEntity.positionZ;
+            x = it->meEntity.pose.position.x;
+            y = it->meEntity.pose.position.y;
+            z = it->meEntity.pose.position.z;
             break;
          }
        }
@@ -132,12 +132,13 @@ void HumanMonitor::humanPlace(string agent, string object, string support){
        toaster_msgs::SetEntityPose srv_setPose;
        srv_setPose.request.id = object;
        srv_setPose.request.type = "object";
-       srv_setPose.request.x = x;
-       srv_setPose.request.y = y;
-       srv_setPose.request.z = z;
-       srv_setPose.request.roll = 0.0;
-       srv_setPose.request.pitch = 0.0;
-       srv_setPose.request.yaw = 0.0;
+       srv_setPose.request.pose.position.x = x;
+       srv_setPose.request.pose.position.y = y;
+       srv_setPose.request.pose.position.z = z;
+       srv_setPose.request.pose.orientation.x = 0.0;
+       srv_setPose.request.pose.orientation.y = 0.0;
+       srv_setPose.request.pose.orientation.z = 0.0;
+       srv_setPose.request.pose.orientation.w = 0.0;
        if (!set_entity_pose.call(srv_setPose)){
       	 ROS_ERROR("Failed to call service toaster_simu/set_entity_pose");
     	 }
@@ -227,27 +228,28 @@ void HumanMonitor::humanDrop(string agent, string object, string container){
    }
 
 	//put the object in the container
-	toaster_msgs::ObjectList objectList;
+    toaster_msgs::ObjectListStamped objectList;
 	double x,y,z;
    try{
-       objectList  = *(ros::topic::waitForMessage<toaster_msgs::ObjectList>("pdg/objectList",ros::Duration(1)));
+       objectList  = *(ros::topic::waitForMessage<toaster_msgs::ObjectListStamped>("pdg/objectList",ros::Duration(1)));
        for(vector<toaster_msgs::Object>::iterator it = objectList.objectList.begin(); it != objectList.objectList.end(); it++){
          if(it->meEntity.id == container){
-            x = it->meEntity.positionX;
-            y = it->meEntity.positionY;
-            z = it->meEntity.positionZ;
+            x = it->meEntity.pose.position.x;
+            y = it->meEntity.pose.position.y;
+            z = it->meEntity.pose.position.z;
             break;
          }
        }
        toaster_msgs::SetEntityPose srv_setPose;
        srv_setPose.request.id = object;
        srv_setPose.request.type = "object";
-       srv_setPose.request.x = x;
-       srv_setPose.request.y = y;
-       srv_setPose.request.z = z;
-       srv_setPose.request.roll = 0.0;
-       srv_setPose.request.pitch = 0.0;
-       srv_setPose.request.yaw = 0.0;
+       srv_setPose.request.pose.position.x = x;
+       srv_setPose.request.pose.position.y = y;
+       srv_setPose.request.pose.position.z = z;
+       srv_setPose.request.pose.orientation.x = 0.0;
+       srv_setPose.request.pose.orientation.y = 0.0;
+       srv_setPose.request.pose.orientation.z = 0.0;
+       srv_setPose.request.pose.orientation.w = 0.0;
        if (!set_entity_pose.call(srv_setPose)){
       	 ROS_ERROR("Failed to call service toaster_simu/set_entity_pose");
     	 }

@@ -10,9 +10,9 @@
 #include "toaster_msgs/PutInHand.h"
 #include "toaster_msgs/RemoveFromHand.h"
 #include "toaster_msgs/SetEntityPose.h"
-#include "toaster_msgs/ObjectList.h"
+#include "toaster_msgs/ObjectListStamped.h"
 #include "toaster_msgs/Object.h"
-#include "toaster_msgs/RobotList.h"
+#include "toaster_msgs/RobotListStamped.h"
 #include "toaster_msgs/Robot.h"
 #include "toaster_msgs/Entity.h"
 #include <gtp_ros_msg/requestAction.h>

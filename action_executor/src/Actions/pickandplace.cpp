@@ -103,12 +103,12 @@ bool PickAndPlace::plan(){
             node_.getParam(zParamTopic, pointZ);
             double x, y, z;
             try{
-                toaster_msgs::ObjectList objectList  = *(ros::topic::waitForMessage<toaster_msgs::ObjectList>("pdg/objectList",ros::Duration(1)));
+                toaster_msgs::ObjectListStamped objectList  = *(ros::topic::waitForMessage<toaster_msgs::ObjectListStamped>("pdg/objectList",ros::Duration(1)));
                 for(vector<toaster_msgs::Object>::iterator it = objectList.objectList.begin(); it != objectList.objectList.end(); it++){
                   if(it->meEntity.id == support_){
-                     x = it->meEntity.positionX;
-                     y = it->meEntity.positionY;
-                     z = it->meEntity.positionZ;
+                     x = it->meEntity.pose.position.x;
+                     y = it->meEntity.pose.position.y;
+                     z = it->meEntity.pose.position.z;
                      break;
                   }
                 }
