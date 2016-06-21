@@ -8,11 +8,12 @@ State machine for the robot
 
 
 
-RobotSM::RobotSM():
+RobotSM::RobotSM(ros::NodeHandle* node):
 actionClient_("supervisor/action_executor", true)
  {
-	node_.getParam("/robot/name", robotName_);
-    node_.getParam("/HATP/AgentX", agentX_);
+    node_ = node;
+    node_->getParam("/robot/name", robotName_);
+    node_->getParam("/HATP/AgentX", agentX_);
 	actionClient_.waitForServer();
 	isActing_ = false;
     shouldRetractRight_ = true;
@@ -33,7 +34,7 @@ void RobotSM::doneCb(const actionlib::SimpleClientGoalState& state, const superv
 /*
 State where the robot is IDLE
 */
-string RobotSM::idleState(){
+string RobotSM::idleState(vector<string> partners){
 
     /*//We look if the robot has an action to do
     ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
@@ -57,6 +58,7 @@ string RobotSM::idleState(){
      ROS_ERROR("[state_machines] Failed to call service mental_state/get_info");
 	}
     */
+    partners_ = partners;
 
     vector<supervisor_msgs::ActionMS> actionsR = getActionReady(robotName_, robotName_);
     if(actionsR.size()){
@@ -67,7 +69,42 @@ string RobotSM::idleState(){
         ROS_INFO("[state_machines] Robot goes to ACTING");
         return "ACTING";
     }else{
-
+        vector<supervisor_msgs::ActionMS> actionsX = getActionReady(agentX_, robotName_);
+        if(actionsX.size()){
+            vector<supervisor_msgs::ActionMS> identicals = getIdenticalActions(actionsX);
+            bool identical;
+            supervisor_msgs::ActionMS actionChosen;
+            if(identicals.size()){
+                identical = true;
+                actionChosen = identicals[0];
+            }else{
+                identical = false;
+                actionChosen = actionsX[0];
+            }
+            vector<string> actorsR = getPossibleActors(actionChosen, robotName_);
+            for(vector<string>::iterator it = partners_.begin(); it != partners_.end(); it++){
+                vector<string> actorsH = getPossibleActors(actionChosen, *it);
+                if(actorsR.size() != actorsH.size()){
+                    //CorrectDB
+                    return "IDLE";
+                }
+            }
+            if(actorsR.size()){
+                if(actorsR.size() == 1){
+                    //we attribute to the only possible actor
+                }else{
+                    if(identical){
+                        //we attribute to the robot
+                    }else{
+                        //we negotiate or adapt to choose an actor
+                    }
+                }
+            }else{
+                //no possible actor: what to do?
+            }
+        }else{
+            //NEXT ROBOT ACTION?
+        }
     }
 
     //if no more action to do we retract if needed
@@ -76,7 +113,7 @@ string RobotSM::idleState(){
         supervisor_msgs::ActionExecutorGoal goal;
         goal.action.name = "moveTo";
         string rightArmRestPose_;
-        node_.getParam("/restPosition/right", rightArmRestPose_);
+        node_->getParam("/restPosition/right", rightArmRestPose_);
         goal.action.parameters.push_back(rightArmRestPose_);
         goal.action.actors.push_back(robotName_);
         actionClient_.sendGoal(goal,  boost::bind(&RobotSM::doneCb, this, _1, _2), Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
@@ -89,7 +126,7 @@ string RobotSM::idleState(){
         supervisor_msgs::ActionExecutorGoal goal;
         goal.action.name = "moveTo";
         string leftArmRestPose_;
-        node_.getParam("/restPosition/left", leftArmRestPose_);
+        node_->getParam("/restPosition/left", leftArmRestPose_);
         goal.action.parameters.push_back(leftArmRestPose_);
         goal.action.actors.push_back(robotName_);
         actionClient_.sendGoal(goal,  boost::bind(&RobotSM::doneCb, this, _1, _2), Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
@@ -122,7 +159,7 @@ State where the robot is WAITING
 string RobotSM::waitingState(){
 
 	//We look if the robot has an action to do
-    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
+    ros::ServiceClient client = node_->serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
     supervisor_msgs::GetInfo srv;
     srv.request.info ="ACTIONS_TODO";
 	srv.request.agent = robotName_;
@@ -229,20 +266,52 @@ bool RobotSM::factsAreIn(string agent, vector<toaster_msgs::Fact> facts){
             for(vector<toaster_msgs::Fact>::iterator itf = facts.begin(); itf != facts.end(); itf++){
                 if(itf->subjectId == "NULL"){
                     for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
-                        if(itk->property == itf->property && itk->targetId == itf->targetId){
+                        string topic = "/highLevelName/";
+                        topic = topic + itk->targetId;
+                        string higlLevelTargetName;
+                        if(node_->hasParam(topic)){
+                            node_->getParam(topic, higlLevelTargetName);
+                        }else{
+                            higlLevelTargetName = itk->targetId;
+                        }
+                        if(itk->property == itf->property && higlLevelTargetName == itf->targetId){
                             return false;
                         }
                     }
                 }else if(itf->targetId == "NULL"){
                     for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
-                        if(itk->property == itf->property && itk->subjectId == itf->subjectId){
+                        string topic = "/highLevelName/";
+                        topic = topic + itk->subjectId;
+                        string higlLevelSubjectName;
+                        if(node_->hasParam(topic)){
+                            node_->getParam(topic, higlLevelSubjectName);
+                        }else{
+                            higlLevelSubjectName = itk->subjectId;
+                        }
+                        if(itk->property == itf->property && higlLevelSubjectName == itf->subjectId){
                             return false;
                         }
                     }
                 }else{
                     bool find = false;
                     for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
-                        if(itk->property == itf->property && itk->subjectId == itf->subjectId && itk->targetId == itf->targetId){
+                        string topic = "/highLevelName/";
+                        topic = topic + itk->subjectId;
+                        string higlLevelSubjectName;
+                        if(node_->hasParam(topic)){
+                            node_->getParam(topic, higlLevelSubjectName);
+                        }else{
+                            higlLevelSubjectName = itk->subjectId;
+                        }
+                        topic = "/highLevelName/";
+                        topic = topic + itk->targetId;
+                        string higlLevelTargetName;
+                        if(node_->hasParam(topic)){
+                            node_->getParam(topic, higlLevelTargetName);
+                        }else{
+                            higlLevelTargetName = itk->targetId;
+                        }
+                        if(itk->property == itf->property && higlLevelSubjectName == itf->subjectId && higlLevelTargetName == itf->targetId){
                             find = true;
                             break;
                         }
@@ -256,4 +325,86 @@ bool RobotSM::factsAreIn(string agent, vector<toaster_msgs::Fact> facts){
         }
     }
     return false; //there is no knowledge concerning this agent
+}
+
+/*
+Function which return the actions in a list which have another identical action in the same list
+*/
+vector<supervisor_msgs::ActionMS> RobotSM::getIdenticalActions(vector<supervisor_msgs::ActionMS> actions){
+
+    vector<supervisor_msgs::ActionMS> answer;
+    for(vector<supervisor_msgs::ActionMS>::iterator it = actions.begin(); it != actions.end(); it++){
+        for(vector<supervisor_msgs::ActionMS>::iterator it2 = it+1; it2 != actions.end(); it2++){
+            if(areIdentical(*it, *it2)){
+                answer.push_back(*it);
+                actions.erase(it2);
+                break;
+            }
+        }
+    }
+
+    return answer;
+}
+
+/*
+Function which return true if two actions are sementically the same (same name, actors and parameters)
+*/
+bool RobotSM::areIdentical(supervisor_msgs::ActionMS action1, supervisor_msgs::ActionMS action2){
+
+    if(action1.name != action2.name){
+        return false;
+    }else{
+        if(action1.actors.size() != action2.actors.size()){
+            return false;
+        }else{
+            vector<string>::iterator it2 = action2.actors.begin();
+            for(vector<string>::iterator it1 = action1.actors.begin(); it1 != action1.actors.end(); it1++){
+                if(*it1 != *it2){
+                    return false;
+                }
+                it2++;
+            }
+            if(action1.parameters.size() != action2.parameters.size()){
+                return false;
+            }else{
+                vector<string>::iterator it2 = action2.parameters.begin();
+                for(vector<string>::iterator it1 = action1.parameters.begin(); it1 != action1.parameters.end(); it1++){
+                    if(*it1 != *it2){
+                        return false;
+                    }
+                    it2++;
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+
+/*
+Function which return the possible actors for an action (actors who check the preconditions) taking the point of view of @agent
+*/
+vector<string> RobotSM::getPossibleActors(supervisor_msgs::ActionMS action, string agent){
+
+    vector<string> answer;
+
+    for(vector<string>::iterator ita = partners_.begin(); ita != partners_.end(); ita++){
+        vector<toaster_msgs::Fact> newPrecs;
+        for(vector<toaster_msgs::Fact>::iterator itp = action.prec.begin(); itp != action.prec.end(); itp++){
+            toaster_msgs::Fact fact = *itp;
+            if(fact.subjectId == agentX_){
+                fact.subjectId = *ita;
+            }
+            if(fact.targetId == agentX_){
+                fact.targetId = *ita;
+            }
+            newPrecs.push_back(fact);
+        }
+        if(factsAreIn(agent, newPrecs)){
+            answer.push_back(*ita);
+        }
+    }
+
+    return answer;
 }

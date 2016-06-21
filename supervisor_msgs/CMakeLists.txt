@@ -31,6 +31,7 @@ add_message_files(
    Bool.msg
    AgentKnowledge.msg
    Knowledge.msg
+   AgentList.msg
 )
 
 # Generate services in the 'srv' folder

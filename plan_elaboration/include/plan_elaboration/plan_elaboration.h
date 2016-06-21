@@ -20,6 +20,8 @@
 #include "supervisor_msgs/Ask.h"
 #include "supervisor_msgs/Bool.h"
 #include "supervisor_msgs/InfoGiven.h"
+#include "supervisor_msgs/AgentList.h"
+
 
 using namespace std;
 
@@ -30,6 +32,7 @@ public:
     void setGoal(string goal);
     void endPlan(bool report);
     void checkPlan();
+    string goalPartner_;
 
 private:
     ros::NodeHandle* node_;
@@ -38,7 +41,6 @@ private:
     string robotName_;
     string agentX_;
     string omni_;
-    string goalPartner_;
     vector<string> agentList_;
     vector<toaster_msgs::Fact> robotFacts_;
     vector<toaster_msgs::Fact> curAgentFacts_;

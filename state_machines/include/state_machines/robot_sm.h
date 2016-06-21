@@ -18,6 +18,7 @@
 #include "supervisor_msgs/ActionExecutorActionFeedback.h"
 #include "supervisor_msgs/AgentKnowledge.h"
 #include "supervisor_msgs/ActionMS.h"
+#include "supervisor_msgs/AgentList.h"
 
 
 typedef actionlib::SimpleActionClient<supervisor_msgs::ActionExecutorAction> Client;
@@ -25,9 +26,9 @@ using namespace std;
 
 class RobotSM{
 public:
-	RobotSM();
+    RobotSM(ros::NodeHandle* node);
 	~RobotSM() {};
-    string idleState();
+    string idleState(vector<string> partners);
     string actingState();
 	string waitingState();
 
@@ -36,19 +37,23 @@ public:
 protected:
 
 private:
-    ros::NodeHandle node_;
+    ros::NodeHandle* node_;
 	string robotName_;
     string agentX_;
 	Client actionClient_;
 	bool isActing_;
     bool shouldRetractRight_;
     bool shouldRetractLeft_;
+    vector<string> partners_;
 
 	void doneCb(const actionlib::SimpleClientGoalState& state, const supervisor_msgs::ActionExecutorResultConstPtr& result);
     vector<supervisor_msgs::ActionMS> getActionReady(string actor, string agent);
     supervisor_msgs::ActionMS getActionFromId(int id);
     supervisor_msgs::Action convertActionMStoAction(supervisor_msgs::ActionMS actionMS);
     bool factsAreIn(string agent, vector<toaster_msgs::Fact> facts);
+    vector<supervisor_msgs::ActionMS> getIdenticalActions(vector<supervisor_msgs::ActionMS> actions);
+    bool areIdentical(supervisor_msgs::ActionMS action1, supervisor_msgs::ActionMS action2);
+    vector<string> getPossibleActors(supervisor_msgs::ActionMS action, string agent);
 
 };
 

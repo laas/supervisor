@@ -48,10 +48,15 @@ int main (int argc, char **argv)
   ros::ServiceServer service_goal = node->advertiseService("plan_elaboration/new_goal", newGoal); //new goal to execute
   ros::ServiceServer service_end = node->advertiseService("plan_elaboration/endPlan", endPlan); //new goal to execute
 
+  ros::Publisher partners_pub = node->advertise<supervisor_msgs::AgentList>("/plan_elaboration/partners", 1000);
+
   ROS_INFO("[plan_elaboration] Plan_elaboration ready");
 
   while(_node.ok()){
     pe->checkPlan();
+    supervisor_msgs::AgentList msg;
+    msg.agents.push_back(pe->goalPartner_);
+    partners_pub.publish(msg);
     ros::spinOnce();
     loop_rate.sleep();
   }

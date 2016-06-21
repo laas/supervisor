@@ -8,22 +8,23 @@ State machine for the robot
 
 
 
-HumanSM::HumanSM(string humanName)
+HumanSM::HumanSM(ros::NodeHandle* node, string humanName)
  {
 	humanName_ = humanName;
-    node_.getParam("/robot/name", robotName_);
-	node_.getParam("/timeNoAction", timeToWait_);
-  	node_.getParam("/simu", simu_);
+    node_ = node;
+    node_->getParam("/robot/name", robotName_);
+    node_->getParam("/timeNoAction", timeToWait_);
+    node_->getParam("/simu", simu_);
 	timerStarted_ = false;
     present_ = true;
 
-    subArea_ = node_.subscribe("area_manager/factList", 1000, &HumanSM::areaFactListCallback, this);
+    subArea_ = node_->subscribe("area_manager/factList", 1000, &HumanSM::areaFactListCallback, this);
 }
 
 void HumanSM::areaFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
 
     string area;
-    node_.getParam("/areaPresence", area);
+    node_->getParam("/areaPresence", area);
     bool found = false;
     vector<toaster_msgs::Fact> areaFacts = msg->factList;
     for(vector<toaster_msgs::Fact>::iterator it = areaFacts.begin(); it != areaFacts.end(); it++){
@@ -91,8 +92,8 @@ string HumanSM::idleState(){
     }
 
 	//We look if the human thinks he has an action to do
-    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
-  	ros::ServiceClient client_db = node_.serviceClient<supervisor_msgs::SolveDivergentBelief>("mental_state/solve_divergent_belief");
+    ros::ServiceClient client = node_->serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
+    ros::ServiceClient client_db = node_->serviceClient<supervisor_msgs::SolveDivergentBelief>("mental_state/solve_divergent_belief");
     supervisor_msgs::GetInfo srv_info;
     supervisor_msgs::SolveDivergentBelief srv_db;
     srv_info.request.info ="ACTIONS_TODO";
@@ -219,8 +220,8 @@ string HumanSM::waitingState(){
     }
 	
 	//We look if the human still thinks he has an action to do
-    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
-    ros::ServiceClient client_db = node_.serviceClient<supervisor_msgs::SolveDivergentBelief>("mental_state/solve_divergent_belief");
+    ros::ServiceClient client = node_->serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
+    ros::ServiceClient client_db = node_->serviceClient<supervisor_msgs::SolveDivergentBelief>("mental_state/solve_divergent_belief");
     supervisor_msgs::GetInfo srv_info;
     supervisor_msgs::SolveDivergentBelief srv_db;
     srv_info.request.info ="ACTIONS_TODO";
@@ -273,8 +274,8 @@ string HumanSM::shouldActState(string robotState, vector<string>* objects){
         return "ACTING";
     }
 
-    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
-    ros::ServiceClient action_state = node_.serviceClient<supervisor_msgs::ChangeState>("mental_state/change_state");
+    ros::ServiceClient client = node_->serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
+    ros::ServiceClient action_state = node_->serviceClient<supervisor_msgs::ChangeState>("mental_state/change_state");
     supervisor_msgs::GetInfo srv_info;
     supervisor_msgs::ChangeState srv_action;
     srv_info.request.info ="ACTIONS_TODO";
@@ -300,7 +301,7 @@ string HumanSM::shouldActState(string robotState, vector<string>* objects){
                     supervisor_msgs::Action actionTodo = srv_info.response.action;
                     if (client.call(srv_info)){
                      if(srv_info.response.state != "ASKED"){//if the action is not already ASKED, the robot asks to do the action
-                        ros::ServiceClient client_ask = node_.serviceClient<supervisor_msgs::Ask>("dialogue_node/ask");
+                        ros::ServiceClient client_ask = node_->serviceClient<supervisor_msgs::Ask>("dialogue_node/ask");
                         supervisor_msgs::Ask srv_ask;
                         srv_ask.request.type = "ACTION";
                         srv_ask.request.subType = "CAN";

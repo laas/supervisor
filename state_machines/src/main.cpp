@@ -25,6 +25,8 @@ double weightRobot_ = 0.0;
 bool actionPerformed = false;
 supervisor_msgs::Action performedAction;
 string agentAction;
+vector<string> allAgents;
+vector<string> partners;
 
 vector<supervisor_msgs::AgentKnowledge> knowledge;
 vector<supervisor_msgs::ActionMS> actions;
@@ -35,7 +37,7 @@ Main function of the robot state machine
 void robotStateMachine(){
   	ros::Rate loop_rate(30);
 	robotState = "IDLE";
-	RobotSM rsm;
+    RobotSM rsm(node);
 
     string topicName = "supervisor/activity_state/";
     topicName = topicName + robotName;
@@ -49,7 +51,7 @@ void robotStateMachine(){
         double weight = 0.0;
         string previousState = robotState;
 		if(robotState == "IDLE"){
-            robotState = rsm.idleState();
+            robotState = rsm.idleState(partners);
 		}else if(robotState == "ACTING"){
             robotState = rsm.actingState();
             objects = objectsRobot_;
@@ -80,7 +82,7 @@ void humanStateMachine(string human_name){
     string topicName = "supervisor/activity_state/";
     topicName = topicName + human_name;
     ros::Publisher human_pub = node->advertise<supervisor_msgs::AgentActivity>(topicName, 1000);
-	HumanSM* hsm = new HumanSM(human_name);
+    HumanSM* hsm = new HumanSM(node, human_name);
 
 	
     while(true){
@@ -142,6 +144,11 @@ void actionsCallback(const supervisor_msgs::ActionMSList::ConstPtr& msg){
     actions = msg->actionsList;
 }
 
+void partnersCallback(const supervisor_msgs::AgentList::ConstPtr& msg){
+
+    partners = msg->agents;
+}
+
 
 /*
 Service call to tell that a human performed an action
@@ -167,17 +174,17 @@ int main (int argc, char **argv)
   ros::Subscriber sub = node_.subscribe("action_executor/focus", 1000, focusCallback);
   ros::Subscriber subKnow = node_.subscribe("mental_states/agents_knowledge", 1000, knowledgeCallback);
   ros::Subscriber subAct = node_.subscribe("mental_states/actions", 1000, actionsCallback);
+  ros::Subscriber subPartners = node_.subscribe("plan_elaboration/partners", 1000, partnersCallback);
 
-  vector<string> allAgents;
   node_.getParam("/robot/name", robotName);
   ros::service::waitForService("mental_state/get_info", -1);
   ros::ServiceClient client = node->serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
   supervisor_msgs::GetInfo srv;
   srv.request.info = "AGENTS";
   if (client.call(srv)){
-	 allAgents = srv.response.agents;
+     allAgents = srv.response.agents;
   }else{
-	ROS_ERROR("[state_machines] Failed to call service mental_state/get_all_agents");
+    ROS_ERROR("[state_machines] Failed to call service mental_state/get_all_agents");
   }
 
   ROS_INFO("[state_machines] state_machines ready");

@@ -27,7 +27,7 @@ using namespace std;
 
 class HumanSM{
 public:
-	HumanSM(string humanName);
+    HumanSM(ros::NodeHandle* node, string humanName);
 	~HumanSM() {};
 	string idleState();
     string actingState(vector<string>* objects, bool* unexpected);
@@ -43,7 +43,7 @@ public:
 protected:
 
 private:
-	ros::NodeHandle node_;
+    ros::NodeHandle* node_;
 	string humanName_;
 	string robotName_;
 	bool simu_;
