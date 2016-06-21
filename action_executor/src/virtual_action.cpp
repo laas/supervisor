@@ -152,9 +152,9 @@ bool VirtualAction::isGripperEmpty(string arm){
     gripperTopic = gripperTopic + arm;
     node_.getParam(gripperTopic, gripperJoint);
     node_.getParam("/gripperThreshold", gripperThreshold);
-    toaster_msgs::RobotList list;
+    toaster_msgs::RobotListStamped list;
     try{
-        list  = *(ros::topic::waitForMessage<toaster_msgs::RobotList>("pdg/robotList",ros::Duration(1)));
+        list  = *(ros::topic::waitForMessage<toaster_msgs::RobotListStamped>("pdg/robotList",ros::Duration(1)));
         for(vector<toaster_msgs::Robot>::iterator it = list.robotList.begin(); it != list.robotList.end(); it++){
           if(it->meAgent.meEntity.id == robotName_){
               for(vector<toaster_msgs::Joint>::iterator itj = it->meAgent.skeletonJoint.begin(); itj != it->meAgent.skeletonJoint.end(); itj++){
@@ -192,15 +192,15 @@ void VirtualAction::PutOnSupport(string object, string support){
 	supportHeightTopic = supportHeightTopic + support;
 	node_.getParam(objectHeightTopic, objectHeight);
 	node_.getParam(supportHeightTopic, supportHeight);
-	toaster_msgs::ObjectList objectList;
+    toaster_msgs::ObjectListStamped objectList;
 	double x,y,z;
    try{
-       objectList  = *(ros::topic::waitForMessage<toaster_msgs::ObjectList>("pdg/objectList",ros::Duration(1)));
+       objectList  = *(ros::topic::waitForMessage<toaster_msgs::ObjectListStamped>("pdg/objectList",ros::Duration(1)));
        for(vector<toaster_msgs::Object>::iterator it = objectList.objectList.begin(); it != objectList.objectList.end(); it++){
          if(it->meEntity.id == support){
-            x = it->meEntity.positionX;
-            y = it->meEntity.positionY;
-            z = it->meEntity.positionZ;
+            x = it->meEntity.pose.position.x;
+            y = it->meEntity.pose.position.y;
+            z = it->meEntity.pose.position.z;
             break;
          }
        }
@@ -208,12 +208,13 @@ void VirtualAction::PutOnSupport(string object, string support){
        toaster_msgs::SetEntityPose srv;
        srv.request.id = object;
        srv.request.type = "object";
-       srv.request.x = x;
-       srv.request.y = y;
-       srv.request.z = z;
-       srv.request.roll = 0.0;
-       srv.request.pitch = 0.0;
-       srv.request.yaw = 0.0;
+       srv.request.pose.position.x = x;
+       srv.request.pose.position.y = y;
+       srv.request.pose.position.z = z;
+       srv.request.pose.orientation.x = 0.0;
+       srv.request.pose.orientation.y = 0.0;
+       srv.request.pose.orientation.z = 0.0;
+       srv.request.pose.orientation.w = 0.0;
        if (!client.call(srv)){
       	 ROS_ERROR("Failed to call service toaster_simu/set_entity_pose");
     	 }
@@ -233,27 +234,28 @@ void VirtualAction::PutInContainer(string object, string container){
 
    ros::ServiceClient client = node_.serviceClient<toaster_msgs::SetEntityPose>("toaster_simu/set_entity_pose");
 
-    toaster_msgs::ObjectList objectList;
+    toaster_msgs::ObjectListStamped objectList;
     double x,y,z;
    try{
-       objectList  = *(ros::topic::waitForMessage<toaster_msgs::ObjectList>("pdg/objectList",ros::Duration(1)));
+       objectList  = *(ros::topic::waitForMessage<toaster_msgs::ObjectListStamped>("pdg/objectList",ros::Duration(1)));
        for(vector<toaster_msgs::Object>::iterator it = objectList.objectList.begin(); it != objectList.objectList.end(); it++){
          if(it->meEntity.id == container){
-            x = it->meEntity.positionX;
-            y = it->meEntity.positionY;
-            z = it->meEntity.positionZ;
+            x = it->meEntity.pose.orientation.x;
+            y = it->meEntity.pose.orientation.y;
+            z = it->meEntity.pose.orientation.z;
             break;
          }
        }
        toaster_msgs::SetEntityPose srv;
        srv.request.id = object;
        srv.request.type = "object";
-       srv.request.x = x;
-       srv.request.y = y;
-       srv.request.z = z;
-       srv.request.roll = 0.0;
-       srv.request.pitch = 0.0;
-       srv.request.yaw = 0.0;
+       srv.request.pose.position.x = x;
+       srv.request.pose.position.y = y;
+       srv.request.pose.position.z = z;
+       srv.request.pose.orientation.x = 0.0;
+       srv.request.pose.orientation.y = 0.0;
+       srv.request.pose.orientation.z = 0.0;
+       srv.request.pose.orientation.w = 0.0;
        if (!client.call(srv)){
          ROS_ERROR("Failed to call service toaster_simu/set_entity_pose");
          }
