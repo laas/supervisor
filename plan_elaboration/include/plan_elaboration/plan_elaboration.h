@@ -7,6 +7,11 @@
 #include <vector>
 #include <ros/ros.h>
 
+#include "plan_elaboration/virtual_domain.h"
+#include "plan_elaboration/Domains/default_domain.h"
+#include "plan_elaboration/Domains/blocks_domain.h"
+
+
 #include "supervisor_msgs/ChangeState.h"
 #include "supervisor_msgs/NewGoal.h"
 #include "supervisor_msgs/EndPlan.h"
@@ -44,6 +49,7 @@ private:
     vector<string> agentList_;
     vector<toaster_msgs::Fact> robotFacts_;
     vector<toaster_msgs::Fact> curAgentFacts_;
+    VirtualDomain* dom_;
 
 
     pair<bool, supervisor_msgs::Plan> findPlan();
@@ -60,6 +66,7 @@ private:
     vector<toaster_msgs::Fact> getPrec(hatp_msgs::Task task);
     toaster_msgs::Fact getMissingPrec(vector<toaster_msgs::Fact> precs, vector<toaster_msgs::Fact> agentFacts);
     bool factsIsIn(toaster_msgs::Fact fact, vector<toaster_msgs::Fact> facts);
+    VirtualDomain* initializeDomain(string goal);
 };
 
 #endif // PLAN_ELABORATION_H

@@ -26,6 +26,7 @@ void PlanElaboration::setGoal(string goal){
 
     currentGoal_ = goal;
     needPlan_ = true;
+    dom_ = initializeDomain(currentGoal_);
 
 }
 
@@ -67,6 +68,22 @@ void PlanElaboration::endPlan(bool report){
         needPlan_ = true;
     }
 
+}
+
+/*
+Initialize the domain considering the current goal
+*/
+VirtualDomain* PlanElaboration::initializeDomain(string goal){
+
+    VirtualDomain* dom = NULL;
+
+    if(goal == "BLOCKS"){
+        dom = new BlocksDomain();
+    }else{
+        dom = new DefaultDomain();
+    }
+
+    return dom;
 }
 
 /*
@@ -167,8 +184,10 @@ void PlanElaboration::setPlanningTable(string agent){
         }else{
             curAgentFacts_ = agentFacts;
         }
+        //we add specific domains fact in the world state
+        vector<toaster_msgs::Fact> updatedFacts = dom_->computeSpecificFacts(agentFacts);
         //we get the final list of facts containing agentX capabilities
-        vector<toaster_msgs::Fact> finalFacts = computeAgentXFacts(agentFacts);
+        vector<toaster_msgs::Fact> finalFacts = computeAgentXFacts(updatedFacts);
         //we update the planning table with these facts
         srv_set.request.infoType = "RESET_PLANNING";
         srv_set.request.facts = finalFacts;
