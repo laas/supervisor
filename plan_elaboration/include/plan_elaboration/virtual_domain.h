@@ -1,6 +1,10 @@
 #ifndef VIRTUAL_DOMAIN_H
 #define VIRTUAL_DOMAIN_H
 
+#include <iostream>
+#include <string>
+#include <vector>
+#include <ros/ros.h>
 
 #include "toaster_msgs/Fact.h"
 
