@@ -1,2 +1,2 @@
 ---
-toIgnorePrint: ['Distance', 'IsMovingToward', 'type', 'IsInArea', 'genericName', 'value']
+toIgnorePrint: ['Distance', 'IsMovingToward', 'type', 'genericName', 'value']

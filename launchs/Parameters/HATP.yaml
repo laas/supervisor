@@ -18,7 +18,8 @@ HATP_domains:
                 'hasInHand',
                 'type',
                 'genericName',
-                'value']
+                'value',
+                'IsInArea']
 HATP_actions:
    Pick: 'pick'
    Place: 'place'
