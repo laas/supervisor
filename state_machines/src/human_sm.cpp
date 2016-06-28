@@ -42,39 +42,33 @@ void HumanSM::areaFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
  Determine the focus of an action
     @shouldAct: true if the action is an action to be done, false if the action is a performed action
  */
-vector<string> HumanSM::focusObjects(supervisor_msgs::Action action, bool shouldAct){
+string HumanSM::focusObject(supervisor_msgs::Action action){
 
-    vector<string> objects;
+    string object;
 
     if(action.name == "pick"){
         if(action.parameters.size() > 0){
-            objects.push_back(action.parameters[0]);
+            object = action.parameters[0];
         }
     }else if(action.name == "place"){
         if(action.parameters.size() > 1){
-            objects.push_back(action.parameters[1]);
+            object = action.parameters[1];
         }
     }else if(action.name == "pickandplace"){
         if(action.parameters.size() > 1){
-            if(shouldAct){
-                objects.push_back(action.parameters[0]);
-            }
-            objects.push_back(action.parameters[1]);
+            object = action.parameters[1];
         }
     }else if(action.name == "drop"){
         if(action.parameters.size() > 1){
-            objects.push_back(action.parameters[1]);
+            object = action.parameters[1];
         }
     }else if(action.name == "pickanddrop"){
         if(action.parameters.size() > 1){
-            if(shouldAct){
-                objects.push_back(action.parameters[0]);
-            }
-            objects.push_back(action.parameters[1]);
+            object = action.parameters[1];
         }
     }
 
-    return objects;
+    return object;
 }
 
 /*
@@ -163,7 +157,7 @@ string HumanSM::idleState(){
 /*
 State where the human is ACTING
 */
-string HumanSM::actingState(vector<string>* objects, bool* unexpected){
+string HumanSM::actingState(string* object, bool* unexpected){
 
     //we compare the action to perform and the action performed in order to know if the action is unexpected
     *unexpected = true;
@@ -183,7 +177,7 @@ string HumanSM::actingState(vector<string>* objects, bool* unexpected){
     }
 
     //we determine the objects of focus
-    *objects = focusObjects(PerformedAction_, false);
+    *object = focusObject(PerformedAction_);
 
     shouldDoAction_.name = "NULL";
     PerformedAction_.name = "NULL";
@@ -263,7 +257,7 @@ string HumanSM::waitingState(){
 /*
 State where the human SHOULD ACT
 */
-string HumanSM::shouldActState(string robotState, vector<string>* objects){
+string HumanSM::shouldActState(string robotState, string* object){
 
     if(!present_){
         ROS_INFO("[state_machines] %s goes to ABSENT", humanName_.c_str());
@@ -291,7 +285,7 @@ string HumanSM::shouldActState(string robotState, vector<string>* objects){
         if (client.call(srv_info)){
             if(srv_info.response.state == "READY"){
                 shouldDoAction_ = srv_info.response.action;
-                *objects = focusObjects(srv_info.response.action, true);
+                *object = focusObject(srv_info.response.action);
                 double duration = (clock() - start_ ) / (double) CLOCKS_PER_SEC;
                 if(duration >= timeToWait_){
                     timerStarted_ = false;

@@ -74,7 +74,6 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
         result_.report = false;
         result_.shouldRetractRight = false;
         result_.shouldRetractLeft = false;
-        connector_->objectsFocus_.clear();
         connector_->weightFocus_ = 0.0;
 		if(!action_server_.isPreemptRequested()){
 			result_.state = feedback_.state;
@@ -93,7 +92,6 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
         result_.report = false;
         result_.shouldRetractRight = false;
         result_.shouldRetractLeft = false;
-        connector_->objectsFocus_.clear();
         connector_->weightFocus_ = 0.0;
         action_server_.setPreempted(result_);
         ROS_INFO("[action_executor] Action stoped");
@@ -111,7 +109,6 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
         result_.report = false;
         result_.shouldRetractRight = false;
         result_.shouldRetractLeft = false;
-        connector_->objectsFocus_.clear();
         connector_->weightFocus_ = 0.0;
 		if(!action_server_.isPreemptRequested()){
 			result_.state = feedback_.state;
@@ -130,7 +127,6 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
         result_.report = false;
         result_.shouldRetractRight = false;
         result_.shouldRetractLeft = false;
-        connector_->objectsFocus_.clear();
         connector_->weightFocus_ = 0.0;
         action_server_.setPreempted(result_);
         ROS_INFO("[action_executor] Action stoped");
@@ -146,7 +142,6 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
          ROS_ERROR("[action_executor] Failed to call service mental_state/change_state");
 		}
         result_.report = false;
-        connector_->objectsFocus_.clear();
         connector_->weightFocus_ = 0.0;
         if(connector_->rightArmRestPose_ != connector_->rightArmPose_){
             result_.shouldRetractRight = true;
@@ -178,8 +173,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 		if (!client.call(srv)){
          ROS_ERROR("[action_executor] Failed to call service mental_state/change_state");
 		}
-		result_.report = false;
-        connector_->objectsFocus_.clear();
+        result_.report = false;
         connector_->weightFocus_ = 0.0;
         if(connector_->rightArmRestPose_ != connector_->rightArmPose_){
             result_.shouldRetractRight = true;
@@ -217,8 +211,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
     }else{
         result_.shouldRetractLeft = false;
     }
-	result_.report = true;
-    connector_->objectsFocus_.clear();
+    result_.report = true;
     connector_->weightFocus_ = 0.0;
 	result_.state = "OK";
     action_server_.setSucceeded(result_);
@@ -282,8 +275,9 @@ void publishFocus(){
 
     while (true) {
         supervisor_msgs::Focus msg;
-        msg.objects = connector_->objectsFocus_;
+        msg.object = connector_->objectFocus_;
         msg.weight = connector_->weightFocus_;
+        msg.stopable = connector_->stopableFocus_;
         focus_pub.publish(msg);
         loop_rate.sleep();
     }

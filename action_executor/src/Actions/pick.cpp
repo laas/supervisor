@@ -12,10 +12,10 @@ Pick::Pick(supervisor_msgs::Action action, Connector* connector) : VirtualAction
 		object_ = action.parameters[0];
 	}else{
 		ROS_WARN("[action_executor] Missing parameter: object to pick");
-	}
-    connector->objectsFocus_.clear();
-    connector->objectsFocus_.push_back(object_);
+    }
+    connector->objectFocus_ = object_;
     connector->weightFocus_ = 0.8;
+    connector->stopableFocus_ = true;
 }
 
 bool Pick::preconditions(){

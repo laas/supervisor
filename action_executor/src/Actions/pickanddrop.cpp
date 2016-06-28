@@ -13,10 +13,10 @@ PickAndDrop::PickAndDrop(supervisor_msgs::Action action, Connector* connector) :
 		container_ = action.parameters[1];
 	}else{
 		ROS_WARN("[action_executor] Wrong parameter numbers, should be: object, container");
-	}
-    connector->objectsFocus_.clear();
-    connector->objectsFocus_.push_back(object_);
+    }
+    connector->objectFocus_ = object_;
     connector->weightFocus_ = 0.8;
+    connector->stopableFocus_ = true;
 }
 
 bool PickAndDrop::preconditions(){
@@ -106,8 +106,7 @@ bool PickAndDrop::exec(Server* action_server){
             ROS_WARN("[action_executor] Robot failed to pick (gripper empty)");
             return false;
         }
-        connector_->objectsFocus_.clear();
-        connector_->objectsFocus_.push_back(container_);
+        connector_->objectFocus_ = container_;
         return execAction(nextActionId_, true, action_server);
     }else{
         return false;
