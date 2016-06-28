@@ -16,6 +16,9 @@ public:
     VirtualDomain() {};
     ~VirtualDomain() {};
     virtual vector<toaster_msgs::Fact> computeSpecificFacts(vector<toaster_msgs::Fact> facts) = 0;
+    vector<toaster_msgs::Fact> computeLockedFacts(vector<toaster_msgs::Fact> facts);
+    string agentLocked_;
+    string objectLocked_;
 };
 
 #endif // VIRTUAL_DOMAIN_H

@@ -36,28 +36,6 @@ State where the robot is IDLE
 */
 string RobotSM::idleState(vector<string> partners){
 
-    /*//We look if the robot has an action to do
-    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
-    supervisor_msgs::GetInfo srv;
-    srv.request.info ="ACTIONS_TODO";
-	srv.request.agent = robotName_;
-	srv.request.actor = robotName_;
-	if (client.call(srv)){
-	 if(srv.response.state == "READY"){//the robot has an action to do, we send it to the action manager
-		supervisor_msgs::ActionExecutorGoal goal;
-  		goal.action = srv.response.action;
-  		actionClient_.sendGoal(goal,  boost::bind(&RobotSM::doneCb, this, _1, _2), Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
-		isActing_ = true;
-		ROS_INFO("[state_machines] Robot goes to ACTING");
-		return "ACTING";
-	 }else if(srv.response.state == "NEEDED"){//the robot has an action but not possible yet, we go to the WAITING state
-		ROS_INFO("[state_machines] Robot goes to WAITING");
-		return "WAITING";
-	 }
-	}else{
-     ROS_ERROR("[state_machines] Failed to call service mental_state/get_info");
-	}
-    */
     partners_ = partners;
 
     vector<supervisor_msgs::ActionMS> actionsR = getActionReady(robotName_, robotName_);

@@ -38,6 +38,7 @@ public:
     void endPlan(bool report);
     void checkPlan();
     string goalPartner_;
+    VirtualDomain* dom_;
 
 private:
     ros::NodeHandle* node_;
@@ -49,7 +50,6 @@ private:
     vector<string> agentList_;
     vector<toaster_msgs::Fact> robotFacts_;
     vector<toaster_msgs::Fact> curAgentFacts_;
-    VirtualDomain* dom_;
 
 
     pair<bool, supervisor_msgs::Plan> findPlan();

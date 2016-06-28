@@ -28,6 +28,10 @@ Service call when the current plan is over
 */
 bool endPlan(supervisor_msgs::EndPlan::Request  &req, supervisor_msgs::EndPlan::Response &res){
 
+    if(req.objectLocked.size()){
+        pe->dom_->objectLocked_ = req.objectLocked;
+        pe->dom_->agentLocked_ = req.agentLocked;
+    }
     pe->endPlan(req.report);
 
     return true;

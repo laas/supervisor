@@ -10,6 +10,7 @@ Update the planning world state with blocks domain specific facts:
     - own
     - canAccess
     - isStack
+    - isLockedBy
 */
 vector<toaster_msgs::Fact> BlocksDomain::computeSpecificFacts(vector<toaster_msgs::Fact> facts){
 
@@ -17,6 +18,7 @@ vector<toaster_msgs::Fact> BlocksDomain::computeSpecificFacts(vector<toaster_msg
 
     facts = computeOwnAndAccess(facts);
 
+    facts = computeLockedFacts(facts);
 
     return facts;
 }

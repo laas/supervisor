@@ -27,6 +27,7 @@ void PlanElaboration::setGoal(string goal){
     currentGoal_ = goal;
     needPlan_ = true;
     dom_ = initializeDomain(currentGoal_);
+    dom_->objectLocked_ = "NONE";
 
 }
 
@@ -138,6 +139,7 @@ pair<bool, supervisor_msgs::Plan> PlanElaboration::findPlan(){
         }
     }
 
+    dom_->objectLocked_ = "NONE";
 
     return answer;
 }
@@ -225,7 +227,7 @@ vector<toaster_msgs::Fact> PlanElaboration::computeAgentXFacts(vector<toaster_ms
 
     for(vector<toaster_msgs::Fact>::iterator it = facts.begin(); it != facts.end(); it++){
         result.push_back(*it);
-        if(isInVector(agentList_, it->subjectId)){
+        if(isInVector(agentList_, it->subjectId) && it->targetId != dom_->objectLocked_){
             bool added = false;
             //if the other object has an high level name we look for other objects with high level names
             topic = "/highLevelName/" + it->targetId;
@@ -235,43 +237,45 @@ vector<toaster_msgs::Fact> PlanElaboration::computeAgentXFacts(vector<toaster_ms
                 highLevelIt = it->targetId;
             }
             for(vector<toaster_msgs::Fact>::iterator it2 = it+1; it2 != facts.end(); it2++){
-                topic = "/highLevelName/" + it2->targetId;
-                if(node_->hasParam(topic)){
-                    node_->getParam(topic, highLevelIt2);
-                    highLevelName = true;
-                }else{
-                    highLevelIt2 = it2->targetId;
-                    highLevelName = false;
-                }
-                if(it2->property == it->property && highLevelIt2 == highLevelIt && isInVector(agentList_, it2->subjectId)){
-                    result.push_back(*it2);
-                    if(!added){
-                        toaster_msgs::Fact toAdd;
-                        toAdd.subjectId = agentX_;
-                        toAdd.property = it->property;
-                        toAdd.propertyType = "state";
-                        toAdd.targetId = it->targetId;
-                        result.push_back(toAdd);
-                        //TODO remove when HATP ok
-                        toAdd.subjectId = "AGENTX2";
-                        result.push_back(toAdd);
-                        added = true;
+                if(it2->targetId != dom_->objectLocked_){
+                    topic = "/highLevelName/" + it2->targetId;
+                    if(node_->hasParam(topic)){
+                        node_->getParam(topic, highLevelIt2);
+                        highLevelName = true;
+                    }else{
+                        highLevelIt2 = it2->targetId;
+                        highLevelName = false;
                     }
-                    if(highLevelName){
-                        toaster_msgs::Fact toAdd;
-                        toAdd.subjectId = agentX_;
-                        toAdd.property = it->property;
-                        toAdd.propertyType = "state";
-                        toAdd.targetId = it2->targetId;
-                        result.push_back(toAdd);
-                        toAdd.subjectId = "AGENTX2";
-                        result.push_back(toAdd);
+                    if(it2->property == it->property && highLevelIt2 == highLevelIt && isInVector(agentList_, it2->subjectId)){
+                        result.push_back(*it2);
+                        if(!added){
+                            toaster_msgs::Fact toAdd;
+                            toAdd.subjectId = agentX_;
+                            toAdd.property = it->property;
+                            toAdd.propertyType = "state";
+                            toAdd.targetId = it->targetId;
+                            result.push_back(toAdd);
+                            //TODO remove when HATP ok
+                            toAdd.subjectId = "AGENTX2";
+                            result.push_back(toAdd);
+                            added = true;
+                        }
+                        if(highLevelName){
+                            toaster_msgs::Fact toAdd;
+                            toAdd.subjectId = agentX_;
+                            toAdd.property = it->property;
+                            toAdd.propertyType = "state";
+                            toAdd.targetId = it2->targetId;
+                            result.push_back(toAdd);
+                            toAdd.subjectId = "AGENTX2";
+                            result.push_back(toAdd);
+                        }
+                        facts.erase(it2);
+                        it2--;
                     }
-                    facts.erase(it2);
-                    it2--;
                 }
             }
-        }else if(isInVector(agentList_, it->targetId)){
+        }else if(isInVector(agentList_, it->targetId) && it->subjectId != dom_->objectLocked_){
             bool added = false;
             //if the other object has an high level name we look for other objects with high level names
             topic = "/highLevelName/" + it->subjectId;
@@ -281,39 +285,41 @@ vector<toaster_msgs::Fact> PlanElaboration::computeAgentXFacts(vector<toaster_ms
                 highLevelIt = it->subjectId;
             }
             for(vector<toaster_msgs::Fact>::iterator it2 = it+1; it2 != facts.end(); it2++){
-                topic = "/highLevelName/" + it2->subjectId;
-                if(node_->hasParam(topic)){
-                    node_->getParam(topic, highLevelIt2);
-                    highLevelName = true;
-                }else{
-                    highLevelName = false;
-                    highLevelIt2 = it2->subjectId;
-                }
-                if(it2->property == it->property && highLevelIt2 == highLevelIt && isInVector(agentList_, it2->targetId)){
-                    result.push_back(*it2);
-                    if(!added){
-                        toaster_msgs::Fact toAdd;
-                        toAdd.subjectId = it->subjectId;
-                        toAdd.property = it->property;
-                        toAdd.propertyType = "state";
-                        toAdd.targetId = agentX_;
-                        result.push_back(toAdd);
-                        toAdd.targetId = "AGENTX2";
-                        result.push_back(toAdd);
-                        added = true;
+                if(it2->subjectId != dom_->objectLocked_){
+                    topic = "/highLevelName/" + it2->subjectId;
+                    if(node_->hasParam(topic)){
+                        node_->getParam(topic, highLevelIt2);
+                        highLevelName = true;
+                    }else{
+                        highLevelName = false;
+                        highLevelIt2 = it2->subjectId;
                     }
-                    if(highLevelName){
-                        toaster_msgs::Fact toAdd;
-                        toAdd.subjectId = it2->subjectId;
-                        toAdd.property = it->property;
-                        toAdd.propertyType = "state";
-                        toAdd.targetId = agentX_;
-                        result.push_back(toAdd);
-                        toAdd.targetId = "AGENTX2";
-                        result.push_back(toAdd);
+                    if(it2->property == it->property && highLevelIt2 == highLevelIt && isInVector(agentList_, it2->targetId)){
+                        result.push_back(*it2);
+                        if(!added){
+                            toaster_msgs::Fact toAdd;
+                            toAdd.subjectId = it->subjectId;
+                            toAdd.property = it->property;
+                            toAdd.propertyType = "state";
+                            toAdd.targetId = agentX_;
+                            result.push_back(toAdd);
+                            toAdd.targetId = "AGENTX2";
+                            result.push_back(toAdd);
+                            added = true;
+                        }
+                        if(highLevelName){
+                            toaster_msgs::Fact toAdd;
+                            toAdd.subjectId = it2->subjectId;
+                            toAdd.property = it->property;
+                            toAdd.propertyType = "state";
+                            toAdd.targetId = agentX_;
+                            result.push_back(toAdd);
+                            toAdd.targetId = "AGENTX2";
+                            result.push_back(toAdd);
+                        }
+                        facts.erase(it2);
+                        it2--;
                     }
-                    facts.erase(it2);
-                    it2--;
                 }
             }
         }
