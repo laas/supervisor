@@ -13,10 +13,10 @@ Place::Place(supervisor_msgs::Action action, Connector* connector) : VirtualActi
 		support_ = action.parameters[1];
 	}else{
 		ROS_WARN("[action_executor] Wrong parameter numbers, should be: object, support");
-	}
-    connector->objectsFocus_.clear();
-    connector->objectsFocus_.push_back(support_);
+    }
+    connector->objectFocus_ = support_;
     connector->weightFocus_ = 0.8;
+    connector->stopableFocus_ = true;
 }
 
 bool Place::preconditions(){

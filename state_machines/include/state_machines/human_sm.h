@@ -30,12 +30,11 @@ public:
 	HumanSM(string humanName);
 	~HumanSM() {};
 	string idleState();
-    string actingState(vector<string>* objects, bool* unexpected);
+    string actingState(string* object, bool* unexpected);
 	string waitingState();
-    string shouldActState(string robotState, vector<string>* objects);
+    string shouldActState(string robotState, string* object);
 	string absentState();
     void areaFactListCallback(const toaster_msgs::FactList::ConstPtr& msg);
-    vector<string> focusObjects(supervisor_msgs::Action action, bool shouldAct);
 
     bool humanActs_;
     supervisor_msgs::Action shouldDoAction_;
@@ -54,6 +53,7 @@ private:
 
 
     ros::Subscriber subArea_;
+    string focusObject(supervisor_msgs::Action action);
 
 };
 

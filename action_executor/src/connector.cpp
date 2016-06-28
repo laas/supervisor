@@ -27,6 +27,7 @@ Connector::Connector(){
    node_.getParam("/waitActionServer", waitActionServer_);
    node_.getParam("/shouldUseRightHand", shouldUseRightHand_);
    weightFocus_ = 0.0;
+   stopableFocus_ = true;
 
    //Init action clients
    acGTP_ = new actionlib::SimpleActionClient<gtp_ros_msg::requestAction>("gtp_ros_server", true);

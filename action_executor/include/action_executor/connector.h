@@ -45,8 +45,9 @@ public:
     string rightArmRestPose_;
     string leftArmRestPose_;
 
-    vector<string> objectsFocus_;
+    string objectFocus_;
     double weightFocus_;
+    bool stopableFocus_;
 
 	
     int previousId_;

@@ -18,8 +18,9 @@ string robotState;
 string robotName;
 ros::NodeHandle* node;
 
-vector<string> objectsRobot_;
+string objectRobot_;
 double weightRobot_ = 0.0;
+bool stopableRobot_ = true;
 bool actionPerformed = false;
 supervisor_msgs::Action performedAction;
 string agentAction;
@@ -38,15 +39,17 @@ void robotStateMachine(){
 	
 	while(true){
         supervisor_msgs::AgentActivity msg;
-        vector<string> objects;
+        string object;
         double weight = 0.0;
+        bool stopable = true;
         string previousState = robotState;
 		if(robotState == "IDLE"){
 			robotState = rsm.idleState();
 		}else if(robotState == "ACTING"){
             robotState = rsm.actingState();
-            objects = objectsRobot_;
+            object = objectRobot_;
             weight = weightRobot_;
+            stopable = stopableRobot_;
 		}else if(robotState == "WAITING"){
 			robotState = rsm.waitingState();
 		}else{
@@ -57,7 +60,8 @@ void robotStateMachine(){
         msg.activityState = previousState;
         msg.unexpected = false;
         msg.weight = weight;
-        msg.objects = objects;
+        msg.object = object;
+        msg.stopable = stopable;
         robot_pub.publish(msg);
   		loop_rate.sleep();
 	}
@@ -87,19 +91,19 @@ void humanStateMachine(string human_name){
             }
         }
         supervisor_msgs::AgentActivity msg;
-        vector<string> objects;
+        string object;
         double weight = 0.0;
         bool unexpected = false;
         string previousState = humanState;
 		if(humanState == "IDLE"){
 			humanState = hsm->idleState();
 		}else if(humanState == "ACTING"){
-            humanState = hsm->actingState(&objects, &unexpected);
+            humanState = hsm->actingState(&object, &unexpected);
             weight = 0.8;
 		}else if(humanState == "WAITING"){
 			humanState = hsm->waitingState();
 		}else if(humanState == "SHOULDACT"){
-            humanState = hsm->shouldActState(robotState, &objects);
+            humanState = hsm->shouldActState(robotState, &object);
             weight = 0.8;
 		}else if(humanState == "ABSENT"){
 			humanState = hsm->absentState();
@@ -112,7 +116,7 @@ void humanStateMachine(string human_name){
         msg.activityState = previousState;
         msg.unexpected = unexpected;
         msg.weight = weight;
-        msg.objects = objects;
+        msg.object = object;
         human_pub.publish(msg);
   		loop_rate.sleep();
 	}
@@ -121,8 +125,9 @@ void humanStateMachine(string human_name){
 
 void focusCallback(const supervisor_msgs::Focus::ConstPtr& msg){
 
-    objectsRobot_ = msg->objects;
+    objectRobot_ = msg->object;
     weightRobot_ = msg->weight;
+    stopableRobot_ = msg->stopable;
 }
 
 /*
