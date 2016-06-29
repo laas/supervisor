@@ -112,7 +112,7 @@ void humanStateMachine(string human_name){
 		}else if(humanState == "WAITING"){
 			humanState = hsm->waitingState();
 		}else if(humanState == "SHOULDACT"){
-            humanState = hsm->shouldActState(robotState, &object);
+            humanState = hsm->shouldActState(robotState);
             weight = 0.8;
 		}else if(humanState == "ABSENT"){
 			humanState = hsm->absentState();

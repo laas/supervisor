@@ -22,6 +22,7 @@
 #include <toaster_msgs/Fact.h>
 #include <toaster_msgs/FactList.h>
 
+#include "head_manager/Signal.h"
 
 using namespace std;
 
@@ -32,7 +33,7 @@ public:
 	string idleState();
     string actingState(string* object, bool* unexpected);
 	string waitingState();
-    string shouldActState(string robotState, string* object);
+    string shouldActState(string robotState);
 	string absentState();
     void areaFactListCallback(const toaster_msgs::FactList::ConstPtr& msg);
 
@@ -47,13 +48,16 @@ private:
 	string robotName_;
 	bool simu_;
 	double timeToWait_;
+    double timeSignaling_;
 	bool timerStarted_;
 	clock_t start_;
     bool present_;
+    bool signalGiven_;
 
 
     ros::Subscriber subArea_;
     string focusObject(supervisor_msgs::Action action);
+    pair<vector<string>, vector<double> > signalObjects(supervisor_msgs::Action action);
 
 };
 

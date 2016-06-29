@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>514</width>
-    <height>561</height>
+    <width>610</width>
+    <height>562</height>
    </rect>
   </property>
   <property name="mouseTracking">
@@ -32,12 +32,12 @@
      <rect>
       <x>0</x>
       <y>10</y>
-      <width>511</width>
+      <width>601</width>
       <height>581</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>6</number>
     </property>
     <widget class="QWidget" name="Goals">
      <attribute name="title">
@@ -1443,6 +1443,178 @@
       </property>
       <property name="text">
        <string>Speak</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab">
+     <attribute name="title">
+      <string>Signals</string>
+     </attribute>
+     <widget class="QLabel" name="label_31">
+      <property name="geometry">
+       <rect>
+        <x>16</x>
+        <y>37</y>
+        <width>81</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Receiver:</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="comboBoxReceiverSignal">
+      <property name="geometry">
+       <rect>
+        <x>90</x>
+        <y>30</y>
+        <width>101</width>
+        <height>27</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="addReceiver">
+      <property name="geometry">
+       <rect>
+        <x>210</x>
+        <y>30</y>
+        <width>97</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Add</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="cleanReceiver">
+      <property name="geometry">
+       <rect>
+        <x>330</x>
+        <y>30</y>
+        <width>97</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Clean</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_32">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>80</y>
+        <width>81</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Entities:</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="comboBoxEntityNameSignal">
+      <property name="geometry">
+       <rect>
+        <x>90</x>
+        <y>70</y>
+        <width>101</width>
+        <height>27</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="addEntity">
+      <property name="geometry">
+       <rect>
+        <x>210</x>
+        <y>80</y>
+        <width>97</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Add</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="cleanEntities">
+      <property name="geometry">
+       <rect>
+        <x>330</x>
+        <y>80</y>
+        <width>97</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Clean</string>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="DurationEntity">
+      <property name="geometry">
+       <rect>
+        <x>90</x>
+        <y>100</y>
+        <width>69</width>
+        <height>27</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_33">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>150</y>
+        <width>81</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Importancy:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_34">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>190</y>
+        <width>81</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Urgency:</string>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="ImportancySignal">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>150</y>
+        <width>69</width>
+        <height>27</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="UrgencySignal">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>190</y>
+        <width>69</width>
+        <height>27</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="SendSignal">
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>270</y>
+        <width>211</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Send Signal</string>
       </property>
      </widget>
     </widget>
