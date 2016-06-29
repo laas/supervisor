@@ -22,6 +22,7 @@ Simple dialogue node
 #include "supervisor_msgs/GetInfoDia.h"
 #include "supervisor_msgs/Bool.h"
 
+#include "head_manager/Signal.h"
 
 #ifdef ACAPELA
 #include "acapela/InitAction.h"
@@ -49,7 +50,20 @@ actionlib::SimpleActionClient<acapela::SayAction>* acSay;
 /*
 Verbalize it if acapela is defined
 */
-void saySentence(string sentence){
+void saySentence(string sentence, string receiver){
+
+    //we send a signal to the head manager to look the receiver
+    if(receiver!= "NONE"){//the sentence has no receiver (coming directly from interface)
+        ros::Publisher signal_pub = node->advertise<head_manager::Signal>("head_manager/signal", 1000);
+        head_manager::Signal msg;
+
+        msg.entities.push_back(receiver);
+        msg.durations.push_back(3.0);
+        msg.urgency = 1.0;
+        msg.importancy = 0.9;
+        msg.weight = 0.9;
+        signal_pub.publish(msg);
+    }
 
     ROS_INFO("[dialogue_node] ROBOT: %s", sentence.c_str());
 
@@ -115,7 +129,7 @@ void giveInfoFact(toaster_msgs::Fact fact, bool isTrue, string receiver){
     }
 
     //We verbalize the sentence
-    saySentence(sentence);
+    saySentence(sentence, receiver);
 
     //We inform the mental state we gave the information
     ros::ServiceClient client = node->serviceClient<supervisor_msgs::InfoGiven>("mental_states/info_given");
@@ -237,7 +251,7 @@ void giveInfoAction(supervisor_msgs::Action action, string actionState, string r
     }
 
     //We verbalize the sentence
-    saySentence(sentence);
+    saySentence(sentence, receiver);
 
     //We inform the mental state we gave the information
     ros::ServiceClient client = node->serviceClient<supervisor_msgs::InfoGiven>("mental_states/info_given");
@@ -267,7 +281,7 @@ void giveInfoPlan(supervisor_msgs::Plan plan, string planState, string receiver)
     }
 
     //We verbalize the sentence
-    saySentence(sentence);
+    saySentence(sentence, receiver);
 
     //We inform the mental state we gave the information
     ros::ServiceClient client = node->serviceClient<supervisor_msgs::InfoGiven>("mental_states/info_given");
@@ -292,7 +306,7 @@ void sharePlan(supervisor_msgs::Plan plan, string receiver){
     sentence = "The new plan is displayed on the screen";
 
     //We verbalize the sentence
-    saySentence(sentence);
+    saySentence(sentence, receiver);
 
     //We inform the mental state we gave the information
     ros::ServiceClient client = node->serviceClient<supervisor_msgs::ChangeState>("mental_states/change_state");
@@ -349,7 +363,7 @@ void askCanAction(supervisor_msgs::Action action, string receiver){
     }
 
     //We verbalize the sentence
-    saySentence(sentence);
+    saySentence(sentence, receiver);
 }
 
 /*
@@ -396,7 +410,7 @@ void askWantAction(supervisor_msgs::Action action, string receiver){
     }
 
     //We verbalize the sentence
-    saySentence(sentence);
+    saySentence(sentence, receiver);
 }
 
 /*
@@ -429,7 +443,7 @@ void askFact(toaster_msgs::Fact fact, string receiver){
     sentence = "Is the " + subjectName + " " + propertyName + " " + targetName + "?";
 
     //We verbalize the sentence
-    saySentence(sentence);
+    saySentence(sentence, receiver);
 }
 
 /*
@@ -437,7 +451,7 @@ Service call to say a sentence
 */
 bool say(supervisor_msgs::Say::Request  &req, supervisor_msgs::Say::Response &res){
 
-    saySentence(req.sentence);
+    saySentence(req.sentence, "NONE");
 
     return true;
 }

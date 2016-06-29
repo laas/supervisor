@@ -35,9 +35,11 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     for(vector<string>::iterator it = agents.begin(); it != agents.end(); it++){
         if(*it != robotName_){
             ui.comboBoxHumanAgent->addItem(it->c_str());
+            ui.comboBoxReceiverSignal->addItem(it->c_str());
         }
         ui.comboBoxAgentKnowName->addItem(it->c_str());
         ui.comboBoxAgents->addItem(it->c_str());
+        ui.comboBoxEntityNameSignal->addItem(it->c_str());
     }
 
     //we retrieve the possible objects from param of the .yaml file
@@ -47,6 +49,7 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
         ui.comboBoxActionObject->addItem(it->c_str());
         ui.comboBoxActionObject2->addItem(it->c_str());
         ui.comboBoxHumanActionObject->addItem(it->c_str());
+        ui.comboBoxEntityNameSignal->addItem(it->c_str());
     }
 
 
@@ -56,6 +59,7 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     for(vector<string>::iterator it = supports.begin(); it != supports.end(); it++){
         ui.comboBoxActionSupport->addItem(it->c_str());
         ui.comboBoxHumanActionSupport->addItem(it->c_str());
+        ui.comboBoxEntityNameSignal->addItem(it->c_str());
     }
 
 
@@ -65,6 +69,7 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     for(vector<string>::iterator it = containers.begin(); it != containers.end(); it++){
         ui.comboBoxActionContainer->addItem(it->c_str());
         ui.comboBoxHumanActionContainer->addItem(it->c_str());
+        ui.comboBoxEntityNameSignal->addItem(it->c_str());
     }
 
 
@@ -126,6 +131,13 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     ui.YHead->setSingleStep(0.1);
     ui.ZHead->setRange(0.0, 2.0);
     ui.ZHead->setSingleStep(0.1);
+
+    ui.DurationEntity->setRange(0.0, 10.0);
+    ui.DurationEntity->setSingleStep(1.0);
+    ui.ImportancySignal->setRange(0.0, 1.0);
+    ui.ImportancySignal->setSingleStep(0.1);
+    ui.UrgencySignal->setRange(0.0, 1.0);
+    ui.UrgencySignal->setSingleStep(0.1);
 
     actionClientSup_.waitForServer();
     actionClientTorso_.waitForServer();
@@ -596,3 +608,51 @@ void MainWindow::on_moveHead_clicked()
     actionClientHead_.sendGoal(goal);
 }
 
+
+/*************************************
+ * Signal tab
+ *************************************/
+
+void MainWindow::on_addReceiver_clicked()
+{
+    string receiver = ui.comboBoxReceiverSignal->currentText().toStdString();
+    receiversSignal_.push_back(receiver);
+}
+
+void MainWindow::on_cleanReceiver_clicked()
+{
+    receiversSignal_.clear();
+}
+
+void MainWindow::on_addEntity_clicked()
+{
+    string entity = ui.comboBoxEntityNameSignal->currentText().toStdString();
+    entitiesSignal_.push_back(entity);
+    double duration = ui.DurationEntity->value();
+    durationsSignal_.push_back(duration);
+}
+
+void MainWindow::on_cleanEntities_clicked()
+{
+    entitiesSignal_.clear();
+    durationsSignal_.clear();
+}
+
+void MainWindow::on_SendSignal_clicked()
+{
+    ros::Publisher signal_pub = node_.advertise<head_manager::Signal>("head_manager/signal", 1000);
+    head_manager::Signal msg;
+
+    msg.receivers = receiversSignal_;
+    receiversSignal_.clear();
+    msg.entities = entitiesSignal_;
+    entitiesSignal_.clear();
+    msg.durations = durationsSignal_;
+    durationsSignal_.clear();
+    double urgency = ui.ImportancySignal->value();
+    msg.urgency = urgency;
+    double importancy = ui.UrgencySignal->value();
+    msg.importancy = importancy;
+    msg.weight = importancy;
+    signal_pub.publish(msg);
+}

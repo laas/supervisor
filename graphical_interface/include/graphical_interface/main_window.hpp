@@ -42,6 +42,8 @@
 #include "supervisor_msgs/GetInfoDia.h"
 #include "supervisor_msgs/Bool.h"
 
+#include "head_manager/Signal.h"
+
 using namespace std;
 
 typedef actionlib::SimpleActionClient<supervisor_msgs::ActionExecutorAction> ClientSup;
@@ -116,6 +118,16 @@ private Q_SLOTS:
 
     void on_pushButtonDetachFromHand_clicked();
 
+    void on_addReceiver_clicked();
+
+    void on_cleanReceiver_clicked();
+
+    void on_addEntity_clicked();
+
+    void on_cleanEntities_clicked();
+
+    void on_SendSignal_clicked();
+
 public:
     Ui::MainWindowDesign ui;
     ros::NodeHandle node_;
@@ -133,6 +145,10 @@ public:
 private:
     double waitActionServer_;
     bool simu_;
+
+    vector<string> receiversSignal_;
+    vector<string> entitiesSignal_;
+    vector<double> durationsSignal_;
 
 
 };

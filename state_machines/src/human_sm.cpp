@@ -13,9 +13,11 @@ HumanSM::HumanSM(string humanName)
 	humanName_ = humanName;
     node_.getParam("/robot/name", robotName_);
 	node_.getParam("/timeNoAction", timeToWait_);
+    node_.getParam("/timeSignalingHuman", timeSignaling_);
   	node_.getParam("/simu", simu_);
 	timerStarted_ = false;
     present_ = true;
+    signalGiven_ = false;
 
     subArea_ = node_.subscribe("area_manager/factList", 1000, &HumanSM::areaFactListCallback, this);
 }
@@ -39,7 +41,6 @@ void HumanSM::areaFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
 
 /*
  Determine the focus of an action
-    @shouldAct: true if the action is an action to be done, false if the action is a performed action
  */
 string HumanSM::focusObject(supervisor_msgs::Action action){
 
@@ -68,6 +69,54 @@ string HumanSM::focusObject(supervisor_msgs::Action action){
     }
 
     return object;
+}
+/*
+ Determine the objects and duration to look when we want to give a signal for an action to do
+ */
+pair<vector<string>, vector<double> > HumanSM::signalObjects(supervisor_msgs::Action action){
+
+    vector<string> objects;
+    vector<double> durations;
+
+    if(action.name == "pick"){
+        if(action.parameters.size() > 0){
+            objects.push_back(action.parameters[0]);
+            durations.push_back(0.0);
+        }
+    }else if(action.name == "place"){
+        if(action.parameters.size() > 1){
+            objects.push_back(action.parameters[0]);
+            durations.push_back(0.0);
+            objects.push_back(action.parameters[1]);
+            durations.push_back(0.0);
+        }
+    }else if(action.name == "pickandplace"){
+        if(action.parameters.size() > 1){
+            objects.push_back(action.parameters[0]);
+            durations.push_back(0.0);
+            objects.push_back(action.parameters[1]);
+            durations.push_back(0.0);
+        }
+    }else if(action.name == "drop"){
+        if(action.parameters.size() > 1){
+            objects.push_back(action.parameters[0]);
+            durations.push_back(0.0);
+            objects.push_back(action.parameters[1]);
+            durations.push_back(0.0);
+        }
+    }else if(action.name == "pickanddrop"){
+        if(action.parameters.size() > 1){
+            objects.push_back(action.parameters[0]);
+            durations.push_back(0.0);
+            objects.push_back(action.parameters[1]);
+            durations.push_back(0.0);
+        }
+    }
+    pair<vector<string>, vector<double> > toReturn;
+    toReturn.first = objects;
+    toReturn.second = durations;
+
+    return toReturn;
 }
 
 /*
@@ -256,7 +305,7 @@ string HumanSM::waitingState(){
 /*
 State where the human SHOULD ACT
 */
-string HumanSM::shouldActState(string robotState, string* object){
+string HumanSM::shouldActState(string robotState){
 
     if(!present_){
         ROS_INFO("[state_machines] %s goes to ABSENT", humanName_.c_str());
@@ -278,16 +327,32 @@ string HumanSM::shouldActState(string robotState, string* object){
     if(!timerStarted_ && robotState =="WAITING"){//we just enter the state, we start the timer
 		start_ = clock();
 		timerStarted_ = true;
+        signalGiven_ = false;
     }else if(timerStarted_ && robotState !="WAITING"){
         timerStarted_ = false;
+        signalGiven_ = false;
     }else{
         if (client.call(srv_info)){
             if(srv_info.response.state == "READY"){
                 shouldDoAction_ = srv_info.response.action;
-                *object = focusObject(srv_info.response.action);
+                pair<vector<string>, vector<double> > objects = signalObjects(srv_info.response.action);
                 double duration = (clock() - start_ ) / (double) CLOCKS_PER_SEC;
+                if(duration >= timeSignaling_){//we send a head signal concerning the action
+                    ros::Publisher signal_pub = node_.advertise<head_manager::Signal>("head_manager/signal", 1000);
+                    head_manager::Signal msg;
+
+                    msg.receivers.push_back(humanName_);
+                    msg.entities = objects.first;
+                    msg.durations = objects.second;
+                    msg.urgency = 0.5;
+                    msg.importancy = 0.6;
+                    msg.weight = 0.6;
+                    signal_pub.publish(msg);
+                    signalGiven_ = true;
+                }
                 if(duration >= timeToWait_){
                     timerStarted_ = false;
+                    signalGiven_ = false;
                     srv_info.request.info ="ACTION_STATE";
                     srv_info.request.agent = robotName_;
                     srv_info.request.action = srv_info.response.action;
