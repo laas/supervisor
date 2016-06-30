@@ -68,7 +68,7 @@ void robotStateMachine(){
         //we publish the robot state
         msg.activityState = previousState;
         msg.unexpected = false;
-        msg.weight = weight;
+        msg.importancy = weight;
         msg.object = object;
         msg.stopable = stopable;
         robot_pub.publish(msg);
@@ -124,7 +124,7 @@ void humanStateMachine(string human_name){
         //we publish the robot state
         msg.activityState = previousState;
         msg.unexpected = unexpected;
-        msg.weight = weight;
+        msg.importancy = weight;
         msg.object = object;
         human_pub.publish(msg);
   		loop_rate.sleep();

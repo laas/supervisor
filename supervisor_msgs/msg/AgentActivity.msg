@@ -1,5 +1,5 @@
 string activityState
 string object
-float64 weight
+float64 importancy
 bool unexpected
 bool stopable
