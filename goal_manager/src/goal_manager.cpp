@@ -88,6 +88,7 @@ void GoalManager::executeGoal(string goal){
               ROS_ERROR("Failed to call service mental_state/change_state");
           }
 	   }else{//the robot aborts the goal
+          ROS_INFO("[goal_manager] Aborting the goal %s", goal.c_str());
 	      string robotName;
           node.getParam("/robot/name", robotName);
           serviceCS.request.type = "goal";
