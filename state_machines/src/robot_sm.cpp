@@ -18,6 +18,57 @@ actionClient_("supervisor/action_executor", true)
 	isActing_ = false;
     shouldRetractRight_ = true;
     shouldRetractLeft_ = true;
+    fillHighLevelNames();
+}
+
+
+/*
+Fill the highLevelNames map from param
+*/
+void RobotSM::fillHighLevelNames(){
+
+    //we retrieve the list objects from param and fill the map with their high level name
+    vector<string> objects;
+    node_->getParam("/entities/objects", objects);
+    for(vector<string>::iterator it = objects.begin(); it != objects.end(); it++){
+        string topic = "/highLevelName/";
+        topic = topic + *it;
+        string highLevelName;
+        if(node_->hasParam(topic)){
+            node_->getParam(topic, highLevelName);
+        }else{
+            highLevelName = *it;
+        }
+        highLevelNames_[*it] = highLevelName;
+    }
+    //same for supports
+    vector<string> support;
+    node_->getParam("/entities/supports", support);
+    for(vector<string>::iterator it = support.begin(); it != support.end(); it++){
+        string topic = "/highLevelName/";
+        topic = topic + *it;
+        string highLevelName;
+        if(node_->hasParam(topic)){
+            node_->getParam(topic, highLevelName);
+        }else{
+            highLevelName = *it;
+        }
+        highLevelNames_[*it] = highLevelName;
+    }
+    //same for containers
+    vector<string> container;
+    node_->getParam("/entities/containers", container);
+    for(vector<string>::iterator it = container.begin(); it != container.end(); it++){
+        string topic = "/highLevelName/";
+        topic = topic + *it;
+        string highLevelName;
+        if(node_->hasParam(topic)){
+            node_->getParam(topic, highLevelName);
+        }else{
+            highLevelName = *it;
+        }
+        highLevelNames_[*it] = highLevelName;
+    }
 }
 
 
@@ -69,10 +120,11 @@ string RobotSM::idleState(vector<string> partners){
             }
             if(actorsR.size()){
                 if(actorsR.size() == 1){
-                    //we attribute to the only possible actor
+                    attributeAction(actionChosen, actorsR[0]);
                 }else{
                     if(identical){
                         //we attribute to the robot
+                        attributeAction(actionChosen, robotName_);
                     }else{
                         //we negotiate or adapt to choose an actor
                     }
@@ -244,52 +296,22 @@ bool RobotSM::factsAreIn(string agent, vector<toaster_msgs::Fact> facts){
             for(vector<toaster_msgs::Fact>::iterator itf = facts.begin(); itf != facts.end(); itf++){
                 if(itf->subjectId == "NULL"){
                     for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
-                        string topic = "/highLevelName/";
-                        topic = topic + itk->targetId;
-                        string higlLevelTargetName;
-                        if(node_->hasParam(topic)){
-                            node_->getParam(topic, higlLevelTargetName);
-                        }else{
-                            higlLevelTargetName = itk->targetId;
-                        }
-                        if(itk->property == itf->property && higlLevelTargetName == itf->targetId){
+                        if(itk->property == itf->property && highLevelNames_[itk->targetId] == itf->targetId){
                             return false;
                         }
                     }
                 }else if(itf->targetId == "NULL"){
                     for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
-                        string topic = "/highLevelName/";
-                        topic = topic + itk->subjectId;
-                        string higlLevelSubjectName;
-                        if(node_->hasParam(topic)){
-                            node_->getParam(topic, higlLevelSubjectName);
-                        }else{
-                            higlLevelSubjectName = itk->subjectId;
-                        }
-                        if(itk->property == itf->property && higlLevelSubjectName == itf->subjectId){
+                        if(itk->property == itf->property && highLevelNames_[itk->subjectId] == itf->subjectId){
                             return false;
                         }
                     }
                 }else{
                     bool find = false;
                     for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
-                        string topic = "/highLevelName/";
-                        topic = topic + itk->subjectId;
-                        string higlLevelSubjectName;
-                        if(node_->hasParam(topic)){
-                            node_->getParam(topic, higlLevelSubjectName);
-                        }else{
-                            higlLevelSubjectName = itk->subjectId;
-                        }
-                        topic = "/highLevelName/";
-                        topic = topic + itk->targetId;
-                        string higlLevelTargetName;
-                        if(node_->hasParam(topic)){
-                            node_->getParam(topic, higlLevelTargetName);
-                        }else{
-                            higlLevelTargetName = itk->targetId;
-                        }
-                        if(itk->property == itf->property && higlLevelSubjectName == itf->subjectId && higlLevelTargetName == itf->targetId){
+                        if(itk->property == itf->property &&
+                                highLevelNames_[itk->subjectId] == itf->subjectId &&
+                                highLevelNames_[itk->targetId] == itf->targetId){
                             find = true;
                             break;
                         }
@@ -366,8 +388,10 @@ Function which return the possible actors for an action (actors who check the pr
 vector<string> RobotSM::getPossibleActors(supervisor_msgs::ActionMS action, string agent){
 
     vector<string> answer;
+    vector<string> goalActors = partners_;
+    goalActors.push_back(robotName_);
 
-    for(vector<string>::iterator ita = partners_.begin(); ita != partners_.end(); ita++){
+    for(vector<string>::iterator ita = goalActors.begin(); ita != goalActors.end(); ita++){
         vector<toaster_msgs::Fact> newPrecs;
         for(vector<toaster_msgs::Fact>::iterator itp = action.prec.begin(); itp != action.prec.end(); itp++){
             toaster_msgs::Fact fact = *itp;
@@ -385,4 +409,90 @@ vector<string> RobotSM::getPossibleActors(supervisor_msgs::ActionMS action, stri
     }
 
     return answer;
+}
+
+
+/*
+Function which attribute an action to an agent
+*/
+void RobotSM::attributeAction(supervisor_msgs::ActionMS action, string agent){
+
+    //find the name of the high level object to lock
+    string highLevelObject = getHighLevelLockedObject(action);
+
+    //find the object corresponding to the high level object
+    string objectLocked = getCorrespondingObject(action, highLevelObject, agent);
+
+    //lock the object and ask for a new plan
+    ros::ServiceClient client = node_->serviceClient<supervisor_msgs::EndPlan>("plan_elaboration/endPlan");
+    supervisor_msgs::EndPlan srv;
+    srv.request.report = false;
+    srv.request.objectLocked = objectLocked;
+    srv.request.agentLocked = agent;
+    if (!client.call(srv)){
+      ROS_ERROR("Failed to call service plan_elaboration/endPlan");
+    }
+}
+
+
+/*
+Function which return te object to lock given an action
+TODO: find a better way to do it
+*/
+string RobotSM::getHighLevelLockedObject(supervisor_msgs::ActionMS action){
+
+    //For now, for each possible action the first parameters is always the object to lock (object to  pick, ...)
+    return action.parameters[0];
+}
+
+/*
+Function which instantiate the object to lock
+*/
+string RobotSM::getCorrespondingObject(supervisor_msgs::ActionMS action, string highLevelObject, string agent){
+
+    string object = "NOT_FOUND";
+
+    for(vector<toaster_msgs::Fact>::iterator itp = action.prec.begin(); itp != action.prec.end(); itp++){
+        if(itp->subjectId != highLevelObject && itp->targetId != highLevelObject){
+            //this precondition does not concern the object
+            break;
+        }else if(itp->subjectId == "NULL" || itp->targetId == "NULL"){
+            break;
+        }else{
+            toaster_msgs::Fact prec = *itp;
+            if(prec.subjectId == agentX_){
+                prec.subjectId = agent;
+            }
+            if(prec.targetId == agentX_){
+                prec.targetId = agent;
+            }
+            bool isSubject;
+            if(itp->subjectId == highLevelObject){
+                isSubject = true;
+            }else{
+                isSubject = false;
+            }
+            for(vector<supervisor_msgs::AgentKnowledge>::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+                if(it->agentName == agent){
+                    for(vector<toaster_msgs::Fact>::iterator itf = it->knowledge.begin(); itf != it->knowledge.end(); itf++){
+                        if(itf->property == prec.property &&
+                                highLevelNames_[itf->subjectId] == highLevelNames_[prec.subjectId] &&
+                                highLevelNames_[itf->targetId] == highLevelNames_[prec.targetId]){
+                            //we get an object checking this precondition for the agent
+                            if(isSubject){
+                                object = itf->subjectId;
+                            }else{
+                                object = itf->targetId;
+                            }
+                            break;
+                            //TODO check other preconditions with this object
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+
+    return object;
 }

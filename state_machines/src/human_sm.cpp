@@ -11,10 +11,10 @@ State machine for the robot
 HumanSM::HumanSM(ros::NodeHandle* node, string humanName)
  {
     humanName_ = humanName;
-    node_.getParam("/robot/name", robotName_);
-	node_.getParam("/timeNoAction", timeToWait_);
-    node_.getParam("/timeSignalingHuman", timeSignaling_);
-    node_.getParam("/simu", simu_);
+    node_->getParam("/robot/name", robotName_);
+    node_->getParam("/timeNoAction", timeToWait_);
+    node_->getParam("/timeSignalingHuman", timeSignaling_);
+    node_->getParam("/simu", simu_);
 	timerStarted_ = false;
     present_ = true;
     signalGiven_ = false;
@@ -338,7 +338,7 @@ string HumanSM::shouldActState(string robotState){
                 pair<vector<string>, vector<double> > objects = signalObjects(srv_info.response.action);
                 double duration = (clock() - start_ ) / (double) CLOCKS_PER_SEC;
                 if(duration >= timeSignaling_){//we send a head signal concerning the action
-                    ros::Publisher signal_pub = node_.advertise<head_manager::Signal>("head_manager/signal", 1000);
+                    ros::Publisher signal_pub = node_->advertise<head_manager::Signal>("head_manager/signal", 1000);
                     head_manager::Signal msg;
 
                     msg.receivers.push_back(humanName_);
@@ -365,6 +365,9 @@ string HumanSM::shouldActState(string robotState){
                         srv_ask.request.subType = "CAN";
                         srv_ask.request.action = actionTodo;
                         srv_ask.request.receiver = humanName_;
+                        if (!client_ask.call(srv_ask)){
+                          ROS_ERROR("Failed to call service dialogue_node/ask");
+                        }
                       }else{//else, we consider the action failed
                          srv_action.request.type = "action";
                          srv_action.request.action = actionTodo;

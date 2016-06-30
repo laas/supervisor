@@ -19,6 +19,7 @@
 #include "supervisor_msgs/AgentKnowledge.h"
 #include "supervisor_msgs/ActionMS.h"
 #include "supervisor_msgs/AgentList.h"
+#include "supervisor_msgs/EndPlan.h"
 
 
 typedef actionlib::SimpleActionClient<supervisor_msgs::ActionExecutorAction> Client;
@@ -45,6 +46,7 @@ private:
     bool shouldRetractRight_;
     bool shouldRetractLeft_;
     vector<string> partners_;
+    map<string, string> highLevelNames_;
 
 	void doneCb(const actionlib::SimpleClientGoalState& state, const supervisor_msgs::ActionExecutorResultConstPtr& result);
     vector<supervisor_msgs::ActionMS> getActionReady(string actor, string agent);
@@ -54,6 +56,10 @@ private:
     vector<supervisor_msgs::ActionMS> getIdenticalActions(vector<supervisor_msgs::ActionMS> actions);
     bool areIdentical(supervisor_msgs::ActionMS action1, supervisor_msgs::ActionMS action2);
     vector<string> getPossibleActors(supervisor_msgs::ActionMS action, string agent);
+    void attributeAction(supervisor_msgs::ActionMS action, string agent);
+    string getHighLevelLockedObject(supervisor_msgs::ActionMS action);
+    string getCorrespondingObject(supervisor_msgs::ActionMS action, string highLevelObject, string agent);
+    void fillHighLevelNames();
 
 };
 
