@@ -57,6 +57,7 @@ void GoalManager::endGoal(bool report){
    ros::ServiceClient clientCS = node_->serviceClient<supervisor_msgs::ChangeState>("mental_state/change_state");
    supervisor_msgs::ChangeState serviceCS;
    if(!report){//if the goal has been achieved, no need to send info to the MS manager (it should know this by itself)
+       ROS_INFO("[goal_manager] Aborting the goal %s", currentGoal_.c_str());
        string robotName;
        node_->getParam("/robot/name", robotName);
        serviceCS.request.type = "goal";

@@ -20,6 +20,7 @@
 #include "supervisor_msgs/ActionMS.h"
 #include "supervisor_msgs/AgentList.h"
 #include "supervisor_msgs/EndPlan.h"
+#include "supervisor_msgs/Ask.h"
 
 
 typedef actionlib::SimpleActionClient<supervisor_msgs::ActionExecutorAction> Client;
@@ -29,7 +30,7 @@ class RobotSM{
 public:
     RobotSM(ros::NodeHandle* node);
 	~RobotSM() {};
-    string idleState(vector<string> partners);
+    string idleState(vector<string> partners, map<string, string> agentsState);
     string actingState();
 	string waitingState();
 
@@ -47,6 +48,7 @@ private:
     bool shouldRetractLeft_;
     vector<string> partners_;
     map<string, string> highLevelNames_;
+    bool negociationMode_;
 
 	void doneCb(const actionlib::SimpleClientGoalState& state, const supervisor_msgs::ActionExecutorResultConstPtr& result);
     vector<supervisor_msgs::ActionMS> getActionReady(string actor, string agent);
@@ -55,7 +57,7 @@ private:
     bool factsAreIn(string agent, vector<toaster_msgs::Fact> facts);
     vector<supervisor_msgs::ActionMS> getIdenticalActions(vector<supervisor_msgs::ActionMS> actions);
     bool areIdentical(supervisor_msgs::ActionMS action1, supervisor_msgs::ActionMS action2);
-    vector<string> getPossibleActors(supervisor_msgs::ActionMS action, string agent);
+    vector<string> getPossibleActors(supervisor_msgs::ActionMS action, string agent, map<string, string> agentsState);
     void attributeAction(supervisor_msgs::ActionMS action, string agent);
     string getHighLevelLockedObject(supervisor_msgs::ActionMS action);
     string getCorrespondingObject(supervisor_msgs::ActionMS action, string highLevelObject, string agent);

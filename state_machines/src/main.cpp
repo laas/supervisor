@@ -29,6 +29,8 @@ string agentAction;
 vector<string> allAgents;
 vector<string> partners;
 
+map<string, string> agentsState;
+
 vector<supervisor_msgs::AgentKnowledge> knowledge;
 vector<supervisor_msgs::ActionMS> actions;
 
@@ -38,6 +40,7 @@ Main function of the robot state machine
 void robotStateMachine(){
   	ros::Rate loop_rate(30);
 	robotState = "IDLE";
+    agentsState[robotName] = robotState;
     RobotSM rsm(node);
 
     string topicName = "supervisor/activity_state/";
@@ -53,7 +56,7 @@ void robotStateMachine(){
         bool stopable = true;
         string previousState = robotState;
 		if(robotState == "IDLE"){
-            robotState = rsm.idleState(partners);
+            robotState = rsm.idleState(partners, agentsState);
 		}else if(robotState == "ACTING"){
             robotState = rsm.actingState();
             object = objectRobot_;
@@ -73,6 +76,8 @@ void robotStateMachine(){
         msg.stopable = stopable;
         robot_pub.publish(msg);
   		loop_rate.sleep();
+
+        agentsState[robotName] = robotState;
 	}
 
 }
@@ -83,6 +88,7 @@ Main function of the human state machine
 void humanStateMachine(string human_name){
   	ros::Rate loop_rate(30);
     string humanState = "IDLE";
+    agentsState[human_name] = humanState;
     string topicName = "supervisor/activity_state/";
     topicName = topicName + human_name;
     ros::Publisher human_pub = node->advertise<supervisor_msgs::AgentActivity>(topicName, 1000);
@@ -128,6 +134,8 @@ void humanStateMachine(string human_name){
         msg.object = object;
         human_pub.publish(msg);
   		loop_rate.sleep();
+
+        agentsState[human_name] = humanState;
 	}
 
 }

@@ -28,3 +28,5 @@ HATP_actions:
 HATP:
     AgentX: 'AGENTX'
     Omni: 'OMNI'
+
+NegociationMode: true

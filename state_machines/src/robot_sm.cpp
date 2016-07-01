@@ -19,6 +19,7 @@ actionClient_("supervisor/action_executor", true)
     shouldRetractRight_ = true;
     shouldRetractLeft_ = true;
     fillHighLevelNames();
+    node_->getParam("/negociationMode", negociationMode_);
 }
 
 
@@ -85,7 +86,7 @@ void RobotSM::doneCb(const actionlib::SimpleClientGoalState& state, const superv
 /*
 State where the robot is IDLE
 */
-string RobotSM::idleState(vector<string> partners){
+string RobotSM::idleState(vector<string> partners, map<string, string> agentsState){
 
     partners_ = partners;
 
@@ -110,9 +111,9 @@ string RobotSM::idleState(vector<string> partners){
                 identical = false;
                 actionChosen = actionsX[0];
             }
-            vector<string> actorsR = getPossibleActors(actionChosen, robotName_);
+            vector<string> actorsR = getPossibleActors(actionChosen, robotName_, agentsState);
             for(vector<string>::iterator it = partners_.begin(); it != partners_.end(); it++){
-                vector<string> actorsH = getPossibleActors(actionChosen, *it);
+                vector<string> actorsH = getPossibleActors(actionChosen, *it, agentsState);
                 if(actorsR.size() != actorsH.size()){
                     //CorrectDB
                     return "IDLE";
@@ -127,6 +128,29 @@ string RobotSM::idleState(vector<string> partners){
                         attributeAction(actionChosen, robotName_);
                     }else{
                         //we negotiate or adapt to choose an actor
+                        if(negociationMode_){
+                            ros::ServiceClient client_ask = node_->serviceClient<supervisor_msgs::Ask>("dialogue_node/ask");
+                            supervisor_msgs::Ask srv_ask;
+                            srv_ask.request.type = "ACTION";
+                            srv_ask.request.subType = "WANT";
+                            srv_ask.request.action = convertActionMStoAction(actionChosen);
+                            srv_ask.request.receiver = partners_[0];
+                            srv_ask.request.waitForAnswer = true;
+                            if (client_ask.call(srv_ask)){
+                              if(srv_ask.response.boolAnswer){
+                                  //the partner want to perform the action
+                                  attributeAction(actionChosen, partners_[0]);
+                              }else{
+                                  //the partner does not want to perform the action: the robot does it
+                                  attributeAction(actionChosen, robotName_);
+                              }
+                            }else{
+                              ROS_ERROR("Failed to call service dialogue_node/ask");
+                            }
+                        }else{
+                            //TODO: we wait few time to see if the partner performs the action, if not the robot does it
+
+                        }
                     }
                 }
             }else{
@@ -385,26 +409,28 @@ bool RobotSM::areIdentical(supervisor_msgs::ActionMS action1, supervisor_msgs::A
 /*
 Function which return the possible actors for an action (actors who check the preconditions) taking the point of view of @agent
 */
-vector<string> RobotSM::getPossibleActors(supervisor_msgs::ActionMS action, string agent){
+vector<string> RobotSM::getPossibleActors(supervisor_msgs::ActionMS action, string agent, map<string, string> agentsState){
 
     vector<string> answer;
     vector<string> goalActors = partners_;
     goalActors.push_back(robotName_);
 
     for(vector<string>::iterator ita = goalActors.begin(); ita != goalActors.end(); ita++){
-        vector<toaster_msgs::Fact> newPrecs;
-        for(vector<toaster_msgs::Fact>::iterator itp = action.prec.begin(); itp != action.prec.end(); itp++){
-            toaster_msgs::Fact fact = *itp;
-            if(fact.subjectId == agentX_){
-                fact.subjectId = *ita;
+        if(agent == robotName_ || agentsState[agent] != "ACTING"){//agents already performing an action are not possible actors
+            vector<toaster_msgs::Fact> newPrecs;
+            for(vector<toaster_msgs::Fact>::iterator itp = action.prec.begin(); itp != action.prec.end(); itp++){
+                toaster_msgs::Fact fact = *itp;
+                if(fact.subjectId == agentX_){
+                    fact.subjectId = *ita;
+                }
+                if(fact.targetId == agentX_){
+                    fact.targetId = *ita;
+                }
+                newPrecs.push_back(fact);
             }
-            if(fact.targetId == agentX_){
-                fact.targetId = *ita;
+            if(factsAreIn(agent, newPrecs)){
+                answer.push_back(*ita);
             }
-            newPrecs.push_back(fact);
-        }
-        if(factsAreIn(agent, newPrecs)){
-            answer.push_back(*ita);
         }
     }
 
