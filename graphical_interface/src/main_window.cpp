@@ -278,14 +278,14 @@ void MainWindow::on_pushButtonDetachFromHand_clicked()
     fact.targetId = agent;
     fact.propertyType = "state";
 
-    ros::ServiceClient clientDB = node_.serviceClient<toaster_msgs::SetInfoDB>("database/set_info");
+    ros::ServiceClient clientDB = node_.serviceClient<toaster_msgs::SetInfoDB>("database_manager/set_info");
     toaster_msgs::SetInfoDB srvDB;
     srvDB.request.add = false;
     srvDB.request.infoType = "FACT";
     srvDB.request.agentId = robotName_;
     srvDB.request.facts.push_back(fact);
     if (!clientDB.call(srvDB)) {
-       ROS_ERROR("Failed to call service database/set_info");
+       ROS_ERROR("Failed to call service database_manager/set_info");
        return;
     }
 
