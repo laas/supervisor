@@ -240,9 +240,9 @@ void VirtualAction::PutInContainer(string object, string container){
        objectList  = *(ros::topic::waitForMessage<toaster_msgs::ObjectListStamped>("pdg/objectList",ros::Duration(1)));
        for(vector<toaster_msgs::Object>::iterator it = objectList.objectList.begin(); it != objectList.objectList.end(); it++){
          if(it->meEntity.id == container){
-            x = it->meEntity.pose.orientation.x;
-            y = it->meEntity.pose.orientation.y;
-            z = it->meEntity.pose.orientation.z;
+            x = it->meEntity.pose.position.x;
+            y = it->meEntity.pose.position.y;
+            z = it->meEntity.pose.position.z;
             break;
          }
        }
