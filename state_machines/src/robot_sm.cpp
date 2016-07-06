@@ -20,6 +20,8 @@ actionClient_("supervisor/action_executor", true)
     shouldRetractLeft_ = true;
     fillHighLevelNames();
     node_->getParam("/negociationMode", negociationMode_);
+    node_->getParam("/timeAdaptation", timeAdaptation_);
+    timerStarted_ = false;
 }
 
 
@@ -91,6 +93,7 @@ string RobotSM::idleState(vector<string> partners, map<string, string> agentsSta
     partners_ = partners;
 
     vector<supervisor_msgs::ActionMS> actionsR = getActionReady(robotName_, robotName_);
+    bool isWaiting = false;
     if(actionsR.size()){
         supervisor_msgs::ActionExecutorGoal goal;
         goal.action = convertActionMStoAction(actionsR[0]);
@@ -148,8 +151,18 @@ string RobotSM::idleState(vector<string> partners, map<string, string> agentsSta
                               ROS_ERROR("Failed to call service dialogue_node/ask");
                             }
                         }else{
-                            //TODO: we wait few time to see if the partner performs the action, if not the robot does it
-
+                            isWaiting = true;
+                            //we wait few time to see if the partner performs the action, if not the robot does it
+                            if(!timerStarted_){
+                                start_ = clock();
+                                timerStarted_ = true;
+                            }else{
+                                double duration = (clock() - start_ ) / (double) CLOCKS_PER_SEC;
+                                if(duration >= timeAdaptation_){
+                                    timerStarted_ = false;
+                                    attributeAction(actionChosen, robotName_);
+                                }
+                            }
                         }
                     }
                 }
@@ -159,6 +172,11 @@ string RobotSM::idleState(vector<string> partners, map<string, string> agentsSta
         }else{
             //NEXT ROBOT ACTION?
         }
+    }
+
+    //if the robot is not waiting for a human action anymore we reset the timer
+    if(!isWaiting){
+        timerStarted_ = false;
     }
 
     //if no more action to do we retract if needed

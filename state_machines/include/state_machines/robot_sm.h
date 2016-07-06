@@ -49,6 +49,9 @@ private:
     vector<string> partners_;
     map<string, string> highLevelNames_;
     bool negociationMode_;
+    double timeAdaptation_;
+    bool timerStarted_;
+    clock_t start_;
 
 	void doneCb(const actionlib::SimpleClientGoalState& state, const supervisor_msgs::ActionExecutorResultConstPtr& result);
     vector<supervisor_msgs::ActionMS> getActionReady(string actor, string agent);
