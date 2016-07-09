@@ -3,21 +3,21 @@ author Sandra Devin
 
 Main class of the goal_manager.
 
-The goal manager allows to choose a goal to execute and find a plan to execute it
+The goal manager allows to choose a goal to execute
 
 **/
 
 #include <goal_manager/goal_manager.h>
 
-GoalManager* gm = new GoalManager();
+GoalManager* gm;
+ros::NodeHandle* node;
 
 /*
 Service call to execute a new goal
 */
 bool newGoal(supervisor_msgs::NewGoal::Request  &req, supervisor_msgs::NewGoal::Response &res){
-	
-	ros::NodeHandle node;
-   ros::ServiceClient client = node.serviceClient<supervisor_msgs::ChangeState>("mental_state/change_state");
+
+   ros::ServiceClient client = node->serviceClient<supervisor_msgs::ChangeState>("mental_state/change_state");
    
 	//We say to the mental state manager that we have a new goal
    supervisor_msgs::ChangeState srv;
@@ -33,12 +33,13 @@ bool newGoal(supervisor_msgs::NewGoal::Request  &req, supervisor_msgs::NewGoal::
 
 	return true;
 }
+
 /*
 Service call when the plan is over
 */
-bool endPlan(supervisor_msgs::EndPlan::Request  &req, supervisor_msgs::EndPlan::Response &res){
+bool endGoal(supervisor_msgs::EndPlan::Request  &req, supervisor_msgs::EndPlan::Response &res){
    
-   gm->endPlan(req.report);
+   gm->endGoal(req.report);
 
 	return true;
 }
@@ -46,17 +47,21 @@ bool endPlan(supervisor_msgs::EndPlan::Request  &req, supervisor_msgs::EndPlan::
 int main (int argc, char **argv)
 {
   ros::init(argc, argv, "goal_manager");
-  ros::NodeHandle node;
-  	ros::Rate loop_rate(30);
+  ros::NodeHandle _node;
+  node = &_node;
+  ros::Rate loop_rate(30);
+
+  GoalManager _gm(&_node);
+  gm = &_gm;
 
   ROS_INFO("[goal_manager] Init goal_manager");
  
   //Services declarations
-  ros::ServiceServer service_goal = node.advertiseService("goal_manager/new_goal", newGoal); //new goal to execute
-  ros::ServiceServer end_plan = node.advertiseService("goal_manager/end_plan", endPlan); //the plan is over
+  ros::ServiceServer service_goal = _node.advertiseService("goal_manager/new_goal", newGoal); //new goal to execute
+  ros::ServiceServer end_goal = _node.advertiseService("goal_manager/end_goal", endGoal); //the plan is over
 
   ROS_INFO("[goal_manager] goal_manager ready");
-  while(node.ok()){
+  while(_node.ok()){
    gm->chooseGoal();
    ros::spinOnce();
   	loop_rate.sleep();

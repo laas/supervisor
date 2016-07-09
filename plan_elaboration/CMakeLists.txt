@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(goal_manager)
+project(plan_elaboration)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   supervisor_msgs
+  hatp_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -105,7 +106,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES mental_states
-   CATKIN_DEPENDS toaster_msgs roscpp rospy std_msgs supervisor_msgs
+   CATKIN_DEPENDS toaster_msgs roscpp rospy std_msgs supervisor_msgs hatp_msgs
 #  DEPENDS system_lib
 )
 
@@ -179,12 +180,12 @@ include_directories(
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
 
-add_executable(goal_manager src/main.cpp src/goal_manager.cpp)
+add_executable(plan_elaboration src/main.cpp src/plan_elaboration.cpp src/virtual_domain.cpp src/Domains/default_domain.cpp src/Domains/scan_domain.cpp)
 target_link_libraries( 
-  goal_manager
+  plan_elaboration
   ${catkin_LIBRARIES}
 )
-add_dependencies(goal_manager supervisor_msgs_generate_messages_cpp)
+add_dependencies(plan_elaboration supervisor_msgs_generate_messages_cpp)
 
 #############
 ## Testing ##
