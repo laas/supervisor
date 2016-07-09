@@ -48,6 +48,7 @@ public:
     string objectFocus_;
     double weightFocus_;
     bool stopableFocus_;
+    bool simu_;
 
 	
     int previousId_;
@@ -65,7 +66,6 @@ protected:
 private:
    ros::NodeHandle node_;
    double waitActionServer_;
-   bool simu_;
 
 };
 
