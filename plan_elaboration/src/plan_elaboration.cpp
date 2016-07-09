@@ -235,7 +235,10 @@ supervisor_msgs::Plan PlanElaboration::convertPlan(hatp_msgs::Plan plan){
           node_->getParam(nameTopic, action.name);
           action.id = it->id;
           action.actors = it->agents;
-          action.parameters = it->parameters;
+          //we remove the first parameter as it is the ame of the actor
+          for(vector<string>::iterator itp = it->parameters.begin() +1; itp != it->parameters.end(); itp++){
+              action.parameters.push_back(*itp);
+          }
           newPlan.actions.push_back(action);
        }
     }
