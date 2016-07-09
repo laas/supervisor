@@ -25,3 +25,7 @@ highLevelActions:
         moveTo_actors: ['mainAgent']
         moveTo_prec: []
         moveTo_effects: []
+        scan_param: ['mainObject']
+        scan_actors: ['mainAgent']
+        scan_prec: []
+        scan_effects: ['mainObject, isScanned, true']

@@ -438,6 +438,8 @@ supervisor_msgs::ActionMS MSManager::createActionFromHighLevel(supervisor_msgs::
 	supervisor_msgs::ActionMS highLevelAction = getHighLevelActionByName(action.name);
 	map<string, string> highLevelNames;
 	highLevelNames["NULL"] = "NULL";
+    highLevelNames["false"] = "false";
+    highLevelNames["true"] = "true";
 	if(action.parameters.size() == highLevelAction.parameters.size()){
 		vector<string>::iterator it2 = action.parameters.begin();
 		for(vector<string>::iterator it = highLevelAction.parameters.begin(); it != highLevelAction.parameters.end(); it++){
