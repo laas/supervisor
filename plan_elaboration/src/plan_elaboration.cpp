@@ -203,7 +203,7 @@ pair<bool, hatp_msgs::Plan> PlanElaboration::GetHATPPlan(){
     }
 
     //We ask a plan to HATP
-    service.request.request.type="first-plan";
+    service.request.request.type="plan";
     if(client.call(service)){
        if(service.response.solution.report == "OK"){
           answer.first = true;
