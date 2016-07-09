@@ -447,7 +447,7 @@ supervisor_msgs::ActionMS MSManager::createActionFromHighLevel(supervisor_msgs::
 			it2++;
 		}
 	}else{
-		ROS_ERROR("[mental_state] Incorrect number of parameters: should be %i but is %i!", (int)highLevelAction.parameters.size(), (int)action.parameters.size());
+        ROS_ERROR("[mental_state] Incorrect number of parameters for %s action: should be %i but is %i!", action.name.c_str(), (int)highLevelAction.parameters.size(), (int)action.parameters.size());
 		return newAction;
 	}
 	if(action.actors.size() == highLevelAction.actors.size()){
@@ -458,7 +458,7 @@ supervisor_msgs::ActionMS MSManager::createActionFromHighLevel(supervisor_msgs::
 		}
 
 	}else{
-		ROS_ERROR("[mental_state] Incorrect number of actors: should be %i but is %i!", (int)highLevelAction.actors.size(), (int)action.actors.size());
+        ROS_ERROR("[mental_state] Incorrect number of actors for %s action: should be %i but is %i!", action.name.c_str(), (int)highLevelAction.actors.size(), (int)action.actors.size());
 		return newAction;
 	}
 
@@ -566,7 +566,7 @@ Function which aborts the current plan in the knowledge of the agent (and remove
 void MSManager::abortPlan(string agent){
 
     ros::NodeHandle node;
-    ros::ServiceClient client = node.serviceClient<supervisor_msgs::EndPlan>("goal_manager/end_plan");
+    ros::ServiceClient client = node.serviceClient<supervisor_msgs::EndPlan>("plan_elaboration/endPlan");
     supervisor_msgs::EndPlan srv;
     string robotName;
     node.getParam("/robot/name", robotName);
@@ -586,7 +586,7 @@ void MSManager::abortPlan(string agent){
                 srv.request.report = false;
             }
             if (!client.call(srv)){
-                ROS_ERROR("[mental_state] Failed to call service goal_manager/end_plan");
+                ROS_ERROR("[mental_state] Failed to call service plan_elaboration/endPlan");
             }
         }
 	}
