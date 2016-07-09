@@ -41,6 +41,8 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
         ui.comboBoxAgents->addItem(it->c_str());
         ui.comboBoxEntityNameSignal->addItem(it->c_str());
     }
+    //Add planning table in knowledge printing
+    ui.comboBoxAgentKnowName->addItem("PLANNING");
 
     //we retrieve the possible objects from param of the .yaml file
     vector<string> objects;
@@ -364,50 +366,67 @@ bool MainWindow::toIgnore(string fact){
 void MainWindow::on_pushButtonPrintKnowledge_clicked()
 {
     ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
+    ros::ServiceClient client_DB = node_.serviceClient<toaster_msgs::GetInfoDB>("database_manager/get_info");
 
     //get the agent name
     string agent = ui.comboBoxAgentKnowName->currentText().toStdString();
 
     //get all the facts for the agent
-    supervisor_msgs::GetInfo srv;
-    srv.request.info = "ALL_FACTS";
-    srv.request.agent = agent;
-    if (client.call(srv)) {
-        //We sort the facts by type
-        vector<toaster_msgs::Fact> envFacts, actionFacts, planFacts, goalFacts;
-        for(vector<toaster_msgs::Fact>::iterator it = srv.response.facts.begin(); it != srv.response.facts.end(); it++){
-            if(it->property == "actionState"){
-                 actionFacts.push_back(*it);
-            }else if(it->property == "planState"){
-                planFacts.push_back(*it);
-           }else if(it->property == "goalState"){
-                goalFacts.push_back(*it);
-           }else if(!toIgnore(it->property)){
-                envFacts.push_back(*it);
-           }
-        }
-        //and we print all the facts
-        string toPrint = "---Environment---\n";
-        for(vector<toaster_msgs::Fact>::iterator it = envFacts.begin(); it != envFacts.end(); it++){
-            toPrint = toPrint + it->subjectId + " " + it->property + " " + it->targetId + "\n";
-        }
-        toPrint = toPrint + "---Goals---\n";
-        for(vector<toaster_msgs::Fact>::iterator it = goalFacts.begin(); it != goalFacts.end(); it++){
-            toPrint = toPrint + it->subjectId + " " + it->property + " " + it->targetId + "\n";
-        }
-        toPrint = toPrint + "---Plans---\n";
-        for(vector<toaster_msgs::Fact>::iterator it = planFacts.begin(); it != planFacts.end(); it++){
-            toPrint = toPrint + it->subjectId + " " + it->property + " " + it->targetId + "\n";
-        }
-        toPrint = toPrint + "---Actions---\n";
-        for(vector<toaster_msgs::Fact>::iterator it = actionFacts.begin(); it != actionFacts.end(); it++){
-            toPrint = toPrint + it->subjectId + " " + it->property + " " + it->targetId + "\n";
-        }
-        ui.textBrowserKnowledge->setText(QString::fromStdString(toPrint));
-
+    vector<toaster_msgs::Fact> facts;
+    if(agent == "PLANNING"){
+        toaster_msgs::GetInfoDB srv_DB;
+        srv_DB.request.type = "FACT";
+        srv_DB.request.subType = "PLANNING";
+        if (client_DB.call(srv_DB)) {
+            facts = srv_DB.response.resFactList.factList;
+        }else{
+            ROS_ERROR("Failed to call service database_manager/get_info");
+            return;
+         }
     }else{
-       ROS_ERROR("Failed to call service mental_state/get_info");
+        supervisor_msgs::GetInfo srv;
+        srv.request.info = "ALL_FACTS";
+        srv.request.agent = agent;
+        if (client.call(srv)) {
+            facts = srv.response.facts;
+        }else{
+            ROS_ERROR("Failed to call service mental_state/get_info");
+            return;
+         }
     }
+
+    //We sort the facts by type
+    vector<toaster_msgs::Fact> envFacts, actionFacts, planFacts, goalFacts;
+    for(vector<toaster_msgs::Fact>::iterator it = facts.begin(); it != facts.end(); it++){
+        if(it->property == "actionState"){
+             actionFacts.push_back(*it);
+        }else if(it->property == "planState"){
+            planFacts.push_back(*it);
+       }else if(it->property == "goalState"){
+            goalFacts.push_back(*it);
+       }else if(!toIgnore(it->property) || agent == "PLANNING"){
+            envFacts.push_back(*it);
+       }
+    }
+    //and we print all the facts
+    string toPrint = "---Environment---\n";
+    for(vector<toaster_msgs::Fact>::iterator it = envFacts.begin(); it != envFacts.end(); it++){
+        toPrint = toPrint + it->subjectId + " " + it->property + " " + it->targetId + "\n";
+    }
+    toPrint = toPrint + "---Goals---\n";
+    for(vector<toaster_msgs::Fact>::iterator it = goalFacts.begin(); it != goalFacts.end(); it++){
+        toPrint = toPrint + it->subjectId + " " + it->property + " " + it->targetId + "\n";
+    }
+    toPrint = toPrint + "---Plans---\n";
+    for(vector<toaster_msgs::Fact>::iterator it = planFacts.begin(); it != planFacts.end(); it++){
+        toPrint = toPrint + it->subjectId + " " + it->property + " " + it->targetId + "\n";
+    }
+    toPrint = toPrint + "---Actions---\n";
+    for(vector<toaster_msgs::Fact>::iterator it = actionFacts.begin(); it != actionFacts.end(); it++){
+        toPrint = toPrint + it->subjectId + " " + it->property + " " + it->targetId + "\n";
+    }
+    ui.textBrowserKnowledge->setText(QString::fromStdString(toPrint));
+
 
 }
 void MainWindow::on_pushButtonSeeActions_clicked()

@@ -41,6 +41,7 @@
 #include "supervisor_msgs/Say.h"
 #include "supervisor_msgs/GetInfoDia.h"
 #include "supervisor_msgs/Bool.h"
+#include "toaster_msgs/GetInfoDB.h"
 
 #include "head_manager/Signal.h"
 
