@@ -39,14 +39,23 @@ bool Scan::plan(){
 bool Scan::exec(Server* action_server){
 
     //TODO: add checking of head focus
+    if(!connector_->simu_){
+        //TODO: start red light
+    }
 
     start_ = clock();
     double duration = 0.0;
     while(duration < timeScan_){
         if(action_server->isPreemptRequested() || connector_->stopOrder_){
+            if(!connector_->simu_){
+                //TODO: stop red light
+            }
             return false;
         }
         duration = (clock() - start_ ) / (double) CLOCKS_PER_SEC;
+    }
+    if(!connector_->simu_){
+        //TODO: stop red light
     }
 
     return true;

@@ -24,4 +24,7 @@ HATP_actions:
    Pick: 'pick'
    Place: 'place'
    PickAndPlace: 'pickandplace'
+   PickAndPlaceReachable: 'pickandplacereachable'
+   PickAndDrop: 'pickanddrop'
+   Scan: 'scan'
 
