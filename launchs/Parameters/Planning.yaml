@@ -11,7 +11,7 @@ HATP_domains:
                 'isOn',
                 'hasInHand',
                 'type']
-  SCAN_method: 'Build'
+  SCAN_method: 'ScanAll'
   SCAN_params: []
   SCAN_facts: ['isReachableBy',
                 'color',
