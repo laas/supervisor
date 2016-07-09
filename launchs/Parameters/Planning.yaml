@@ -20,6 +20,13 @@ HATP_domains:
                 'genericName',
                 'value',
                 'IsInArea']
+  SCAN_method: 'ScanAll'
+  SCAN_params: []
+  SCAN_facts: ['isReachableBy',
+                'color',
+                'isIn',
+                'hasInHand',
+                'IsInArea']
 HATP_actions:
    Pick: 'pick'
    Place: 'place'
