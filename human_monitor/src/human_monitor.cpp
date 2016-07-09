@@ -164,25 +164,55 @@ void HumanMonitor::humanPlace(string agent, string object, string support){
      ROS_ERROR("Failed to call service mental_state/change_state");
  	}
 
-	//we also consider a pick and place action
-	supervisor_msgs::Action action2;
-	action2.name = "pickandplace";
-	action2.parameters.push_back(object);
-	action2.parameters.push_back(support);
-	action2.actors.push_back(agent);
-	
+    //send the action to the state machine manager
     supervisor_msgs::HumanAction srv_sm;
     srv_sm.request.action = action;
     srv_sm.request.agent = agent;
     if (!state_machine.call(srv_sm)){
      ROS_ERROR("Failed to call service state_machines/change_state");
     }
+
+	//we also consider a pick and place action
+	supervisor_msgs::Action action2;
+	action2.name = "pickandplace";
+	action2.parameters.push_back(object);
+	action2.parameters.push_back(support);
+	action2.actors.push_back(agent);
+
     //send the action to the mental state manager
- 	srv_astate.request.action = action2;
+    srv_astate.request.action = action2;
+    srv_astate.request.state = "DONE";
+    if (!action_state.call(srv_astate)){
+     ROS_ERROR("Failed to call service mental_state/change_state");
+    }
+
+    //we also consider a pick and place reachable action
+    supervisor_msgs::Action action3;
+    action3.name = "pickandplacereachable";
+    action3.parameters.push_back(object);
+    action3.parameters.push_back(support);
+    action3.actors.push_back(agent);
+
+    //send the action to the mental state manager
+    srv_astate.request.action = action3;
  	srv_astate.request.state = "DONE";
   	if (!action_state.call(srv_astate)){
      ROS_ERROR("Failed to call service mental_state/change_state");
  	}
+
+    //we also consider a place reachable action
+    supervisor_msgs::Action action4;
+    action4.name = "placereachable";
+    action4.parameters.push_back(object);
+    action4.parameters.push_back(support);
+    action4.actors.push_back(agent);
+
+    //send the action to the mental state manager
+    srv_astate.request.action = action4;
+    srv_astate.request.state = "DONE";
+    if (!action_state.call(srv_astate)){
+     ROS_ERROR("Failed to call service mental_state/change_state");
+    }
 }
 
 /*
