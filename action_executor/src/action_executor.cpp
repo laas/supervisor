@@ -236,7 +236,9 @@ VirtualAction* ActionExecutor::initializeAction(supervisor_msgs::Action action) 
 		act = new PickAndDrop(action, connector_);
 	}else if(action.name == "moveTo"){
 		act = new MoveTo(action, connector_);
-	}else{
+    }else if(action.name == "scan"){
+        act = new Scan(action, connector_);
+    }else{
 		ROS_WARN("[action_executor] Unknown action");
 	}	
 

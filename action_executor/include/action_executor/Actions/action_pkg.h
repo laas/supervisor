@@ -7,5 +7,6 @@
 #include "action_executor/Actions/drop.h"
 #include "action_executor/Actions/pickanddrop.h"
 #include "action_executor/Actions/moveTo.h"
+#include "action_executor/Actions/scan.h"
 
 #endif // ACTIONPKG_H
