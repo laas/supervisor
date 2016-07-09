@@ -105,8 +105,8 @@ Set facts into the planning table of the database
 void PlanElaboration::setPlanningTable(){
 
     ros::NodeHandle node;
-    ros::ServiceClient client = node.serviceClient<toaster_msgs::ExecuteDB>("database/execute");
-    ros::ServiceClient client_set = node.serviceClient<toaster_msgs::SetInfoDB>("database/set_info");
+    ros::ServiceClient client = node.serviceClient<toaster_msgs::ExecuteDB>("database_manager/execute");
+    ros::ServiceClient client_set = node.serviceClient<toaster_msgs::SetInfoDB>("database_manager/set_info");
     toaster_msgs::ExecuteDB srv;
     toaster_msgs::SetInfoDB srv_set;
 
@@ -140,10 +140,10 @@ void PlanElaboration::setPlanningTable(){
         srv_set.request.infoType = "RESET_PLANNING";
         srv_set.request.facts = updatedFacts;
         if (!client_set.call(srv_set)){
-            ROS_ERROR("[plan_elaboration] Failed to call service database/set_info");
+            ROS_ERROR("[plan_elaboration] Failed to call service database_manager/set_info");
         }
     }else{
-        ROS_ERROR("[plan_elaboration] Failed to call service database/execute");
+        ROS_ERROR("[plan_elaboration] Failed to call service database_manager/execute");
     }
 
 
@@ -203,7 +203,7 @@ pair<bool, hatp_msgs::Plan> PlanElaboration::GetHATPPlan(){
     }
 
     //We ask a plan to HATP
-    service.request.request.type="plan";
+    service.request.request.type="first-plan";
     if(client.call(service)){
        if(service.response.solution.report == "OK"){
           answer.first = true;
