@@ -6,6 +6,10 @@
 
 #include <actionlib/server/simple_action_server.h>
 
+#include <dynamic_reconfigure/DoubleParameter.h>
+#include <dynamic_reconfigure/Reconfigure.h>
+#include <dynamic_reconfigure/Config.h>
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -26,6 +30,8 @@ protected:
 private:
     double timeScan_;
     clock_t start_;
+
+    void controlRobotLight(bool on);
 
 
 };
