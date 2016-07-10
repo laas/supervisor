@@ -38,6 +38,8 @@ bool Scan::plan(){
 
 bool Scan::exec(Server* action_server){
 
+    //TODO: add moveToManip
+
     //TODO: add checking of head focus
     if(!connector_->simu_){
         //TODO: start red light

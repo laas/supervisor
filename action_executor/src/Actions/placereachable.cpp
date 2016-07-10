@@ -76,12 +76,24 @@ bool PlaceReachable::plan(){
     object.actionKey = "mainObject";
     object.objectName = object_;
     objects.push_back(object);
-    gtp_ros_msg::Obj support;
-    support.actionKey = "supportObject";
-    support.objectName = support_;
-    objects.push_back(support);
     vector<gtp_ros_msg::Points> points;
     vector<gtp_ros_msg::Data> datas;
+
+    string replacementTopic = "/replacementPlacement/";
+    replacementTopic = replacementTopic + support_;
+    if(node_.hasParam(replacementTopic)){
+        string replacementSupport;
+        node_.getParam(replacementTopic, replacementSupport);
+        gtp_ros_msg::Obj support;
+        support.actionKey = "supportObject";
+        support.objectName = replacementSupport;
+        objects.push_back(support);
+    }else{
+        gtp_ros_msg::Obj support;
+        support.actionKey = "supportObject";
+        support.objectName = support_;
+        objects.push_back(support);
+    }
 
     if(connector_->shouldUseRightHand_){
         gtp_ros_msg::Data data;

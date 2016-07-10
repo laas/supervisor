@@ -25,7 +25,7 @@ using namespace std;
 
 class HumanMonitor{
 public:
-	HumanMonitor() {};
+    HumanMonitor() {};
 	~HumanMonitor() {};
 	void humanPick(string agent, string object);
 	void humanPlace(string agent, string object, string support);
