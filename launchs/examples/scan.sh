@@ -14,6 +14,42 @@ orientation:
   z: 0.0,
   w: 1.0}}}"
 
+  rosservice call /toaster_simu/add_entity "{id: 'PLACEMAT_ROBOT', name: 'PLACEMAT_ROBOT', type: 'object', ownerId: ''}"
+  rosservice call /toaster_simu/set_entity_pose "{id: 'PLACEMAT_ROBOT', ownerId: '', type: 'object', pose:
+  {position:
+    {x: 4.7,
+    y: 3.8,
+    z: 0.73},
+  orientation:
+    {x: 0.0,
+    y: 0.0,
+    z: 0.0,
+    w: 1.0}}}"
+
+  rosservice call /toaster_simu/add_entity "{id: 'PLACEMAT_HUMAN1', name: 'PLACEMAT_HUMAN1', type: 'object', ownerId: ''}"
+  rosservice call /toaster_simu/set_entity_pose "{id: 'PLACEMAT_HUMAN1', ownerId: '', type: 'object', pose:
+  {position:
+    {x: 5.05,
+    y: 4.1,
+    z: 0.73},
+  orientation:
+    {x: 0.0,
+    y: 0.0,
+    z: 0.0,
+    w: 1.0}}}"
+
+  rosservice call /toaster_simu/add_entity "{id: 'PLACEMAT_HUMAN2', name: 'PLACEMAT_HUMAN2', type: 'object', ownerId: ''}"
+  rosservice call /toaster_simu/set_entity_pose "{id: 'PLACEMAT_HUMAN2', ownerId: '', type: 'object', pose:
+  {position:
+    {x: 4.8,
+    y: 4.2,
+    z: 0.73},
+  orientation:
+    {x: 0.0,
+    y: 0.0,
+    z: 0.0,
+    w: 1.0}}}"
+
   rosservice call /toaster_simu/add_entity "{id: 'IKEA_SHELF_LIGHT_1', name: 'IKEA_SHELF_LIGHT_1', type: 'object', ownerId: ''}"
   rosservice call /toaster_simu/set_entity_pose "{id: 'IKEA_SHELF_LIGHT_1', ownerId: '', type: 'object', pose:
   {position:
