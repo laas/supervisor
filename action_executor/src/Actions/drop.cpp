@@ -95,7 +95,7 @@ bool Drop::plan(){
 
 bool Drop::exec(Server* action_server){
 
-    return execAction(actionId_, true, action_server);
+    return execAction(actionId_, false, action_server);
 
 }
 

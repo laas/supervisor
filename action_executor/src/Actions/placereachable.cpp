@@ -113,7 +113,7 @@ bool PlaceReachable::plan(){
 
 bool PlaceReachable::exec(Server* action_server){
 
-    return execAction(actionId_, true, action_server);
+    return execAction(actionId_, false, action_server);
 
 }
 

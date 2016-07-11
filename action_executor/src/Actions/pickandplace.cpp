@@ -173,7 +173,7 @@ bool PickAndPlace::exec(Server* action_server){
             return false;
         }
         connector_->objectFocus_ = support_;
-        return execAction(nextActionId_, true, action_server);
+        return execAction(nextActionId_, false, action_server);
     }else{
         return false;
     }
