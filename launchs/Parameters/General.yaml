@@ -5,5 +5,5 @@ robot:
     hands:
         right: 'r_gripper_palm_link'
         left: 'l_gripper_palm_link'
-simu: true
+simu: false
 waitActionServer: 30.0

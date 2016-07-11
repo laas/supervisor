@@ -44,6 +44,10 @@ Connector::Connector(){
    PR2motion_gripper_right_->waitForServer();
    PR2motion_gripper_left_ = new actionlib::SimpleActionClient<pr2motion::Gripper_Left_OperateAction>("pr2motion/Gripper_Left_Operate",true);
    PR2motion_gripper_left_->waitForServer();
+   gripper_right = new actionlib::SimpleActionClient<pr2_controllers_msgs::Pr2GripperCommandAction>("r_gripper_sensor_controller/gripper_action", true);
+  gripper_right->waitForServer();
+  gripper_left = new actionlib::SimpleActionClient<pr2_controllers_msgs::Pr2GripperCommandAction>("l_gripper_sensor_controller/gripper_action", true);
+  gripper_left->waitForServer();
    ROS_INFO("[action_executor] Action clients started.");
    
    //Init PR2motion

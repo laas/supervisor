@@ -12,6 +12,8 @@
 #include <pr2motion/connect_port.h>
 #include <pr2motion/Torso_MoveAction.h>
 
+#include <pr2_controllers_msgs/Pr2GripperCommandAction.h>
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -59,8 +61,11 @@ public:
     actionlib::SimpleActionClient<pr2motion::Arm_Right_MoveAction>* PR2motion_arm_right_;
     actionlib::SimpleActionClient<pr2motion::Arm_Left_MoveAction>* PR2motion_arm_left_;
     actionlib::SimpleActionClient<pr2motion::Gripper_Right_OperateAction>* PR2motion_gripper_right_;
-    actionlib::SimpleActionClient<pr2motion::Gripper_Left_OperateAction>* PR2motion_gripper_left_;
-   
+    actionlib::SimpleActionClient<pr2motion::Gripper_Left_OperateAction>* PR2motion_gripper_left_; 
+    actionlib::SimpleActionClient<pr2_controllers_msgs::Pr2GripperCommandAction>* gripper_right;
+    actionlib::SimpleActionClient<pr2_controllers_msgs::Pr2GripperCommandAction>* gripper_left;   
+
+
 protected:
 
 private:

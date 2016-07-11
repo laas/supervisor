@@ -3,8 +3,8 @@ timeNoAction: 300.0
 timeSignalingHuman: 10.0
 humanRightHand: 'rightHand'
 threshold:
-    pick: 0.20
-    place: 0.30
+    pick: 0.30
+    place: 0.40
     drop: 0.40
 areaPresence: 'interaction'
 humanReplacementSupport:
