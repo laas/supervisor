@@ -40,13 +40,15 @@ void agentFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
     vector<toaster_msgs::Fact> facts = msg->factList;
 
     for(vector<toaster_msgs::Fact>::iterator it = facts.begin(); it != facts.end(); it++){
-        if(it->property == "distance" && it->subjectId == humanHand){
+        if(it->property == "Distance" && it->subjectId == humanHand){
             pair<bool, string> ownerAttachment = hm->hasInHand(it->subjectOwnerId);
             if(ownerAttachment.first){
-                if(it->doubleValue < placeThreshold && hm->isSupportObject(it->targetId)){
-                    hm->humanPlace(it->subjectOwnerId, ownerAttachment.second, it->targetId);
-                }else if(it->doubleValue < dropThreshold && hm->isContainerObject(it->targetId)){
-                        hm->humanDrop(it->subjectOwnerId, ownerAttachment.second, it->targetId);
+                if(it->targetId != ownerAttachment.second){
+                    if(it->doubleValue < placeThreshold && hm->isSupportObject(it->targetId)){
+                        hm->humanPlace(it->subjectOwnerId, ownerAttachment.second, it->targetId);
+                    }else if(it->doubleValue < dropThreshold && hm->isContainerObject(it->targetId)){
+                            hm->humanDrop(it->subjectOwnerId, ownerAttachment.second, it->targetId);
+                    }
                 }
             }else{
                 if(it->doubleValue < pickThreshold && hm->isManipulableObject(it->targetId)){
