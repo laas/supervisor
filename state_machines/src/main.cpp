@@ -63,8 +63,9 @@ void robotStateMachine(){
         msg.object = object;
         msg.stopable = stopable;
         robot_pub.publish(msg);
+        ros::spinOnce();
   		loop_rate.sleep();
-	}
+    }
 
 }
 
@@ -118,6 +119,7 @@ void humanStateMachine(string human_name){
         msg.importancy = weight;
         msg.object = object;
         human_pub.publish(msg);
+        ros::spinOnce();
   		loop_rate.sleep();
 	}
 
