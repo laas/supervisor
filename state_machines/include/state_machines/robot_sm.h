@@ -37,8 +37,7 @@ protected:
 
 private:
     ros::NodeHandle node_;
-	string robotName_;
-    string agentX_;
+    string robotName_;
 	Client actionClient_;
 	bool isActing_;
     bool shouldRetractRight_;
@@ -46,6 +45,7 @@ private:
 
 	void doneCb(const actionlib::SimpleClientGoalState& state, const supervisor_msgs::ActionExecutorResultConstPtr& result);
     vector<supervisor_msgs::ActionMS> getActionReady(string actor, string agent);
+    vector<supervisor_msgs::ActionMS> getActionNeeded(string actor, string agent);
     supervisor_msgs::ActionMS getActionFromId(int id);
     supervisor_msgs::Action convertActionMStoAction(supervisor_msgs::ActionMS actionMS);
     bool factsAreIn(string agent, vector<toaster_msgs::Fact> facts);

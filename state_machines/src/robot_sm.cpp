@@ -11,8 +11,7 @@ State machine for the robot
 RobotSM::RobotSM():
 actionClient_("supervisor/action_executor", true)
  {
-	node_.getParam("/robot/name", robotName_);
-    node_.getParam("/HATP/AgentX", agentX_);
+    node_.getParam("/robot/name", robotName_);
 	actionClient_.waitForServer();
 	isActing_ = false;
     shouldRetractRight_ = true;
@@ -35,39 +34,20 @@ State where the robot is IDLE
 */
 string RobotSM::idleState(){
 
-    /*//We look if the robot has an action to do
-    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
-    supervisor_msgs::GetInfo srv;
-    srv.request.info ="ACTIONS_TODO";
-	srv.request.agent = robotName_;
-	srv.request.actor = robotName_;
-	if (client.call(srv)){
-	 if(srv.response.state == "READY"){//the robot has an action to do, we send it to the action manager
-		supervisor_msgs::ActionExecutorGoal goal;
-  		goal.action = srv.response.action;
-  		actionClient_.sendGoal(goal,  boost::bind(&RobotSM::doneCb, this, _1, _2), Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
-		isActing_ = true;
-		ROS_INFO("[state_machines] Robot goes to ACTING");
-		return "ACTING";
-	 }else if(srv.response.state == "NEEDED"){//the robot has an action but not possible yet, we go to the WAITING state
-		ROS_INFO("[state_machines] Robot goes to WAITING");
-		return "WAITING";
-	 }
-	}else{
-     ROS_ERROR("[state_machines] Failed to call service mental_state/get_info");
-	}
-    */
-
-    vector<supervisor_msgs::ActionMS> actionsR = getActionReady(robotName_, robotName_);
-    if(actionsR.size()){
+    vector<supervisor_msgs::ActionMS> actionsReady = getActionReady(robotName_, robotName_);
+    if(actionsReady.size()){
         supervisor_msgs::ActionExecutorGoal goal;
-        goal.action = convertActionMStoAction(actionsR[0]);
+        goal.action = convertActionMStoAction(actionsReady[0]);
         actionClient_.sendGoal(goal,  boost::bind(&RobotSM::doneCb, this, _1, _2), Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
         isActing_ = true;
         ROS_INFO("[state_machines] Robot goes to ACTING");
         return "ACTING";
     }else{
-
+        vector<supervisor_msgs::ActionMS> actionsNeeded = getActionNeeded(robotName_, robotName_);
+        if(actionsNeeded.size()){
+            ROS_INFO("[state_machines] Robot goes to WAITING");
+            return "WAITING";
+        }
     }
 
     //if no more action to do we retract if needed
@@ -105,9 +85,6 @@ State where the robot is ACTING
 */
 string RobotSM::actingState(){
 
-    //get objects and weight from action_executor topic
-
-
 	if(!isActing_){
 		ROS_INFO("[state_machines] Robot goes to IDLE");
 		return "IDLE";
@@ -121,29 +98,23 @@ State where the robot is WAITING
 */
 string RobotSM::waitingState(){
 
-	//We look if the robot has an action to do
-    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
-    supervisor_msgs::GetInfo srv;
-    srv.request.info ="ACTIONS_TODO";
-	srv.request.agent = robotName_;
-	srv.request.actor = robotName_;
-	if (client.call(srv)){
-	 if(srv.response.state == "READY"){//the robot has an action to do, we send it to the action manager
+    vector<supervisor_msgs::ActionMS> actionsReady = getActionReady(robotName_, robotName_);
+    if (actionsReady.size()){//the robot has an action to do, we send it to the action manager
 		supervisor_msgs::ActionExecutorGoal goal;
-  		goal.action = srv.response.action;
+        goal.action = convertActionMStoAction(actionsReady[0]);
   		actionClient_.sendGoal(goal,  boost::bind(&RobotSM::doneCb, this, _1, _2), Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
 		isActing_ = true;
 		ROS_INFO("[state_machines] Robot goes to ACTING");
 		return "ACTING";
-	 }else if(srv.response.state == "NEEDED"){//the robot is still not possible, we stay in the WAITING state
-		return "WAITING";
-	 }else{// the robot has no more action to do, we return to IDLE
+     }else{
+        vector<supervisor_msgs::ActionMS> actionsNeeded = getActionNeeded(robotName_, robotName_);
+        if(actionsNeeded.size()){//the robot is still not possible, we stay in the WAITING state
+            return "WAITING";
+        }else{// the robot has no more action to do, we return to IDLE
 		ROS_INFO("[state_machines] Robot goes to IDLE");
 		return "IDLE";
-	  }
-	}else{
-     ROS_ERROR("[state_machines] Failed to call service mental_state/get_info");
-	}
+        }
+    }
 	
 	return "WAITING";
 }
@@ -170,6 +141,46 @@ vector<supervisor_msgs::ActionMS> RobotSM::getActionReady(string actor, string a
                             //if it is an asked action, we chek if the action is feasible
                             if(itk->targetId == "ASKED"){
                                 if(factsAreIn(agent, action.prec)){
+                                    answer.push_back(action);
+                                }
+                            }
+                            else{
+                                answer.push_back(action);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return answer;
+
+}
+
+/*
+Get the actions needed for an agent in another agent knowledge
+    - @actor: the agent we look the actions
+    - @agent: the agent in which knowledge we look
+ */
+vector<supervisor_msgs::ActionMS> RobotSM::getActionNeeded(string actor, string agent){
+
+    vector<supervisor_msgs::ActionMS> answer;
+    for(vector<supervisor_msgs::AgentKnowledge>::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->agentName == agent){
+            for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
+                if(itk->property == "actionState" && (itk->targetId == "NEEDED" || itk->targetId == "ASKED")){
+                    //we got a ready action, now we need to check the actors
+                    istringstream buffer(itk->subjectId);
+                    int id;
+                    buffer >> id;
+                    supervisor_msgs::ActionMS action = getActionFromId(id);
+                    for(vector<string>::iterator ita = action.actors.begin(); ita != action.actors.end(); ita++){
+                        if(*ita == actor){
+                            //if it is an asked action, we chek if the action is not feasible
+                            if(itk->targetId == "ASKED"){
+                                if(!factsAreIn(agent, action.prec)){
                                     answer.push_back(action);
                                 }
                             }
