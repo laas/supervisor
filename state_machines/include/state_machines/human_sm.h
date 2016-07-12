@@ -19,6 +19,8 @@
 #include "supervisor_msgs/ActionExecutorActionResult.h"
 #include "supervisor_msgs/ActionExecutorActionFeedback.h"
 #include "supervisor_msgs/Ask.h"
+#include "supervisor_msgs/AgentKnowledge.h"
+#include "supervisor_msgs/ActionMS.h"
 #include <toaster_msgs/Fact.h>
 #include <toaster_msgs/FactList.h>
 
@@ -40,6 +42,8 @@ public:
     bool humanActs_;
     supervisor_msgs::Action shouldDoAction_;
     supervisor_msgs::Action PerformedAction_;
+    vector<supervisor_msgs::ActionMS> actions_;
+    vector<supervisor_msgs::AgentKnowledge> knowledge_;
 protected:
 
 private:
@@ -58,6 +62,13 @@ private:
     ros::Subscriber subArea_;
     string focusObject(supervisor_msgs::Action action);
     pair<vector<string>, vector<double> > signalObjects(supervisor_msgs::Action action);
+    vector<supervisor_msgs::ActionMS> getActionReady(string actor, string agent);
+    vector<supervisor_msgs::ActionMS> getActionNeeded(string actor, string agent);
+    supervisor_msgs::ActionMS getActionFromId(int id);
+    supervisor_msgs::Action convertActionMStoAction(supervisor_msgs::ActionMS actionMS);
+    bool factsAreIn(string agent, vector<toaster_msgs::Fact> facts);
+    string getActionState(supervisor_msgs::ActionMS action, string agent);
+
 
 };
 

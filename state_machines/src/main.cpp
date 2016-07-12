@@ -89,6 +89,8 @@ void humanStateMachine(string human_name){
 
 	
     while(true){
+        hsm->knowledge_ = knowledge;
+        hsm->actions_ = actions;
         //check if no action from the agent
         if(actionPerformed){
             if(agentAction == human_name){
