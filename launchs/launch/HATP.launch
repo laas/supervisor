@@ -1,4 +1,4 @@
 <launch>
-	<node name="hatponboard" pkg="hatponboard" type="hatponboard" args="--ros -vvv" output="screen" />  <!-- Launch hatponboard -->
+        <node name="hatponboard" pkg="hatponboard" type="hatponboard" args="--ros -vvv" output="screen" />  <!-- Launch hatponboard -->
 	<node name="hatpconsole" pkg="hatpconsole" type="hatpconsole" output="screen" />  <!-- Launch hatpconsole -->
 </launch>

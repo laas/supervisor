@@ -142,13 +142,13 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     ui.UrgencySignal->setSingleStep(0.1);
 
     actionClientSup_.waitForServer();
-    actionClientTorso_.waitForServer();
-    actionClientRightArm_.waitForServer();
-    actionClientLeftArm_.waitForServer();
-    actionClientRightGripper_.waitForServer();
-    actionClientLeftGripper_.waitForServer();
-    actionClientHead_.waitForServer();
-    actionClientGetQ_.waitForServer();
+    //actionClientTorso_.waitForServer();
+    //actionClientRightArm_.waitForServer();
+    //actionClientLeftArm_.waitForServer();
+    //actionClientRightGripper_.waitForServer();
+    //actionClientLeftGripper_.waitForServer();
+    //actionClientHead_.waitForServer();
+    //actionClientGetQ_.waitForServer();
 
 
 }

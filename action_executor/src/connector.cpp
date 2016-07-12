@@ -30,8 +30,10 @@ Connector::Connector(){
    stopableFocus_ = true;
 
    //Init action clients
+   ROS_INFO("Waiting for gtp actions server.");
    acGTP_ = new actionlib::SimpleActionClient<gtp_ros_msg::requestAction>("gtp_ros_server", true);
    acGTP_->waitForServer();
+   ROS_INFO("Waiting for pr2motion actions server.");
    PR2motion_init_ = new actionlib::SimpleActionClient<pr2motion::InitAction>("pr2motion/Init", true);
    PR2motion_init_->waitForServer();
    PR2motion_torso_ = new actionlib::SimpleActionClient<pr2motion::Torso_MoveAction>("pr2motion/Torso_Move", true);
@@ -44,6 +46,7 @@ Connector::Connector(){
    PR2motion_gripper_right_->waitForServer();
    PR2motion_gripper_left_ = new actionlib::SimpleActionClient<pr2motion::Gripper_Left_OperateAction>("pr2motion/Gripper_Left_Operate",true);
    PR2motion_gripper_left_->waitForServer();
+   ROS_INFO("Waiting for grippers actions server.");
    gripper_right = new actionlib::SimpleActionClient<pr2_controllers_msgs::Pr2GripperCommandAction>("r_gripper_sensor_controller/gripper_action", true);
   gripper_right->waitForServer();
   gripper_left = new actionlib::SimpleActionClient<pr2_controllers_msgs::Pr2GripperCommandAction>("l_gripper_sensor_controller/gripper_action", true);

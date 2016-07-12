@@ -55,6 +55,7 @@ void HumanMonitor::humanPick(string agent, string object){
     if (!state_machine.call(srv_sm)){
      ROS_ERROR("Failed to call service state_machines/change_state");
     }
+
 	//send the action to the mental state manager
     supervisor_msgs::ChangeState srv_astate;
     srv_astate.request.type = "action";
