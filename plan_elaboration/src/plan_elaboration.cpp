@@ -80,6 +80,8 @@ VirtualDomain* PlanElaboration::initializeDomain(string goal){
 
     if(goal == "BLOCKS"){
         dom = new BlocksDomain();
+    }else if(goal == "SCAN"){
+        dom = new ScanDomain();
     }else{
         dom = new DefaultDomain();
     }

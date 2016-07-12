@@ -63,10 +63,6 @@ bool PickAndPlace::plan(){
     object.actionKey = "mainObject";
     object.objectName = object_;
     objects.push_back(object);
-    gtp_ros_msg::Obj support;
-    support.actionKey = "supportObject";
-    support.objectName = support_;
-    objects.push_back(support);
     vector<gtp_ros_msg::Points> points;
     vector<gtp_ros_msg::Data> datas;
 
@@ -79,8 +75,12 @@ bool PickAndPlace::plan(){
 
     string actionName;
     if(isManipulableObject(support_)){
+        gtp_ros_msg::Obj support;
+        support.actionKey = "supportObject";
+        support.objectName = support_;
+        objects.push_back(support);
         //if the support is also a manipulable object, this is a stack action
-         actionName = "stack";
+         actionName = "stackObj";
          //we add a point in order the objects to be align
          gtp_ros_msg::Points point;
          point.pointKey = "target";
@@ -90,42 +90,57 @@ bool PickAndPlace::plan(){
          points.push_back(point);
     }else{
         actionName = "place";
-        string xParamTopic = "/points/";
-        string yParamTopic = "/points/";
-        string zParamTopic = "/points/";
-        xParamTopic = xParamTopic + support_ + "/" + object_ + "/x";
-        yParamTopic = xParamTopic + support_ + "/" + object_ + "/y";
-        zParamTopic = xParamTopic + support_ + "/" + object_ + "/z";
-        if(node_.hasParam(xParamTopic)){
-            double pointX, pointY, pointZ;
-            node_.getParam(xParamTopic, pointX);
-            node_.getParam(yParamTopic, pointY);
-            node_.getParam(zParamTopic, pointZ);
-            double x, y, z;
-            try{
-                toaster_msgs::ObjectListStamped objectList  = *(ros::topic::waitForMessage<toaster_msgs::ObjectListStamped>("pdg/objectList",ros::Duration(1)));
-                for(vector<toaster_msgs::Object>::iterator it = objectList.objectList.begin(); it != objectList.objectList.end(); it++){
-                  if(it->meEntity.id == support_){
-                     x = it->meEntity.pose.position.x;
-                     y = it->meEntity.pose.position.y;
-                     z = it->meEntity.pose.position.z;
-                     break;
-                  }
+        string replacementTopic = "/replacementPlacement/";
+        replacementTopic = replacementTopic + support_;
+        if(node_.hasParam(replacementTopic)){
+            string replacementSupport;
+            node_.getParam(replacementTopic, replacementSupport);
+            gtp_ros_msg::Obj support;
+            support.actionKey = "supportObject";
+            support.objectName = replacementSupport;
+            objects.push_back(support);
+        }else{
+            gtp_ros_msg::Obj support;
+            support.actionKey = "supportObject";
+            support.objectName = support_;
+            objects.push_back(support);
+            string xParamTopic = "/points/";
+            string yParamTopic = "/points/";
+            string zParamTopic = "/points/";
+            xParamTopic = xParamTopic + support_ + "/" + object_ + "/x";
+            yParamTopic = xParamTopic + support_ + "/" + object_ + "/y";
+            zParamTopic = xParamTopic + support_ + "/" + object_ + "/z";
+            if(node_.hasParam(xParamTopic)){
+                double pointX, pointY, pointZ;
+                node_.getParam(xParamTopic, pointX);
+                node_.getParam(yParamTopic, pointY);
+                node_.getParam(zParamTopic, pointZ);
+                double x, y, z;
+                try{
+                    toaster_msgs::ObjectListStamped objectList  = *(ros::topic::waitForMessage<toaster_msgs::ObjectListStamped>("pdg/objectList",ros::Duration(1)));
+                    for(vector<toaster_msgs::Object>::iterator it = objectList.objectList.begin(); it != objectList.objectList.end(); it++){
+                      if(it->meEntity.id == support_){
+                         x = it->meEntity.pose.position.x;
+                         y = it->meEntity.pose.position.y;
+                         z = it->meEntity.pose.position.z;
+                         break;
+                      }
+                    }
+                    x = x + pointX;
+                    y = y + pointY;
+                    z = z + pointZ;
+                    gtp_ros_msg::Points point;
+                    point.pointKey = "target";
+                    point.value.x = x;
+                    point.value.y = y;
+                    point.value.z = z;
+                    points.push_back(point);
                 }
-                x = x + pointX;
-                y = y + pointY;
-                z = z + pointZ;
-                gtp_ros_msg::Points point;
-                point.pointKey = "target";
-                point.value.x = x;
-                point.value.y = y;
-                point.value.z = z;
-                points.push_back(point);
-            }
-            catch(const std::exception & e){
-                ROS_WARN("[action_executor] Failed to read %s pose from toaster", support_.c_str());
-            }
-       }
+                catch(const std::exception & e){
+                    ROS_WARN("[action_executor] Failed to read %s pose from toaster", support_.c_str());
+                }
+           }
+        }
     }
 
     int nbTry = 0;
@@ -158,7 +173,7 @@ bool PickAndPlace::exec(Server* action_server){
             return false;
         }
         connector_->objectFocus_ = support_;
-        return execAction(nextActionId_, true, action_server);
+        return execAction(nextActionId_, false, action_server);
     }else{
         return false;
     }

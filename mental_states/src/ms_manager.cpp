@@ -437,6 +437,8 @@ supervisor_msgs::ActionMS MSManager::createActionFromHighLevel(supervisor_msgs::
 	supervisor_msgs::ActionMS highLevelAction = getHighLevelActionByName(action.name);
 	map<string, string> highLevelNames;
 	highLevelNames["NULL"] = "NULL";
+    highLevelNames["false"] = "false";
+    highLevelNames["true"] = "true";
 	if(action.parameters.size() == highLevelAction.parameters.size()){
 		vector<string>::iterator it2 = action.parameters.begin();
 		for(vector<string>::iterator it = highLevelAction.parameters.begin(); it != highLevelAction.parameters.end(); it++){
@@ -444,7 +446,7 @@ supervisor_msgs::ActionMS MSManager::createActionFromHighLevel(supervisor_msgs::
 			it2++;
 		}
 	}else{
-		ROS_ERROR("[mental_state] Incorrect number of parameters: should be %i but is %i!", (int)highLevelAction.parameters.size(), (int)action.parameters.size());
+        ROS_ERROR("[mental_state] Incorrect number of parameters for %s action: should be %i but is %i!", action.name.c_str(), (int)highLevelAction.parameters.size(), (int)action.parameters.size());
 		return newAction;
 	}
 	if(action.actors.size() == highLevelAction.actors.size()){
@@ -455,7 +457,7 @@ supervisor_msgs::ActionMS MSManager::createActionFromHighLevel(supervisor_msgs::
 		}
 
 	}else{
-		ROS_ERROR("[mental_state] Incorrect number of actors: should be %i but is %i!", (int)highLevelAction.actors.size(), (int)action.actors.size());
+        ROS_ERROR("[mental_state] Incorrect number of actors for %s action: should be %i but is %i!", action.name.c_str(), (int)highLevelAction.actors.size(), (int)action.actors.size());
 		return newAction;
 	}
 
@@ -582,7 +584,7 @@ void MSManager::abortPlan(string agent){
                 srv.request.report = false;
             }
             if (!client.call(srv)){
-                ROS_ERROR("[mental_state] Failed to call service goal_manager/end_plan");
+                ROS_ERROR("[mental_state] Failed to call service plan_elaboration/endPlan");
             }
         }
 	}

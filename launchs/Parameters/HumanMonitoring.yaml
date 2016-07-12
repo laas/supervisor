@@ -7,4 +7,8 @@ threshold:
     pick: 0.20
     place: 0.30
     drop: 0.40
+    disengage: 0.50
 areaPresence: 'interaction'
+humanReplacementSupport:
+    PLACEMAT_HUMAN1: TABLE_4
+    PLACEMAT_HUMAN2: TABLE_4

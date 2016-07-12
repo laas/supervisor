@@ -214,7 +214,7 @@ void VirtualAction::PutOnSupport(string object, string support){
        srv.request.pose.orientation.x = 0.0;
        srv.request.pose.orientation.y = 0.0;
        srv.request.pose.orientation.z = 0.0;
-       srv.request.pose.orientation.w = 0.0;
+       srv.request.pose.orientation.w = 1.0;
        if (!client.call(srv)){
       	 ROS_ERROR("Failed to call service toaster_simu/set_entity_pose");
     	 }
@@ -255,7 +255,7 @@ void VirtualAction::PutInContainer(string object, string container){
        srv.request.pose.orientation.x = 0.0;
        srv.request.pose.orientation.y = 0.0;
        srv.request.pose.orientation.z = 0.0;
-       srv.request.pose.orientation.w = 0.0;
+       srv.request.pose.orientation.w = 1.0;
        if (!client.call(srv)){
          ROS_ERROR("Failed to call service toaster_simu/set_entity_pose");
          }

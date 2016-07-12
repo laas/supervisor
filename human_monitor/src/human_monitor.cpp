@@ -73,7 +73,8 @@ Function to call when a human place an object
 	@support: the support where the object is placed
 */
 void HumanMonitor::humanPlace(string agent, string object, string support){
-	
+
+
     pair<bool, string> previousAttachment = hasInHand(agent);
     if(!previousAttachment.first){
         ROS_WARN("[human_monitor] %s has no object in hand", agent.c_str());
@@ -92,6 +93,9 @@ void HumanMonitor::humanPlace(string agent, string object, string support){
 	ros::ServiceClient remove_from_hand = node.serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
 	ros::ServiceClient set_entity_pose = node.serviceClient<toaster_msgs::SetEntityPose>("toaster_simu/set_entity_pose");
     ros::ServiceClient state_machine = node.serviceClient<supervisor_msgs::HumanAction>("state_machines/human_action");
+
+    string robotName;
+    node.getParam("/robot/name", robotName);
 
 	//remove the object from the hand of the agent
 	toaster_msgs::RemoveFromHand srv_rmFromHand;
@@ -138,7 +142,7 @@ void HumanMonitor::humanPlace(string agent, string object, string support){
        srv_setPose.request.pose.orientation.x = 0.0;
        srv_setPose.request.pose.orientation.y = 0.0;
        srv_setPose.request.pose.orientation.z = 0.0;
-       srv_setPose.request.pose.orientation.w = 0.0;
+       srv_setPose.request.pose.orientation.w = 1.0;
        if (!set_entity_pose.call(srv_setPose)){
       	 ROS_ERROR("Failed to call service toaster_simu/set_entity_pose");
     	 }
@@ -146,16 +150,23 @@ void HumanMonitor::humanPlace(string agent, string object, string support){
    catch(const std::exception & e){
        ROS_WARN("Failed to read %s pose from toaster", support.c_str());
    }
+
+    string replacementTopic = "/humanReplacementSupport/";
+    replacementTopic = replacementTopic + support;
+    string replacementSupport;
+    if(node.hasParam(replacementTopic)){
+        node.getParam(replacementTopic, replacementSupport);
+    }else{
+        replacementSupport = support;
+    }
 	
 
-	//we create the corresponding action
+    //send the action to the mental state manager
 	supervisor_msgs::Action action;
 	action.name = "place";
 	action.parameters.push_back(object);
-	action.parameters.push_back(support);
-	action.actors.push_back(agent);
-
-	//send the action to the mental state manager
+    action.parameters.push_back(replacementSupport);
+    action.actors.push_back(agent);
     supervisor_msgs::ChangeState srv_astate;
     srv_astate.request.type = "action";
  	srv_astate.request.action = action;
@@ -164,25 +175,63 @@ void HumanMonitor::humanPlace(string agent, string object, string support){
      ROS_ERROR("Failed to call service mental_state/change_state");
  	}
 
-	//we also consider a pick and place action
-	supervisor_msgs::Action action2;
-	action2.name = "pickandplace";
-	action2.parameters.push_back(object);
-	action2.parameters.push_back(support);
-	action2.actors.push_back(agent);
-	
+    //send the action to the state machine manager
+    supervisor_msgs::Action action1;
+    action1.name = "place";
+    action1.parameters.push_back(object);
+    action1.parameters.push_back(support);
+    action1.actors.push_back(agent);
+
     supervisor_msgs::HumanAction srv_sm;
-    srv_sm.request.action = action;
+    srv_sm.request.action = action1;
     srv_sm.request.agent = agent;
     if (!state_machine.call(srv_sm)){
      ROS_ERROR("Failed to call service state_machines/change_state");
     }
+
+	//we also consider a pick and place action
+	supervisor_msgs::Action action2;
+	action2.name = "pickandplace";
+	action2.parameters.push_back(object);
+    action2.parameters.push_back(replacementSupport);
+	action2.actors.push_back(agent);
+
     //send the action to the mental state manager
- 	srv_astate.request.action = action2;
+    srv_astate.request.action = action2;
+    srv_astate.request.state = "DONE";
+    if (!action_state.call(srv_astate)){
+     ROS_ERROR("Failed to call service mental_state/change_state");
+    }
+
+    //we also consider a pick and place reachable action
+    supervisor_msgs::Action action3;
+    action3.name = "pickandplacereachable";
+    action3.parameters.push_back(object);
+    action3.parameters.push_back(replacementSupport);
+    action3.parameters.push_back(robotName);
+    action3.actors.push_back(agent);
+
+    //send the action to the mental state manager
+    srv_astate.request.action = action3;
  	srv_astate.request.state = "DONE";
   	if (!action_state.call(srv_astate)){
      ROS_ERROR("Failed to call service mental_state/change_state");
  	}
+
+    //we also consider a place reachable action
+    supervisor_msgs::Action action4;
+    action4.name = "placereachable";
+    action4.parameters.push_back(object);
+    action4.parameters.push_back(replacementSupport);
+    action4.parameters.push_back(robotName);
+    action4.actors.push_back(agent);
+
+    //send the action to the mental state manager
+    srv_astate.request.action = action4;
+    srv_astate.request.state = "DONE";
+    if (!action_state.call(srv_astate)){
+     ROS_ERROR("Failed to call service mental_state/change_state");
+    }
 }
 
 /*
@@ -249,7 +298,7 @@ void HumanMonitor::humanDrop(string agent, string object, string container){
        srv_setPose.request.pose.orientation.x = 0.0;
        srv_setPose.request.pose.orientation.y = 0.0;
        srv_setPose.request.pose.orientation.z = 0.0;
-       srv_setPose.request.pose.orientation.w = 0.0;
+       srv_setPose.request.pose.orientation.w = 1.0;
        if (!set_entity_pose.call(srv_setPose)){
       	 ROS_ERROR("Failed to call service toaster_simu/set_entity_pose");
     	 }

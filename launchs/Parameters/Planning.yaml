@@ -1,6 +1,6 @@
 ---
 HATP_domains:
-  names: ['STACK', 'BLOCKS']
+  names: ['STACK', 'BLOCKS', 'SCAN']
   STACK_method: 'BuildStack'
   STACK_params: ['PLACEMAT_RED',
                     'RED_CUBE',
@@ -20,10 +20,22 @@ HATP_domains:
                 'genericName',
                 'value',
                 'IsInArea']
+  SCAN_method: 'ScanAll'
+  SCAN_params: []
+  SCAN_facts: ['isReachableBy',
+                'color',
+                'isIn',
+                'hasInHand',
+                'isScanned',
+                'canScan',
+                'IsInArea']
 HATP_actions:
    Pick: 'pick'
    Place: 'place'
    PickAndPlace: 'pickandplace'
+   PickAndPlaceReachable: 'pickandplacereachable'
+   PickAndDrop: 'pickanddrop'
+   Scan: 'scan'
 
 HATP:
     AgentX: 'AGENTX'

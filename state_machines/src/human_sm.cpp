@@ -134,70 +134,44 @@ string HumanSM::idleState(){
     }
 
 	//We look if the human thinks he has an action to do
-    ros::ServiceClient client = node_->serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
     ros::ServiceClient client_db = node_->serviceClient<supervisor_msgs::SolveDivergentBelief>("mental_state/solve_divergent_belief");
-    supervisor_msgs::GetInfo srv_info;
     supervisor_msgs::SolveDivergentBelief srv_db;
-    srv_info.request.info ="ACTIONS_TODO";
-    srv_info.request.agent = humanName_;
-    srv_info.request.actor = humanName_;
-	srv_db.request.agent = humanName_;
-    if (client.call(srv_info)){
-     if(srv_info.response.state == "READY"){//the human thinks he has an action to do
-        //we look if the robot also thinks the human should do the action
-        srv_info.request.info ="ACTION_STATE";
-        srv_info.request.agent = robotName_;
-        srv_info.request.action = srv_info.response.action;
-        if (client.call(srv_info)){
-         if(srv_info.response.state == "READY"){//the state is the same in the robot knowledge, the human SOULD ACT
-            shouldDoAction_ = srv_info.response.action;
+    vector<supervisor_msgs::ActionMS> actionsReady = getActionReady(humanName_, humanName_);
+     if(actionsReady.size()){//the human thinks he has an action to do
+         string robotState = getActionState(actionsReady[0], robotName_);
+         if(robotState== "READY"){//the state is the same in the robot knowledge, the human SOULD ACT
+            shouldDoAction_ = convertActionMStoAction(actionsReady[0]);
 			ROS_INFO("[state_machines] %s goes to SHOULD ACT", humanName_.c_str());
 			return "SHOULDACT";
 		 }else{//it is necessary to solve the divergent belief
-            srv_db.request.action = srv_info.response.action;
+            srv_db.request.action = convertActionMStoAction(actionsReady[0]);
 			if (!client_db.call(srv_db)){
 				ROS_ERROR("[state_machines] Failed to call service mental_state/solve_divergent_belief");
 			}
 		  }
-		}else{
-	 	 ROS_ERROR("[state_machines] Failed to call service mental_state/get_action_state");
-		}
-     }else if(srv_info.response.state == "NEEDED"){//the human thinks he has an action to do but no possible
-        //we look if the robot also thinks the human should do the action and that the action is not possible
-        srv_info.request.info ="ACTION_STATE";
-        srv_info.request.agent = robotName_;
-        srv_info.request.action = srv_info.response.action;
-        if (client.call(srv_info)){
-         if(srv_info.response.state == "NEEDED"){//the state is the same in the robot knowledge, the human has to WAIT
+        }else{
+         vector<supervisor_msgs::ActionMS> actionsNeeded = getActionNeeded(humanName_, humanName_);
+         if(actionsNeeded.size()){//the human thinks he has an action to do but no possible
+         string robotState = getActionState(actionsNeeded[0], robotName_);
+         if(robotState == "NEEDED"){//the state is the same in the robot knowledge, the human has to WAIT
 			ROS_INFO("[state_machines] %s goes to WAITING", humanName_.c_str());
 			return "WAITING";
-         }else if(srv_info.response.state == "READY"){//the robot thinks the human can act, it is necessary to solve the divergent belief
-            srv_db.request.action = srv_info.response.action;
+         }else if(robotState == "READY"){//the robot thinks the human can act, it is necessary to solve the divergent belief
+            srv_db.request.action = convertActionMStoAction(actionsNeeded[0]);
 			if (!client_db.call(srv_db)){
 				ROS_ERROR("[state_machines] Failed to call service mental_state/solve_divergent_belief");
 			}
-		  }
-		}else{
-         ROS_ERROR("[state_machines] Failed to call service mental_state/get_info");
-		}
-	 }else{//the human thinks he has no action, we check if the robot thinks he has an action to do	
-        srv_info.request.agent = robotName_;
-        srv_info.request.info ="ACTIONS_TODO";
-        srv_info.request.actor = humanName_;
-        if (client.call(srv_info)){
-          if(srv_info.response.state == "READY"){//the robot thinks the human should act, it is necessary to solve the divergent belief
-            srv_db.request.action = srv_info.response.action;
-			if (!client_db.call(srv_db)){
-				ROS_ERROR("[state_machines] Failed to call service mental_state/solve_divergent_belief");
-			}
-		  }
-		}else{
-         ROS_ERROR("[state_machines] Failed to call service mental_state/get_info");
-		}
-	  }
-	}else{
-     ROS_ERROR("[state_machines] Failed to call service mental_state/get_info");
-	}
+          }
+         }else{
+             vector<supervisor_msgs::ActionMS> actionsRobotReady = getActionReady(humanName_, robotName_);
+             if(actionsRobotReady.size()){
+                 srv_db.request.action = convertActionMStoAction(actionsRobotReady[0]);
+                 if (!client_db.call(srv_db)){
+                     ROS_ERROR("[state_machines] Failed to call service mental_state/solve_divergent_belief");
+                 }
+             }
+         }
+     }
 
 	return "IDLE";
 }
@@ -260,44 +234,29 @@ string HumanSM::waitingState(){
         ROS_INFO("[state_machines] %s goes to ACTING", humanName_.c_str());
         return "ACTING";
     }
-	
+
 	//We look if the human still thinks he has an action to do
-    ros::ServiceClient client = node_->serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
     ros::ServiceClient client_db = node_->serviceClient<supervisor_msgs::SolveDivergentBelief>("mental_state/solve_divergent_belief");
-    supervisor_msgs::GetInfo srv_info;
     supervisor_msgs::SolveDivergentBelief srv_db;
-    srv_info.request.info ="ACTIONS_TODO";
-    srv_info.request.agent = humanName_;
-    srv_info.request.actor = humanName_;
-	srv_db.request.agent = humanName_;
-    if (client.call(srv_info)){
-     if(srv_info.response.state == "NEEDED"){
+    vector<supervisor_msgs::ActionMS> actionsNeeded = getActionNeeded(humanName_, humanName_);
+     if(actionsNeeded.size()){
         //we verify that the robot also thinks the action is NEEDED
-        srv_info.request.info ="ACTION_STATE";
-        srv_info.request.agent = robotName_;
-        srv_info.request.action = srv_info.response.action;
-        if (client.call(srv_info)){
-         if(srv_info.response.state == "NEEDED"){
+        string robotState = getActionState(actionsNeeded[0], robotName_);
+         if(robotState == "NEEDED"){
 			//the state is the same in the robot knowledge, the human continue to WAIT
 			return "WAITING";
 		 }else{//there is a divergent belief, we solve it and return to IDLE
-            srv_db.request.action = srv_info.response.action;
+            srv_db.request.action = convertActionMStoAction(actionsNeeded[0]);
 			if (!client_db.call(srv_db)){
 				ROS_ERROR("[state_machines] Failed to call service mental_state/solve_divergent_belief");
 			}
 			ROS_INFO("[state_machines] %s goes to IDLE", humanName_.c_str());
 			return "IDLE";
-		  }
-		}else{
-         ROS_ERROR("[state_machines] Failed to call service mental_state/get_info");
-		}
+          }
 	 }else{//we return to IDLE to look for other actions
 		ROS_INFO("[state_machines] %s goes to IDLE", humanName_.c_str());
 		return "IDLE";
-	  }
-	}else{
-     ROS_ERROR("[state_machines] Failed to call service mental_state/get_info");
-	}
+      }
 	
 	return "WAITING";
 }
@@ -316,13 +275,8 @@ string HumanSM::shouldActState(string robotState){
         return "ACTING";
     }
 
-    ros::ServiceClient client = node_->serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
     ros::ServiceClient action_state = node_->serviceClient<supervisor_msgs::ChangeState>("mental_state/change_state");
-    supervisor_msgs::GetInfo srv_info;
     supervisor_msgs::ChangeState srv_action;
-    srv_info.request.info ="ACTIONS_TODO";
-    srv_info.request.agent = humanName_;
-    srv_info.request.actor = humanName_;
 
     if(!timerStarted_ && robotState =="WAITING"){//we just enter the state, we start the timer
 		start_ = clock();
@@ -332,10 +286,10 @@ string HumanSM::shouldActState(string robotState){
         timerStarted_ = false;
         signalGiven_ = false;
     }else{
-        if (client.call(srv_info)){
-            if(srv_info.response.state == "READY"){
-                shouldDoAction_ = srv_info.response.action;
-                pair<vector<string>, vector<double> > objects = signalObjects(srv_info.response.action);
+        vector<supervisor_msgs::ActionMS> actionsReady = getActionNeeded(humanName_, humanName_);
+            if(actionsReady.size()){
+                shouldDoAction_ = convertActionMStoAction(actionsReady[0]);
+                pair<vector<string>, vector<double> > objects = signalObjects(convertActionMStoAction(actionsReady[0]));
                 double duration = (clock() - start_ ) / (double) CLOCKS_PER_SEC;
                 if(duration >= timeSignaling_){//we send a head signal concerning the action
                     ros::Publisher signal_pub = node_->advertise<head_manager::Signal>("head_manager/signal", 1000);
@@ -353,24 +307,20 @@ string HumanSM::shouldActState(string robotState){
                 if(duration >= timeToWait_){
                     timerStarted_ = false;
                     signalGiven_ = false;
-                    srv_info.request.info ="ACTION_STATE";
-                    srv_info.request.agent = robotName_;
-                    srv_info.request.action = srv_info.response.action;
-                    supervisor_msgs::Action actionTodo = srv_info.response.action;
-                    if (client.call(srv_info)){
-                     if(srv_info.response.state != "ASKED"){//if the action is not already ASKED, the robot asks to do the action
+                    string robotState = getActionState(actionsReady[0], robotName_);
+                     if(robotState != "ASKED"){//if the action is not already ASKED, the robot asks to do the action
                         ros::ServiceClient client_ask = node_->serviceClient<supervisor_msgs::Ask>("dialogue_node/ask");
                         supervisor_msgs::Ask srv_ask;
                         srv_ask.request.type = "ACTION";
                         srv_ask.request.subType = "CAN";
-                        srv_ask.request.action = actionTodo;
+                        srv_ask.request.action = convertActionMStoAction(actionsReady[0]);
                         srv_ask.request.receiver = humanName_;
                         if (!client_ask.call(srv_ask)){
                           ROS_ERROR("Failed to call service dialogue_node/ask");
                         }
                       }else{//else, we consider the action failed
                          srv_action.request.type = "action";
-                         srv_action.request.action = actionTodo;
+                         srv_action.request.action = convertActionMStoAction(actionsReady[0]);
                          srv_action.request.state = "FAILED";
                           if (!action_state.call(srv_action)){
                             ROS_ERROR("Failed to call service mental_state/change_state");
@@ -379,12 +329,6 @@ string HumanSM::shouldActState(string robotState){
                        shouldDoAction_.name = "NULL";
                        return "IDLE";
                       }
-                    }else{
-                     ROS_ERROR("[state_machines] Failed to call service mental_state/get_info");
-                    }
-                }else{
-                 ROS_ERROR("[state_machines] Failed to call service mental_state/get_info");
-                }
             }else{//there is no more action to do
                 ROS_INFO("[state_machines] %s goes to IDLE", humanName_.c_str());
                 shouldDoAction_.name = "NULL";
@@ -395,4 +339,179 @@ string HumanSM::shouldActState(string robotState){
 	
     shouldDoAction_.name = "NULL";
 	return "SHOULDACT";
+}
+
+
+
+/*
+Get the actions ready for an agent in another agent knowledge
+    - @actor: the agent we look the actions
+    - @agent: the agent in which knowledge we look
+ */
+vector<supervisor_msgs::ActionMS> HumanSM::getActionReady(string actor, string agent){
+
+    vector<supervisor_msgs::ActionMS> answer;
+    for(vector<supervisor_msgs::AgentKnowledge>::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->agentName == agent){
+            for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
+                if(itk->property == "actionState" && (itk->targetId == "READY" || itk->targetId == "ASKED")){
+                    //we got a ready action, now we need to check the actors
+                    istringstream buffer(itk->subjectId);
+                    int id;
+                    buffer >> id;
+                    supervisor_msgs::ActionMS action = getActionFromId(id);
+                    for(vector<string>::iterator ita = action.actors.begin(); ita != action.actors.end(); ita++){
+                        if(*ita == actor){
+                            //if it is an asked action, we chek if the action is feasible
+                            if(itk->targetId == "ASKED"){
+                                if(factsAreIn(agent, action.prec)){
+                                    answer.push_back(action);
+                                }
+                            }
+                            else{
+                                answer.push_back(action);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return answer;
+
+}
+
+/*
+Get the actions needed for an agent in another agent knowledge
+    - @actor: the agent we look the actions
+    - @agent: the agent in which knowledge we look
+ */
+vector<supervisor_msgs::ActionMS> HumanSM::getActionNeeded(string actor, string agent){
+
+    vector<supervisor_msgs::ActionMS> answer;
+    for(vector<supervisor_msgs::AgentKnowledge>::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->agentName == agent){
+            for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
+                if(itk->property == "actionState" && (itk->targetId == "NEEDED" || itk->targetId == "ASKED")){
+                    //we got a ready action, now we need to check the actors
+                    istringstream buffer(itk->subjectId);
+                    int id;
+                    buffer >> id;
+                    supervisor_msgs::ActionMS action = getActionFromId(id);
+                    for(vector<string>::iterator ita = action.actors.begin(); ita != action.actors.end(); ita++){
+                        if(*ita == actor){
+                            //if it is an asked action, we chek if the action is not feasible
+                            if(itk->targetId == "ASKED"){
+                                if(!factsAreIn(agent, action.prec)){
+                                    answer.push_back(action);
+                                }
+                            }
+                            else{
+                                answer.push_back(action);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return answer;
+
+}
+
+/*
+Get the state of an action from an agent point of view
+ */
+string HumanSM::getActionState(supervisor_msgs::ActionMS action, string agent){
+
+    string answer = "NOT_FOUND";
+    for(vector<supervisor_msgs::AgentKnowledge>::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->agentName == agent){
+            for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
+                istringstream buffer(itk->subjectId);
+                int id;
+                buffer >> id;
+                if(itk->property == "actionState" && id == action.id){
+                    return itk->targetId;
+                }
+            }
+        }
+    }
+
+    return answer;
+
+}
+
+/*
+Return an action from an id
+ */
+supervisor_msgs::ActionMS HumanSM::getActionFromId(int id){
+
+    for(vector<supervisor_msgs::ActionMS>::iterator it = actions_.begin(); it != actions_.end(); it++){
+        if(it->id == id){
+            return *it;
+        }
+    }
+
+    supervisor_msgs::ActionMS answer;
+    return answer;
+}
+
+/*
+Convert an action in the ActionMS format to Action format
+ */
+supervisor_msgs::Action HumanSM::convertActionMStoAction(supervisor_msgs::ActionMS actionMS){
+
+    supervisor_msgs::Action action;
+    action.name = actionMS.name;
+    action.id = actionMS.id;
+    action.parameters = actionMS.parameters;
+    action.actors = actionMS.actors;
+
+    return action;
+}
+
+/*
+Function which return true if all the facts given are in the agent knowledge
+    @agent: the agent name
+    @facts: the facts we are looking for
+*/
+bool HumanSM::factsAreIn(string agent, vector<toaster_msgs::Fact> facts){
+
+    for(vector<supervisor_msgs::AgentKnowledge>::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->agentName == agent){
+            for(vector<toaster_msgs::Fact>::iterator itf = facts.begin(); itf != facts.end(); itf++){
+                if(itf->subjectId == "NULL"){
+                    for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
+                        if(itk->property == itf->property && itk->targetId == itf->targetId){
+                            return false;
+                        }
+                    }
+                }else if(itf->targetId == "NULL"){
+                    for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
+                        if(itk->property == itf->property && itk->subjectId == itf->subjectId){
+                            return false;
+                        }
+                    }
+                }else{
+                    bool find = false;
+                    for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
+                        if(itk->property == itf->property && itk->subjectId == itf->subjectId && itk->targetId == itf->targetId){
+                            find = true;
+                            break;
+                        }
+                    }
+                    if(!find){
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+    }
+    return false; //there is no knowledge concerning this agent
 }

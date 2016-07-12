@@ -366,7 +366,7 @@ bool MainWindow::toIgnore(string fact){
 void MainWindow::on_pushButtonPrintKnowledge_clicked()
 {
     ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
-    ros::ServiceClient client_DB = node_.serviceClient<toaster_msgs::GetInfoDB>("database/get_info");
+    ros::ServiceClient client_DB = node_.serviceClient<toaster_msgs::GetInfoDB>("database_manager/get_info");
 
     //get the agent name
     string agent = ui.comboBoxAgentKnowName->currentText().toStdString();
@@ -380,7 +380,7 @@ void MainWindow::on_pushButtonPrintKnowledge_clicked()
         if (client_DB.call(srv_DB)) {
             facts = srv_DB.response.resFactList.factList;
         }else{
-            ROS_ERROR("Failed to call service database/get_info");
+            ROS_ERROR("Failed to call service database_manager/get_info");
             return;
          }
     }else{

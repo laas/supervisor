@@ -184,7 +184,7 @@ link_directories(${pr2motion-genom3_LIBRARY_DIRS})
 # )
 
 
-add_executable(action_executor src/action_executor.cpp src/virtual_action.cpp src/connector.cpp src/Actions/pick.cpp src/Actions/place.cpp src/Actions/pickandplace.cpp src/Actions/drop.cpp src/Actions/pickanddrop.cpp src/Actions/moveTo.cpp)
+add_executable(action_executor src/action_executor.cpp src/virtual_action.cpp src/Actions/scan.cpp src/connector.cpp src/Actions/pick.cpp src/Actions/place.cpp src/Actions/placereachable.cpp src/Actions/pickandplace.cpp src/Actions/pickandplacereachable.cpp src/Actions/drop.cpp src/Actions/pickanddrop.cpp src/Actions/moveTo.cpp)
 target_link_libraries( 
   action_executor
   ${catkin_LIBRARIES}

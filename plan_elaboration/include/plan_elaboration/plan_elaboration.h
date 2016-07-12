@@ -10,6 +10,7 @@
 #include "plan_elaboration/virtual_domain.h"
 #include "plan_elaboration/Domains/default_domain.h"
 #include "plan_elaboration/Domains/blocks_domain.h"
+#include "plan_elaboration/Domains/scan_domain.h"
 
 
 #include "supervisor_msgs/ChangeState.h"

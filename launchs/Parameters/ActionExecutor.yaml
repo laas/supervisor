@@ -17,6 +17,9 @@ gripperJoint:
 gripperThreshold: 0.01
 humanSafetyJoint: 'rightHand'
 safetyThreshold: 0.5
+timeScan: 5.0
+replacementPlacement:
+    TABLE_4: PLACEMAT_ROBOT
 points:
     PLACEMAT_RED:
         RED_CUBE:

@@ -55,7 +55,7 @@ void robotStateMachine(){
         double weight = 0.0;
         bool stopable = true;
         string previousState = robotState;
-		if(robotState == "IDLE"){
+        if(robotState == "IDLE"){
             robotState = rsm.idleState(partners, agentsState);
 		}else if(robotState == "ACTING"){
             robotState = rsm.actingState();
@@ -75,10 +75,11 @@ void robotStateMachine(){
         msg.object = object;
         msg.stopable = stopable;
         robot_pub.publish(msg);
-  		loop_rate.sleep();
+        ros::spinOnce();
+        loop_rate.sleep();
 
         agentsState[robotName] = robotState;
-	}
+    }
 
 }
 
@@ -96,6 +97,8 @@ void humanStateMachine(string human_name){
 
 	
     while(true){
+        hsm->knowledge_ = knowledge;
+        hsm->actions_ = actions;
         //check if no action from the agent
         if(actionPerformed){
             if(agentAction == human_name){
@@ -133,6 +136,7 @@ void humanStateMachine(string human_name){
         msg.importancy = weight;
         msg.object = object;
         human_pub.publish(msg);
+        ros::spinOnce();
   		loop_rate.sleep();
 
         agentsState[human_name] = humanState;

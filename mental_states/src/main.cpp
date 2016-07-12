@@ -629,6 +629,7 @@ int main (int argc, char **argv)
   ros::Publisher knowledge_pub = node->advertise<supervisor_msgs::Knowledge>("/mental_states/agents_knowledge", 1000);
   ros::Publisher actions_pub = node->advertise<supervisor_msgs::ActionMSList>("/mental_states/actions", 1000);
 
+
   _node.getParam("/simu", simu);
   _node.getParam("/robot/name", robotName);
   allAgents = ms->db_.getAgents();

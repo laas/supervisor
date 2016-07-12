@@ -3,9 +3,12 @@
 
 #include "action_executor/Actions/pick.h"
 #include "action_executor/Actions/place.h"
+#include "action_executor/Actions/placereachable.h"
 #include "action_executor/Actions/pickandplace.h"
+#include "action_executor/Actions/pickandplacereachable.h"
 #include "action_executor/Actions/drop.h"
 #include "action_executor/Actions/pickanddrop.h"
 #include "action_executor/Actions/moveTo.h"
+#include "action_executor/Actions/scan.h"
 
 #endif // ACTIONPKG_H
