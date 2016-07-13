@@ -10,6 +10,10 @@ rosservice call /agent_monitor/add_joint_to_agent "{jointName: 'rightHand', agen
 
 rosservice call /agent_monitor/add_joint_to_agent "{jointName: 'laser_tilt_mount_link', agentId: 'pr2'}"
 
+
+rosservice call /toaster_simu/add_entity "{id: 'IKEA_SHELF_LIGHT_1', name: 'IKEA_SHELF_LIGHT_1', type: 'object', ownerId: ''}"
+rosservice call /toaster_simu/add_entity "{id: 'IKEA_SHELF_DARK', name: 'IKEA_SHELF_DARK', type: 'object', ownerId: ''}"
+
 rosservice call /area_manager/add_area "myArea:
   id: 0
   name: 'interaction'

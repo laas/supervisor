@@ -675,3 +675,116 @@ void MainWindow::on_SendSignal_clicked()
     msg.weight = importancy;
     signal_pub.publish(msg);
 }
+
+/*************************************
+ * Scan
+ *************************************/
+
+void MainWindow::on_pushButtonSetEnvScan_clicked()
+{
+    ros::ServiceClient client = node_.serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
+
+     toaster_msgs::ObjectListStamped objectList;
+     double xTable,yTable,zTable;
+    try{
+         bool found = false;
+        objectList  = *(ros::topic::waitForMessage<toaster_msgs::ObjectListStamped>("pdg/objectList",ros::Duration(1)));
+        for(vector<toaster_msgs::Object>::iterator it = objectList.objectList.begin(); it != objectList.objectList.end(); it++){
+          if(it->meEntity.id == "TABLE_4"){
+             xTable = it->meEntity.pose.position.x;
+             yTable = it->meEntity.pose.position.y;
+             zTable = it->meEntity.pose.position.z;
+             found = true;
+             break;
+          }
+        }
+        if(!found){
+            ROS_ERROR("No table position!");
+        }
+        toaster_msgs::SetEntityPose srv;
+        double x, y, z;
+        //set table without orientation
+        x = xTable;
+        y = yTable;
+        z = 0.0;
+        srv.request.id = "TABLE_4";
+        srv.request.type = "object";
+        srv.request.pose.position.x = x;
+        srv.request.pose.position.y = y;
+        srv.request.pose.position.z = 0.0;
+        srv.request.pose.orientation.x = 0.0;
+        srv.request.pose.orientation.y = 0.0;
+        srv.request.pose.orientation.z = 0.0;
+        srv.request.pose.orientation.w = 1.0;
+        if (!client.call(srv)){
+          ROS_ERROR("Failed to call service pdg/set_entity_pose");
+          }
+        //set light shelf
+        x = xTable + 0.8;
+        y = yTable + 0.9;
+        z = 0.0;
+        srv.request.id = "IKEA_SHELF_LIGHT_1";
+        srv.request.type = "object";
+        srv.request.pose.position.x = x;
+        srv.request.pose.position.y = y;
+        srv.request.pose.position.z = z;
+        srv.request.pose.orientation.x = 0.0;
+        srv.request.pose.orientation.y = 0.0;
+        srv.request.pose.orientation.z = 0.7;
+        srv.request.pose.orientation.w = 0.7;
+        if (!client.call(srv)){
+          ROS_ERROR("Failed to call service pdg/set_entity_pose");
+          }
+        //set light shelf
+        x = xTable - 0.6;
+        y = yTable - 0.95;
+        z = 0.0;
+        srv.request.id = "IKEA_SHELF_DARK";
+        srv.request.type = "object";
+        srv.request.pose.position.x = x;
+        srv.request.pose.position.y = y;
+        srv.request.pose.position.z = z;
+        srv.request.pose.orientation.x = 0.0;
+        srv.request.pose.orientation.y = 0.0;
+        srv.request.pose.orientation.z = 0.7;
+        srv.request.pose.orientation.w = 0.7;
+        if (!client.call(srv)){
+          ROS_ERROR("Failed to call service pdg/set_entity_pose");
+          }
+        //set red_cube2
+        x = xTable + 0.5;
+        y = yTable + 0.75;
+        z = 0.83;
+        srv.request.id = "RED_CUBE2";
+        srv.request.type = "object";
+        srv.request.pose.position.x = x;
+        srv.request.pose.position.y = y;
+        srv.request.pose.position.z = z;
+        srv.request.pose.orientation.x = 0.0;
+        srv.request.pose.orientation.y = 0.0;
+        srv.request.pose.orientation.z = 0.0;
+        srv.request.pose.orientation.w = 1.0;
+        if (!client.call(srv)){
+          ROS_ERROR("Failed to call service pdg/set_entity_pose");
+          }
+        //set green_cube2
+        x = xTable + 0.5;
+        y = yTable + 1.0;
+        z = 0.83;
+        srv.request.id = "GREEN_CUBE2";
+        srv.request.type = "object";
+        srv.request.pose.position.x = x;
+        srv.request.pose.position.y = y;
+        srv.request.pose.position.z = z;
+        srv.request.pose.orientation.x = 0.0;
+        srv.request.pose.orientation.y = 0.0;
+        srv.request.pose.orientation.z = 0.0;
+        srv.request.pose.orientation.w = 1.0;
+        if (!client.call(srv)){
+          ROS_ERROR("Failed to call service pdg/set_entity_pose");
+          }
+    }
+    catch(const std::exception & e){
+        ROS_WARN("[action_executor] Failed to read toaster poster");
+    }
+}

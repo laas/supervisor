@@ -42,6 +42,9 @@
 #include "supervisor_msgs/GetInfoDia.h"
 #include "supervisor_msgs/Bool.h"
 #include "toaster_msgs/GetInfoDB.h"
+#include "toaster_msgs/SetEntityPose.h"
+#include "toaster_msgs/ObjectListStamped.h"
+
 
 #include "head_manager/Signal.h"
 
@@ -128,6 +131,8 @@ private Q_SLOTS:
     void on_cleanEntities_clicked();
 
     void on_SendSignal_clicked();
+
+    void on_pushButtonSetEnvScan_clicked();
 
 public:
     Ui::MainWindowDesign ui;
