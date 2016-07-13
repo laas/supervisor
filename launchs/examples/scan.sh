@@ -98,20 +98,8 @@ orientation:
   z: 0.0,
   w: 1.0}}}"
 
-rosservice call /toaster_simu/add_entity "{id: 'RED_CUBE3', name: 'RED_CUBE3', type: 'object', ownerId: ''}"
-rosservice call /toaster_simu/set_entity_pose "{id: 'RED_CUBE3', ownerId: '', type: 'object', pose:
-{position:
-  {x: 5.3,
-  y: 4.9,
-  z: 0.82},
-orientation:
-  {x: 0.0,
-  y: 0.0,
-  z: 0.0,
-  w: 1.0}}}"
-
-rosservice call /toaster_simu/add_entity "{id: 'BLUE_CUBE', name: 'BLUE_CUBE', type: 'object', ownerId: ''}"
-rosservice call /toaster_simu/set_entity_pose "{id: 'BLUE_CUBE', ownerId: '', type: 'object', pose:
+rosservice call /toaster_simu/add_entity "{id: 'GREEN_CUBE', name: 'GREEN_CUBE', type: 'object', ownerId: ''}"
+rosservice call /toaster_simu/set_entity_pose "{id: 'GREEN_CUBE', ownerId: '', type: 'object', pose:
 {position:
   {x: 4.1,
   y: 3.4,
@@ -122,8 +110,8 @@ orientation:
   z: 0.0,
   w: 1.0}}}"
 
-rosservice call /toaster_simu/add_entity "{id: 'BLUE_CUBE2', name: 'BLUE_CUBE2', type: 'object', ownerId: ''}"
-rosservice call /toaster_simu/set_entity_pose "{id: 'BLUE_CUBE2', ownerId: '', type: 'object', pose:
+rosservice call /toaster_simu/add_entity "{id: 'GREEN_CUBE2', name: 'GREEN_CUBE2', type: 'object', ownerId: ''}"
+rosservice call /toaster_simu/set_entity_pose "{id: 'GREEN_CUBE2', ownerId: '', type: 'object', pose:
 {position:
   {x: 5.3,
   y: 5.1,
@@ -134,17 +122,6 @@ orientation:
   z: 0.0,
   w: 1.0}}}"
 
-rosservice call /toaster_simu/add_entity "{id: 'BLUE_CUBE3', name: 'BLUE_CUBE3', type: 'object', ownerId: ''}"
-rosservice call /toaster_simu/set_entity_pose "{id: 'BLUE_CUBE3', ownerId: '', type: 'object', pose:
-{position:
-  {x: 5.4,
-  y: 5.0,
-  z: 0.82},
-orientation:
-  {x: 0.0,
-  y: 0.0,
-  z: 0.0,
-  w: 1.0}}}"
 
 rosservice call /toaster_simu/add_entity "{id: 'PINK_TRASHBIN', name: 'PINK_TRASHBIN', type: 'object', ownerId: ''}"
 rosservice call /toaster_simu/set_entity_pose "{id: 'PINK_TRASHBIN', ownerId: '', type: 'object', pose:
@@ -159,8 +136,8 @@ rosservice call /toaster_simu/set_entity_pose "{id: 'PINK_TRASHBIN', ownerId: ''
     w: 0.7}}}"
 
 
-rosservice call /toaster_simu/add_entity "{id: 'BLUE_TRASHBIN', name: 'BLUE_TRASHBIN', type: 'object', ownerId: ''}"
-rosservice call /toaster_simu/set_entity_pose "{id: 'BLUE_TRASHBIN', ownerId: '', type: 'object', pose:
+rosservice call /toaster_simu/add_entity "{id: 'GREEN_TRASHBIN', name: 'GREEN_TRASHBIN', type: 'object', ownerId: ''}"
+rosservice call /toaster_simu/set_entity_pose "{id: 'GREEN_TRASHBIN', ownerId: '', type: 'object', pose:
 {position:
   {x: 5.7,
   y: 5.0,
@@ -269,12 +246,10 @@ rosservice call /area_manager/add_area "myArea:
 rosservice call /database_manager/set_info "{add: true, infoType: 'FACT', agentId: 'PR2_ROBOT', facts: [
     {property: 'color', propertyType: 'state', subProperty: '', subjectId: 'RED_CUBE', targetId: 'red', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
     , {property: 'color', propertyType: 'state', subProperty: '', subjectId: 'RED_CUBE2', targetId: 'red', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
-    , {property: 'color', propertyType: 'state', subProperty: '', subjectId: 'RED_CUBE3', targetId: 'red', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
-    , {property: 'color', propertyType: 'state', subProperty: '', subjectId: 'BLUE_CUBE', targetId: 'blue', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
-    , {property: 'color', propertyType: 'state', subProperty: '', subjectId: 'BLUE_CUBE2', targetId: 'blue', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
-    , {property: 'color', propertyType: 'state', subProperty: '', subjectId: 'BLUE_CUBE3', targetId: 'blue', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
+    , {property: 'color', propertyType: 'state', subProperty: '', subjectId: 'GREEN_CUBE', targetId: 'green', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
+    , {property: 'color', propertyType: 'state', subProperty: '', subjectId: 'GREEN_CUBE2', targetId: 'green', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
     , {property: 'color', propertyType: 'state', subProperty: '', subjectId: 'PINK_TRASHBIN', targetId: 'red', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
-    , {property: 'color', propertyType: 'state', subProperty: '', subjectId: 'BLUE_TRASHBIN', targetId: 'blue', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
+    , {property: 'color', propertyType: 'state', subProperty: '', subjectId: 'GREEN_TRASHBIN', targetId: 'green', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
     , {property: 'canScan', propertyType: 'state', subProperty: '', subjectId: 'PR2_ROBOT', targetId: 'true', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
 ], event: {property: '', propertyType: '', subProperty: '', subjectId: '', targetId: '', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0}, id: '', name: '', ownerId: ''}"
 

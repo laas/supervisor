@@ -1,0 +1,7 @@
+<launch>
+        <rosparam command="load" file="$(find launchs)/Parameters/General.yaml" />
+        <rosparam command="load" file="$(find launchs)/Parameters/Entities.yaml" />
+        <rosparam command="load" file="$(find launchs)/Parameters/ActionExecutor.yaml" />
+
+        <node name="action_executor" pkg="action_executor" type="action_executor" output="screen" />  <!-- Launch the action executor -->
+</launch>
