@@ -91,7 +91,7 @@ void HumanMonitor::humanPlace(string agent, string object, string support){
 	ros::NodeHandle node;
     ros::ServiceClient action_state = node.serviceClient<supervisor_msgs::ChangeState>("mental_state/change_state");
 	ros::ServiceClient remove_from_hand = node.serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
-	ros::ServiceClient set_entity_pose = node.serviceClient<toaster_msgs::SetEntityPose>("toaster_simu/set_entity_pose");
+    ros::ServiceClient set_entity_pose = node.serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
     ros::ServiceClient state_machine = node.serviceClient<supervisor_msgs::HumanAction>("state_machines/human_action");
 
     string robotName;
@@ -144,7 +144,7 @@ void HumanMonitor::humanPlace(string agent, string object, string support){
        srv_setPose.request.pose.orientation.z = 0.0;
        srv_setPose.request.pose.orientation.w = 1.0;
        if (!set_entity_pose.call(srv_setPose)){
-      	 ROS_ERROR("Failed to call service toaster_simu/set_entity_pose");
+         ROS_ERROR("Failed to call service pdg/set_entity_pose");
     	 }
    }
    catch(const std::exception & e){
@@ -258,7 +258,7 @@ void HumanMonitor::humanDrop(string agent, string object, string container){
 	ros::NodeHandle node;
     ros::ServiceClient action_state = node.serviceClient<supervisor_msgs::ChangeState>("mental_state/change_state");
 	ros::ServiceClient remove_from_hand = node.serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
-	ros::ServiceClient set_entity_pose = node.serviceClient<toaster_msgs::SetEntityPose>("toaster_simu/set_entity_pose");
+    ros::ServiceClient set_entity_pose = node.serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
     ros::ServiceClient state_machine = node.serviceClient<supervisor_msgs::HumanAction>("state_machines/human_action");
 
 	//remove the object from the hand of the agent
@@ -300,8 +300,8 @@ void HumanMonitor::humanDrop(string agent, string object, string container){
        srv_setPose.request.pose.orientation.z = 0.0;
        srv_setPose.request.pose.orientation.w = 1.0;
        if (!set_entity_pose.call(srv_setPose)){
-      	 ROS_ERROR("Failed to call service toaster_simu/set_entity_pose");
-    	 }
+         ROS_ERROR("Failed to call service pdg/set_entity_pose");
+         }
    }
    catch(const std::exception & e){
        ROS_WARN("Failed to read %s pose from toaster", container.c_str());
