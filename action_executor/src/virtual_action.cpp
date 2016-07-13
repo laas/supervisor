@@ -183,7 +183,7 @@ Function which puts an object on a support
 */
 void VirtualAction::PutOnSupport(string object, string support){
 
-   ros::ServiceClient client = node_.serviceClient<toaster_msgs::SetEntityPose>("toaster_simu/set_entity_pose");
+   ros::ServiceClient client = node_.serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
 
    double objectHeight, supportHeight;
 	string objectHeightTopic = "/objectsHeight/bottom/";
@@ -216,7 +216,7 @@ void VirtualAction::PutOnSupport(string object, string support){
        srv.request.pose.orientation.z = 0.0;
        srv.request.pose.orientation.w = 1.0;
        if (!client.call(srv)){
-      	 ROS_ERROR("Failed to call service toaster_simu/set_entity_pose");
+         ROS_ERROR("Failed to call service pdg/set_entity_pose");
     	 }
    }
    catch(const std::exception & e){
@@ -232,7 +232,7 @@ Function which puts an object in a container
 */
 void VirtualAction::PutInContainer(string object, string container){
 
-   ros::ServiceClient client = node_.serviceClient<toaster_msgs::SetEntityPose>("toaster_simu/set_entity_pose");
+   ros::ServiceClient client = node_.serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
 
     toaster_msgs::ObjectListStamped objectList;
     double x,y,z;
@@ -257,7 +257,7 @@ void VirtualAction::PutInContainer(string object, string container){
        srv.request.pose.orientation.z = 0.0;
        srv.request.pose.orientation.w = 1.0;
        if (!client.call(srv)){
-         ROS_ERROR("Failed to call service toaster_simu/set_entity_pose");
+         ROS_ERROR("Failed to call service pdg/set_entity_pose");
          }
    }
    catch(const std::exception & e){
