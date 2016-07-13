@@ -154,8 +154,8 @@ Set facts into the planning table of the database (with AgentX capabilities)
 void PlanElaboration::setPlanningTable(string agent){
 
     ros::NodeHandle node;
-    ros::ServiceClient client = node.serviceClient<toaster_msgs::ExecuteDB>("database/execute");
-    ros::ServiceClient client_set = node.serviceClient<toaster_msgs::SetInfoDB>("database/set_info");
+    ros::ServiceClient client = node.serviceClient<toaster_msgs::ExecuteDB>("database_manager/execute");
+    ros::ServiceClient client_set = node.serviceClient<toaster_msgs::SetInfoDB>("database_manager/set_info");
     toaster_msgs::ExecuteDB srv;
     toaster_msgs::SetInfoDB srv_set;
 
@@ -196,10 +196,10 @@ void PlanElaboration::setPlanningTable(string agent){
         srv_set.request.infoType = "RESET_PLANNING";
         srv_set.request.facts = finalFacts;
         if (!client_set.call(srv_set)){
-            ROS_ERROR("[plan_elaboration] Failed to call service database/set_info");
+            ROS_ERROR("[plan_elaboration] Failed to call service database_manager/set_info");
         }
     }else{
-        ROS_ERROR("[plan_elaboration] Failed to call service database/execute");
+        ROS_ERROR("[plan_elaboration] Failed to call service database_manager/execute");
     }
 
 

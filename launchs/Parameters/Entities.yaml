@@ -40,6 +40,7 @@ objectsHeight:
          BLUE_CUBE1: 0.0265
          BLUE_CUBE2: 0.0265
          BLUE_CUBE3: 0.0265
+         STICK: 0.0265
          PLACEMAT_RED: 0.00
          PLACEMAT_ROBOT: 0.00
          PLACEMAT_HUMAN1: 0.00

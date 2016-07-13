@@ -39,7 +39,7 @@ vector<toaster_msgs::Fact> BlocksDomain::computeStack(vector<toaster_msgs::Fact>
             toAdd.subjectId = it->subjectId;
             toAdd.property = "isStack";
             toAdd.propertyType = "state";
-            toAdd.targetId = "false";
+            toAdd.targetId = "true";
             toReturn.push_back(toAdd);
         }else if(it->property != "IsInArea"){
             //we remove all facts isInArea because they are not usefull for planning
