@@ -79,7 +79,7 @@ bool PlaceReachable::plan(){
     vector<gtp_ros_msg::Points> points;
     vector<gtp_ros_msg::Data> datas;
 
-    string replacementTopic = "/replacementPlacement/";
+    string replacementTopic = "/replacementPlacementReachable/";
     replacementTopic = replacementTopic + support_;
     if(node_.hasParam(replacementTopic)){
         string replacementSupport;
@@ -102,7 +102,7 @@ bool PlaceReachable::plan(){
         datas.push_back(data);
     }
 
-    actionId_ = planGTP("placereachable", agents, objects, datas, points);
+    actionId_ = planGTP("place", agents, objects, datas, points);
 
     if(actionId_ == -1){
         return false;

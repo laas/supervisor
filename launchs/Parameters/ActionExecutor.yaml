@@ -19,7 +19,9 @@ humanSafetyJoint: 'rightHand'
 safetyThreshold: 0.5
 timeScan: 5.0
 replacementPlacement:
-    TABLE_4: PLACEMAT_ROBOT
+    TABLE_4: PLACEMAT_ROBOT1
+    replacementPlacementReachable:
+        TABLE_4: PLACEMAT_ROBOT2
 points:
     PLACEMAT_RED:
         RED_CUBE:

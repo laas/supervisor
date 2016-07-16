@@ -78,7 +78,7 @@ bool PickAndPlaceReachable::plan(){
         datas.push_back(data);
     }
 
-    string replacementTopic = "/replacementPlacement/";
+    string replacementTopic = "/replacementPlacementReachable/";
     replacementTopic = replacementTopic + support_;
     if(node_.hasParam(replacementTopic)){
         string replacementSupport;
@@ -102,7 +102,7 @@ bool PickAndPlaceReachable::plan(){
          }else{
             int previousId = connector_->previousId_;
             connector_->previousId_ = actionId_;
-            nextActionId_ = planGTP("placereachable", agents, objects, datas, points);
+            nextActionId_ = planGTP("place", agents, objects, datas, points);
             connector_->previousId_ = previousId;
             if(nextActionId_ != -1){
                 return true;
