@@ -19,6 +19,7 @@ HATP_domains:
                 'hasInHand',
                 'isScanned',
                 'canScan',
+                'isInScanArea',
                 'IsInArea']
 HATP_actions:
    Pick: 'pick'
