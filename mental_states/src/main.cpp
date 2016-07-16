@@ -180,7 +180,7 @@ bool actionState(supervisor_msgs::Action action, string state){
         //if the action has no state, it is an old plan action, we ignore it
         string actionState = ms->db_.getActionState(robotName, actionMS);
         if(actionState == "DONE" || actionState == "FAILED" || actionState == "UNKNOWN"){
-            actionMS = ms->createActionFromHighLevel(action);
+            //actionMS = ms->createActionFromHighLevel(action);
         }
     }else {
         actionMS = ms->createActionFromHighLevel(action);
