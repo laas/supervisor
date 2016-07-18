@@ -60,6 +60,8 @@ string RobotSM::idleState(){
      ROS_ERROR("[state_machines] Failed to call service mental_state/get_info");
 	}
 
+	lookAtHuman();
+
     //if no more action to do we retract if needed
     if(shouldRetractRight_){
         //retract right arm if needed
@@ -88,7 +90,6 @@ string RobotSM::idleState(){
         return "ACTING";
     }
 
-    lookAtHuman();
 
 	return "IDLE";
 }
@@ -143,6 +144,7 @@ string RobotSM::waitingState(){
 
 void RobotSM::lookAtHuman(){
 
+
     //we get the coordonates of the object
     toaster_msgs::HumanListStamped humanList;
     double x,y,z;
@@ -174,9 +176,13 @@ void RobotSM::lookAtHuman(){
     goal.head_target_z = z;
     head_action_client->sendGoal(goal);
 
+
+
     bool finishedBeforeTimeout = head_action_client->waitForResult(ros::Duration(300.0));
 
     if (!finishedBeforeTimeout){
         ROS_INFO("[action_executor] pr2motion head action did not finish before the time out.");
     }
+   
+
 }
