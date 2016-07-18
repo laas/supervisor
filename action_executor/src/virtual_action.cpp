@@ -619,6 +619,10 @@ void VirtualAction::lookAt(string object){
         ROS_WARN("[action_executor] Failed to read %s pose from toaster", object.c_str());
     }
 
+    if(object == "TABLE_4"){
+        z = z + 0.73;
+    }
+
     //we look at the object
     pr2motion::Head_Move_TargetGoal goal;
     goal.head_mode.value = 0;
