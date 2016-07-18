@@ -13,10 +13,12 @@ rosservice call /agent_monitor/add_joint_to_agent "{jointName: 'laser_tilt_mount
 
 rosservice call /toaster_simu/add_entity "{id: 'IKEA_SHELF_LIGHT_1', name: 'IKEA_SHELF_LIGHT_1', type: 'object', ownerId: ''}"
 rosservice call /toaster_simu/add_entity "{id: 'IKEA_SHELF_DARK', name: 'IKEA_SHELF_DARK', type: 'object', ownerId: ''}"
-rosservice call /toaster_simu/add_entity "{id: 'PLACEMAT_ROBOT', name: 'PLACEMAT_ROBOT', type: 'object', ownerId: ''}"
+rosservice call /toaster_simu/add_entity "{id: 'PLACEMAT_ROBOT1', name: 'PLACEMAT_ROBOT1', type: 'object', ownerId: ''}"
+rosservice call /toaster_simu/add_entity "{id: 'PLACEMAT_ROBOT2', name: 'PLACEMAT_ROBOT2', type: 'object', ownerId: ''}"
 rosservice call /toaster_simu/add_entity "{id: 'PLACEMAT_HUMAN1', name: 'PLACEMAT_HUMAN1', type: 'object', ownerId: ''}"
 rosservice call /toaster_simu/add_entity "{id: 'PLACEMAT_HUMAN2', name: 'PLACEMAT_HUMAN2', type: 'object', ownerId: ''}"
 rosservice call /toaster_simu/add_entity "{id: 'GREEN_TRASHBIN', name: 'GREEN_TRASHBIN', type: 'object', ownerId: ''}"
+rosservice call /toaster_simu/add_entity "{id: 'PINK_TRASHBIN', name: 'PINK_TRASHBIN', type: 'object', ownerId: ''}"
 rosservice call /area_manager/add_area "myArea:
   id: 0
   name: 'interaction'
@@ -67,12 +69,12 @@ rosservice call /database_manager/set_info "{add: true, infoType: 'FACT', agentI
 ], event: {property: '', propertyType: '', subProperty: '', subjectId: '', targetId: '', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0}, id: '', name: '', ownerId: ''}"
 
 rosservice call /database_manager/set_info "{add: true, infoType: 'FACT', agentId: 'PR2_ROBOT', facts: [
-    {property: 'isReachebleBy', propertyType: 'state', subProperty: '', subjectId: 'RED_CUBE', targetId: 'PR2_ROBOT', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
-    , {property: 'isReachebleBy', propertyType: 'state', subProperty: '', subjectId: 'RED_CUBE2', targetId: 'HERAKLES_HUMAN1', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
-    , {property: 'isReachebleBy', propertyType: 'state', subProperty: '', subjectId: 'GREEN_CUBE', targetId: 'PR2_ROBOT', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
-    , {property: 'isReachebleBy', propertyType: 'state', subProperty: '', subjectId: 'GREEN_CUBE2', targetId: 'HERAKLES_HUMAN1', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
-    , {property: 'isReachebleBy', propertyType: 'state', subProperty: '', subjectId: 'PINK_TRASHBIN', targetId: 'PR2_ROBOT', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
-    , {property: 'isReachebleBy', propertyType: 'state', subProperty: '', subjectId: 'GREEN_TRASHBIN', targetId: 'HERAKLES_HUMAN1', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
-    , {property: 'isReachebleBy', propertyType: 'state', subProperty: '', subjectId: 'TABLE_4', targetId: 'HERAKLES_HUMAN1', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
-    , {property: 'isReachebleBy', propertyType: 'state', subProperty: '', subjectId: 'TABLE_4', targetId: 'PR2_ROBOT', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
+    {property: 'isReachableBy', propertyType: 'state', subProperty: '', subjectId: 'RED_CUBE', targetId: 'PR2_ROBOT', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
+    , {property: 'isReachableBy', propertyType: 'state', subProperty: '', subjectId: 'RED_CUBE2', targetId: 'HERAKLES_HUMAN1', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
+    , {property: 'isReachableBy', propertyType: 'state', subProperty: '', subjectId: 'GREEN_CUBE', targetId: 'PR2_ROBOT', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
+    , {property: 'isReachableBy', propertyType: 'state', subProperty: '', subjectId: 'GREEN_CUBE2', targetId: 'HERAKLES_HUMAN1', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
+    , {property: 'isReachableBy', propertyType: 'state', subProperty: '', subjectId: 'PINK_TRASHBIN', targetId: 'PR2_ROBOT', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
+    , {property: 'isReachableBy', propertyType: 'state', subProperty: '', subjectId: 'GREEN_TRASHBIN', targetId: 'HERAKLES_HUMAN1', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
+    , {property: 'isReachableBy', propertyType: 'state', subProperty: '', subjectId: 'TABLE_4', targetId: 'HERAKLES_HUMAN1', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
+    , {property: 'isReachableBy', propertyType: 'state', subProperty: '', subjectId: 'TABLE_4', targetId: 'PR2_ROBOT', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
 ], event: {property: '', propertyType: '', subProperty: '', subjectId: '', targetId: '', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0}, id: '', name: '', ownerId: ''}"

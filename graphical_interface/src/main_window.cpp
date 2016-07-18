@@ -750,7 +750,7 @@ void MainWindow::on_pushButtonSetEnvScan_clicked()
                     srv.request.pose.orientation.z = 0.0;
                     srv.request.pose.orientation.w = 1.0;
                 }
-                if (!client.call(srv)){
+                if (!client_simu.call(srv)){
                   ROS_ERROR("Failed to call service toaster_simu/set_entity_pose");
                   }
         }
