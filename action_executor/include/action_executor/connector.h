@@ -12,6 +12,7 @@
 #include <pr2motion/connect_port.h>
 #include <pr2motion/Torso_MoveAction.h>
 #include <pr2motion/Head_Move_TargetAction.h>
+#include "std_msgs/Bool.h"
 
 #include <pr2_controllers_msgs/Pr2GripperCommandAction.h>
 

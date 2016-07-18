@@ -10,6 +10,7 @@
 #include <boost/thread.hpp>
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/client/terminal_state.h>
+#include "std_msgs/Bool.h"
 
 #include "supervisor_msgs/GetInfo.h"
 #include "supervisor_msgs/Action.h"

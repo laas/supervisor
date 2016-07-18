@@ -238,6 +238,8 @@ string HumanSM::actingState(string* object, bool* unexpected, string objectRobot
     lookAt(*object);
     if(robotState == "ACTING"){
         lookAt(objectRobot);
+    }else{
+        lookAtHuman();
     }
 
     ros::Publisher signal_pub = node_.advertise<head_manager::Signal>("head_manager/signal", 1000);
@@ -455,3 +457,58 @@ void HumanSM::lookAt(string object){
         ROS_INFO("[action_executor] pr2motion head action did not finish before the time out.");
     }
 }
+
+void HumanSM::lookAtHuman(){
+
+
+    //we get the coordonates of the object
+    toaster_msgs::HumanListStamped humanList;
+    double x,y,z;
+   try{
+       humanList  = *(ros::topic::waitForMessage<toaster_msgs::HumanListStamped>("pdg/humanList",ros::Duration(1)));
+       for(std::vector<toaster_msgs::Human>::iterator it = humanList.humanList.begin(); it != humanList.humanList.end(); it++){
+         if(it->meAgent.meEntity.id == "HERAKLES_HUMAN1"){
+             for(std::vector<toaster_msgs::Joint>::iterator itt = it->meAgent.skeletonJoint.begin(); itt != it->meAgent.skeletonJoint.end(); itt++){
+                if(itt->meEntity.id == "head"){
+                    x = itt->meEntity.pose.position.x;
+                    y = itt->meEntity.pose.position.y;
+                    z = itt->meEntity.pose.position.z;
+                }
+             }
+            break;
+         }
+       }
+   }
+    catch(const std::exception & e){
+        ROS_WARN("[action_executor] Failed to read human pose from toaster");
+    }
+
+    //we look at the object
+    pr2motion::Head_Move_TargetGoal goal;
+    goal.head_mode.value = 0;
+    goal.head_target_frame = "map";
+    goal.head_target_x = x;
+    goal.head_target_y = y;
+    goal.head_target_z = z;
+    head_action_client->sendGoal(goal);
+
+
+
+    bool finishedBeforeTimeout = head_action_client->waitForResult(ros::Duration(300.0));
+
+    if (!finishedBeforeTimeout){
+        ROS_INFO("[action_executor] pr2motion head action did not finish before the time out.");
+    }
+
+    ros::Publisher tag_detection_pub = node_.advertise <std_msgs::Bool>("ar_track_alvar/enable_detection",1);
+    std_msgs::Bool msg;
+    msg.data  = true;
+    tag_detection_pub.publish(msg);
+    ros::Duration(0.05).sleep();
+    msg.data  = true;
+    tag_detection_pub.publish(msg);
+
+
+
+}
+

@@ -633,5 +633,13 @@ void VirtualAction::lookAt(string object){
     if (!finishedBeforeTimeout){
         ROS_INFO("[action_executor] pr2motion head action did not finish before the time out.");
     }
+
+    ros::Publisher tag_detection_pub = node_.advertise <std_msgs::Bool>("ar_track_alvar/enable_detection",1);
+    std_msgs::Bool msg;
+    msg.data  = true;
+    tag_detection_pub.publish(msg);
+    ros::Duration(0.05).sleep();
+    msg.data  = true;
+    tag_detection_pub.publish(msg);
 }
 

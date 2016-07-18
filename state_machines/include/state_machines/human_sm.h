@@ -23,6 +23,8 @@
 #include <toaster_msgs/FactList.h>
 #include <pr2motion/Head_Move_TargetAction.h>
 #include "toaster_msgs/ObjectListStamped.h"
+#include "toaster_msgs/HumanListStamped.h"
+#include "std_msgs/Bool.h"
 
 #include "head_manager/Signal.h"
 
@@ -62,6 +64,7 @@ private:
     string focusObject(supervisor_msgs::Action action);
     pair<vector<string>, vector<double> > signalObjects(supervisor_msgs::Action action);
     void lookAt(string object);
+    void lookAtHuman();
 
 };
 

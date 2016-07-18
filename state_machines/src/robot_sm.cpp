@@ -20,6 +20,10 @@ actionClient_("supervisor/action_executor", true)
     head_action_client = new actionlib::SimpleActionClient<pr2motion::Head_Move_TargetAction>("pr2motion/Head_Move_Target",true);
     head_action_client->waitForServer();
     ROS_INFO("[state_machines] Human state machine ready");
+    ros::Publisher tag_detection_pub = node_.advertise <std_msgs::Bool>("ar_track_alvar/enable_detection",1);
+    std_msgs::Bool msg;
+    msg.data  = false;
+    tag_detection_pub.publish(msg);
 }
 
 
