@@ -87,6 +87,7 @@ bool PickAndPlaceReachable::plan(){
         support.actionKey = "supportObject";
         support.objectName = replacementSupport;
         objects.push_back(support);
+	ROS_INFO("param found ");
     }else{
         gtp_ros_msg::Obj support;
         support.actionKey = "supportObject";

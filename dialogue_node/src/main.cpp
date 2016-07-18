@@ -70,6 +70,7 @@ void saySentence(string sentence, string receiver){
     #ifdef ACAPELA
     if(shoudlSpeak){
         acapela::SayGoal goal;
+        goal.message = sentence;
         acSay->sendGoal(goal);
         bool finishedBeforeTimeout = acSay->waitForResult(ros::Duration(waitActionServer));
         if (!finishedBeforeTimeout){
@@ -129,7 +130,7 @@ void giveInfoFact(toaster_msgs::Fact fact, bool isTrue, string receiver){
     }
 
     //We verbalize the sentence
-    saySentence(sentence, receiver);
+ //   saySentence(sentence, receiver);
 
     //We inform the mental state we gave the information
     ros::ServiceClient client = node->serviceClient<supervisor_msgs::InfoGiven>("mental_states/info_given");
@@ -251,7 +252,7 @@ void giveInfoAction(supervisor_msgs::Action action, string actionState, string r
     }
 
     //We verbalize the sentence
-    saySentence(sentence, receiver);
+   // saySentence(sentence, receiver);
 
     //We inform the mental state we gave the information
     ros::ServiceClient client = node->serviceClient<supervisor_msgs::InfoGiven>("mental_states/info_given");
@@ -281,7 +282,7 @@ void giveInfoPlan(supervisor_msgs::Plan plan, string planState, string receiver)
     }
 
     //We verbalize the sentence
-    saySentence(sentence, receiver);
+    //saySentence(sentence, receiver);
 
     //We inform the mental state we gave the information
     ros::ServiceClient client = node->serviceClient<supervisor_msgs::InfoGiven>("mental_states/info_given");
@@ -306,7 +307,7 @@ void sharePlan(supervisor_msgs::Plan plan, string receiver){
     sentence = "The new plan is displayed on the screen";
 
     //We verbalize the sentence
-    saySentence(sentence, receiver);
+    //saySentence(sentence, receiver);
 
     //We inform the mental state we gave the information
     ros::ServiceClient client = node->serviceClient<supervisor_msgs::ChangeState>("mental_states/change_state");
@@ -363,7 +364,7 @@ void askCanAction(supervisor_msgs::Action action, string receiver){
     }
 
     //We verbalize the sentence
-    saySentence(sentence, receiver);
+    //saySentence(sentence, receiver);
 }
 
 /*
@@ -410,7 +411,7 @@ void askWantAction(supervisor_msgs::Action action, string receiver){
     }
 
     //We verbalize the sentence
-    saySentence(sentence, receiver);
+    //saySentence(sentence, receiver);
 }
 
 /*
@@ -443,7 +444,7 @@ void askFact(toaster_msgs::Fact fact, string receiver){
     sentence = "Is the " + subjectName + " " + propertyName + " " + targetName + "?";
 
     //We verbalize the sentence
-    saySentence(sentence, receiver);
+    //saySentence(sentence, receiver);
 }
 
 /*
@@ -558,7 +559,7 @@ void initAcapela(){
     acSay = new actionlib::SimpleActionClient<acapela::SayAction>("acapela/Say", true);
     acSay->waitForServer();
     acapela::InitGoal goal;
-    acInit->sendGoal(goal);
+    goal.server = "maxc2";
     acInit->sendGoal(goal);
     bool finishedBeforeTimeout = acInit->waitForResult(ros::Duration(waitActionServer));
     if (!finishedBeforeTimeout){
