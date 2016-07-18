@@ -20,6 +20,8 @@ HumanSM::HumanSM(string humanName)
     signalGiven_ = false;
 
     subArea_ = node_.subscribe("area_manager/factList", 1000, &HumanSM::areaFactListCallback, this);
+    head_action_client = new actionlib::SimpleActionClient<pr2motion::Head_Move_TargetAction>("pr2motion/Head_Move_Target",true);
+    head_action_client->waitForServer();
 }
 
 void HumanSM::areaFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
@@ -205,7 +207,7 @@ string HumanSM::idleState(){
 /*
 State where the human is ACTING
 */
-string HumanSM::actingState(string* object, bool* unexpected){
+string HumanSM::actingState(string* object, bool* unexpected, string objectRobot, string robotState){
 
     //we compare the action to perform and the action performed in order to know if the action is unexpected
     *unexpected = true;
@@ -230,6 +232,11 @@ string HumanSM::actingState(string* object, bool* unexpected){
     shouldDoAction_.name = "NULL";
     PerformedAction_.name = "NULL";
     humanActs_ = false;
+
+    lookAt(*object);
+    if(robotState == "ACTING"){
+        lookAt(objectRobot);
+    }
 
     ros::Publisher signal_pub = node_.advertise<head_manager::Signal>("head_manager/signal", 1000);
     head_manager::Signal msg;
@@ -406,4 +413,43 @@ string HumanSM::shouldActState(string robotState){
 	
     shouldDoAction_.name = "NULL";
 	return "SHOULDACT";
+}
+
+/*
+Look at an object
+*/
+void HumanSM::lookAt(string object){
+
+    //we get the coordonates of the object
+    toaster_msgs::ObjectListStamped objectList;
+    double x,y,z;
+   try{
+       objectList  = *(ros::topic::waitForMessage<toaster_msgs::ObjectListStamped>("pdg/objectList",ros::Duration(1)));
+       for(std::vector<toaster_msgs::Object>::iterator it = objectList.objectList.begin(); it != objectList.objectList.end(); it++){
+         if(it->meEntity.id == object){
+            x = it->meEntity.pose.position.x;
+            y = it->meEntity.pose.position.y;
+            z = it->meEntity.pose.position.z;
+            break;
+         }
+       }
+   }
+    catch(const std::exception & e){
+        ROS_WARN("[action_executor] Failed to read %s pose from toaster", object.c_str());
+    }
+
+    //we look at the object
+    pr2motion::Head_Move_TargetGoal goal;
+    goal.head_mode.value = 0;
+    goal.head_target_frame = "map";
+    goal.head_target_x = x;
+    goal.head_target_y = y;
+    goal.head_target_z = z;
+    head_action_client->sendGoal(goal);
+
+    bool finishedBeforeTimeout = head_action_client->waitForResult(ros::Duration(300.0));
+
+    if (!finishedBeforeTimeout){
+        ROS_INFO("[action_executor] pr2motion head action did not finish before the time out.");
+    }
 }

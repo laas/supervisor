@@ -119,6 +119,7 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   $ENV{TOASTER_DIR}/devel/include
+  $ENV{ROBOTPKG_BASE}/include
 )
 
 ## Declare a C++ library

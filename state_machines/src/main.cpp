@@ -99,7 +99,7 @@ void humanStateMachine(string human_name){
 		if(humanState == "IDLE"){
 			humanState = hsm->idleState();
 		}else if(humanState == "ACTING"){
-            humanState = hsm->actingState(&object, &unexpected);
+            humanState = hsm->actingState(&object, &unexpected, objectRobot_, robotState);
             weight = 0.8;
 		}else if(humanState == "WAITING"){
 			humanState = hsm->waitingState();

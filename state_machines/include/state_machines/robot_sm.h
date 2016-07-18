@@ -16,6 +16,9 @@
 #include "supervisor_msgs/ActionExecutorAction.h"
 #include "supervisor_msgs/ActionExecutorActionResult.h"
 #include "supervisor_msgs/ActionExecutorActionFeedback.h"
+#include "toaster_msgs/Human.h"
+#include <pr2motion/Head_Move_TargetAction.h>
+#include "toaster_msgs/HumanListStamped.h"
 
 
 typedef actionlib::SimpleActionClient<supervisor_msgs::ActionExecutorAction> Client;
@@ -39,6 +42,8 @@ private:
     bool shouldRetractLeft_;
 
 	void doneCb(const actionlib::SimpleClientGoalState& state, const supervisor_msgs::ActionExecutorResultConstPtr& result);
+    void lookAtHuman();
+    actionlib::SimpleActionClient<pr2motion::Head_Move_TargetAction>* head_action_client;
 
 };
 

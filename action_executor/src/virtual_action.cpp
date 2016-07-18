@@ -596,3 +596,42 @@ void VirtualAction::moveLeftGripper(const actionlib::SimpleClientGoalState& stat
         connector_->leftGripperMoving_ = false;
 }
 
+/*
+Look at an object
+*/
+void VirtualAction::lookAt(string object){
+
+    //we get the coordonates of the object
+    toaster_msgs::ObjectListStamped objectList;
+    double x,y,z;
+   try{
+       objectList  = *(ros::topic::waitForMessage<toaster_msgs::ObjectListStamped>("pdg/objectList",ros::Duration(1)));
+       for(std::vector<toaster_msgs::Object>::iterator it = objectList.objectList.begin(); it != objectList.objectList.end(); it++){
+         if(it->meEntity.id == object){
+            x = it->meEntity.pose.position.x;
+            y = it->meEntity.pose.position.y;
+            z = it->meEntity.pose.position.z;
+            break;
+         }
+       }
+   }
+    catch(const std::exception & e){
+        ROS_WARN("[action_executor] Failed to read %s pose from toaster", object.c_str());
+    }
+
+    //we look at the object
+    pr2motion::Head_Move_TargetGoal goal;
+    goal.head_mode.value = 0;
+    goal.head_target_frame = "map";
+    goal.head_target_x = x;
+    goal.head_target_y = y;
+    goal.head_target_z = z;
+    connector_->head_action_client->sendGoal(goal);
+
+    bool finishedBeforeTimeout = connector_->head_action_client->waitForResult(ros::Duration(waitActionServer_));
+
+    if (!finishedBeforeTimeout){
+        ROS_INFO("[action_executor] pr2motion head action did not finish before the time out.");
+    }
+}
+

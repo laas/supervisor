@@ -16,6 +16,8 @@ actionClient_("supervisor/action_executor", true)
 	isActing_ = false;
     shouldRetractRight_ = true;
     shouldRetractLeft_ = true;
+    head_action_client = new actionlib::SimpleActionClient<pr2motion::Head_Move_TargetAction>("pr2motion/Head_Move_Target",true);
+    head_action_client->waitForServer();
 }
 
 
@@ -83,6 +85,9 @@ string RobotSM::idleState(){
         ROS_INFO("[state_machines] Robot goes to ACTING");
         return "ACTING";
     }
+
+    lookAtHuman();
+
 	return "IDLE";
 }
 
@@ -132,4 +137,44 @@ string RobotSM::waitingState(){
 	}
 	
 	return "WAITING";
+}
+
+void RobotSM::lookAtHuman(){
+
+    //we get the coordonates of the object
+    toaster_msgs::HumanListStamped humanList;
+    double x,y,z;
+   try{
+       humanList  = *(ros::topic::waitForMessage<toaster_msgs::HumanListStamped>("pdg/humanList",ros::Duration(1)));
+       for(std::vector<toaster_msgs::Human>::iterator it = humanList.humanList.begin(); it != humanList.humanList.end(); it++){
+         if(it->meAgent.meEntity.id == "HERAKLES_HUMAN1"){
+             for(std::vector<toaster_msgs::Joint>::iterator itt = it->meAgent.skeletonJoint.begin(); itt != it->meAgent.skeletonJoint.end(); itt++){
+                if(itt->meEntity.id == "head"){
+                    x = itt->meEntity.pose.position.x;
+                    y = itt->meEntity.pose.position.y;
+                    z = itt->meEntity.pose.position.z;
+                }
+             }
+            break;
+         }
+       }
+   }
+    catch(const std::exception & e){
+        ROS_WARN("[action_executor] Failed to read human pose from toaster");
+    }
+
+    //we look at the object
+    pr2motion::Head_Move_TargetGoal goal;
+    goal.head_mode.value = 0;
+    goal.head_target_frame = "map";
+    goal.head_target_x = x;
+    goal.head_target_y = y;
+    goal.head_target_z = z;
+    head_action_client->sendGoal(goal);
+
+    bool finishedBeforeTimeout = head_action_client->waitForResult(ros::Duration(300.0));
+
+    if (!finishedBeforeTimeout){
+        ROS_INFO("[action_executor] pr2motion head action did not finish before the time out.");
+    }
 }

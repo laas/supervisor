@@ -18,6 +18,8 @@ PickAndPlaceReachable::PickAndPlaceReachable(supervisor_msgs::Action action, Con
     connector->objectFocus_ = object_;
     connector->weightFocus_ = 0.8;
     connector->stopableFocus_ = true;
+
+    lookAt(object_);
 }
 
 bool PickAndPlaceReachable::preconditions(){
@@ -126,6 +128,7 @@ bool PickAndPlaceReachable::exec(Server* action_server){
             return false;
         }
         connector_->objectFocus_ = support_;
+        lookAt(support_);
         return execAction(nextActionId_, false, action_server);
     }else{
         return false;

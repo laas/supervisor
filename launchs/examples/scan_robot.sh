@@ -19,6 +19,7 @@ rosservice call /toaster_simu/add_entity "{id: 'PLACEMAT_HUMAN1', name: 'PLACEMA
 rosservice call /toaster_simu/add_entity "{id: 'PLACEMAT_HUMAN2', name: 'PLACEMAT_HUMAN2', type: 'object', ownerId: ''}"
 rosservice call /toaster_simu/add_entity "{id: 'GREEN_TRASHBIN', name: 'GREEN_TRASHBIN', type: 'object', ownerId: ''}"
 rosservice call /toaster_simu/add_entity "{id: 'PINK_TRASHBIN', name: 'PINK_TRASHBIN', type: 'object', ownerId: ''}"
+rosservice call /toaster_simu/add_entity "{id: 'DRAWERS', name: 'DRAWERS', type: 'object', ownerId: ''}"
 rosservice call /area_manager/add_area "myArea:
   id: 0
   name: 'interaction'

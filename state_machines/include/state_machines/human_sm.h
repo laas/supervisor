@@ -21,6 +21,8 @@
 #include "supervisor_msgs/Ask.h"
 #include <toaster_msgs/Fact.h>
 #include <toaster_msgs/FactList.h>
+#include <pr2motion/Head_Move_TargetAction.h>
+#include "toaster_msgs/ObjectListStamped.h"
 
 #include "head_manager/Signal.h"
 
@@ -31,7 +33,7 @@ public:
 	HumanSM(string humanName);
 	~HumanSM() {};
 	string idleState();
-    string actingState(string* object, bool* unexpected);
+    string actingState(string* object, bool* unexpected, string objectRobot, string robotState);
 	string waitingState();
     string shouldActState(string robotState);
 	string absentState();
@@ -53,11 +55,13 @@ private:
 	clock_t start_;
     bool present_;
     bool signalGiven_;
+    actionlib::SimpleActionClient<pr2motion::Head_Move_TargetAction>* head_action_client;
 
 
     ros::Subscriber subArea_;
     string focusObject(supervisor_msgs::Action action);
     pair<vector<string>, vector<double> > signalObjects(supervisor_msgs::Action action);
+    void lookAt(string object);
 
 };
 

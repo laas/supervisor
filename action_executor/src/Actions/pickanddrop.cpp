@@ -17,6 +17,7 @@ PickAndDrop::PickAndDrop(supervisor_msgs::Action action, Connector* connector) :
     connector->objectFocus_ = object_;
     connector->weightFocus_ = 0.8;
     connector->stopableFocus_ = true;
+    lookAt(object_);
 }
 
 bool PickAndDrop::preconditions(){
@@ -107,6 +108,7 @@ bool PickAndDrop::exec(Server* action_server){
             return false;
         }
         connector_->objectFocus_ = container_;
+        lookAt(container_);
         return execAction(nextActionId_, false, action_server);
     }else{
         return false;

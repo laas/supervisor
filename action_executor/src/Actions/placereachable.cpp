@@ -18,6 +18,7 @@ PlaceReachable::PlaceReachable(supervisor_msgs::Action action, Connector* connec
     connector->objectFocus_ = support_;
     connector->weightFocus_ = 0.8;
     connector->stopableFocus_ = true;
+    lookAt(support_);
 }
 
 bool PlaceReachable::preconditions(){

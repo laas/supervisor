@@ -19,6 +19,7 @@ Scan::Scan(supervisor_msgs::Action action, Connector* connector) : VirtualAction
     connector->stopableFocus_ = false;
 
     node_.getParam("/timeScan", timeScan_);
+    lookAt(object_);
 }
 
 bool Scan::preconditions(){

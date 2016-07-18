@@ -16,6 +16,7 @@ Pick::Pick(supervisor_msgs::Action action, Connector* connector) : VirtualAction
     connector->objectFocus_ = object_;
     connector->weightFocus_ = 0.8;
     connector->stopableFocus_ = false;
+    lookAt(object_);
 }
 
 bool Pick::preconditions(){

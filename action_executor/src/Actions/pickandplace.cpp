@@ -17,6 +17,7 @@ PickAndPlace::PickAndPlace(supervisor_msgs::Action action, Connector* connector)
     connector->objectFocus_ = object_;
     connector->weightFocus_ = 0.8;
     connector->stopableFocus_ = true;
+    lookAt(object_);
 }
 
 bool PickAndPlace::preconditions(){
@@ -173,6 +174,7 @@ bool PickAndPlace::exec(Server* action_server){
             return false;
         }
         connector_->objectFocus_ = support_;
+        lookAt(support_);
         return execAction(nextActionId_, false, action_server);
     }else{
         return false;

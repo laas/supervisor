@@ -72,6 +72,7 @@ protected:
    bool openGripper(int armId, Server* action_server);
    bool closeGripper(int armId, Server* action_server);
    bool isGripperEmpty(string arm);
+   void lookAt(string object);
 
    string object_;
    int actionId_;

@@ -17,6 +17,7 @@ Place::Place(supervisor_msgs::Action action, Connector* connector) : VirtualActi
     connector->objectFocus_ = support_;
     connector->weightFocus_ = 0.8;
     connector->stopableFocus_ = true;
+    lookAt(support_);
 }
 
 bool Place::preconditions(){
