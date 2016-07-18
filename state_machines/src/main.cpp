@@ -112,6 +112,10 @@ void humanStateMachine(string human_name){
 		}else{
 			ROS_ERROR("[state_machines] Wrong human state");	
         }
+        //DEBUG: not to send to time human is acting
+        if(previousState == "ACTING"){
+            previousState = "IDLE";
+        }
 
         //we publish the robot state
         msg.activityState = previousState;

@@ -552,12 +552,12 @@ bool ask(supervisor_msgs::Ask::Request  &req, supervisor_msgs::Ask::Response &re
 
 #ifdef ACAPELA
 void initAcapela(){
+
+    ROS_INFO("[dialogue_node] Waiting for acapela init");
     //Init
     node->getParam("/waitActionServer", waitActionServer);
     acInit = new actionlib::SimpleActionClient<acapela::InitAction>("acapela/Init", true);
     acInit->waitForServer();
-    acSay = new actionlib::SimpleActionClient<acapela::SayAction>("acapela/Say", true);
-    acSay->waitForServer();
     acapela::InitGoal goal;
     goal.server = "maxc2";
     acInit->sendGoal(goal);
@@ -566,6 +566,7 @@ void initAcapela(){
        ROS_INFO("Acapela init did not finish before the time out.");
     }
 
+    ROS_INFO("[dialogue_node] Waiting for acapela connect");
     //Set voice
     string voice;
     node->getParam("/acapelaVoice", voice);
@@ -575,6 +576,10 @@ void initAcapela(){
     if (!client.call(srv)) {
         ROS_ERROR("Failed to call service acapela/SetVoice");
     }
+
+    ROS_INFO("[dialogue_node] Waiting for acapela say");
+    acSay = new actionlib::SimpleActionClient<acapela::SayAction>("acapela/Say", true);
+    acSay->waitForServer();
 
 }
 #endif //ACAPELA

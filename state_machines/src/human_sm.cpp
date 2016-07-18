@@ -231,6 +231,20 @@ string HumanSM::actingState(string* object, bool* unexpected){
     PerformedAction_.name = "NULL";
     humanActs_ = false;
 
+    ros::Publisher signal_pub = node_.advertise<head_manager::Signal>("head_manager/signal", 1000);
+    head_manager::Signal msg;
+
+    vector<string> objects;
+    objects.push_back(*object);
+    msg.entities = objects;
+    vector<double> durations;
+    durations.push_back(0.0);
+    msg.durations = durations;
+    msg.urgency = 0.8;
+    msg.importancy = 0.8;
+    msg.weight = 0.6;
+    signal_pub.publish(msg);
+
     return "IDLE";
 }
 

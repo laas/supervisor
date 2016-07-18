@@ -64,7 +64,7 @@ bool PickAndDrop::plan(){
     object.objectName = object_;
     objects.push_back(object);
     gtp_ros_msg::Obj container;
-    container.actionKey = "containerObject";
+    container.actionKey = "supportObject";
     container.objectName = container_;
     objects.push_back(container);
     vector<gtp_ros_msg::Points> points;

@@ -87,12 +87,13 @@ bool PickAndPlaceReachable::plan(){
         support.actionKey = "supportObject";
         support.objectName = replacementSupport;
         objects.push_back(support);
-	ROS_INFO("param found ");
+        ROS_INFO("param found topic: %s, object: %s", replacementTopic.c_str(), support.objectName.c_str());
     }else{
         gtp_ros_msg::Obj support;
         support.actionKey = "supportObject";
         support.objectName = support_;
         objects.push_back(support);
+        ROS_INFO("param not found topic: %s, object: %s", replacementTopic.c_str(), support.objectName.c_str());
     }
 
     int nbTry = 0;

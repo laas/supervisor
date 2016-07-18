@@ -16,6 +16,6 @@
 	<node name="state_machines" pkg="state_machines" type="state_machines" output="screen" />  <!-- Launch the state machines -->
         <node name="goal_manager" pkg="goal_manager" type="goal_manager" output="screen" />  <!-- Launch the goal manager -->
         <node name="plan_elaboration" pkg="plan_elaboration" type="plan_elaboration" output="screen" />  <!-- Launch the plan elaboration -->
-        <node name="dialogue_node" pkg="dialogue_node" type="dialogue_node" output="screen" />  <!-- Launch the dialogue node -->
+        <!--node name="dialogue_node" pkg="dialogue_node" type="dialogue_node" output="screen" /-->  <!-- Launch the dialogue node -->
 	<node name="graphical_interface" pkg="graphical_interface" type="graphical_interface" output="screen" />  <!-- Launch the graphical interface -->
 </launch>
