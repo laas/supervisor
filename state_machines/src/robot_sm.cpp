@@ -16,8 +16,10 @@ actionClient_("supervisor/action_executor", true)
 	isActing_ = false;
     shouldRetractRight_ = true;
     shouldRetractLeft_ = true;
+    ROS_INFO("[state_machines] Waiting for head action server");
     head_action_client = new actionlib::SimpleActionClient<pr2motion::Head_Move_TargetAction>("pr2motion/Head_Move_Target",true);
     head_action_client->waitForServer();
+    ROS_INFO("[state_machines] Human state machine ready");
 }
 
 

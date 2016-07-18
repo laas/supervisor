@@ -20,8 +20,10 @@ HumanSM::HumanSM(string humanName)
     signalGiven_ = false;
 
     subArea_ = node_.subscribe("area_manager/factList", 1000, &HumanSM::areaFactListCallback, this);
+     ROS_INFO("[state_machines] Waiting for head action server");
     head_action_client = new actionlib::SimpleActionClient<pr2motion::Head_Move_TargetAction>("pr2motion/Head_Move_Target",true);
     head_action_client->waitForServer();
+    ROS_INFO("[state_machines] Human state machine ready");
 }
 
 void HumanSM::areaFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){

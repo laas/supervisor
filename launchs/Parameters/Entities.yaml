@@ -47,14 +47,9 @@ objectsHeight:
          IKEA_SHELF_DARK: 0.00
 
 scanDemo:
-    toasterSimuObjects: ['DRAWERS', 'IKEA_SHELF_LIGHT_1', 'IKEA_SHELF_DARK', 'PINK_TRASHBIN', 'GREEN_TRASHBIN', 'PLACEMAT_ROBOT1', 'PLACEMAT_ROBOT2', 'PLACEMAT_HUMAN1', 'PLACEMAT_HUMAN2']
+    toasterSimuObjects: ['IKEA_SHELF_LIGHT_1', 'IKEA_SHELF_DARK', 'PINK_TRASHBIN', 'GREEN_TRASHBIN', 'PLACEMAT_ROBOT1', 'PLACEMAT_ROBOT2', 'PLACEMAT_HUMAN1', 'PLACEMAT_HUMAN2']
     pdgObjects: ['RED_CUBE2', 'GREEN_CUBE2']
     objectsRelativePose:
-        DRAWERS:
-            x: -1.128
-            y: -1.491
-            z: 0.0
-            rotation: false
         IKEA_SHELF_LIGHT_1:
             x: 0.8
             y: 0.9
