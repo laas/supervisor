@@ -29,12 +29,9 @@ add_message_files(
    Focus.msg
    Bool.msg
    AgentList.msg
-<<<<<<< HEAD
-=======
    AgentKnowledge.msg
    Knowledge.msg
    ActionMSList.msg
->>>>>>> e0a6ca3... add missing line in CMakeList
 )
 
 # Generate services in the 'srv' folder
