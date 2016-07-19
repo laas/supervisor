@@ -119,6 +119,7 @@ void lookAt(string object){
     ros::Duration(0.05).sleep();
     msg.data  = true;
     tag_detection_pub.publish(msg);
+    ros::spinOnce();
 }
 
 
@@ -285,6 +286,7 @@ int main (int argc, char **argv)
   std_msgs::Bool msg;
   msg.data  = false;
   tag_detection_pub.publish(msg);
+  ros::spinOnce();
 
   ROS_INFO("[state_machines] state_machines ready");
 
