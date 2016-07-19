@@ -645,7 +645,7 @@ void VirtualAction::lookAt(string object){
     std_msgs::Bool msg;
     msg.data  = true;
     tag_detection_pub.publish(msg);
-    ros::Duration(0.05).sleep();
+//    ros::Duration(0.05).sleep();
     msg.data  = false;
     tag_detection_pub.publish(msg);
     ros::spinOnce();

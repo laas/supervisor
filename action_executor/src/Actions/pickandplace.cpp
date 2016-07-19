@@ -90,7 +90,7 @@ bool PickAndPlace::plan(){
          point.value.z = 0.0;
          points.push_back(point);
     }else{
-        actionName = "stack";
+        actionName = "stackObj";
         string replacementTopic = "/replacementPlacement/";
         replacementTopic = replacementTopic + support_;
         if(node_.hasParam(replacementTopic)){
