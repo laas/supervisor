@@ -42,9 +42,7 @@ private:
     bool shouldRetractRight_;
     bool shouldRetractLeft_;
 
-	void doneCb(const actionlib::SimpleClientGoalState& state, const supervisor_msgs::ActionExecutorResultConstPtr& result);
-    void lookAtHuman();
-    actionlib::SimpleActionClient<pr2motion::Head_Move_TargetAction>* head_action_client;
+    void doneCb(const actionlib::SimpleClientGoalState& state, const supervisor_msgs::ActionExecutorResultConstPtr& result);
 
 };
 

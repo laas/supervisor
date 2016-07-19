@@ -35,7 +35,7 @@ public:
 	HumanSM(string humanName);
 	~HumanSM() {};
 	string idleState();
-    string actingState(string* object, bool* unexpected, string objectRobot, string robotState);
+    string actingState(string* object, bool* unexpected);
 	string waitingState();
     string shouldActState(string robotState);
 	string absentState();
@@ -57,14 +57,11 @@ private:
 	clock_t start_;
     bool present_;
     bool signalGiven_;
-    actionlib::SimpleActionClient<pr2motion::Head_Move_TargetAction>* head_action_client;
 
 
     ros::Subscriber subArea_;
     string focusObject(supervisor_msgs::Action action);
     pair<vector<string>, vector<double> > signalObjects(supervisor_msgs::Action action);
-    void lookAt(string object);
-    void lookAtHuman();
 
 };
 

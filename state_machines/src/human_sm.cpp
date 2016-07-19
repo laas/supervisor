@@ -20,10 +20,6 @@ HumanSM::HumanSM(string humanName)
     signalGiven_ = false;
 
     subArea_ = node_.subscribe("area_manager/factList", 1000, &HumanSM::areaFactListCallback, this);
-     ROS_INFO("[state_machines] Waiting for head action server");
-    head_action_client = new actionlib::SimpleActionClient<pr2motion::Head_Move_TargetAction>("pr2motion/Head_Move_Target",true);
-    head_action_client->waitForServer();
-    ROS_INFO("[state_machines] Human state machine ready");
 }
 
 void HumanSM::areaFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
@@ -209,7 +205,7 @@ string HumanSM::idleState(){
 /*
 State where the human is ACTING
 */
-string HumanSM::actingState(string* object, bool* unexpected, string objectRobot, string robotState){
+string HumanSM::actingState(string* object, bool* unexpected){
 
     //we compare the action to perform and the action performed in order to know if the action is unexpected
     *unexpected = true;
@@ -234,13 +230,6 @@ string HumanSM::actingState(string* object, bool* unexpected, string objectRobot
     shouldDoAction_.name = "NULL";
     PerformedAction_.name = "NULL";
     humanActs_ = false;
-
-    lookAt(*object);
-    if(robotState == "ACTING"){
-        lookAt(objectRobot);
-    }else{
-        lookAtHuman();
-    }
 
     ros::Publisher signal_pub = node_.advertise<head_manager::Signal>("head_manager/signal", 1000);
     head_manager::Signal msg;
@@ -418,97 +407,3 @@ string HumanSM::shouldActState(string robotState){
     shouldDoAction_.name = "NULL";
 	return "SHOULDACT";
 }
-
-/*
-Look at an object
-*/
-void HumanSM::lookAt(string object){
-
-    //we get the coordonates of the object
-    toaster_msgs::ObjectListStamped objectList;
-    double x,y,z;
-   try{
-       objectList  = *(ros::topic::waitForMessage<toaster_msgs::ObjectListStamped>("pdg/objectList",ros::Duration(1)));
-       for(std::vector<toaster_msgs::Object>::iterator it = objectList.objectList.begin(); it != objectList.objectList.end(); it++){
-         if(it->meEntity.id == object){
-            x = it->meEntity.pose.position.x;
-            y = it->meEntity.pose.position.y;
-            z = it->meEntity.pose.position.z;
-            break;
-         }
-       }
-   }
-    catch(const std::exception & e){
-        ROS_WARN("[action_executor] Failed to read %s pose from toaster", object.c_str());
-    }
-
-    //we look at the object
-    pr2motion::Head_Move_TargetGoal goal;
-    goal.head_mode.value = 0;
-    goal.head_target_frame = "map";
-    goal.head_target_x = x;
-    goal.head_target_y = y;
-    goal.head_target_z = z;
-    head_action_client->sendGoal(goal);
-
-    bool finishedBeforeTimeout = head_action_client->waitForResult(ros::Duration(300.0));
-
-    if (!finishedBeforeTimeout){
-        ROS_INFO("[action_executor] pr2motion head action did not finish before the time out.");
-    }
-}
-
-void HumanSM::lookAtHuman(){
-
-
-    //we get the coordonates of the object
-    toaster_msgs::HumanListStamped humanList;
-    double x,y,z;
-   try{
-       humanList  = *(ros::topic::waitForMessage<toaster_msgs::HumanListStamped>("pdg/humanList",ros::Duration(1)));
-       for(std::vector<toaster_msgs::Human>::iterator it = humanList.humanList.begin(); it != humanList.humanList.end(); it++){
-         if(it->meAgent.meEntity.id == "HERAKLES_HUMAN1"){
-             for(std::vector<toaster_msgs::Joint>::iterator itt = it->meAgent.skeletonJoint.begin(); itt != it->meAgent.skeletonJoint.end(); itt++){
-                if(itt->meEntity.id == "head"){
-                    x = itt->meEntity.pose.position.x;
-                    y = itt->meEntity.pose.position.y;
-                    z = itt->meEntity.pose.position.z;
-                }
-             }
-            break;
-         }
-       }
-   }
-    catch(const std::exception & e){
-        ROS_WARN("[action_executor] Failed to read human pose from toaster");
-    }
-
-    //we look at the object
-    pr2motion::Head_Move_TargetGoal goal;
-    goal.head_mode.value = 0;
-    goal.head_target_frame = "map";
-    goal.head_target_x = x;
-    goal.head_target_y = y;
-    goal.head_target_z = z;
-    head_action_client->sendGoal(goal);
-
-
-
-    bool finishedBeforeTimeout = head_action_client->waitForResult(ros::Duration(300.0));
-
-    if (!finishedBeforeTimeout){
-        ROS_INFO("[action_executor] pr2motion head action did not finish before the time out.");
-    }
-
-    ros::Publisher tag_detection_pub = node_.advertise <std_msgs::Bool>("ar_track_alvar/enable_detection",1);
-    std_msgs::Bool msg;
-    msg.data  = true;
-    tag_detection_pub.publish(msg);
-    ros::Duration(0.05).sleep();
-    msg.data  = true;
-    tag_detection_pub.publish(msg);
-
-
-
-}
-
