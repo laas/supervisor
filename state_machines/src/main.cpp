@@ -117,7 +117,7 @@ void lookAt(string object){
     msg.data  = true;
     tag_detection_pub_->publish(msg);
     ros::Duration(0.05).sleep();
-    msg.data  = true;
+    msg.data  = false;
     tag_detection_pub_->publish(msg);
     ros::spinOnce();
 }
@@ -264,7 +264,7 @@ int main (int argc, char **argv)
 
   ros::ServiceServer service = node_.advertiseService("state_machines/human_action", humanAction);
   ros::Subscriber sub = node_.subscribe("action_executor/focus", 1000, focusCallback);
-  ros::Publisher tag_detection_pub = node_.advertise <std_msgs::Bool>("ar_track_alvar/enable_detection",100);
+  ros::Publisher tag_detection_pub = node_.advertise <std_msgs::Bool>("ar_track_alvar/enable_detection",1);
   tag_detection_pub_ = &tag_detection_pub;
 
   while(tag_detection_pub_->getNumSubscribers() == 0)
