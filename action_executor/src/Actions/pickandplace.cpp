@@ -90,7 +90,7 @@ bool PickAndPlace::plan(){
          point.value.z = 0.0;
          points.push_back(point);
     }else{
-        actionName = "place";
+        actionName = "stack";
         string replacementTopic = "/replacementPlacement/";
         replacementTopic = replacementTopic + support_;
         if(node_.hasParam(replacementTopic)){
@@ -100,6 +100,12 @@ bool PickAndPlace::plan(){
             support.actionKey = "supportObject";
             support.objectName = replacementSupport;
             objects.push_back(support);
+            gtp_ros_msg::Points point;
+            point.pointKey = "target";
+            point.value.x = 0.0;
+            point.value.y = 0.0;
+            point.value.z = 0.0;
+            points.push_back(point);
         }else{
             gtp_ros_msg::Obj support;
             support.actionKey = "supportObject";

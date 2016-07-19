@@ -98,6 +98,13 @@ bool PickAndPlaceReachable::plan(){
         ROS_INFO("param not found topic: %s, object: %s", replacementTopic.c_str(), support.objectName.c_str());
     }
 
+    gtp_ros_msg::Points point;
+    point.pointKey = "target";
+    point.value.x = 0.0;
+    point.value.y = 0.0;
+    point.value.z = 0.0;
+    points.push_back(point);
+
     int nbTry = 0;
     while(nbTry < nbPlanMax_){
         actionId_ = planGTP("pick", agents, objects, datas, points);
@@ -106,7 +113,7 @@ bool PickAndPlaceReachable::plan(){
          }else{
             int previousId = connector_->previousId_;
             connector_->previousId_ = actionId_;
-            nextActionId_ = planGTP("place", agents, objects, datas, points);
+            nextActionId_ = planGTP("stack", agents, objects, datas, points);
             connector_->previousId_ = previousId;
             if(nextActionId_ != -1){
                 return true;
