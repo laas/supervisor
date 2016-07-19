@@ -110,6 +110,14 @@ void lookAt(string object){
     if (!finishedBeforeTimeout){
         ROS_INFO("[action_executor] pr2motion head action did not finish before the time out.");
     }
+
+   ros::Publisher tag_detection_pub = node->advertise <std_msgs::Bool>("ar_track_alvar/enable_detection",1);
+    std_msgs::Bool msg;
+    msg.data  = true;
+    tag_detection_pub.publish(msg);
+    ros::Duration(0.05).sleep();
+    msg.data  = true;
+    tag_detection_pub.publish(msg);
 }
 
 
@@ -117,6 +125,7 @@ void lookAt(string object){
 Main function of the robot state machine
 */
 void robotStateMachine(){
+
   	ros::Rate loop_rate(30);
 	robotState = "IDLE";
 	RobotSM rsm;
@@ -124,7 +133,8 @@ void robotStateMachine(){
     string topicName = "supervisor/activity_state/";
     topicName = topicName + robotName;
     ros::Publisher robot_pub = node->advertise<supervisor_msgs::AgentActivity>(topicName, 1000);
-	
+
+
 	while(true){
         supervisor_msgs::AgentActivity msg;
         string object;
@@ -269,7 +279,7 @@ int main (int argc, char **argv)
 	ROS_ERROR("[state_machines] Failed to call service mental_state/get_all_agents");
   }
 
-  ros::Publisher tag_detection_pub = node_.advertise <std_msgs::Bool>("ar_track_alvar/enable_detection",1);
+  ros::Publisher tag_detection_pub = node_.advertise <std_msgs::Bool>("ar_track_alvar/enable_detection",100);
   std_msgs::Bool msg;
   msg.data  = false;
   tag_detection_pub.publish(msg);
