@@ -111,6 +111,7 @@ void lookAt(string object){
         ROS_INFO("[action_executor] pr2motion head action did not finish before the time out.");
     }
 
+    ros::Rate loop_rate(30);
    ros::Publisher tag_detection_pub = node->advertise <std_msgs::Bool>("ar_track_alvar/enable_detection",1);
     std_msgs::Bool msg;
     msg.data  = true;
@@ -256,6 +257,7 @@ int main (int argc, char **argv)
   ros::init(argc, argv, "state_machines");
   ros::NodeHandle node_;
   node = &node_;
+  ros::Rate loop_rate(30);
 
   ROS_INFO("[state_machines] Init state_machines");
 

@@ -168,7 +168,7 @@ bool Place::exec(Server* action_server){
 
 bool Place::post(){
 
-    string replacementTopic = "/replacementPlacementReachable/";
+    string replacementTopic = "/replacementPlacement/";
     replacementTopic = replacementTopic + support_;
     string replacementSupport;
     if(node_.hasParam(replacementTopic)){

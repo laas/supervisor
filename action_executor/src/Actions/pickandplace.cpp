@@ -185,7 +185,7 @@ bool PickAndPlace::exec(Server* action_server){
 
 bool PickAndPlace::post(){
 
-    string replacementTopic = "/replacementPlacementReachable/";
+    string replacementTopic = "/replacementPlacement/";
     replacementTopic = replacementTopic + support_;
     string replacementSupport;
     if(node_.hasParam(replacementTopic)){
