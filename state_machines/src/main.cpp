@@ -24,6 +24,7 @@ bool stopableRobot_ = true;
 bool actionPerformed = false;
 supervisor_msgs::Action performedAction;
 string agentAction;
+ros::Publisher* tag_detection_pub_;
 
 actionlib::SimpleActionClient<pr2motion::Head_Move_TargetAction>* head_action_client;
 
@@ -112,13 +113,12 @@ void lookAt(string object){
     }
 
     ros::Rate loop_rate(30);
-   ros::Publisher tag_detection_pub = node->advertise <std_msgs::Bool>("ar_track_alvar/enable_detection",1);
     std_msgs::Bool msg;
     msg.data  = true;
-    tag_detection_pub.publish(msg);
+    tag_detection_pub_->publish(msg);
     ros::Duration(0.05).sleep();
     msg.data  = true;
-    tag_detection_pub.publish(msg);
+    tag_detection_pub_->publish(msg);
     ros::spinOnce();
 }
 
@@ -264,7 +264,11 @@ int main (int argc, char **argv)
 
   ros::ServiceServer service = node_.advertiseService("state_machines/human_action", humanAction);
   ros::Subscriber sub = node_.subscribe("action_executor/focus", 1000, focusCallback);
+  ros::Publisher tag_detection_pub = node_.advertise <std_msgs::Bool>("ar_track_alvar/enable_detection",100);
+  tag_detection_pub_ = &tag_detection_pub;
 
+  while(tag_detection_pub_->getNumSubscribers() == 0)
+      loop_rate.sleep();
 
   ROS_INFO("[state_machines] Waiting for head action server");
   head_action_client = new actionlib::SimpleActionClient<pr2motion::Head_Move_TargetAction>("pr2motion/Head_Move_Target",true);
@@ -282,7 +286,6 @@ int main (int argc, char **argv)
 	ROS_ERROR("[state_machines] Failed to call service mental_state/get_all_agents");
   }
 
-  ros::Publisher tag_detection_pub = node_.advertise <std_msgs::Bool>("ar_track_alvar/enable_detection",100);
   std_msgs::Bool msg;
   msg.data  = false;
   tag_detection_pub.publish(msg);
