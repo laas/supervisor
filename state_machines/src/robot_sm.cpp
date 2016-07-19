@@ -16,10 +16,6 @@ actionClient_("supervisor/action_executor", true)
 	isActing_ = false;
     shouldRetractRight_ = true;
     shouldRetractLeft_ = true;
-    ros::Publisher tag_detection_pub = node_.advertise <std_msgs::Bool>("ar_track_alvar/enable_detection",1);
-    std_msgs::Bool msg;
-    msg.data  = false;
-    tag_detection_pub.publish(msg);
 }
 
 
