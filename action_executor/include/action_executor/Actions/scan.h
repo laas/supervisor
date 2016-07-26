@@ -3,6 +3,7 @@
 
 #include "supervisor_msgs/Action.h"
 #include "action_executor/virtual_action.h"
+#include <toaster_msgs/FactList.h>
 
 #include <actionlib/server/simple_action_server.h>
 
@@ -30,8 +31,15 @@ protected:
 private:
     double timeScan_;
     clock_t start_;
+    double timeWait_;
+    clock_t wait_;
+    bool isLookingObject_;
+    string robotToaster_;
+    
+    ros::Subscriber subLook_;
 
     void controlRobotLight(bool on);
+    void isLookingCallback(const toaster_msgs::FactList::ConstPtr& msg);
 
 
 };
