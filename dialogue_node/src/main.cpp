@@ -70,6 +70,7 @@ void saySentence(string sentence, string receiver){
     #ifdef ACAPELA
     if(shoudlSpeak){
         acapela::SayGoal goal;
+        goal.message = sentence;
         acSay->sendGoal(goal);
         bool finishedBeforeTimeout = acSay->waitForResult(ros::Duration(waitActionServer));
         if (!finishedBeforeTimeout){
@@ -552,19 +553,19 @@ bool ask(supervisor_msgs::Ask::Request  &req, supervisor_msgs::Ask::Response &re
 #ifdef ACAPELA
 void initAcapela(){
     //Init
+    ROS_INFO("[dialogue_node] Waiting for acapela init");
     node->getParam("/waitActionServer", waitActionServer);
     acInit = new actionlib::SimpleActionClient<acapela::InitAction>("acapela/Init", true);
     acInit->waitForServer();
-    acSay = new actionlib::SimpleActionClient<acapela::SayAction>("acapela/Say", true);
-    acSay->waitForServer();
     acapela::InitGoal goal;
-    acInit->sendGoal(goal);
+    goal.server = "maxc2";
     acInit->sendGoal(goal);
     bool finishedBeforeTimeout = acInit->waitForResult(ros::Duration(waitActionServer));
     if (!finishedBeforeTimeout){
        ROS_INFO("Acapela init did not finish before the time out.");
     }
 
+    ROS_INFO("[dialogue_node] Waiting for acapela set voice");
     //Set voice
     string voice;
     node->getParam("/acapelaVoice", voice);
@@ -574,6 +575,10 @@ void initAcapela(){
     if (!client.call(srv)) {
         ROS_ERROR("Failed to call service acapela/SetVoice");
     }
+    
+    ROS_INFO("[dialogue_node] Waiting for acapela say");
+	acSay = new actionlib::SimpleActionClient<acapela::SayAction>("acapela/Say", true);
+	acSay->waitForServer();
 
 }
 #endif //ACAPELA

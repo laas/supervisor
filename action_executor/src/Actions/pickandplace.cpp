@@ -16,7 +16,7 @@ PickAndPlace::PickAndPlace(supervisor_msgs::Action action, Connector* connector)
     }
     connector->objectFocus_ = object_;
     connector->weightFocus_ = 0.8;
-    connector->stopableFocus_ = true;
+    connector->stopableFocus_ = false;
 }
 
 bool PickAndPlace::preconditions(){
@@ -165,6 +165,7 @@ bool PickAndPlace::plan(){
 
 bool PickAndPlace::exec(Server* action_server){
 
+    connector_->stopableFocus_ = true;
     bool firstTask = execAction(actionId_, true, action_server);
 
     if(firstTask){
@@ -183,7 +184,16 @@ bool PickAndPlace::exec(Server* action_server){
 
 bool PickAndPlace::post(){
 
-    PutOnSupport(object_, support_);
-
+    string replacementTopic = "/replacementPlacement/";
+	replacementTopic = replacementTopic + support_;
+	string replacementSupport;
+	if(node_.hasParam(replacementTopic)){
+		node_.getParam(replacementTopic, replacementSupport);
+	}
+	else{
+		replacementSupport = support_;
+	}
+	PutOnSupport(object_, replacementSupport);
+	
 	return true;
 }
