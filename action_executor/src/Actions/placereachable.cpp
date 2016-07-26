@@ -119,7 +119,16 @@ bool PlaceReachable::exec(Server* action_server){
 
 bool PlaceReachable::post(){
 
-   PutOnSupport(object_, support_);
+   string replacementTopic = "/replacementPlacement/";
+	replacementTopic = replacementTopic + support_;
+	string replacementSupport;
+	if(node_.hasParam(replacementTopic)){
+		node_.getParam(replacementTopic, replacementSupport);
+	}
+	else{
+		replacementSupport = support_;
+	}
+	PutOnSupport(object_, replacementSupport);
 
 	return true;
 }

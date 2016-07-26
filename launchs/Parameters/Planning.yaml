@@ -27,6 +27,7 @@ HATP_domains:
                 'isIn',
                 'hasInHand',
                 'isScanned',
+                'isInScanArea',
                 'canScan',
                 'IsInArea']
 HATP_actions:

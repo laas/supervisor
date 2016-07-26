@@ -15,7 +15,7 @@ Pick::Pick(supervisor_msgs::Action action, Connector* connector) : VirtualAction
     }
     connector->objectFocus_ = object_;
     connector->weightFocus_ = 0.8;
-    connector->stopableFocus_ = true;
+    connector->stopableFocus_ = false;
 }
 
 bool Pick::preconditions(){
@@ -80,6 +80,7 @@ bool Pick::plan(){
 
 bool Pick::exec(Server* action_server){
 
+   connector_->stopableFocus_ = true;
    return execAction(actionId_, true, action_server);
 
 }
