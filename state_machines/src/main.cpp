@@ -68,6 +68,10 @@ void robotStateMachine(){
 			ROS_ERROR("[state_machines] Wrong robot state");	
         }
 
+		//to avoid transitory states
+        if(previousState == "IDLE" && previousState != robotState){
+			previousState = robotState;
+		}
         //we publish the robot state
         msg.activityState = previousState;
         msg.unexpected = false;
