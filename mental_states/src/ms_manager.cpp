@@ -600,40 +600,54 @@ pair<bool, supervisor_msgs::ActionMS> MSManager::getActionFromAction(supervisor_
 	boost::unique_lock<boost::mutex> lock(actionListMutex_);
 	pair<bool, supervisor_msgs::ActionMS> answer;
 	for(vector<supervisor_msgs::ActionMS>::iterator it = actionList_.begin(); it != actionList_.end(); it++){
-	   bool same = false;
+        bool same = true;
 		if(action.name != it->name){
 			continue;
 		}
+        if(action.actors.size() == it->actors.size()){
+            vector<string>::iterator ita2 = action.actors.begin();
+            for(vector<string>::iterator ita = it->actors.begin(); ita != it->actors.end(); ita++){
+                if(*ita != *ita2){
+                    same = false;
+                    break;
+                }
+                ita2++;
+            }
+            if(!same){
+               continue;
+            }
+        }else{
+            continue;
+        }
 		if(action.parameters.size() == it->parameters.size()){
-			vector<string>::iterator itp2 = action.parameters.begin();
+            vector<string>::iterator itp2 = action.parameters.begin();
 			for(vector<string>::iterator itp = it->parameters.begin(); itp != it->parameters.end(); itp++){
-				if(*itp != *itp2){
-					same = true;
+                //we compare the high level names
+                string topic = "/highLevelName/" + *itp;
+                string topic2 = "/highLevelName/" + *itp2;
+                string highLevel, highLevel2;
+                if(node_->hasParam(topic)){
+                    node_->getParam(topic, highLevel);
+                }else{
+                    highLevel = *itp;
+                }
+                if(node_->hasParam(topic2)){
+                    node_->getParam(topic, highLevel2);
+                }else{
+                    highLevel2 = *itp2;
+                }
+                if(highLevel != highLevel2){
+                    same = false;
 					break;
 				}
 				itp2++;
 			}
-			if(same){
+            if(!same){
 			   continue;
 			}
 		}else{
 			continue;
-		}
-		if(action.actors.size() == it->actors.size()){
-			vector<string>::iterator ita2 = action.actors.begin();
-			for(vector<string>::iterator ita = it->actors.begin(); ita != it->actors.end(); ita++){
-				if(*ita != *ita2){
-					same = false;
-					continue;
-				}
-				ita2++;
-			}
-			if(same){
-			   continue;
-			}
-		}else{
-			continue;
-		}
+        }
 
 
 		answer.first = true;
