@@ -10,7 +10,9 @@ Class allowing the execution of a place action
 Drop::Drop(supervisor_msgs::Action action, Connector* connector) : VirtualAction(connector){
 	if(action.parameters.size() == 2){
 		object_ = action.parameters[0];
+        objectRefined_ = isRefinedObject(object_);
 		container_ = action.parameters[1];
+        containerRefined_ = isRefinedObject(container_);
 	}else{
 		ROS_WARN("[action_executor] Wrong parameter numbers, should be: object, container");
     }
@@ -31,6 +33,22 @@ bool Drop::preconditions(){
    if(!isContainerObject(container_)){
        ROS_WARN("[action_executor] The container is not a known container object");
       return false;
+   }
+
+   if(!objectRefined_){
+       ROS_WARN("[action_executor] The given object is not refined!");
+      return false;
+   }
+
+   //If the container is not refined, we refine it
+   if(!containerRefined_){
+      string refinedObject = refineObject(container_);
+      if(refinedObject == "NULL"){
+          ROS_WARN("[action_executor] No possible refinement for object: %s", container_.c_str());
+          return false;
+      }else{
+           container_ = refinedObject;
+      }
    }
    
    //Then we check if the robot has the object in hand and if the object is reachable

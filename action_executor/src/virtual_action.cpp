@@ -18,6 +18,54 @@ VirtualAction::VirtualAction(Connector* connector){
 }
 
 /*
+Function which return true if an object is not a high level object
+    @object: the tested object
+*/
+bool VirtualAction::isRefinedObject(string object){
+
+    string topic = "/highLevelRefinement/" + object;
+    if(node_.hasParam(topic)){
+        return false;
+    }
+
+   return true;
+
+}
+
+/*
+Function which look for the refinement of an object
+*/
+string VirtualAction::refineObject(string object){
+
+    //First we look for all possible refinement
+    string topic = "/highLevelRefinement/" + object;
+    vector<string> possibleObjects;
+    node_.getParam(topic, possibleObjects);
+
+    //Then, for all these objects we check if they are reachable by the robot
+    bool found = false;
+    string objectStored;
+    for(vector<string>::iterator it = possibleObjects.begin(); it != possibleObjects.end(); it++){
+        vector<toaster_msgs::Fact> factsTocheck;
+        toaster_msgs::Fact fact;
+        fact.subjectId = *it;
+        fact.property = "isReachableBy";
+        fact.targetId = robotName_;
+        factsTocheck.push_back(fact);
+        if(ArePreconditionsChecked(factsTocheck)){
+            //TODO: add priority to the one not reachable by the human (objectStored and found if reachable by someone else)
+            return *it;
+        }
+    }
+
+    if(found){
+        return objectStored;
+    }
+
+    return "NULL";
+}
+
+/*
 Function which return true if an object is a manipulable object (based on parameters)
 	@object: the tested object
 */

@@ -72,8 +72,11 @@ protected:
    bool openGripper(int armId, Server* action_server);
    bool closeGripper(int armId, Server* action_server);
    bool isGripperEmpty(string arm);
+   bool isRefinedObject(string object);
+   string refineObject(string object);
 
    string object_;
+   bool objectRefined_;
    int actionId_;
    string robotName_;
    double waitActionServer_;

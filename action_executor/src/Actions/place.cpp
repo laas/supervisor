@@ -9,8 +9,10 @@ Class allowing the execution of a place action
 
 Place::Place(supervisor_msgs::Action action, Connector* connector) : VirtualAction(connector){
 	if(action.parameters.size() == 2){
-		object_ = action.parameters[0];
-		support_ = action.parameters[1];
+        object_ = action.parameters[0];
+        objectRefined_ = isRefinedObject(object_);
+        support_ = action.parameters[1];
+        supportRefined_ = isRefinedObject(support_);
 	}else{
 		ROS_WARN("[action_executor] Wrong parameter numbers, should be: object, support");
     }
@@ -32,18 +34,34 @@ bool Place::preconditions(){
        ROS_WARN("[action_executor] The support is not a known support object");
       return false;
    }
+
+   if(!objectRefined_){
+       ROS_WARN("[action_executor] The given object is not refined!");
+      return false;
+   }
+
+   //If the support is not refined, we refine it
+   if(!supportRefined_){
+      string refinedObject = refineObject(support_);
+      if(refinedObject == "NULL"){
+          ROS_WARN("[action_executor] No possible refinement for object: %s", support_.c_str());
+          return false;
+      }else{
+           support_ = refinedObject;
+      }
+   }
    
    //Then we check if the robot has the object in hand and if the support is reachable
    vector<toaster_msgs::Fact> precsTocheck;
    toaster_msgs::Fact fact;
    fact.subjectId = object_;
-	fact.property = "isHoldBy";
-	fact.targetId = robotName_;
-	precsTocheck.push_back(fact);
+    fact.property = "isHoldBy";
+    fact.targetId = robotName_;
+    precsTocheck.push_back(fact);
    fact.subjectId = support_;
-	fact.property = "isReachableBy";
-	fact.targetId = robotName_;
-	precsTocheck.push_back(fact);
+    fact.property = "isReachableBy";
+    fact.targetId = robotName_;
+    precsTocheck.push_back(fact);
 
     //If there is no previous task we look for a previous grasp
     if(connector_->previousId_ == -1){

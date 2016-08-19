@@ -10,6 +10,7 @@ Class allowing the execution of a pick action
 Pick::Pick(supervisor_msgs::Action action, Connector* connector) : VirtualAction(connector){
 	if(action.parameters.size() == 1){
 		object_ = action.parameters[0];
+        objectRefined_ = isRefinedObject(object_);
 	}else{
 		ROS_WARN("[action_executor] Missing parameter: object to pick");
     }
@@ -20,23 +21,34 @@ Pick::Pick(supervisor_msgs::Action action, Connector* connector) : VirtualAction
 
 bool Pick::preconditions(){
    
-   //First we check if the object is a known manipulable object
-   if(!isManipulableObject(object_)){
+    //First we check if the object is a known manipulable object
+    if(!isManipulableObject(object_)){
       ROS_WARN("[action_executor] The object to pick is not a known manipulable object");
       return false;
-   }
-   
-   //Then we check if the robot has the hands free and if the object is reachable
-   vector<toaster_msgs::Fact> precsTocheck;
-   toaster_msgs::Fact fact;
-   fact.subjectId = "NULL";
-	fact.property = "isHoldBy";
-	fact.targetId = robotName_;
-	precsTocheck.push_back(fact);
-   fact.subjectId = object_;
-	fact.property = "isReachableBy";
-	fact.targetId = robotName_;
-	precsTocheck.push_back(fact);
+    }
+
+    //If the object is not refined, we refine it
+    if(!objectRefined_){
+       string refinedObject = refineObject(object_);
+       if(refinedObject == "NULL"){
+           ROS_WARN("[action_executor] No possible refinement for object: %s", object_.c_str());
+           return false;
+       }else{
+            object_ = refinedObject;
+       }
+    }
+
+    //Then we check if the robot has the hands free and if the object is reachable
+    vector<toaster_msgs::Fact> precsTocheck;
+    toaster_msgs::Fact fact;
+    fact.subjectId = "NULL";
+    fact.property = "isHoldBy";
+    fact.targetId = robotName_;
+    precsTocheck.push_back(fact);
+    fact.subjectId = object_;
+    fact.property = "isReachableBy";
+    fact.targetId = robotName_;
+    precsTocheck.push_back(fact);
 	
 	return ArePreconditionsChecked(precsTocheck);
  

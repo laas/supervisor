@@ -25,6 +25,7 @@ protected:
 
 private:
 	string container_;
+    bool containerRefined_;
     int nextActionId_;
 
 

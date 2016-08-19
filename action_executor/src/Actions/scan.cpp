@@ -50,6 +50,17 @@ bool Scan::preconditions(){
        ROS_WARN("[action_executor] The object to place is not a known manipulable object");
       return false;
    }
+
+   //If the object is not refined, we refine it
+   if(!objectRefined_){
+      string refinedObject = refineObject(object_);
+      if(refinedObject == "NULL"){
+          ROS_WARN("[action_executor] No possible refinement for object: %s", object_.c_str());
+          return false;
+      }else{
+           object_ = refinedObject;
+      }
+   }
    
     return true;
 }

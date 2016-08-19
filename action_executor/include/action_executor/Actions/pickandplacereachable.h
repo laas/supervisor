@@ -25,6 +25,7 @@ protected:
 
 private:
 	string support_;
+    bool supportRefined_;
     int nextActionId_;
     string targetAgent_;
 

@@ -10,7 +10,9 @@ Class allowing the execution of a place action
 PickAndDrop::PickAndDrop(supervisor_msgs::Action action, Connector* connector) : VirtualAction(connector){
 	if(action.parameters.size() == 2){
 		object_ = action.parameters[0];
+        objectRefined_ = isRefinedObject(object_);
 		container_ = action.parameters[1];
+        containerRefined_ = isRefinedObject(container_);
 	}else{
 		ROS_WARN("[action_executor] Wrong parameter numbers, should be: object, container");
     }
@@ -33,17 +35,26 @@ bool PickAndDrop::preconditions(){
       return false;
    }
    
-   //Then we check if the container and the object are reachable
+   //If the object is not refined, we refine it
+   if(!objectRefined_){
+      string refinedObject = refineObject(object_);
+      if(refinedObject == "NULL"){
+          ROS_WARN("[action_executor] No possible refinement for object: %s", object_.c_str());
+          return false;
+      }else{
+           object_ = refinedObject;
+      }
+   }
+   //TODO: add check of possible refinement for the container?
+
+   //Then we check if  the object is reachable
    vector<toaster_msgs::Fact> precsTocheck;
    toaster_msgs::Fact fact;
    fact.subjectId = object_;
 	fact.property = "isReachableBy";
 	fact.targetId = robotName_;
-	precsTocheck.push_back(fact);
-   fact.subjectId = container_;
-	fact.property = "isReachableBy";
-	fact.targetId = robotName_;
-	precsTocheck.push_back(fact);
+    precsTocheck.push_back(fact);
+
 	
 	return ArePreconditionsChecked(precsTocheck);
 }
@@ -80,15 +91,15 @@ bool PickAndDrop::plan(){
     int nbTry = 0;
     while(nbTry < nbPlanMax_){
         actionId_ = planGTP("pick", agents, objects, datas, points);
-        if(actionId_ == -1){
-            return false;
-         }else{
-            int previousId = connector_->previousId_;
-            connector_->previousId_ = actionId_;
-            nextActionId_ = planGTP("drop", agents, objects, datas, points);
-            connector_->previousId_ = previousId;
-            if(nextActionId_ != -1){
-                return true;
+        if(actionId_ != -1){
+            if(containerRefined_){
+                int previousId = connector_->previousId_;
+                connector_->previousId_ = actionId_;
+                nextActionId_ = planGTP("drop", agents, objects, datas, points);
+                connector_->previousId_ = previousId;
+                if(nextActionId_ != -1){
+                    return true;
+                }
             }
          }
         nbTry++;
@@ -107,7 +118,53 @@ bool PickAndDrop::exec(Server* action_server){
             ROS_WARN("[action_executor] Robot failed to pick (gripper empty)");
             return false;
         }
+        //We refine the container if needed
+        if(!containerRefined_){
+            string refinedObject = refineObject(container_);
+            if(refinedObject == "NULL"){
+                ROS_WARN("[action_executor] No possible refinement for object: %s", container_.c_str());
+                return false;
+            }else{
+                 container_ = refinedObject;
+            }
+        }
         connector_->objectFocus_ = container_;
+        //we plan a traj if needed
+        if(!containerRefined_){
+            vector<gtp_ros_msg::Ag> agents;
+            gtp_ros_msg::Ag agent;
+            agent.actionKey = "mainAgent";
+            agent.agentName = robotName_;
+            agents.push_back(agent);
+            vector<gtp_ros_msg::Obj> objects;
+            gtp_ros_msg::Obj object;
+            object.actionKey = "mainObject";
+            object.objectName = object_;
+            objects.push_back(object);
+            gtp_ros_msg::Obj container;
+            container.actionKey = "supportObject";
+            container.objectName = container_;
+            objects.push_back(container);
+            vector<gtp_ros_msg::Points> points;
+            vector<gtp_ros_msg::Data> datas;
+            int previousId = connector_->previousId_;
+            connector_->previousId_ = actionId_;
+            int nbTry = 0;
+            bool trajFound = false;
+            while(nbTry < nbPlanMax_){
+                nextActionId_ = planGTP("drop", agents, objects, datas, points);
+                connector_->previousId_ = previousId;
+                if(nextActionId_ != -1){
+                    trajFound = true;
+                    break;
+                }
+                nbTry++;
+            }
+            if(!trajFound){
+                ROS_WARN("[action_executor] No traj found by GTP");
+                return false;
+            }
+        }
         return execAction(nextActionId_, false, action_server);
 
     }else{
