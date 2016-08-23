@@ -15,6 +15,8 @@ The state machines manager keeps trace of the activity of each agent.
 #include "supervisor_msgs/HumanAction.h"
 #include "supervisor_msgs/Knowledge.h"
 #include "supervisor_msgs/ActionMSList.h"
+#include <std_msgs/Bool.h>
+
 
 string robotState;
 string robotName;
@@ -33,6 +35,8 @@ map<string, string> agentsState;
 
 vector<supervisor_msgs::AgentKnowledge> knowledge;
 vector<supervisor_msgs::ActionMS> actions;
+
+ros::Publisher* unexpected_pub;
 
 /*
 Main function of the robot state machine
@@ -134,7 +138,13 @@ void humanStateMachine(string human_name){
 			ROS_ERROR("[state_machines] Wrong human state");	
         }
 
-        //we publish the robot state
+        //we publish the human state
+        if(unexpected){
+            std_msgs::Bool msg_unex;
+            msg_unex.data = true;
+            unexpected_pub->publish(msg_unex);
+        }
+
         msg.activityState = previousState;
         msg.unexpected = unexpected;
         msg.importancy = weight;
@@ -196,6 +206,8 @@ int main (int argc, char **argv)
   ros::Subscriber subKnow = node_.subscribe("mental_states/agents_knowledge", 1000, knowledgeCallback);
   ros::Subscriber subAct = node_.subscribe("mental_states/actions", 1000, actionsCallback);
   ros::Subscriber subPartners = node_.subscribe("plan_elaboration/partners", 1000, partnersCallback);
+
+  *unexpected_pub = node_.advertise<std_msgs::Bool>("state_machine/unexpected_action", 1);
 
   node_.getParam("/robot/name", robotName);
   ros::service::waitForService("mental_state/get_info", -1);
