@@ -118,7 +118,7 @@ pair<bool, supervisor_msgs::Plan> PlanElaboration::findPlan(){
             if(feasible == "ok"){
                 needPlan = false;
                 //Ask plan for partner + check feasability
-                for(vector<string>::iterator it = goalActors.begin(); it != goalActors.end(); it++){
+                /*for(vector<string>::iterator it = goalActors.begin(); it != goalActors.end(); it++){
                     if(*it != robotName_){
                         setPlanningTable(*it);
                         pair<bool, hatp_msgs::Plan> hatpPartnerPlan = GetHATPPlan();
@@ -126,7 +126,7 @@ pair<bool, supervisor_msgs::Plan> PlanElaboration::findPlan(){
                             checkDivergentBelief(hatpPartnerPlan.second, *it);
                         }
                     }
-                }
+                }*/
 
                 //Apply post-process
                 answer.second = convertPlan(hatpPlan.second);

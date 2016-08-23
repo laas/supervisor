@@ -115,13 +115,13 @@ string RobotSM::idleState(vector<string> partners, map<string, string> agentsSta
                 actionChosen = actionsX[0];
             }
             vector<string> actorsR = getPossibleActors(actionChosen, robotName_, agentsState);
-            for(vector<string>::iterator it = partners_.begin(); it != partners_.end(); it++){
+            /*for(vector<string>::iterator it = partners_.begin(); it != partners_.end(); it++){
                 vector<string> actorsH = getPossibleActors(actionChosen, *it, agentsState);
                 if(actorsR.size() != actorsH.size()){
                     //CorrectDB
                     return "IDLE";
                 }
-            }
+            }*/
             if(actorsR.size()){
                 if(actorsR.size() == 1){
                     attributeAction(actionChosen, actorsR[0]);
@@ -141,7 +141,7 @@ string RobotSM::idleState(vector<string> partners, map<string, string> agentsSta
                             srv_ask.request.waitForAnswer = true;
                             if (client_ask.call(srv_ask)){
                               if(srv_ask.response.boolAnswer){
-                                  //the partner want to perform the action
+                                  //the partner wants to perform the action
                                   attributeAction(actionChosen, partners_[0]);
                               }else{
                                   //the partner does not want to perform the action: the robot does it
