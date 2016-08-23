@@ -597,7 +597,7 @@ Function which return the action (ActionMS format) corresponding to the action i
 */
 pair<bool, supervisor_msgs::ActionMS> MSManager::getActionFromAction(supervisor_msgs::Action action){
 
-	boost::unique_lock<boost::mutex> lock(actionListMutex_);
+    boost::unique_lock<boost::mutex> lock(actionListMutex_);
 	pair<bool, supervisor_msgs::ActionMS> answer;
 	for(vector<supervisor_msgs::ActionMS>::iterator it = actionList_.begin(); it != actionList_.end(); it++){
         bool same = true;

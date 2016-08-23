@@ -608,6 +608,13 @@ void update(MSManager* ms, string agent){
      ms->update(agent);
 }
 
+void unexpectedCallback(const std_msgs::Bool::ConstPtr& msg){
+
+    if(msg->data == true){
+        ms->abortPlan(robotName);
+    }
+}
+
 int main (int argc, char **argv)
 {
   ros::init(argc, argv, "mental_state");
@@ -629,6 +636,7 @@ int main (int argc, char **argv)
   ros::Publisher knowledge_pub = node->advertise<supervisor_msgs::Knowledge>("/mental_states/agents_knowledge", 1000);
   ros::Publisher actions_pub = node->advertise<supervisor_msgs::ActionMSList>("/mental_states/actions", 1000);
 
+  ros::Subscriber subUnexpected = node->subscribe("state_machine/unexpected_action", 1, unexpectedCallback);
 
   _node.getParam("/simu", simu);
   _node.getParam("/robot/name", robotName);

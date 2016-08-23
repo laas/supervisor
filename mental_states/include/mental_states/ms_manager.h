@@ -27,6 +27,7 @@
 #include "supervisor_msgs/Plan.h"
 #include "supervisor_msgs/GiveInfo.h"
 #include "supervisor_msgs/Knowledge.h"
+#include <std_msgs/Bool.h>
 
 
 using namespace std;
