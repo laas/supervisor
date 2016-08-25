@@ -51,7 +51,7 @@ void robotStateMachine(){
     topicName = topicName + robotName;
     ros::Publisher robot_pub = node->advertise<supervisor_msgs::AgentActivity>(topicName, 1000);
 	
-	while(true){
+    while(true){
         rsm.knowledge_ = knowledge;
         rsm.actions_ = actions;
         supervisor_msgs::AgentActivity msg;
@@ -207,7 +207,8 @@ int main (int argc, char **argv)
   ros::Subscriber subAct = node_.subscribe("mental_states/actions", 1000, actionsCallback);
   ros::Subscriber subPartners = node_.subscribe("plan_elaboration/partners", 1000, partnersCallback);
 
-  *unexpected_pub = node_.advertise<std_msgs::Bool>("state_machine/unexpected_action", 1);
+  ros::Publisher _unexpected_pub = node_.advertise<std_msgs::Bool>("state_machine/unexpected_action", 1);
+  unexpected_pub = &_unexpected_pub;
 
   node_.getParam("/robot/name", robotName);
   ros::service::waitForService("mental_state/get_info", -1);

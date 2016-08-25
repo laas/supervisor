@@ -10,6 +10,7 @@ State machine for the robot
 
 HumanSM::HumanSM(ros::NodeHandle* node, string humanName)
  {
+    node_ = node;
     humanName_ = humanName;
     node_->getParam("/robot/name", robotName_);
     node_->getParam("/timeNoAction", timeToWait_);
