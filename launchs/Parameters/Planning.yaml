@@ -35,6 +35,7 @@ HATP_actions:
    Place: 'place'
    PickAndPlace: 'pickandplace'
    PickAndPlaceReachable: 'pickandplacereachable'
+   PickAndPlaceStick: 'pickandplacestick'
    PickAndDrop: 'pickanddrop'
    Scan: 'scan'
 
