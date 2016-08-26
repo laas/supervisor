@@ -6,5 +6,5 @@
 	<node name="toaster_simu" pkg="toaster_simu" type="toaster_simu" output="screen" />  <!-- Launch toaster simu -->
    <!--node name="run_server" pkg="database_manager" type="run_server" output="screen"/-->  <!-- Launch the toaster database -->
    <include file="$(find database_manager)/launch/Database.launch"/>
-	<node name="rviz" pkg="rviz" type="rviz" output="screen"/>  <!-- Launch rviz -->
+	<node name="rviz" pkg="rqt_rviz" type="rqt_rviz" output="screen"/>  <!-- Launch rviz -->
 </launch>
