@@ -132,8 +132,7 @@ void humanStateMachine(string human_name){
             humanState = hsm->shouldActState(robotState);
             weight = 0.8;
 		}else if(humanState == "ABSENT"){
-			humanState = hsm->absentState();
-            unexpected = true;
+            humanState = hsm->absentState();
 		}else{
 			ROS_ERROR("[state_machines] Wrong human state");	
         }

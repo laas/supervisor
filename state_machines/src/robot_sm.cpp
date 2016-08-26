@@ -93,6 +93,7 @@ string RobotSM::idleState(vector<string> partners, map<string, string> agentsSta
     partners_ = partners;
 
     vector<supervisor_msgs::ActionMS> actionsR = getActionReady(robotName_, robotName_);
+
     bool isWaiting = false;
     if(actionsR.size()){
         supervisor_msgs::ActionExecutorGoal goal;
@@ -106,7 +107,7 @@ string RobotSM::idleState(vector<string> partners, map<string, string> agentsSta
         if(actionsX.size()){
             vector<supervisor_msgs::ActionMS> identicals = getIdenticalActions(actionsX);
             bool identical;
-            supervisor_msgs::ActionMS actionChosen;
+            supervisor_msgs::ActionMS actionChosen;;
             if(identicals.size()){
                 identical = true;
                 actionChosen = identicals[0];
@@ -129,6 +130,13 @@ string RobotSM::idleState(vector<string> partners, map<string, string> agentsSta
                     if(identical){
                         //we attribute to the robot
                         attributeAction(actionChosen, robotName_);
+                        //and the execute the action
+                        supervisor_msgs::ActionExecutorGoal goal;
+                        goal.action = convertActionMStoAction(actionChosen);
+                        actionClient_.sendGoal(goal,  boost::bind(&RobotSM::doneCb, this, _1, _2), Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
+                        isActing_ = true;
+                        ROS_INFO("[state_machines] Robot goes to ACTING");
+                        return "ACTING";
                     }else{
                         //we negotiate or adapt to choose an actor
                         if(negociationMode_){
@@ -146,6 +154,13 @@ string RobotSM::idleState(vector<string> partners, map<string, string> agentsSta
                               }else{
                                   //the partner does not want to perform the action: the robot does it
                                   attributeAction(actionChosen, robotName_);
+                                  //and the execute the action
+                                  supervisor_msgs::ActionExecutorGoal goal;
+                                  goal.action = convertActionMStoAction(actionChosen);
+                                  actionClient_.sendGoal(goal,  boost::bind(&RobotSM::doneCb, this, _1, _2), Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
+                                  isActing_ = true;
+                                  ROS_INFO("[state_machines] Robot goes to ACTING");
+                                  return "ACTING";
                               }
                             }else{
                               ROS_ERROR("Failed to call service dialogue_node/ask");
@@ -161,6 +176,13 @@ string RobotSM::idleState(vector<string> partners, map<string, string> agentsSta
                                 if(duration >= timeAdaptation_){
                                     timerStarted_ = false;
                                     attributeAction(actionChosen, robotName_);
+                                    //and the execute the action
+                                    supervisor_msgs::ActionExecutorGoal goal;
+                                    goal.action = convertActionMStoAction(actionChosen);
+                                    actionClient_.sendGoal(goal,  boost::bind(&RobotSM::doneCb, this, _1, _2), Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
+                                    isActing_ = true;
+                                    ROS_INFO("[state_machines] Robot goes to ACTING");
+                                    return "ACTING";
                                 }
                             }
                         }
@@ -369,13 +391,13 @@ bool RobotSM::factsAreIn(string agent, vector<toaster_msgs::Fact> facts){
             for(vector<toaster_msgs::Fact>::iterator itf = facts.begin(); itf != facts.end(); itf++){
                 if(itf->subjectId == "NULL"){
                     for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
-                        if(itk->property == itf->property && highLevelNames_[itk->targetId] == itf->targetId){
+                        if(itk->property == itf->property && (highLevelNames_[itk->targetId] == itf->targetId || itk->targetId == itf->subjectId)){
                             return false;
                         }
                     }
                 }else if(itf->targetId == "NULL"){
                     for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
-                        if(itk->property == itf->property && highLevelNames_[itk->subjectId] == itf->subjectId){
+                        if(itk->property == itf->property && (highLevelNames_[itk->subjectId] == itf->subjectId|| itk->subjectId == itf->subjectId)){
                             return false;
                         }
                     }
@@ -383,10 +405,10 @@ bool RobotSM::factsAreIn(string agent, vector<toaster_msgs::Fact> facts){
                     bool find = false;
                     for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
                         if(itk->property == itf->property &&
-                                highLevelNames_[itk->subjectId] == itf->subjectId &&
-                                highLevelNames_[itk->targetId] == itf->targetId){
-                            find = true;
-                            break;
+                                (highLevelNames_[itk->subjectId] == itf->subjectId || itk->subjectId == itf->subjectId) &&
+                                (highLevelNames_[itk->targetId] == itf->targetId || itk->targetId == itf->targetId)){
+                                find = true;
+                                break;
                         }
                     }
                     if(!find){

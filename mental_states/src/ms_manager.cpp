@@ -289,7 +289,7 @@ Function which checks if an agent still think that the current plan is still fea
 */
 void MSManager::planFeasibility(string agent){
 
-    ros::ServiceClient client = node_->serviceClient<supervisor_msgs::EndPlan>("plan_elaboration/end_plan");
+    ros::ServiceClient client = node_->serviceClient<supervisor_msgs::EndPlan>("plan_elaboration/endPlan");
     supervisor_msgs::EndPlan srv;
     string robotName;
     node_->getParam("/robot/name", robotName);
@@ -323,7 +323,7 @@ void MSManager::planFeasibility(string agent){
 		allActions.insert(allActions.end(), askedActions.begin(), askedActions.end() );
 		allActions.insert(allActions.end(), plannedActions.begin(), plannedActions.end() );
 		allActions.insert(allActions.end(), readyActions.begin(), readyActions.end() );
-		if(allActions.size() == 0){
+        if(allActions.size() == 0){
             db_.addPlanState(agentPlan.second, agent, "DONE");
             string goalState = db_.getGoalState(agent, agentPlan.second.goal);
 	      if(goalState == "DONE"){
@@ -332,7 +332,7 @@ void MSManager::planFeasibility(string agent){
 	         srv.request.report = false;
 	      }
 	      if (!client.call(srv)){
-             ROS_ERROR("[mental_state] Failed to call service plan_elaboration/end_plan");
+             ROS_ERROR("[mental_state] Failed to call service plan_elaboration/endPlan");
 	      }
         }else{ //else, if there is no action in progress or possible the plan is aborted
 			vector<supervisor_msgs::ActionMS> possibleActions;
@@ -564,7 +564,7 @@ Function which aborts the current plan in the knowledge of the agent (and remove
 */
 void MSManager::abortPlan(string agent){
 
-    ros::ServiceClient client = node_->serviceClient<supervisor_msgs::EndPlan>("plan_negotiation/end_plan");
+    ros::ServiceClient client = node_->serviceClient<supervisor_msgs::EndPlan>("plan_negotiation/endPlan");
     supervisor_msgs::EndPlan srv;
     string robotName;
     node_->getParam("/robot/name", robotName);

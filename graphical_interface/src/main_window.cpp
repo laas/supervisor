@@ -141,6 +141,7 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     ui.UrgencySignal->setRange(0.0, 1.0);
     ui.UrgencySignal->setSingleStep(0.1);
 
+
     actionClientSup_.waitForServer();
     actionClientTorso_.waitForServer();
     actionClientRightArm_.waitForServer();
