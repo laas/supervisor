@@ -11,7 +11,7 @@ project(graphical_interface)
 
 # qt_build provides the qt cmake glue, roscpp the comms for a default talker
 find_package(PkgConfig)
-find_package(catkin REQUIRED COMPONENTS qt_build roscpp actionlib)
+find_package(catkin REQUIRED COMPONENTS qt_build roscpp actionlib supervisor_msgs)
 
 pkg_check_modules(pr2motion-genom3 REQUIRED pr2motion-genom3)
 
