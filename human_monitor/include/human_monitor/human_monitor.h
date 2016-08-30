@@ -29,6 +29,7 @@ public:
 	~HumanMonitor() {};
 	void humanPick(string agent, string object);
 	void humanPlace(string agent, string object, string support);
+    void humanPlaceStick(string agent, string object);
 	void humanDrop(string agent, string object, string container);
     pair<bool, string> hasInHand(string agent);
     bool isManipulableObject(string object);

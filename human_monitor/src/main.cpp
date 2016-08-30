@@ -25,7 +25,9 @@ bool humaActionSimu(supervisor_msgs::HumanActionSimu::Request  &req, supervisor_
 	   hm->humanPick(req.agent, req.object);
 	}else if(req.actionName == "place"){
 	   hm->humanPlace(req.agent, req.object, req.support);
-	}else if(req.actionName == "drop"){
+    }else if(req.actionName == "placestick"){
+        hm->humanPlaceStick(req.agent, req.object);
+     }else if(req.actionName == "drop"){
 	   hm->humanDrop(req.agent, req.object, req.container);
 	}else{
 	   ROS_ERROR("[human_monitor] Unknown action name");

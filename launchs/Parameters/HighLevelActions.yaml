@@ -1,6 +1,6 @@
 ---
 highLevelActions:
-        names: ['pick', 'place', 'pickandplace', 'placereachable', 'pickandplacereachable', 'pickandplacestick', 'drop', 'pickanddrop', 'moveTo', 'scan']
+        names: ['pick', 'place', 'placestick', 'pickandplace', 'placereachable', 'pickandplacereachable', 'pickandplacestick', 'drop', 'pickanddrop', 'moveTo', 'scan']
         pick_param: ['mainObject']
         pick_actors: ['mainAgent']
         pick_prec: ['mainObject, isReachableBy, mainAgent', 'NULL, isHoldBy, mainAgent', 'mainObject, isHoldBy, NULL']
@@ -13,6 +13,10 @@ highLevelActions:
         placereachable_actors: ['mainAgent']
         placereachable_prec: ['supportObject, isReachableBy, mainAgent', 'mainObject, isHoldBy, mainAgent']
         placereachable_effects: ['mainObject, isOn, supportObject', 'NULL, isHoldBy, mainAgent', 'mainObject, isReachableBy, targetAgent']
+        placestick_param: ['mainObject', 'supportObject1', 'supportObject2']
+        placestick_actors: ['mainAgent']
+        placestick_prec: ['mainObject, isReachableBy, mainAgent', 'supportObject1, isReachableBy, mainAgent', 'supportObject2, isReachableBy, mainAgent']
+        placestick_effects: ['mainObject, isOn, supportObject1', 'mainObject, isOn, supportObject2']
         pickandplace_param: ['mainObject', 'supportObject']
         pickandplace_actors: ['mainAgent']
         pickandplace_prec: ['mainObject, isReachableBy, mainAgent', 'supportObject, isReachableBy, mainAgent']
