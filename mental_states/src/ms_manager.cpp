@@ -559,12 +559,28 @@ pair<bool, supervisor_msgs::PlanMS> MSManager::getAgentPlan(string agent){
 }
 
 /*
+Function which aborts the current plan in the knowledge of the agent (and remove PLANNED and NEEDED actions) without contacting plan_elaboration
+    @agent: the name of the agent
+*/
+void MSManager::abortPlanWithoutTelling(string agent){
+
+    pair<bool, supervisor_msgs::PlanMS> agentPlan = getAgentPlan(agent);
+    if(agentPlan.first){
+        db_.addPlanState(agentPlan.second, agent, "ABORTED");
+        db_.removeActionsState(agent, "PLANNED");
+        db_.removeActionsState(agent, "NEEDED");
+        db_.removeActionsState(agent, "READY");
+    }
+
+}
+
+/*
 Function which aborts the current plan in the knowledge of the agent (and remove PLANNED and NEEDED actions)
 	@agent: the name of the agent
 */
 void MSManager::abortPlan(string agent){
 
-    ros::ServiceClient client = node_->serviceClient<supervisor_msgs::EndPlan>("plan_negotiation/endPlan");
+    ros::ServiceClient client = node_->serviceClient<supervisor_msgs::EndPlan>("plan_elaboration/endPlan");
     supervisor_msgs::EndPlan srv;
     string robotName;
     node_->getParam("/robot/name", robotName);
@@ -593,6 +609,60 @@ void MSManager::abortPlan(string agent){
 
 /*
 Function which return the action (ActionMS format) corresponding to the action in parameters
+    @action: the action in Action format
+*/
+pair<bool, supervisor_msgs::ActionMS> MSManager::getExactActionFromAction(supervisor_msgs::Action action){
+
+    boost::unique_lock<boost::mutex> lock(actionListMutex_);
+    pair<bool, supervisor_msgs::ActionMS> answer;
+    for(vector<supervisor_msgs::ActionMS>::iterator it = actionList_.begin(); it != actionList_.end(); it++){
+        bool same = true;
+        if(action.name != it->name){
+            continue;
+        }
+        if(action.actors.size() == it->actors.size()){
+            vector<string>::iterator ita2 = action.actors.begin();
+            for(vector<string>::iterator ita = it->actors.begin(); ita != it->actors.end(); ita++){
+                if(*ita != *ita2){
+                    same = false;
+                    break;
+                }
+                ita2++;
+            }
+            if(!same){
+               continue;
+            }
+        }else{
+            continue;
+        }
+        if(action.parameters.size() == it->parameters.size()){
+            vector<string>::iterator itp2 = action.parameters.begin();
+            for(vector<string>::iterator itp = it->parameters.begin(); itp != it->parameters.end(); itp++){
+                if(*itp != *itp2){
+                    same = false;
+                    break;
+                }
+                itp2++;
+            }
+            if(!same){
+               continue;
+            }
+        }else{
+            continue;
+        }
+
+
+        answer.first = true;
+        answer.second = *it;
+        return answer;
+    }
+
+    answer.first = false;
+    return answer;
+}
+
+/*
+Function which return the action (ActionMS format) corresponding to the action in parameters taking into account high level objects
 	@action: the action in Action format
 */
 pair<bool, supervisor_msgs::ActionMS> MSManager::getActionFromAction(supervisor_msgs::Action action){
@@ -632,7 +702,7 @@ pair<bool, supervisor_msgs::ActionMS> MSManager::getActionFromAction(supervisor_
                     highLevel = *itp;
                 }
                 if(node_->hasParam(topic2)){
-                    node_->getParam(topic, highLevel2);
+                    node_->getParam(topic2, highLevel2);
                 }else{
                     highLevel2 = *itp2;
                 }

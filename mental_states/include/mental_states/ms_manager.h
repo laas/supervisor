@@ -45,7 +45,9 @@ public:
 	void addPlanToList(supervisor_msgs::PlanMS plan);
 	pair<bool, supervisor_msgs::PlanMS> getAgentPlan(string agent);
 	void abortPlan(string agent);
+    void abortPlanWithoutTelling(string agent);
 	pair<bool, supervisor_msgs::ActionMS> getActionFromAction(supervisor_msgs::Action action);
+    pair<bool, supervisor_msgs::ActionMS> getExactActionFromAction(supervisor_msgs::Action action);
 	pair<bool, supervisor_msgs::ActionMS> getActionFromId(int id);
 	pair<bool, supervisor_msgs::PlanMS> getPlanFromId(int id);
 	supervisor_msgs::Action convertActionMStoAction(supervisor_msgs::ActionMS actionMS);

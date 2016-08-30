@@ -160,7 +160,7 @@ Function call to abort the current plan for an agent
 */
 bool abortPlan(string agent){
 
-    ms->abortPlan(agent);
+    ms->abortPlanWithoutTelling(agent);
 
 
     return true;
@@ -172,8 +172,9 @@ Function call when the robot detects the change of state of an action (either ac
 bool actionState(supervisor_msgs::Action action, string state){
 
     //first we get the corresponding action
-    pair<bool, supervisor_msgs::ActionMS> actionFind = ms->getActionFromAction(action);
-    supervisor_msgs::ActionMS actionMS;
+    pair<bool, supervisor_msgs::ActionMS> actionFind = ms->getExactActionFromAction(action);
+    supervisor_msgs::ActionMS actionMS, actionNotInstantiate;
+    bool notInstantiateAction = false;
     if(actionFind.first){
         actionMS = actionFind.second;
         //if this action is already consider DONE or FAILED, so it is another new action
@@ -183,6 +184,17 @@ bool actionState(supervisor_msgs::Action action, string state){
             actionMS = ms->createActionFromHighLevel(action);
         }
     }else {
+        actionFind = ms->getActionFromAction(action);
+        if(actionFind.first){
+            notInstantiateAction = true;
+            actionNotInstantiate = actionFind.second;
+            //if this action is already consider DONE or FAILED, so it is another new action
+            //if the action has no state, it is an old plan action, we ignore it
+            string actionState = ms->db_.getActionState(robotName, actionNotInstantiate);
+            if(actionState == "DONE" || actionState == "FAILED" || actionState == "UNKNOWN"){
+                notInstantiateAction = false;
+            }
+        }
         actionMS = ms->createActionFromHighLevel(action);
     }
 
@@ -208,9 +220,15 @@ bool actionState(supervisor_msgs::Action action, string state){
         vector<supervisor_msgs::ActionMS> actions;
         actions.push_back(actionMS);
         ms->db_.addActionsState(actions, *it, state);
+        //we also update the state of the not instantiate action if needed
+        if(notInstantiateAction){
+            vector<supervisor_msgs::ActionMS> actions;
+            actions.push_back(actionNotInstantiate);
+            ms->db_.addActionsState(actions, *it, state);
+        }
         //if it is a failed action (from the plan), we abort the plan for all agent who can see
         if(state == "FAILED"){
-            if(ms->isFromCurrentPlan(actionMS, *it)){
+            if((!notInstantiateAction && ms->isFromCurrentPlan(actionMS, *it)) || (notInstantiateAction && ms->isFromCurrentPlan(actionNotInstantiate, *it))){
                 abortPlan(*it);
             }
 
