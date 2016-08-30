@@ -32,6 +32,7 @@ public:
 	void addActionsState(vector<supervisor_msgs::ActionMS> actions, string agent, string state);
 	vector<int> getActionsIdFromState(string agent, string state);
 	bool factsAreIn(string agent, vector<toaster_msgs::Fact> facts);
+    bool factsAreInWithHighLevel(string agent, vector<toaster_msgs::Fact> facts);
 	int getAgentIdPlan(string agent);
 	void removeActionsState(string agent, string state);
 	string getActionState(string agent, supervisor_msgs::ActionMS action);
@@ -48,6 +49,7 @@ public:
     void updateKnowledge();
     void initKnowledge(vector<string> agents);
     void setNode(ros::NodeHandle* node);
+    void fillHighLevelNames();
 
     vector<supervisor_msgs::AgentKnowledge> knowledge_;
 protected:
@@ -56,6 +58,7 @@ private:
     vector<supervisor_msgs::AgentKnowledge> toAdd_;
     vector<supervisor_msgs::AgentKnowledge> toRemove_;
     ros::NodeHandle* node_;
+    map<string, string> highLevelNames_;
 
 
 };

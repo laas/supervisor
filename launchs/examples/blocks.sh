@@ -29,7 +29,7 @@ orientation:
 rosservice call /toaster_simu/add_entity "{id: 'GREEN_CUBE', name: 'GREEN_CUBE', type: 'object', ownerId: ''}"
 rosservice call /toaster_simu/set_entity_pose "{id: 'GREEN_CUBE', ownerId: '', type: 'object', pose:
 {position:
-  {x: 4.7,
+  {x: 4.5,
   y: 3.7,
   z: 0.7},
 orientation:
@@ -77,7 +77,7 @@ orientation:
 rosservice call /toaster_simu/add_entity "{id: 'STICK', name: 'STICK', type: 'object', ownerId: ''}"
 rosservice call /toaster_simu/set_entity_pose "{id: 'STICK', ownerId: '', type: 'object', pose:
 {position:
-  {x: 5.0,
+  {x: 5.2,
   y: 4.4,
   z: 0.7},
 orientation:
@@ -204,6 +204,45 @@ rosservice call /area_manager/add_area "myArea:
     - {x: -0.1, y: 0.2, z: 0}
     - {x: -0.1, y: -0.2, z: 0}
   insideEntities: [0]"
+
+rosservice call /area_manager/add_area "myArea:
+  id: 2
+  name: 'robotReachable'
+  myOwner: 'pr2'
+  areaType: ''
+  factType: ''
+  entityType: 'entities'
+  isCircle: false
+  center: {x: 0.0, y: 0.0, z: 0.0}
+  ray: 2.0
+  poly:
+    points:
+    - {x: 0, y: -1, z: 0}
+    - {x: 0.75, y: -1, z: 0}
+    - {x: 0.75, y: 1, z: 0}
+    - {x: 0, y: 1, z: 0}
+    - {x: 0, y: -1, z: 0}
+  insideEntities: [0]"
+
+rosservice call /area_manager/add_area "myArea:
+  id: 3
+  name: 'humanReachable'
+  myOwner: 'HERAKLES_HUMAN1'
+  areaType: ''
+  factType: ''
+  entityType: 'entities'
+  isCircle: false
+  center: {x: 0.0, y: 0.0, z: 0.0}
+  ray: 2.0
+  poly:
+    points:
+    - {x: 0, y: -1, z: 0}
+    - {x: 1.25, y: -1, z: 0}
+    - {x: 1.25, y: 1, z: 0}
+    - {x: 0, y: 1, z: 0}
+    - {x: 0, y: -1, z: 0}
+  insideEntities: [0]"
+
 
 rosservice call /database_manager/set_info "{add: true, infoType: 'FACT', agentId: 'PR2_ROBOT', facts: [
     {property: 'type', propertyType: 'state', subProperty: '', subjectId: 'RED_CUBE1', targetId: 'CUBE', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}

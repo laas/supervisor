@@ -266,14 +266,14 @@ void MSManager::computePreconditions(string agent){
         vector<int> neededIds = db_.getActionsIdFromState(agent, "NEEDED");
 		vector<supervisor_msgs::ActionMS> neededActions = getActionsFromIds(neededIds);
 		for(vector<supervisor_msgs::ActionMS>::iterator it = linksOk.begin(); it != linksOk.end(); it++){
-            if(db_.factsAreIn(agent, it->prec) || isInActor(agentX_, *it)){ //if the preconditions are respected the action becomes READY, else it goes to NEEDED
+            if(db_.factsAreInWithHighLevel(agent, it->prec) || isInActor(agentX_, *it)){ //if the preconditions are respected the action becomes READY, else it goes to NEEDED
 				toReady.push_back(*it);
 			}else{
 				toNeeded.push_back(*it);
 			}
 		}
 		for(vector<supervisor_msgs::ActionMS>::iterator it = neededActions.begin(); it != neededActions.end(); it++){
-            if(db_.factsAreIn(agent, it->prec) || isInActor(agentX_, *it)){ //if the preconditions are respected the action becomes READY, else it remains to NEEDED
+            if(db_.factsAreInWithHighLevel(agent, it->prec) || isInActor(agentX_, *it)){ //if the preconditions are respected the action becomes READY, else it remains to NEEDED
 				toReady.push_back(*it);
 			}
 		}

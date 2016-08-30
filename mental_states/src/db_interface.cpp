@@ -9,6 +9,7 @@ Allows to make the link with the database of toaster
 
 void DBInterface::setNode(ros::NodeHandle* node){
     node_ = node;
+    fillHighLevelNames();
 }
 
 /*
@@ -34,6 +35,57 @@ vector<string> DBInterface::getAgents(){
   	}
   	return agents;
 }
+
+/*
+Fill the highLevelNames map from param
+*/
+void DBInterface::fillHighLevelNames(){
+
+    //we retrieve the list objects from param and fill the map with their high level name
+    vector<string> objects;
+    node_->getParam("/entities/objects", objects);
+    for(vector<string>::iterator it = objects.begin(); it != objects.end(); it++){
+        string topic = "/highLevelName/";
+        topic = topic + *it;
+        string highLevelName;
+        if(node_->hasParam(topic)){
+            node_->getParam(topic, highLevelName);
+        }else{
+            highLevelName = *it;
+        }
+        highLevelNames_[*it] = highLevelName;
+    }
+    //same for supports
+    vector<string> support;
+    node_->getParam("/entities/supports", support);
+    for(vector<string>::iterator it = support.begin(); it != support.end(); it++){
+        string topic = "/highLevelName/";
+        topic = topic + *it;
+        string highLevelName;
+        if(node_->hasParam(topic)){
+            node_->getParam(topic, highLevelName);
+        }else{
+            highLevelName = *it;
+        }
+        highLevelNames_[*it] = highLevelName;
+    }
+    //same for containers
+    vector<string> container;
+    node_->getParam("/entities/containers", container);
+    for(vector<string>::iterator it = container.begin(); it != container.end(); it++){
+        string topic = "/highLevelName/";
+        topic = topic + *it;
+        string highLevelName;
+        if(node_->hasParam(topic)){
+            node_->getParam(topic, highLevelName);
+        }else{
+            highLevelName = *it;
+        }
+        highLevelNames_[*it] = highLevelName;
+    }
+
+}
+
 
 /*
 Function which add a fact to the list to add
@@ -268,6 +320,48 @@ Function which return true if all the facts given are in the agent knowledge
 	@agent: the agent name 
 	@facts: the facts we are looking for
 */
+bool DBInterface::factsAreInWithHighLevel(string agent, vector<toaster_msgs::Fact> facts){
+
+    for(vector<supervisor_msgs::AgentKnowledge>::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+        if(it->agentName == agent){
+            for(vector<toaster_msgs::Fact>::iterator itf = facts.begin(); itf != facts.end(); itf++){
+                if(itf->subjectId == "NULL"){
+                    for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
+                        if(itk->property == itf->property && (highLevelNames_[itk->targetId] == itf->targetId || itk->targetId == itf->targetId)){
+                            return false;
+                        }
+                    }
+                }else if(itf->targetId == "NULL"){
+                    for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
+                        if(itk->property == itf->property && (highLevelNames_[itk->subjectId] == itf->subjectId|| itk->subjectId == itf->subjectId)){
+                            return false;
+                        }
+                    }
+                }else{
+                    bool find = false;
+                    for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
+                        if(itk->property == itf->property &&
+                                (highLevelNames_[itk->subjectId] == itf->subjectId || itk->subjectId == itf->subjectId) &&
+                                (highLevelNames_[itk->targetId] == itf->targetId || itk->targetId == itf->targetId)){
+                                find = true;
+                                break;
+                        }
+                    }
+                    if(!find){
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+    }
+    return false; //there is no knowledge concerning this agent
+}
+/*
+Function which return true if all the facts given are in the agent knowledge
+    @agent: the agent name
+    @facts: the facts we are looking for
+*/
 bool DBInterface::factsAreIn(string agent, vector<toaster_msgs::Fact> facts){
 
     for(vector<supervisor_msgs::AgentKnowledge>::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
@@ -288,9 +382,11 @@ bool DBInterface::factsAreIn(string agent, vector<toaster_msgs::Fact> facts){
                 }else{
                     bool find = false;
                     for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
-                        if(itk->property == itf->property && itk->subjectId == itf->subjectId && itk->targetId == itf->targetId){
-                            find = true;
-                            break;
+                        if(itk->property == itf->property &&
+                                 itk->subjectId == itf->subjectId &&
+                                 itk->targetId == itf->targetId){
+                                find = true;
+                                break;
                         }
                     }
                     if(!find){
@@ -303,6 +399,8 @@ bool DBInterface::factsAreIn(string agent, vector<toaster_msgs::Fact> facts){
     }
     return false; //there is no knowledge concerning this agent
 }
+
+
 
 /*
 Function which return the id of the plan in PROGRESS fo the agent
