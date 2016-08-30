@@ -35,6 +35,8 @@ public:
 	string waitingState();
 
     vector<supervisor_msgs::ActionMS> actions_;
+    vector<supervisor_msgs::Action> actionsRobotReady_;
+    vector<supervisor_msgs::Action> actionsXReady_;
     vector<supervisor_msgs::AgentKnowledge> knowledge_;
 protected:
 
@@ -52,6 +54,7 @@ private:
     double timeAdaptation_;
     bool timerStarted_;
     clock_t start_;
+    vector<supervisor_msgs::ActionMS> highLevelActions_;
 
 	void doneCb(const actionlib::SimpleClientGoalState& state, const supervisor_msgs::ActionExecutorResultConstPtr& result);
     vector<supervisor_msgs::ActionMS> getActionReady(string actor, string agent);
@@ -66,6 +69,9 @@ private:
     string getHighLevelLockedObject(supervisor_msgs::ActionMS action);
     string getCorrespondingObject(supervisor_msgs::ActionMS action, string highLevelObject, string agent);
     void fillHighLevelNames();
+    void initHighLevelActions();
+    supervisor_msgs::ActionMS getHighLevelActionByName(string name);
+    supervisor_msgs::ActionMS createActionFromHighLevel(supervisor_msgs::Action action);
 
 };
 

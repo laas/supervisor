@@ -15,6 +15,7 @@
 
 #include "supervisor_msgs/ChangeState.h"
 #include "supervisor_msgs/NewGoal.h"
+#include "supervisor_msgs/NewPlan.h"
 #include "supervisor_msgs/EndPlan.h"
 #include "supervisor_msgs/Plan.h"
 #include "hatp_msgs/Plan.h"

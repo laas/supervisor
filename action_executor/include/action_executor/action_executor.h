@@ -3,6 +3,7 @@
 
 #include "supervisor_msgs/ActionExecutorAction.h"
 #include "supervisor_msgs/ChangeState.h"
+#include "supervisor_msgs/HumanAction.h"
 #include "supervisor_msgs/Empty.h"
 #include "supervisor_msgs/Focus.h"
 #include "action_executor/virtual_action.h"

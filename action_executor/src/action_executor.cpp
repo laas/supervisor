@@ -202,6 +202,14 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 	if (!client.call(srv)){
      ROS_ERROR("[action_executor] Failed to call service mental_state/change_state");
     }
+
+    ros::ServiceClient clientPE = node_.serviceClient<supervisor_msgs::HumanAction>("plan_executor/robot_action");
+    supervisor_msgs::HumanAction srvPE;
+    srvPE.request.action = goal->action;
+    if (!clientPE.call(srvPE)){
+     ROS_ERROR("[action_executor] Failed to call service plan_executor/robot_action");
+    }
+
     if(connector_->rightArmRestPose_ != connector_->rightArmPose_){
         result_.shouldRetractRight = true;
     }else{

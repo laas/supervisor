@@ -15,6 +15,7 @@ The state machines manager keeps trace of the activity of each agent.
 #include "supervisor_msgs/HumanAction.h"
 #include "supervisor_msgs/Knowledge.h"
 #include "supervisor_msgs/ActionMSList.h"
+#include "supervisor_msgs/ActionList.h"
 #include <std_msgs/Bool.h>
 
 
@@ -35,6 +36,7 @@ map<string, string> agentsState;
 
 vector<supervisor_msgs::AgentKnowledge> knowledge;
 vector<supervisor_msgs::ActionMS> actions;
+vector<supervisor_msgs::Action> actionsRobotReady, actionsXReady;
 
 ros::Publisher* unexpected_pub;
 
@@ -53,6 +55,8 @@ void robotStateMachine(){
 	
     while(true){
         rsm.knowledge_ = knowledge;
+        rsm.actionsRobotReady_ = actionsRobotReady;
+        rsm.actionsXReady_ = actionsXReady;
         rsm.actions_ = actions;
         supervisor_msgs::AgentActivity msg;
         string object;
@@ -179,6 +183,16 @@ void partnersCallback(const supervisor_msgs::AgentList::ConstPtr& msg){
     partners = msg->agents;
 }
 
+void robotReadyCallback(const supervisor_msgs::ActionList::ConstPtr& msg){
+
+    actionsRobotReady = msg->actionsList;
+}
+
+void xReadyCallback(const supervisor_msgs::ActionList::ConstPtr& msg){
+
+    actionsXReady = msg->actionsList;
+}
+
 
 /*
 Service call to tell that a human performed an action
@@ -205,6 +219,8 @@ int main (int argc, char **argv)
   ros::Subscriber subKnow = node_.subscribe("mental_states/agents_knowledge", 1000, knowledgeCallback);
   ros::Subscriber subAct = node_.subscribe("mental_states/actions", 1000, actionsCallback);
   ros::Subscriber subPartners = node_.subscribe("plan_elaboration/partners", 1000, partnersCallback);
+  ros::Subscriber subActionsRobotReady = node_.subscribe("plan_executor/actions_robot_ready", 1, robotReadyCallback);
+  ros::Subscriber subActionsXReady = node_.subscribe("plan_executor/actions_x_ready", 1, xReadyCallback);
 
   ros::Publisher _unexpected_pub = node_.advertise<std_msgs::Bool>("state_machine/unexpected_action", 1);
   unexpected_pub = &_unexpected_pub;

@@ -34,18 +34,25 @@ void PlanElaboration::setGoal(string goal){
 void PlanElaboration::checkPlan(){
 
     if(needPlan_){
+        ROS_INFO("[plan_elaboration] Replaning");
         needPlan_ = false;
         ros::ServiceClient client = node_->serviceClient<supervisor_msgs::EndPlan>("goal_manager/end_goal");
         ros::ServiceClient clientCS = node_->serviceClient<supervisor_msgs::ChangeState>("mental_state/change_state");
+        ros::ServiceClient clientPE = node_->serviceClient<supervisor_msgs::NewPlan>("plan_executor/newPlan");
 
         pair<bool, supervisor_msgs::Plan> plan = findPlan();
         if(plan.first){ //we send the plan to the MS and wait report
-            supervisor_msgs::ChangeState serviceCS;
+            /*supervisor_msgs::ChangeState serviceCS;
             serviceCS.request.type = "plan";
             serviceCS.request.state = "PROGRESS_SHARE";
             serviceCS.request.plan = plan.second;
             if(!clientCS.call(serviceCS)){
                 ROS_ERROR("Failed to call service mental_state/change_state");
+            }*/
+            supervisor_msgs::NewPlan servicePE;
+            servicePE.request.plan = plan.second;
+            if(!clientPE.call(servicePE)){
+                ROS_ERROR("Failed to call service plan_executor/newPlan");
             }
         }else{ //if no plan found we send a report to the goal_manager
             supervisor_msgs::EndPlan srv;

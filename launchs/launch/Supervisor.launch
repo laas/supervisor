@@ -18,4 +18,5 @@
         <node name="plan_elaboration" pkg="plan_elaboration" type="plan_elaboration" output="screen" />  <!-- Launch the plan elaboration -->
         <node name="dialogue_node" pkg="dialogue_node" type="dialogue_node" output="screen" />  <!-- Launch the dialogue node -->
 	<node name="graphical_interface" pkg="graphical_interface" type="graphical_interface" output="screen" />  <!-- Launch the graphical interface -->
+        <node name="plan_executor" pkg="plan_executor" type="plan_executor" output="screen" />  <!-- Launch the plan executor -->
 </launch>

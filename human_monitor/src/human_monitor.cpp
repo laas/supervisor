@@ -210,6 +210,14 @@ void HumanMonitor::humanPlace(string agent, string object, string support){
      ROS_ERROR("Failed to call service state_machines/change_state");
     }
 
+    ros::ServiceClient clientPE = node.serviceClient<supervisor_msgs::HumanAction>("plan_executor/human_action");
+    supervisor_msgs::HumanAction srvPE;
+    srvPE.request.action = action1;
+    srvPE.request.agent = agent;
+    if (!clientPE.call(srvPE)){
+     ROS_ERROR("[action_executor] Failed to call service plan_executor/human_action");
+    }
+
     /*//we also consider a pick and place reachable action
     supervisor_msgs::Action action3;
     action3.name = "pickandplacereachable";
@@ -372,8 +380,8 @@ void HumanMonitor::humanPlaceStick(string agent, string object){
     supervisor_msgs::Action action1;
     action1.name = "pickandplacestick";
     action1.parameters.push_back(object);
-    action.parameters.push_back(supports[0]);
-    action.parameters.push_back(supports[1]);
+    action1.parameters.push_back(supports[0]);
+    action1.parameters.push_back(supports[1]);
     action1.actors.push_back(agent);
 
     supervisor_msgs::HumanAction srv_sm;
@@ -381,6 +389,14 @@ void HumanMonitor::humanPlaceStick(string agent, string object){
     srv_sm.request.agent = agent;
     if (!state_machine.call(srv_sm)){
      ROS_ERROR("Failed to call service state_machines/change_state");
+    }
+
+    ros::ServiceClient clientPE = node.serviceClient<supervisor_msgs::HumanAction>("plan_executor/human_action");
+    supervisor_msgs::HumanAction srvPE;
+    srvPE.request.action = action1;
+    srvPE.request.agent = agent;
+    if (!clientPE.call(srvPE)){
+     ROS_ERROR("[action_executor] Failed to call service plan_executor/human_action");
     }
 
     /*we also consider a pick and place reachable action

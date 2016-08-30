@@ -22,6 +22,7 @@ actionClient_("supervisor/action_executor", true)
     node_->getParam("/negociationMode", negociationMode_);
     node_->getParam("/timeAdaptation", timeAdaptation_);
     timerStarted_ = false;
+    initHighLevelActions();
 }
 
 
@@ -278,7 +279,19 @@ Get the actions ready for an agent in another agent knowledge
 vector<supervisor_msgs::ActionMS> RobotSM::getActionReady(string actor, string agent){
 
     vector<supervisor_msgs::ActionMS> answer;
-    for(vector<supervisor_msgs::AgentKnowledge>::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
+
+    if(actor == robotName_){
+       for(vector<supervisor_msgs::Action>::iterator it = actionsRobotReady_.begin(); it != actionsRobotReady_.end(); it++){
+            answer.push_back(createActionFromHighLevel(*it));
+       }
+    }else{
+        for(vector<supervisor_msgs::Action>::iterator it = actionsXReady_.begin(); it != actionsXReady_.end(); it++){
+             answer.push_back(createActionFromHighLevel(*it));
+        }
+    }
+
+
+    /*for(vector<supervisor_msgs::AgentKnowledge>::iterator it = knowledge_.begin(); it != knowledge_.end(); it++){
         if(it->agentName == agent){
             for(vector<toaster_msgs::Fact>::iterator itk = it->knowledge.begin(); itk != it->knowledge.end(); itk++){
                 if(itk->property == "actionState" && (itk->targetId == "READY" || itk->targetId == "ASKED")){
@@ -304,7 +317,7 @@ vector<supervisor_msgs::ActionMS> RobotSM::getActionReady(string actor, string a
                 }
             }
         }
-    }
+    }*/
 
     return answer;
 
@@ -592,4 +605,148 @@ string RobotSM::getCorrespondingObject(supervisor_msgs::ActionMS action, string 
     }
 
     return object;
+}
+
+/*
+Function which create an ActionMS from an other action based on preconditions and effects of High level actions
+    @action: action without preconditions and effects (Action format)
+*/
+supervisor_msgs::ActionMS RobotSM::createActionFromHighLevel(supervisor_msgs::Action action){
+
+    supervisor_msgs::ActionMS newAction;
+    //We map the name of parameters and actors with the name from the high level action
+    supervisor_msgs::ActionMS highLevelAction = getHighLevelActionByName(action.name);
+    map<string, string> highLevelNames;
+    highLevelNames["NULL"] = "NULL";
+    highLevelNames["false"] = "false";
+    highLevelNames["true"] = "true";
+    if(action.parameters.size() == highLevelAction.parameters.size()){
+        vector<string>::iterator it2 = action.parameters.begin();
+        for(vector<string>::iterator it = highLevelAction.parameters.begin(); it != highLevelAction.parameters.end(); it++){
+            highLevelNames[*it] = *it2;
+            it2++;
+        }
+    }else{
+        ROS_ERROR("[mental_state] Incorrect number of parameters for %s action: should be %i but is %i!", action.name.c_str(), (int)highLevelAction.parameters.size(), (int)action.parameters.size());
+        return newAction;
+    }
+    if(action.actors.size() == highLevelAction.actors.size()){
+        vector<string>::iterator it2 = action.actors.begin();
+        for(vector<string>::iterator it = highLevelAction.actors.begin(); it != highLevelAction.actors.end(); it++){
+            highLevelNames[*it] = *it2;
+            it2++;
+        }
+
+    }else{
+        ROS_ERROR("[mental_state] Incorrect number of actors for %s action: should be %i but is %i!", action.name.c_str(), (int)highLevelAction.actors.size(), (int)action.actors.size());
+        return newAction;
+    }
+
+    //We fill the action
+    newAction.name = action.name;
+    newAction.id = action.id;
+    newAction.parameters = action.parameters;
+    newAction.actors = action.actors;
+    for(vector<toaster_msgs::Fact>::iterator it = highLevelAction.prec.begin(); it != highLevelAction.prec.end(); it++){
+        toaster_msgs::Fact fact;
+        fact.subjectId = highLevelNames[it->subjectId];
+        fact.targetId = highLevelNames[it->targetId];
+        fact.property = it->property;
+        fact.propertyType = "state";
+        newAction.prec.push_back(fact);
+    }
+    for(vector<toaster_msgs::Fact>::iterator it = highLevelAction.effects.begin(); it != highLevelAction.effects.end(); it++){
+        toaster_msgs::Fact fact;
+        fact.subjectId = highLevelNames[it->subjectId];
+        fact.targetId = highLevelNames[it->targetId];
+        fact.property = it->property;
+        fact.propertyType = "state";
+        newAction.effects.push_back(fact);
+    }
+
+
+    return newAction;
+
+}
+
+/*
+Function which create an ActionMS from an other action based on preconditions and effects of High level actions
+    @action: action without preconditions and effects (Action format)
+*/
+supervisor_msgs::ActionMS RobotSM::getHighLevelActionByName(string name){
+
+    supervisor_msgs::ActionMS action;
+
+    for(vector<supervisor_msgs::ActionMS>::iterator it = highLevelActions_.begin(); it != highLevelActions_.end(); it++){
+        if(it->name == name){
+            return *it;
+        }
+    }
+
+    ROS_ERROR("[mental_state] Unknown action name: %s", name.c_str());
+    return action;
+
+}
+
+
+/*
+Function which initialize the list of high level actions from param
+*/
+void RobotSM::initHighLevelActions(){
+
+    //we retrieve the high level actions from param of the .yaml file
+    vector<string> names;
+    node_->getParam("/highLevelActions/names", names);
+    for(vector<string>::iterator it = names.begin(); it != names.end(); it++){
+        //for each high level action we retreive its composition
+        string paramTopic = "highLevelActions/";
+        paramTopic = paramTopic + *it + "_param";
+        vector<string> params;
+        node_->getParam(paramTopic, params);
+        string actorsTopic = "highLevelActions/";
+        actorsTopic = actorsTopic + *it + "_actors";
+        vector<string> actors;
+        node_->getParam(actorsTopic, actors);
+        string precTopic = "highLevelActions/";
+        precTopic = precTopic + *it + "_prec";
+        vector<string> prec;
+        node_->getParam(precTopic, prec);
+        //we transform the preconditions into facts
+        vector<toaster_msgs::Fact> precFact;
+        for(vector<string>::iterator p = prec.begin(); p != prec.end(); p++){
+            int beg = p->find(',');
+            int end = p->find(',', beg+1);
+            toaster_msgs::Fact fact;
+            fact.subjectId = p->substr(0, beg);
+            fact.property = p->substr(beg+2, end - beg - 2);
+            fact.propertyType = "state";
+            fact.targetId = p->substr(end+2, p->size() - end - 2);
+            precFact.push_back(fact);
+        }
+        string effectsTopic = "highLevelActions/";
+        effectsTopic = effectsTopic + *it + "_effects";
+        vector<string> effects;
+        node_->getParam(effectsTopic, effects);
+        //we transform the effects into facts
+        vector<toaster_msgs::Fact> effectsFact;
+        for(vector<string>::iterator e = effects.begin(); e != effects.end(); e++){
+            int beg = e->find(',');
+            int end = e->find(',', beg+1);
+            toaster_msgs::Fact fact;
+            fact.subjectId = e->substr(0, beg);
+            fact.property = e->substr(beg+2, end - beg - 2);
+            fact.propertyType = "state";
+            fact.targetId = e->substr(end+2, e->size() - end - 2);
+            effectsFact.push_back(fact);
+        }
+        //we then fill the high level action list
+        supervisor_msgs::ActionMS highLevelAction;
+        highLevelAction.name = *it;
+        highLevelAction.parameters = params;
+        highLevelAction.actors = actors;
+        highLevelAction.prec = precFact;
+        highLevelAction.effects = effectsFact;
+        highLevelActions_.push_back(highLevelAction);
+    }
+
 }

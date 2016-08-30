@@ -23,6 +23,7 @@ add_message_files(
    Plan.msg
    ActionMS.msg
    ActionMSList.msg
+   ActionList.msg
    PlanMS.msg
    GoalMS.msg
    Link.msg
@@ -38,6 +39,7 @@ add_message_files(
 add_service_files(
   FILES
   NewGoal.srv
+  NewPlan.srv
   InfoGiven.srv
   HumanActionSimu.srv
   SolveDivergentBelief.srv
