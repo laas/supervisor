@@ -27,6 +27,7 @@
 #include "supervisor_msgs/Bool.h"
 #include "supervisor_msgs/InfoGiven.h"
 #include "supervisor_msgs/AgentList.h"
+#include "supervisor_msgs/ChangeState.h"
 
 
 using namespace std;
