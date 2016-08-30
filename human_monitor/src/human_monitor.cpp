@@ -91,7 +91,14 @@ void HumanMonitor::humanPlace(string agent, string object, string support){
 	ros::NodeHandle node;
     ros::ServiceClient action_state = node.serviceClient<supervisor_msgs::ChangeState>("mental_state/change_state");
 	ros::ServiceClient remove_from_hand = node.serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
-    ros::ServiceClient set_entity_pose = node.serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
+    bool simu;
+    node.getParam("/simu", simu);
+    ros::ServiceClient set_entity_pose;
+    if(simu){
+     set_entity_pose = node.serviceClient<toaster_msgs::SetEntityPose>("toaster_simu/set_entity_pose");
+    }else{
+     set_entity_pose = node.serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
+    }
     ros::ServiceClient state_machine = node.serviceClient<supervisor_msgs::HumanAction>("state_machines/human_action");
 
     string robotName;
@@ -257,8 +264,15 @@ void HumanMonitor::humanDrop(string agent, string object, string container){
 	
 	ros::NodeHandle node;
     ros::ServiceClient action_state = node.serviceClient<supervisor_msgs::ChangeState>("mental_state/change_state");
-	ros::ServiceClient remove_from_hand = node.serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
-    ros::ServiceClient set_entity_pose = node.serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
+    ros::ServiceClient remove_from_hand = node.serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
+    bool simu;
+    node.getParam("/simu", simu);
+    ros::ServiceClient set_entity_pose;
+    if(simu){
+     set_entity_pose = node.serviceClient<toaster_msgs::SetEntityPose>("toaster_simu/set_entity_pose");
+    }else{
+     set_entity_pose = node.serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
+    }
     ros::ServiceClient state_machine = node.serviceClient<supervisor_msgs::HumanAction>("state_machines/human_action");
 
 	//remove the object from the hand of the agent
