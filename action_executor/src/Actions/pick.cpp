@@ -17,6 +17,7 @@ Pick::Pick(supervisor_msgs::Action action, Connector* connector) : VirtualAction
     connector->objectFocus_ = object_;
     connector->weightFocus_ = 0.8;
     connector->stopableFocus_ = false;
+    originalAction_ = action;
 }
 
 bool Pick::preconditions(){
@@ -106,4 +107,15 @@ bool Pick::post(){
     }
 
 	return true;
+}
+
+supervisor_msgs::Action Pick::getInstantiatedAction(){
+
+    supervisor_msgs::Action action = originalAction_;
+
+    vector<string> newParams;
+    newParams.push_back(object_);
+    action.parameters = newParams;
+
+    return action;
 }

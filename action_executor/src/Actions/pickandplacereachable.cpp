@@ -20,6 +20,7 @@ PickAndPlaceReachable::PickAndPlaceReachable(supervisor_msgs::Action action, Con
     connector->objectFocus_ = object_;
     connector->weightFocus_ = 0.8;
     connector->stopableFocus_ = false;
+    originalAction_ = action;
 }
 
 bool PickAndPlaceReachable::preconditions(){
@@ -224,4 +225,17 @@ bool PickAndPlaceReachable::post(){
 	PutOnSupport(object_, replacementSupport);
 
 	return true;
+}
+
+supervisor_msgs::Action PickAndPlaceReachable::getInstantiatedAction(){
+
+    supervisor_msgs::Action action = originalAction_;
+
+    vector<string> newParams;
+    newParams.push_back(object_);
+    newParams.push_back(support_);
+    newParams.push_back(targetAgent_);
+    action.parameters = newParams;
+
+    return action;
 }

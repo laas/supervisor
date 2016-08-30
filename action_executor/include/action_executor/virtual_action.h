@@ -50,6 +50,7 @@ public:
 	virtual bool plan() = 0;
     virtual bool exec(Server* action_server) = 0;
 	virtual bool post() = 0;
+    virtual supervisor_msgs::Action getInstantiatedAction() = 0;
 
     void moveRightArm(const actionlib::SimpleClientGoalState& state, const pr2motion::Arm_Right_MoveResultConstPtr& result);
     void moveLeftArm(const actionlib::SimpleClientGoalState& state, const pr2motion::Arm_Left_MoveResultConstPtr& result);
@@ -74,6 +75,8 @@ protected:
    bool isGripperEmpty(string arm);
    bool isRefinedObject(string object);
    string refineObject(string object);
+
+   supervisor_msgs::Action originalAction_;
 
    string object_;
    bool objectRefined_;

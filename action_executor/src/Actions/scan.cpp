@@ -21,7 +21,7 @@ void Scan::isLookingCallback(const toaster_msgs::FactList::ConstPtr& msg){
     }
     if(!found){
 		isLookingObject_ = false;
-	}
+    }
 }
 
 Scan::Scan(supervisor_msgs::Action action, Connector* connector) : VirtualAction(connector){
@@ -33,6 +33,7 @@ Scan::Scan(supervisor_msgs::Action action, Connector* connector) : VirtualAction
     connector->objectFocus_ = object_;
     connector->weightFocus_ = 0.8;
     connector->stopableFocus_ = false;
+    originalAction_ = action;
     
     isLookingObject_ =false;
 
@@ -202,4 +203,15 @@ void Scan::controlRobotLight(bool on){
     srv_req.config = conf;
 
     ros::service::call("/camera_synchronizer_node/set_parameters", srv_req, srv_resp);
+}
+
+supervisor_msgs::Action Scan::getInstantiatedAction(){
+
+    supervisor_msgs::Action action = originalAction_;
+
+    vector<string> newParams;
+    newParams.push_back(object_);
+    action.parameters = newParams;
+
+    return action;
 }

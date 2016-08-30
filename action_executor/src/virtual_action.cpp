@@ -231,7 +231,12 @@ Function which puts an object on a support
 */
 void VirtualAction::PutOnSupport(string object, string support){
 
-   ros::ServiceClient client = node_.serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
+   ros::ServiceClient client;
+   if(connector_->simu_){
+    client = node_.serviceClient<toaster_msgs::SetEntityPose>("toaster_simu/set_entity_pose");
+   }else{
+    client = node_.serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
+   }
 
    double objectHeight, supportHeight;
 	string objectHeightTopic = "/objectsHeight/bottom/";
@@ -280,7 +285,12 @@ Function which puts an object in a container
 */
 void VirtualAction::PutInContainer(string object, string container){
 
-   ros::ServiceClient client = node_.serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
+    ros::ServiceClient client;
+    if(connector_->simu_){
+     client = node_.serviceClient<toaster_msgs::SetEntityPose>("toaster_simu/set_entity_pose");
+    }else{
+     client = node_.serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
+    }
 
     toaster_msgs::ObjectListStamped objectList;
     double x,y,z;

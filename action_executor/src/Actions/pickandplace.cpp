@@ -19,6 +19,7 @@ PickAndPlace::PickAndPlace(supervisor_msgs::Action action, Connector* connector)
     connector->objectFocus_ = object_;
     connector->weightFocus_ = 0.8;
     connector->stopableFocus_ = false;
+    originalAction_ = action;
 }
 
 bool PickAndPlace::preconditions(){
@@ -323,4 +324,16 @@ bool PickAndPlace::post(){
 	PutOnSupport(object_, replacementSupport);
 	
 	return true;
+}
+
+supervisor_msgs::Action PickAndPlace::getInstantiatedAction(){
+
+    supervisor_msgs::Action action = originalAction_;
+
+    vector<string> newParams;
+    newParams.push_back(object_);
+    newParams.push_back(support_);
+    action.parameters = newParams;
+
+    return action;
 }

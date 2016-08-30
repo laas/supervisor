@@ -19,6 +19,7 @@ PickAndDrop::PickAndDrop(supervisor_msgs::Action action, Connector* connector) :
     connector->objectFocus_ = object_;
     connector->weightFocus_ = 0.8;
     connector->stopableFocus_ = false;
+    originalAction_ = action;
 }
 
 bool PickAndDrop::preconditions(){
@@ -177,4 +178,16 @@ bool PickAndDrop::post(){
     PutInContainer(object_, container_);
 
 	return true;
+}
+
+supervisor_msgs::Action PickAndDrop::getInstantiatedAction(){
+
+    supervisor_msgs::Action action = originalAction_;
+
+    vector<string> newParams;
+    newParams.push_back(object_);
+    newParams.push_back(container_);
+    action.parameters = newParams;
+
+    return action;
 }

@@ -26,6 +26,7 @@ public:
 	virtual bool plan();
     virtual bool exec(Server* action_server);
 	virtual bool post();
+    virtual supervisor_msgs::Action getInstantiatedAction();
 protected:
 
 private:

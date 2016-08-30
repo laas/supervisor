@@ -13,6 +13,7 @@ MoveTo::MoveTo(supervisor_msgs::Action action, Connector* connector) : VirtualAc
 	}else{
 		ROS_WARN("[action_executor] Wrong parameters number, should be: position");
 	}
+    originalAction_ = action;
 }
 
 bool MoveTo::preconditions(){
@@ -94,4 +95,11 @@ bool MoveTo::post(){
         connector_->leftArmPose_ = posName_;
     }
 	return true;
+}
+
+supervisor_msgs::Action MoveTo::getInstantiatedAction(){
+
+    supervisor_msgs::Action action = originalAction_;
+
+    return action;
 }

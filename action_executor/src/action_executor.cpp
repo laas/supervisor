@@ -33,19 +33,19 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
     ros::ServiceClient client = node_.serviceClient<supervisor_msgs::ChangeState>("mental_state/change_state");
     supervisor_msgs::ChangeState srv;
     srv.request.type= "action";
-	srv.request.action = goal->action;
+    srv.request.action = goal->action;
 
 	//Getting action informations
-	string name = goal->action.name;
-	int id = goal->action.id;
+    string name = goal->action.name;
+    int id = goal->action.id;
 	ROS_INFO("Executing action %s with id %i with parameters:", name.c_str(), id);
-	for(int i=0; i<goal->action.parameters.size();i++){
-		ROS_INFO("  %s", goal->action.parameters[i].c_str());
+    for(int i=0; i<goal->action.parameters.size();i++){
+        ROS_INFO("  %s", goal->action.parameters[i].c_str());
 	}
 
 	//Creating the action
 	VirtualAction* act = NULL;
-	act = initializeAction(goal->action);
+    act = initializeAction(goal->action);
 	if(!act){
 		ROS_WARN("Aborted");
 		result_.report = false;
@@ -197,6 +197,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 		return;
 	}
 	
+    srv.request.action = act->getInstantiatedAction();
 	srv.request.state = "DONE";
 	if (!client.call(srv)){
      ROS_ERROR("[action_executor] Failed to call service mental_state/change_state");

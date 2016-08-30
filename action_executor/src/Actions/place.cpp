@@ -19,6 +19,7 @@ Place::Place(supervisor_msgs::Action action, Connector* connector) : VirtualActi
     connector->objectFocus_ = support_;
     connector->weightFocus_ = 0.8;
     connector->stopableFocus_ = true;
+    originalAction_ = action;
 }
 
 bool Place::preconditions(){
@@ -197,4 +198,16 @@ bool Place::post(){
 	PutOnSupport(object_, replacementSupport);
 
 	return true;
+}
+
+supervisor_msgs::Action Place::getInstantiatedAction(){
+
+    supervisor_msgs::Action action = originalAction_;
+
+    vector<string> newParams;
+    newParams.push_back(object_);
+    newParams.push_back(support_);
+    action.parameters = newParams;
+
+    return action;
 }

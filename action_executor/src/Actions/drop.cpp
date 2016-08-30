@@ -19,6 +19,7 @@ Drop::Drop(supervisor_msgs::Action action, Connector* connector) : VirtualAction
     connector->objectFocus_ = container_;
     connector->weightFocus_ = 0.8;
     connector->stopableFocus_ = true;
+    originalAction_ = action;
 }
 
 bool Drop::preconditions(){
@@ -122,4 +123,16 @@ bool Drop::post(){
     PutInContainer(object_, container_);
 
 	return true;
+}
+
+supervisor_msgs::Action Drop::getInstantiatedAction(){
+
+    supervisor_msgs::Action action = originalAction_;
+
+    vector<string> newParams;
+    newParams.push_back(object_);
+    newParams.push_back(container_);
+    action.parameters = newParams;
+
+    return action;
 }
