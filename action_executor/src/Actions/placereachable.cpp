@@ -44,7 +44,13 @@ bool PlaceReachable::preconditions(){
 
    //If the support is not refined, we refine it
    if(!supportRefined_){
-      string refinedObject = refineObject(support_);
+       bool uniqueSupport;
+       if(isUniqueSupportObject(support_)){
+           uniqueSupport = true;
+       }else{
+           uniqueSupport = false;
+       }
+       string refinedObject = refineObject(support_, uniqueSupport);
       if(refinedObject == "NULL"){
           ROS_WARN("[action_executor] No possible refinement for object: %s", support_.c_str());
           return false;

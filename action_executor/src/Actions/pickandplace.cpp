@@ -38,7 +38,7 @@ bool PickAndPlace::preconditions(){
    
    //If the object is not refined, we refine it
    if(!objectRefined_){
-      string refinedObject = refineObject(object_);
+      string refinedObject = refineObject(object_, false);
       if(refinedObject == "NULL"){
           ROS_WARN("[action_executor] No possible refinement for object: %s", object_.c_str());
           return false;
@@ -184,7 +184,13 @@ bool PickAndPlace::exec(Server* action_server){
         }
         //We refine the support if needed
         if(!supportRefined_){
-            string refinedObject = refineObject(support_);
+            bool uniqueSupport;
+            if(isUniqueSupportObject(support_)){
+                uniqueSupport = true;
+            }else{
+                uniqueSupport = false;
+            }
+            string refinedObject = refineObject(support_, uniqueSupport);
             if(refinedObject == "NULL"){
                 ROS_WARN("[action_executor] No possible refinement for object: %s", support_.c_str());
                 return false;

@@ -43,7 +43,7 @@ bool Drop::preconditions(){
 
    //If the container is not refined, we refine it
    if(!containerRefined_){
-      string refinedObject = refineObject(container_);
+      string refinedObject = refineObject(container_, false);
       if(refinedObject == "NULL"){
           ROS_WARN("[action_executor] No possible refinement for object: %s", container_.c_str());
           return false;

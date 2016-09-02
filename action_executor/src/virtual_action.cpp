@@ -35,7 +35,7 @@ bool VirtualAction::isRefinedObject(string object){
 /*
 Function which look for the refinement of an object
 */
-string VirtualAction::refineObject(string object){
+string VirtualAction::refineObject(string object, bool uniqueSupport){
 
     //First we look for all possible refinement
     string topic = "/highLevelRefinement/" + object;
@@ -48,6 +48,12 @@ string VirtualAction::refineObject(string object){
     for(vector<string>::iterator it = possibleObjects.begin(); it != possibleObjects.end(); it++){
         vector<toaster_msgs::Fact> factsTocheck;
         toaster_msgs::Fact fact;
+        if(uniqueSupport){
+            fact.subjectId = "NULL";
+            fact.property = "isOn";
+            fact.targetId = *it;
+            factsTocheck.push_back(fact);
+        }
         fact.subjectId = *it;
         fact.property = "isReachableBy";
         fact.targetId = robotName_;
@@ -106,6 +112,28 @@ bool VirtualAction::isSupportObject(string support){
    return false;
    
 }
+
+/*
+Function which return true if an object is a support object (based on parameters)
+    @support: the tested object
+*/
+bool VirtualAction::isUniqueSupportObject(string support){
+
+   //first we get the manipulable object from parameters
+   vector<string> supportObjects;
+   node_.getParam("/uniqueSupports", supportObjects);
+
+   //Then we check if the object is in the list
+   for(vector<string>::iterator it = supportObjects.begin(); it != supportObjects.end(); it++){
+      if(*it == support){
+         return true;
+      }
+   }
+
+   return false;
+
+}
+
 
 /*
 Function which return true if an object is a container object (based on parameters)

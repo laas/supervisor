@@ -38,7 +38,7 @@ bool PickAndDrop::preconditions(){
    
    //If the object is not refined, we refine it
    if(!objectRefined_){
-      string refinedObject = refineObject(object_);
+      string refinedObject = refineObject(object_, false);
       if(refinedObject == "NULL"){
           ROS_WARN("[action_executor] No possible refinement for object: %s", object_.c_str());
           return false;
@@ -121,7 +121,7 @@ bool PickAndDrop::exec(Server* action_server){
         }
         //We refine the container if needed
         if(!containerRefined_){
-            string refinedObject = refineObject(container_);
+            string refinedObject = refineObject(container_, false);
             if(refinedObject == "NULL"){
                 ROS_WARN("[action_executor] No possible refinement for object: %s", container_.c_str());
                 return false;

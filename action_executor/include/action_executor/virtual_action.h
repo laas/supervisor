@@ -60,6 +60,7 @@ protected:
    ros::NodeHandle node_;
    bool isManipulableObject(string object);
    bool isSupportObject(string support);
+   bool isUniqueSupportObject(string support);
    bool isContainerObject(string container);
    bool ArePreconditionsChecked(vector<toaster_msgs::Fact> precs);
    void PutInHand(string object, string hand, int gtpId);
@@ -74,7 +75,7 @@ protected:
    bool closeGripper(int armId, Server* action_server);
    bool isGripperEmpty(string arm);
    bool isRefinedObject(string object);
-   string refineObject(string object);
+   string refineObject(string object, bool uniqueSupport);
 
    supervisor_msgs::Action originalAction_;
 

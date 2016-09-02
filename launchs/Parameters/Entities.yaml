@@ -65,3 +65,4 @@ highLevelRefinement:
     BLUE_CUBE: ['BLUE_CUBE1', 'BLUE_CUBE2']
     PLACEMAT: ['PLACEMAT_1', 'PLACEMAT_2']
 stickPlacements: ['RED_CUBE1', 'RED_CUBE2']
+uniqueSupports: ['PLACEMAT','PLACEMAT_1', 'PLACEMAT_2']
