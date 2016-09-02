@@ -337,8 +337,8 @@ void HumanMonitor::humanPlaceStick(string agent, string object){
        srv_setPose.request.pose.position.z = z;
        srv_setPose.request.pose.orientation.x = 0.0;
        srv_setPose.request.pose.orientation.y = 0.0;
-       srv_setPose.request.pose.orientation.z = 0.0;
-       srv_setPose.request.pose.orientation.w = 1.0;
+       srv_setPose.request.pose.orientation.z = 0.7;
+       srv_setPose.request.pose.orientation.w = 0.7;
        if (!set_entity_pose.call(srv_setPose)){
          ROS_ERROR("Failed to call service pdg/set_entity_pose");
          }
