@@ -182,26 +182,6 @@ bool newPlan(supervisor_msgs::NewPlan::Request  &req, supervisor_msgs::NewPlan::
     return true;
 }
 
-/*
-Service call when a plan is computed by the robot
-*/
-bool robotAction(supervisor_msgs::HumanAction::Request  &req, supervisor_msgs::HumanAction::Response &res){
-
-    actionsDone.push_back(req.action.id);
-
-    vector<supervisor_msgs::Action> newRobotActions;
-
-    for(vector<supervisor_msgs::Action>::iterator it = robotActionsReady.begin(); it != robotActionsReady.end(); it++){
-        if(!(req.action.id == it->id)){
-            newRobotActions.push_back(*it);
-        }
-    }
-    robotActionsReady = newRobotActions;
-    evaluatePlan();
-
-    return true;
-}
-
 pair<bool, int> isInList(supervisor_msgs::Action action, vector<supervisor_msgs::Action> actions){
 
     pair<bool, int> answer;
@@ -231,6 +211,30 @@ pair<bool, int> isInList(supervisor_msgs::Action action, vector<supervisor_msgs:
     answer.first = false;
     answer.second = -1;
     return answer;
+}
+
+/*
+Service call when a plan is computed by the robot
+*/
+bool robotAction(supervisor_msgs::HumanAction::Request  &req, supervisor_msgs::HumanAction::Response &res){
+
+    actionsDone.push_back(req.action.id);
+
+    vector<supervisor_msgs::Action> newRobotActions;
+
+    pair<bool, int> robotAction = isInList(req.action, robotActionsReady);
+    if(robotAction.first){
+        actionsDone.push_back(robotAction.second);
+        for(vector<supervisor_msgs::Action>::iterator it = robotActionsReady.begin(); it != robotActionsReady.end(); it++){
+            if(!(robotAction.second == it->id)){
+                newRobotActions.push_back(*it);
+            }
+        }
+    }
+    robotActionsReady = newRobotActions;
+    evaluatePlan();
+
+    return true;
 }
 
 /*
