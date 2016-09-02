@@ -26,6 +26,7 @@ entitiesTranslation:
     PINK_TRASHBIN: 'pink box'
     BLUE_TRASHBIN: 'blue box'
     GREEN_TRASHBIN: 'green box'
+    STICK: 'stick'
 properties:
     translationTrue:
         isOn: 'is on'

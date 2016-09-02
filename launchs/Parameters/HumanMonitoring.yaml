@@ -1,7 +1,7 @@
 ---
 timeNoAction: 300.0
 timeSignalingHuman: 10.0
-timeAdaptation: 5.0
+timeAdaptation: 3.0
 humanRightHand: 'rightHand'
 threshold:
     pick: 0.20
