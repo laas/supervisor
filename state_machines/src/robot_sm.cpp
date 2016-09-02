@@ -19,7 +19,7 @@ actionClient_("supervisor/action_executor", true)
     shouldRetractRight_ = true;
     shouldRetractLeft_ = true;
     fillHighLevelNames();
-    node_->getParam("/negociationMode", negociationMode_);
+    node_->getParam("/NegociationMode", negociationMode_);
     node_->getParam("/timeAdaptation", timeAdaptation_);
     timerStarted_ = false;
     initHighLevelActions();
