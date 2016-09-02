@@ -255,7 +255,7 @@ vector<toaster_msgs::Fact> PlanElaboration::computeAgentXFacts(vector<toaster_ms
                         highLevelIt2 = it2->targetId;
                         highLevelName = false;
                     }
-                    if(it2->property == it->property && highLevelIt2 == highLevelIt && isInVector(agentList_, it2->subjectId)){
+                    if(it2->property == it->property && highLevelIt2 == highLevelIt && isInVector(agentList_, it2->subjectId) && it2->subjectId != it->subjectId){
                         result.push_back(*it2);
                         if(!added){
                             toaster_msgs::Fact toAdd;
@@ -303,7 +303,7 @@ vector<toaster_msgs::Fact> PlanElaboration::computeAgentXFacts(vector<toaster_ms
                         highLevelName = false;
                         highLevelIt2 = it2->subjectId;
                     }
-                    if(it2->property == it->property && highLevelIt2 == highLevelIt && isInVector(agentList_, it2->targetId)){
+                    if(it2->property == it->property && highLevelIt2 == highLevelIt && isInVector(agentList_, it2->targetId) && it2->targetId != it->targetId){
                         result.push_back(*it2);
                         if(!added){
                             toaster_msgs::Fact toAdd;
