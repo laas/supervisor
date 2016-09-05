@@ -61,7 +61,7 @@ string VirtualAction::refineObject(string object, bool uniqueSupport){
         if(ArePreconditionsChecked(factsTocheck)){
             //TODO: add priority to the one not reachable by the human (objectStored and found if reachable by someone else)
             //get cost for this object (humanDistance)
-            if(bestCost == 0.0 || connector_->humanDistances_[*it] < bestCost){
+            if(connector_->humanDistances_[*it] > bestCost){
                 objectStored = *it;
             }
         }
