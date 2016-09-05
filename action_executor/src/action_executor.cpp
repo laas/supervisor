@@ -16,7 +16,7 @@ TODO: placereachable (+pickandplacereachable), give/grab, moveTo, goTo (+engage/
 
 ros::NodeHandle* node_;
 Connector* connector_;
-string humanSafetyJoint, robotToaster;
+string humanSafetyJoint, robotToaster, robotRightHand, humanRightHand;
 double safetyThreshold;
 ros::Publisher focus_pub;
 
@@ -274,12 +274,19 @@ void agentFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
 
     for(vector<toaster_msgs::Fact>::iterator it = distanceFacts.begin(); it != distanceFacts.end(); it++){
         if(it->property == "Distance"){
+            //check safety
             if(it->subjectId == humanSafetyJoint && it->targetId == robotToaster){
                 if(it->doubleValue < safetyThreshold){
                     connector_->stopOrder_ = true;
                 }else{
                     connector_->stopOrder_ = false;
                 }
+            }
+            //fill cost maps
+            if(it->subjectId == robotRightHand){
+                connector_->robotDistances_[it->targetId] = it->doubleValue;
+            }else if(it->subjectId == humanRightHand){
+                connector_->humanDistances_[it->targetId] = it->doubleValue;
             }
         }
     }
@@ -310,6 +317,8 @@ int main (int argc, char **argv)
   node.getParam("humanSafetyJoint", humanSafetyJoint);
   node.getParam("safetyThreshold", safetyThreshold);
   node.getParam("robot/toasterName", robotToaster);
+  node.getParam("robot/hands/right", robotRightHand);
+  node.getParam("humanRightHand", humanRightHand);
    
   Connector connector;
   connector_ = &connector;

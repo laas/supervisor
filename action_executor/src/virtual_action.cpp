@@ -43,8 +43,8 @@ string VirtualAction::refineObject(string object, bool uniqueSupport){
     node_.getParam(topic, possibleObjects);
 
     //Then, for all these objects we check if they are reachable by the robot
-    bool found = false;
-    string objectStored;
+    double bestCost = 0.0;
+    string objectStored = "NULL";
     for(vector<string>::iterator it = possibleObjects.begin(); it != possibleObjects.end(); it++){
         vector<toaster_msgs::Fact> factsTocheck;
         toaster_msgs::Fact fact;
@@ -60,15 +60,14 @@ string VirtualAction::refineObject(string object, bool uniqueSupport){
         factsTocheck.push_back(fact);
         if(ArePreconditionsChecked(factsTocheck)){
             //TODO: add priority to the one not reachable by the human (objectStored and found if reachable by someone else)
-            return *it;
+            //get cost for this object (humanDistance)
+            if(bestCost == 0.0 || connector_->humanDistances_[*it] < bestCost){
+                objectStored = *it;
+            }
         }
     }
 
-    if(found){
-        return objectStored;
-    }
-
-    return "NULL";
+    return objectStored;
 }
 
 /*

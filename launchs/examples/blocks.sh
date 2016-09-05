@@ -86,8 +86,8 @@ orientation:
   z: 0.0,
   w: 1.0}}}"
 
-rosservice call /toaster_simu/add_entity "{id: 'PLACEMAT_1', name: 'PLACEMAT_1', type: 'object', ownerId: ''}"
-rosservice call /toaster_simu/set_entity_pose "{id: 'PLACEMAT_1', ownerId: '', type: 'object', pose:
+rosservice call /toaster_simu/add_entity "{id: 'PLACEMAT_2', name: 'PLACEMAT_2', type: 'object', ownerId: ''}"
+rosservice call /toaster_simu/set_entity_pose "{id: 'PLACEMAT_2', ownerId: '', type: 'object', pose:
 {position:
   {x: 4.8,
   y: 4.013,
@@ -98,8 +98,8 @@ orientation:
   z: 0.0,
   w: 1.0}}}"
 
-rosservice call /toaster_simu/add_entity "{id: 'PLACEMAT_2', name: 'PLACEMAT_2', type: 'object', ownerId: ''}"
-rosservice call /toaster_simu/set_entity_pose "{id: 'PLACEMAT_2', ownerId: '', type: 'object', pose:
+rosservice call /toaster_simu/add_entity "{id: 'PLACEMAT_1', name: 'PLACEMAT_1', type: 'object', ownerId: ''}"
+rosservice call /toaster_simu/set_entity_pose "{id: 'PLACEMAT_1', ownerId: '', type: 'object', pose:
 {position:
   {x: 4.8,
   y: 4.187,

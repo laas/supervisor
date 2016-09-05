@@ -50,6 +50,9 @@ public:
     bool stopableFocus_;
     bool simu_;
 
+    map<string, double> robotDistances_;
+    map<string, double> humanDistances_;
+
 	
     int previousId_;
     int idGrasp_;
