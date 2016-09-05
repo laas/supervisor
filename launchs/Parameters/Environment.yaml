@@ -1,0 +1,47 @@
+---
+environment:
+    referenceObject: 'TABLE_4'
+    setReferenceWithoutOrientation: true
+    toasterSimuObjects: ['PLACEMAT_1', 'PLACEMAT_2']
+    pdgObjects: ['RED_CUBE2', 'BLUE_CUBE2', 'RED_CUBE', 'BLUE_CUBE', 'GREEN_CUBE', 'STICK']
+    objectsRelativePose:
+        PLACEMAT_1:
+            x: 0.0
+            y: +0.087
+            z: 0.75
+            rotation: false
+        PLACEMAT_2:
+            x:  0.0
+            y: -0.087
+            z: 0.75
+            rotation: false
+        RED_CUBE2:
+            x: 0.5
+            y: 0.75
+            z: 0.75
+            rotation: false
+        BLUE_CUBE2:
+            x: 0.5
+            y: 1.0
+            z: 0.75
+            rotation: false
+        RED_CUBE:
+            x: -0.44
+            y: -0.95
+            z: 0.75
+            rotation: false
+        BLUE_CUBE:
+            x: -0.30
+            y: -0.875
+            z: 0.75
+            rotation: false
+        GREEN_CUBE:
+            x: -0.30
+            y: -0.875
+            z: 0.75
+            rotation: false
+        STICK:
+            x: -0.30
+            y: -0.875
+            z: 0.75
+            rotation: false

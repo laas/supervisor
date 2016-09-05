@@ -349,6 +349,126 @@ void MainWindow::on_pushButtonExecuteGoal_clicked()
 }
 
 
+void MainWindow::on_pushButtonSetEnv_clicked()
+{
+    ros::ServiceClient client = node_.serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
+   ros::ServiceClient client_simu = node_.serviceClient<toaster_msgs::SetEntityPose>("toaster_simu/set_entity_pose");
+
+    toaster_msgs::ObjectListStamped objectList;
+    string objectRef;
+    bool setRefWithoutOri;
+    double xRef,yRef,zRef;
+    node_.getParam("environment/referenceObject", objectRef);
+    node_.getParam("envionment/setReferenceWithoutOrientation", setRefWithoutOri);
+   try{
+        bool found = false;
+       objectList  = *(ros::topic::waitForMessage<toaster_msgs::ObjectListStamped>("pdg/objectList",ros::Duration(1)));
+       for(vector<toaster_msgs::Object>::iterator it = objectList.objectList.begin(); it != objectList.objectList.end(); it++){
+         if(it->meEntity.id == objectRef){
+            xRef = it->meEntity.pose.position.x;
+            yRef = it->meEntity.pose.position.y;
+            zRef = it->meEntity.pose.position.z;
+            found = true;
+            break;
+         }
+       }
+       if(!found){
+           ROS_ERROR("No table position!");
+       }
+       toaster_msgs::SetEntityPose srv;
+       double x, y, z;
+       if(setRefWithoutOri){
+           //set table without orientation
+           x = xRef;
+           y = yRef;
+           z = 0.0;
+           srv.request.id = objectRef;
+           srv.request.type = "object";
+           srv.request.pose.position.x = x;
+           srv.request.pose.position.y = y;
+           srv.request.pose.position.z = 0.0;
+           srv.request.pose.orientation.x = 0.0;
+           srv.request.pose.orientation.y = 0.0;
+           srv.request.pose.orientation.z = 0.0;
+           srv.request.pose.orientation.w = 1.0;
+           if (!client.call(srv)){
+             ROS_ERROR("Failed to call service pdg/set_entity_pose");
+             }
+       }
+
+       //get list of entities to move with toaster_simu
+       string toasterSimuTopic = "/environment/toasterSimuObjects";
+       vector<string> toasterSimuObjects;
+       node_.getParam(toasterSimuTopic, toasterSimuObjects);
+       for(vector<string>::iterator it = toasterSimuObjects.begin(); it != toasterSimuObjects.end(); it++){
+               string posex = "/environment/objectsRelativePose/" + *it + "/x" ;
+               string posey = "/environment/objectsRelativePose/" + *it + "/y" ;
+               string posez = "/environment/objectsRelativePose/" + *it + "/z" ;
+               string rotationTopic = "/environment/objectsRelativePose/" + *it + "/rotation" ;
+               double xRel, yRel, zRel;
+               bool rotation;
+               node_.getParam(posex, xRel);
+               node_.getParam(posey, yRel);
+               node_.getParam(posez, zRel);
+               node_.getParam(rotationTopic, rotation);
+               srv.request.id = *it;
+               srv.request.type = "object";
+               srv.request.pose.position.x = xRef + xRel;
+               srv.request.pose.position.y = yRef + yRel;
+               srv.request.pose.position.z = zRel;
+               srv.request.pose.orientation.x = 0.0;
+               srv.request.pose.orientation.y = 0.0;
+               if(rotation){
+                   srv.request.pose.orientation.z = 0.7;
+                   srv.request.pose.orientation.w = 0.7;
+               }else{
+                   srv.request.pose.orientation.z = 0.0;
+                   srv.request.pose.orientation.w = 1.0;
+               }
+               if (!client_simu.call(srv)){
+                 ROS_ERROR("Failed to call service toaster_simu/set_entity_pose");
+                 }
+       }
+       //get list of entities to move with pdg
+       string pdgTopic = "/environment/pdgObjects";
+       vector<string> pdgObjects;
+       node_.getParam(pdgTopic, pdgObjects);
+       for(vector<string>::iterator it = pdgObjects.begin(); it != pdgObjects.end(); it++){
+               string posex = "/environment/objectsRelativePose/" + *it + "/x" ;
+               string posey = "/environment/objectsRelativePose/" + *it + "/y" ;
+               string posez = "/environment/objectsRelativePose/" + *it + "/z" ;
+               string rotationTopic = "/environment/objectsRelativePose/" + *it + "/rotation" ;
+               double xRel, yRel, zRel;
+               bool rotation;
+               node_.getParam(posex, xRel);
+               node_.getParam(posey, yRel);
+               node_.getParam(posez, zRel);
+               node_.getParam(rotationTopic, rotation);
+               srv.request.id = *it;
+               srv.request.type = "object";
+               srv.request.pose.position.x = xRef + xRel;
+               srv.request.pose.position.y = yRef + yRel;
+               srv.request.pose.position.z = zRel;
+               srv.request.pose.orientation.x = 0.0;
+               srv.request.pose.orientation.y = 0.0;
+               if(rotation){
+                   srv.request.pose.orientation.z = 0.7;
+                   srv.request.pose.orientation.w = 0.7;
+               }else{
+                   srv.request.pose.orientation.z = 0.0;
+                   srv.request.pose.orientation.w = 1.0;
+               }
+               if (!client.call(srv)){
+                 ROS_ERROR("Failed to call service pdg/set_entity_pose");
+                 }
+       }
+   }
+   catch(const std::exception & e){
+       ROS_WARN("[action_executor] Failed to read toaster poster");
+   }
+}
+
+
 
 /*************************************
  * Knowledge tab
@@ -676,3 +796,4 @@ void MainWindow::on_SendSignal_clicked()
     msg.weight = importancy;
     signal_pub.publish(msg);
 }
+

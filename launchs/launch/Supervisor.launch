@@ -9,6 +9,7 @@
         <rosparam command="load" file="$(find launchs)/Parameters/Interface.yaml" />
         <rosparam command="load" file="$(find launchs)/Parameters/Dialogue.yaml" />
         <rosparam command="load" file="$(find launchs)/Parameters/Planning.yaml" />
+        <rosparam command="load" file="$(find launchs)/Parameters/Environment.yaml" />
 
 	<node name="action_executor" pkg="action_executor" type="action_executor" output="screen" />  <!-- Launch the action executor -->
 	<node name="mental_states" pkg="mental_states" type="mental_states" output="screen" />  <!-- Launch the mental state manager -->
