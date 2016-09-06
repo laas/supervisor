@@ -15,7 +15,9 @@ PlanElaboration::PlanElaboration(ros::NodeHandle* node)
     if (client.call(srv)){
        agentList_ = srv.response.agents;
     }else{
-      ROS_ERROR("[state_machines] Failed to call service mental_state/get_all_agents");
+        agentList_.push_back("PR2_ROBOT");
+        agentList_.push_back("HERAKLES_HUMAN1");
+      ROS_ERROR("[plan_elaboration] Failed to call service mental_state/get_all_agents");
     }
 }
 
