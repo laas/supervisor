@@ -16,6 +16,7 @@ gripperJoint:
     left: 'pr2l_gripper_joint'
 gripperThreshold: 0.01
 humanSafetyJoint: 'rightHand'
+toWatchThreshold: 0.5
 safetyThreshold: 0.5
 timeScan: 5.0
 timeWaitScan: 10.0

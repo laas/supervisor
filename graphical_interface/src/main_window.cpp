@@ -143,13 +143,13 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
 
 
     actionClientSup_.waitForServer();
-    actionClientTorso_.waitForServer();
+    /*actionClientTorso_.waitForServer();
     actionClientRightArm_.waitForServer();
     actionClientLeftArm_.waitForServer();
     actionClientRightGripper_.waitForServer();
     actionClientLeftGripper_.waitForServer();
     actionClientHead_.waitForServer();
-    actionClientGetQ_.waitForServer();
+    actionClientGetQ_.waitForServer();*/
 
 
 }
