@@ -14,7 +14,6 @@ Pick::Pick(supervisor_msgs::Action action, Connector* connector) : VirtualAction
 	}else{
 		ROS_WARN("[action_executor] Missing parameter: object to pick");
     }
-    connector->objectFocus_ = object_;
     connector->weightFocus_ = 0.8;
     connector->stopableFocus_ = false;
     originalAction_ = action;
@@ -38,6 +37,8 @@ bool Pick::preconditions(){
             object_ = refinedObject;
        }
     }
+    connector_->objectFocus_ = object_;
+    connector_->objectToWatch_ = object_;
 
     //Then we check if the robot has the hands free and if the object is reachable
     vector<toaster_msgs::Fact> precsTocheck;
@@ -94,7 +95,32 @@ bool Pick::plan(){
 bool Pick::exec(Server* action_server){
 
    connector_->stopableFocus_ = true;
-   return execAction(actionId_, true, action_server);
+   while(true){
+       bool exec = execAction(actionId_, true, action_server);
+       if(exec){
+           return true;
+       }else if(connector_->refineOrder_){
+            connector_->objectLocked_ = connector_->objectToWatch_;
+            string topic = "/highLevelName/";
+            topic = topic + object_;
+            node_.getParam(topic, object_);
+            string refinedObject = refineObject(object_, false);
+            if(refinedObject == "NULL"){
+                ROS_WARN("[action_executor] No possible refinement for object: %s", object_.c_str());
+                return false;
+            }else{
+                 object_ = refinedObject;
+                 connector_->objectFocus_ = object_;
+                 connector_->objectToWatch_ = object_;
+                 bool plan = this->plan();
+                 if(!plan){
+                     return false;
+                 }
+            }
+       }else{
+           return false;
+       }
+   }
 
 }
 

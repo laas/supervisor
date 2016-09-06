@@ -16,7 +16,6 @@ PickAndPlace::PickAndPlace(supervisor_msgs::Action action, Connector* connector)
 	}else{
 		ROS_WARN("[action_executor] Wrong parameter numbers, should be: object, support");
     }
-    connector->objectFocus_ = object_;
     connector->weightFocus_ = 0.8;
     connector->stopableFocus_ = false;
     originalAction_ = action;
@@ -46,6 +45,8 @@ bool PickAndPlace::preconditions(){
            object_ = refinedObject;
       }
    }
+   connector_->objectFocus_ = object_;
+   connector_->objectToWatch_ = object_;
    //TODO: add check of possible refinement for the support?
 
    //Then we check if  the object is reachable
@@ -175,9 +176,36 @@ bool PickAndPlace::plan(){
 bool PickAndPlace::exec(Server* action_server){
 
     connector_->stopableFocus_ = true;
-    bool firstTask = execAction(actionId_, true, action_server);
+    bool firstTask = false;
+    while(!firstTask){
+        bool exec = execAction(actionId_, true, action_server);
+        if(exec){
+            firstTask = true;
+        }else if(connector_->refineOrder_){
+             connector_->objectLocked_ = connector_->objectToWatch_;
+             string topic = "/highLevelName/";
+             topic = topic + object_;
+             node_.getParam(topic, object_);
+             string refinedObject = refineObject(object_, false);
+             if(refinedObject == "NULL"){
+                 ROS_WARN("[action_executor] No possible refinement for object: %s", object_.c_str());
+                 return false;
+             }else{
+                  object_ = refinedObject;
+                  connector_->objectFocus_ = object_;
+                  connector_->objectToWatch_ = object_;
+                  bool plan = this->plan();
+                  if(!plan){
+                      return false;
+                  }
+             }
+        }else{
+            return false;
+        }
+    }
 
     if(firstTask){
+        while(true){
         if(gripperEmpty_  && !simu_){
             ROS_WARN("[action_executor] Robot failed to pick (gripper empty)");
             return false;
@@ -199,6 +227,7 @@ bool PickAndPlace::exec(Server* action_server){
             }
         }
         connector_->objectFocus_ = support_;
+        connector_->objectToWatch_ = support_;
         //we plan a traj if needed
         if(!supportRefined_){
             vector<gtp_ros_msg::Ag> agents;
@@ -308,7 +337,27 @@ bool PickAndPlace::exec(Server* action_server){
                 return false;
             }
         }
-        return execAction(nextActionId_, false, action_server);
+        bool exec = execAction(actionId_, false, action_server);
+        if(exec){
+            return true;
+        }else if(connector_->refineOrder_){
+             connector_->objectLocked_ = connector_->objectToWatch_;
+             string topic = "/highLevelName/";
+             topic = topic + support_;
+             node_.getParam(topic, support_);
+             string refinedObject = refineObject(support_, false);
+             if(refinedObject == "NULL"){
+                 ROS_WARN("[action_executor] No possible refinement for object: %s", object_.c_str());
+                 return false;
+             }else{
+                  support_ = refinedObject;
+                  connector_->objectFocus_ = support_;
+                  connector_->objectToWatch_ = support_;
+             }
+        }else{
+            return false;
+        }
+        }
     }else{
         return false;
     }

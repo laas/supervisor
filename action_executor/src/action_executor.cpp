@@ -17,7 +17,7 @@ TODO: placereachable (+pickandplacereachable), give/grab, moveTo, goTo (+engage/
 ros::NodeHandle* node_;
 Connector* connector_;
 string humanSafetyJoint, robotToaster, robotRightHand, humanRightHand;
-double safetyThreshold;
+double safetyThreshold, toWatchThreshold;
 ros::Publisher focus_pub;
 
 ActionExecutor::ActionExecutor(string name):
@@ -285,6 +285,13 @@ void agentFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
             //fill cost maps
             if(it->subjectId == robotRightHand){
                 connector_->robotDistances_[it->targetId] = it->doubleValue;
+                if(it->targetId == connector_->objectToWatch_){
+                    if(it->doubleValue < toWatchThreshold){
+                        connector_->refineOrder_ = true;
+                    }else{
+                        connector_->refineOrder_ = false;
+                    }
+                }
             }else if(it->subjectId == humanRightHand){
                 connector_->humanDistances_[it->targetId] = it->doubleValue;
             }
@@ -316,6 +323,7 @@ int main (int argc, char **argv)
 
   node.getParam("humanSafetyJoint", humanSafetyJoint);
   node.getParam("safetyThreshold", safetyThreshold);
+  node.getParam("toWatchThreshold", toWatchThreshold);
   node.getParam("robot/toasterName", robotToaster);
   node.getParam("robot/hands/right", robotRightHand);
   node.getParam("humanRightHand", humanRightHand);

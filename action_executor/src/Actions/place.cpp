@@ -16,7 +16,6 @@ Place::Place(supervisor_msgs::Action action, Connector* connector) : VirtualActi
 	}else{
 		ROS_WARN("[action_executor] Wrong parameter numbers, should be: object, support");
     }
-    connector->objectFocus_ = support_;
     connector->weightFocus_ = 0.8;
     connector->stopableFocus_ = true;
     originalAction_ = action;
@@ -57,6 +56,8 @@ bool Place::preconditions(){
            support_ = refinedObject;
       }
    }
+   connector_->objectFocus_ = support_;
+   connector_->objectToWatch_ = support_;
    
    //Then we check if the robot has the object in hand and if the support is reachable
    vector<toaster_msgs::Fact> precsTocheck;
@@ -186,7 +187,32 @@ bool Place::plan(){
 
 bool Place::exec(Server* action_server){
 
-    return execAction(actionId_, false, action_server);
+    while(true){
+        bool exec = execAction(actionId_, false, action_server);
+        if(exec){
+            return true;
+        }else if(connector_->refineOrder_){
+             connector_->objectLocked_ = connector_->objectToWatch_;
+             string topic = "/highLevelName/";
+             topic = topic + support_;
+             node_.getParam(topic, support_);
+             string refinedObject = refineObject(support_, false);
+             if(refinedObject == "NULL"){
+                 ROS_WARN("[action_executor] No possible refinement for object: %s", object_.c_str());
+                 return false;
+             }else{
+                  support_ = refinedObject;
+                  connector_->objectFocus_ = support_;
+                  connector_->objectToWatch_ = support_;
+                  bool plan = this->plan();
+                  if(!plan){
+                      return false;
+                  }
+             }
+        }else{
+            return false;
+        }
+    }
 
 }
 

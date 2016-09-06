@@ -53,6 +53,10 @@ public:
     map<string, double> robotDistances_;
     map<string, double> humanDistances_;
 
+    string objectToWatch_;
+    string objectLocked_;
+    bool refineOrder_;
+
 	
     int previousId_;
     int idGrasp_;

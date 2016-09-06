@@ -16,7 +16,6 @@ PickAndDrop::PickAndDrop(supervisor_msgs::Action action, Connector* connector) :
 	}else{
 		ROS_WARN("[action_executor] Wrong parameter numbers, should be: object, container");
     }
-    connector->objectFocus_ = object_;
     connector->weightFocus_ = 0.8;
     connector->stopableFocus_ = false;
     originalAction_ = action;
@@ -46,6 +45,8 @@ bool PickAndDrop::preconditions(){
            object_ = refinedObject;
       }
    }
+   connector_->objectFocus_ = object_;
+   connector_->objectToWatch_ = object_;
    //TODO: add check of possible refinement for the container?
 
    //Then we check if  the object is reachable
@@ -112,61 +113,111 @@ bool PickAndDrop::plan(){
 bool PickAndDrop::exec(Server* action_server){
 
     connector_->stopableFocus_ = true;
-    bool firstTask = execAction(actionId_, true, action_server);
-
-    if(firstTask){
-        if(gripperEmpty_  && !simu_){
-            ROS_WARN("[action_executor] Robot failed to pick (gripper empty)");
+    bool firstTask = false;
+    while(!firstTask){
+        bool exec = execAction(actionId_, true, action_server);
+        if(exec){
+            firstTask = true;
+        }else if(connector_->refineOrder_){
+             connector_->objectLocked_ = connector_->objectToWatch_;
+             string topic = "/highLevelName/";
+             topic = topic + object_;
+             node_.getParam(topic, object_);
+             string refinedObject = refineObject(object_, false);
+             if(refinedObject == "NULL"){
+                 ROS_WARN("[action_executor] No possible refinement for object: %s", object_.c_str());
+                 return false;
+             }else{
+                  object_ = refinedObject;
+                  connector_->objectFocus_ = object_;
+                  connector_->objectToWatch_ = object_;
+                  bool plan = this->plan();
+                  if(!plan){
+                      return false;
+                  }
+             }
+        }else{
             return false;
         }
-        //We refine the container if needed
-        if(!containerRefined_){
-            string refinedObject = refineObject(container_, false);
-            if(refinedObject == "NULL"){
-                ROS_WARN("[action_executor] No possible refinement for object: %s", container_.c_str());
+    }
+
+
+    if(firstTask){
+        while(true){
+            if(gripperEmpty_  && !simu_){
+                ROS_WARN("[action_executor] Robot failed to pick (gripper empty)");
                 return false;
-            }else{
-                 container_ = refinedObject;
             }
-        }
-        connector_->objectFocus_ = container_;
-        //we plan a traj if needed
-        if(!containerRefined_){
-            vector<gtp_ros_msg::Ag> agents;
-            gtp_ros_msg::Ag agent;
-            agent.actionKey = "mainAgent";
-            agent.agentName = robotName_;
-            agents.push_back(agent);
-            vector<gtp_ros_msg::Obj> objects;
-            gtp_ros_msg::Obj object;
-            object.actionKey = "mainObject";
-            object.objectName = object_;
-            objects.push_back(object);
-            gtp_ros_msg::Obj container;
-            container.actionKey = "supportObject";
-            container.objectName = container_;
-            objects.push_back(container);
-            vector<gtp_ros_msg::Points> points;
-            vector<gtp_ros_msg::Data> datas;
-            int previousId = connector_->previousId_;
-            connector_->previousId_ = actionId_;
-            int nbTry = 0;
-            bool trajFound = false;
-            while(nbTry < nbPlanMax_){
-                nextActionId_ = planGTP("drop", agents, objects, datas, points);
-                connector_->previousId_ = previousId;
-                if(nextActionId_ != -1){
-                    trajFound = true;
-                    break;
+            //We refine the container if needed
+            if(!containerRefined_){
+                string refinedObject = refineObject(container_, false);
+                if(refinedObject == "NULL"){
+                    ROS_WARN("[action_executor] No possible refinement for object: %s", container_.c_str());
+                    return false;
+                }else{
+                     container_ = refinedObject;
                 }
-                nbTry++;
             }
-            if(!trajFound){
-                ROS_WARN("[action_executor] No traj found by GTP");
+            connector_->objectFocus_ = container_;
+            connector_->objectToWatch_ = container_;
+
+            //we plan a traj if needed
+            if(!containerRefined_){
+                vector<gtp_ros_msg::Ag> agents;
+                gtp_ros_msg::Ag agent;
+                agent.actionKey = "mainAgent";
+                agent.agentName = robotName_;
+                agents.push_back(agent);
+                vector<gtp_ros_msg::Obj> objects;
+                gtp_ros_msg::Obj object;
+                object.actionKey = "mainObject";
+                object.objectName = object_;
+                objects.push_back(object);
+                gtp_ros_msg::Obj container;
+                container.actionKey = "supportObject";
+                container.objectName = container_;
+                objects.push_back(container);
+                vector<gtp_ros_msg::Points> points;
+                vector<gtp_ros_msg::Data> datas;
+                int previousId = connector_->previousId_;
+                connector_->previousId_ = actionId_;
+                int nbTry = 0;
+                bool trajFound = false;
+                while(nbTry < nbPlanMax_){
+                    nextActionId_ = planGTP("drop", agents, objects, datas, points);
+                    connector_->previousId_ = previousId;
+                    if(nextActionId_ != -1){
+                        trajFound = true;
+                        break;
+                    }
+                    nbTry++;
+                }
+                if(!trajFound){
+                    ROS_WARN("[action_executor] No traj found by GTP");
+                    return false;
+                }
+            }
+            bool exec = execAction(actionId_, false, action_server);
+            if(exec){
+                return true;
+            }else if(connector_->refineOrder_){
+                 connector_->objectLocked_ = connector_->objectToWatch_;
+                 string topic = "/highLevelName/";
+                 topic = topic + container_;
+                 node_.getParam(topic, container_);
+                 string refinedObject = refineObject(container_, false);
+                 if(refinedObject == "NULL"){
+                     ROS_WARN("[action_executor] No possible refinement for object: %s", object_.c_str());
+                     return false;
+                 }else{
+                      container_ = refinedObject;
+                      connector_->objectFocus_ = container_;
+                      connector_->objectToWatch_ = container_;
+                 }
+            }else{
                 return false;
             }
         }
-        return execAction(nextActionId_, false, action_server);
 
     }else{
         return false;

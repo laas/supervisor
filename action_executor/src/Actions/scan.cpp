@@ -30,7 +30,6 @@ Scan::Scan(supervisor_msgs::Action action, Connector* connector) : VirtualAction
 	}else{
         ROS_WARN("[action_executor] Wrong parameter numbers, should be: object");
     }
-    connector->objectFocus_ = object_;
     connector->weightFocus_ = 0.8;
     connector->stopableFocus_ = false;
     originalAction_ = action;
@@ -62,6 +61,8 @@ bool Scan::preconditions(){
            object_ = refinedObject;
       }
    }
+   connector_->objectFocus_ = object_;
+   connector_->objectToWatch_ = object_;
    
     return true;
 }

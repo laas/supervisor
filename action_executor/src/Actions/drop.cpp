@@ -16,7 +16,6 @@ Drop::Drop(supervisor_msgs::Action action, Connector* connector) : VirtualAction
 	}else{
 		ROS_WARN("[action_executor] Wrong parameter numbers, should be: object, container");
     }
-    connector->objectFocus_ = container_;
     connector->weightFocus_ = 0.8;
     connector->stopableFocus_ = true;
     originalAction_ = action;
@@ -51,6 +50,8 @@ bool Drop::preconditions(){
            container_ = refinedObject;
       }
    }
+   connector_->objectFocus_ = container_;
+   connector_->objectToWatch_ = container_;
    
    //Then we check if the robot has the object in hand and if the object is reachable
    vector<toaster_msgs::Fact> precsTocheck;
@@ -114,7 +115,32 @@ bool Drop::plan(){
 
 bool Drop::exec(Server* action_server){
 
-    return execAction(actionId_, false, action_server);
+    while(true){
+        bool exec = execAction(actionId_, false, action_server);
+        if(exec){
+            return true;
+        }else if(connector_->refineOrder_){
+             connector_->objectLocked_ = connector_->objectToWatch_;
+             string topic = "/highLevelName/";
+             topic = topic + container_;
+             node_.getParam(topic, container_);
+             string refinedObject = refineObject(container_, false);
+             if(refinedObject == "NULL"){
+                 ROS_WARN("[action_executor] No possible refinement for object: %s", object_.c_str());
+                 return false;
+             }else{
+                  container_ = refinedObject;
+                  connector_->objectFocus_ = container_;
+                  connector_->objectToWatch_ = container_;
+                  bool plan = this->plan();
+                  if(!plan){
+                      return false;
+                  }
+             }
+        }else{
+            return false;
+        }
+    }
 
 }
 

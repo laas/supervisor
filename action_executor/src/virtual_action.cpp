@@ -430,7 +430,7 @@ bool VirtualAction::execAction(int actionId, bool shouldOpen, Server* action_ser
         openGripper(subTrajs[0].armId, action_server);
      }
      for(vector<gtp_ros_msg::SubTraj>::iterator it = subTrajs.begin(); it != subTrajs.end(); it++){
-         if(action_server->isPreemptRequested()|| connector_->stopOrder_){
+         if(action_server->isPreemptRequested() || connector_->stopOrder_ || connector_->refineOrder_){
             return false;
          }
          if(it->agent == robotName_){
@@ -488,7 +488,7 @@ bool VirtualAction::executeTrajectory(int actionId, int actionSubId, int armId, 
                                                    Client_Right_Arm::SimpleActiveCallback(),  Client_Right_Arm::SimpleFeedbackCallback());
         while(connector_->rightArmMoving_ == true){
             //wait for preempted request or end of the action
-            if(action_server->isPreemptRequested() || connector_->stopOrder_){
+            if(action_server->isPreemptRequested() || connector_->stopOrder_ || connector_->refineOrder_){
                 connector_->PR2motion_arm_right_->cancelGoal();
                 return false;
             }
@@ -503,7 +503,7 @@ bool VirtualAction::executeTrajectory(int actionId, int actionSubId, int armId, 
                                                    Client_Left_Arm::SimpleActiveCallback(),  Client_Left_Arm::SimpleFeedbackCallback());
         while(connector_->leftArmMoving_ == true){
             //wait for preempted request or end of the action
-            if(action_server->isPreemptRequested() || connector_->stopOrder_){
+            if(action_server->isPreemptRequested() || connector_->stopOrder_ || connector_->refineOrder_){
                 connector_->PR2motion_arm_left_->cancelGoal();
                 return false;
             }
@@ -536,7 +536,7 @@ bool VirtualAction::closeGripper(int armId, Server* action_server){
                                                   Client_Right_Gripper::SimpleActiveCallback(),  Client_Right_Gripper::SimpleFeedbackCallback());
        while(connector_->rightGripperMoving_ == true){
            //wait for preempted request or end of the action
-           if(action_server->isPreemptRequested() || connector_->stopOrder_){
+           if(action_server->isPreemptRequested() || connector_->stopOrder_ || connector_->refineOrder_){
                connector_->PR2motion_gripper_right_->cancelGoal();
                return false;
            }
@@ -550,7 +550,7 @@ bool VirtualAction::closeGripper(int armId, Server* action_server){
                                                   Client_Left_Gripper::SimpleActiveCallback(),  Client_Left_Gripper::SimpleFeedbackCallback());
        while(connector_->leftGripperMoving_ == true){
            //wait for preempted request or end of the action
-           if(action_server->isPreemptRequested() || connector_->stopOrder_){
+           if(action_server->isPreemptRequested() || connector_->stopOrder_ || connector_->refineOrder_){
                connector_->PR2motion_gripper_left_->cancelGoal();
                return false;
            }
