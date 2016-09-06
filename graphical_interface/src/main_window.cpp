@@ -142,6 +142,7 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     ui.UrgencySignal->setSingleStep(0.1);
 
 
+    ROS_INFO("[graphical_interface] Waiting for action executor server");
     actionClientSup_.waitForServer();
     /*actionClientTorso_.waitForServer();
     actionClientRightArm_.waitForServer();
@@ -373,7 +374,7 @@ void MainWindow::on_pushButtonSetEnv_clicked()
          }
        }
        if(!found){
-           ROS_ERROR("No table position!");
+           ROS_ERROR("No reference object position!");
        }
        toaster_msgs::SetEntityPose srv;
        double x, y, z;

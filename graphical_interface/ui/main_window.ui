@@ -37,7 +37,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>6</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="Goals">
      <attribute name="title">
@@ -129,6 +129,19 @@
       </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonSetEnv">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>160</y>
+        <width>141</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Set Environment</string>
       </property>
      </widget>
     </widget>
