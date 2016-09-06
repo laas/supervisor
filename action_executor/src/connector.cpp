@@ -20,6 +20,7 @@ Connector::Connector(){
    leftGripperMoving_ = false;
    torsoMoving_ = false;
    stopOrder_ = false;
+   refineOrder_ = false;
    rightArmPose_ = "unknown";
    leftArmPose_ = "unknown";
    node_.getParam("/restPosition/right", rightArmRestPose_);
