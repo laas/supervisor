@@ -9,7 +9,6 @@
         <rosparam command="load" file="$(find launchs)/Parameters/Interface.yaml" />
         <rosparam command="load" file="$(find launchs)/Parameters/Dialogue.yaml" />
         <rosparam command="load" file="$(find launchs)/Parameters/Planning.yaml" />
-        <rosparam command="load" file="$(find launchs)/Parameters/Environment.yaml" />
 
         <node name="dialogue_node" pkg="dialogue_node" type="dialogue_node" output="screen" />  <!-- Launch the dialogue node -->
 </launch>

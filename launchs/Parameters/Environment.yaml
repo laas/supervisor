@@ -7,7 +7,7 @@ environment:
     objectsRelativePose:
         PLACEMAT_1:
             x: 0.0
-            y: +0.087
+            y: 0.087
             z: 0.75
             rotation: false
         PLACEMAT_2:
@@ -16,32 +16,32 @@ environment:
             z: 0.75
             rotation: false
         RED_CUBE2:
-            x: 0.5
-            y: 0.75
+            x: 0.201
+            y: 0.6339
             z: 0.75
             rotation: false
         BLUE_CUBE2:
-            x: 0.5
-            y: 1.0
+            x: 0.09
+            y: 0.4912
             z: 0.75
             rotation: false
         RED_CUBE:
-            x: -0.44
-            y: -0.95
+            x: -0.1308
+            y: -0.4312
             z: 0.75
             rotation: false
         BLUE_CUBE:
-            x: -0.30
-            y: -0.875
+            x: -0.1256
+            y: -0.6222
             z: 0.75
             rotation: false
         GREEN_CUBE:
-            x: -0.30
-            y: -0.875
+            x: 0.00058
+            y: -0.1608
             z: 0.75
             rotation: false
         STICK:
-            x: -0.30
-            y: -0.875
+            x: 0.2146
+            y: 0.4036
             z: 0.75
             rotation: false
