@@ -25,12 +25,12 @@ environment:
             y: 0.4912
             z: 0.75
             rotation: false
-        RED_CUBE:
+        RED_CUBE1:
             x: -0.1308
             y: -0.4312
             z: 0.75
             rotation: false
-        BLUE_CUBE:
+        BLUE_CUBE1:
             x: -0.1256
             y: -0.6222
             z: 0.75

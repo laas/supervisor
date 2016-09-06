@@ -1,6 +1,10 @@
 rosservice call /pdg/manage_stream "{morseHuman: false, niutHuman: false, groupHuman: false, mocapHuman: false, adreamMocapHuman: true, toasterSimuHuman: true, pr2Robot: true, spencerRobot: false, toasterSimuRobot: false, toasterSimuObject: true, arObject: true}"
 rosservice call /database_manager/execute "{command: 'EMPTY', type: 'ALL', facts: [], agent: '', order: '', areaTopic: false ,agentTopic: false ,move3dTopic: false ,pdgTopic: false}"
 
+rosservice call /toaster_simu/add_entity "{id: 'PLACEMAT_2', name: 'PLACEMAT_2', type: 'object', ownerId: ''}"
+rosservice call /toaster_simu/add_entity "{id: 'PLACEMAT_1', name: 'PLACEMAT_1', type: 'object', ownerId: ''}"
+
+
 rosservice call /toaster_simu/add_entity "{id: 'HERAKLES_HUMAN1', name: 'HERAKLES_HUMAN1', type: 'human', ownerId: ''}"
 rosservice call /toaster_simu/set_entity_pose "{id: 'HERAKLES_HUMAN1', ownerId: '', type: 'human', pose:
 {position:
@@ -98,8 +102,8 @@ rosservice call /area_manager/add_area "myArea:
 
 rosservice call /area_manager/add_area "myArea:
   id: 2
-  name: 'robotReachable'
-  myOwner: 'pr2'
+  name: 'humanReachable'
+  myOwner: 'TABLE_4'
   areaType: ''
   factType: ''
   entityType: 'entities'
@@ -108,17 +112,17 @@ rosservice call /area_manager/add_area "myArea:
   ray: 2.0
   poly:
     points:
-    - {x: 0, y: -1, z: 0}
-    - {x: 0.75, y: -1, z: 0}
-    - {x: 0.75, y: 1, z: 0}
-    - {x: 0, y: 1, z: 0}
-    - {x: 0, y: -1, z: 0}
+    - {x: 0.1, y: -1, z: 0}
+    - {x: -0.75, y: -1, z: 0}
+    - {x: -0.75, y: 0.2, z: 0}
+    - {x: 0.1, y: 0.2, z: 0}
+    - {x: 0.1, y: -1, z: 0}
   insideEntities: [0]"
 
 rosservice call /area_manager/add_area "myArea:
   id: 3
-  name: 'humanReachable'
-  myOwner: 'HERAKLES_HUMAN1'
+  name: 'robotReachable'
+  myOwner: 'TABLE_4'
   areaType: ''
   factType: ''
   entityType: 'entities'
@@ -127,11 +131,11 @@ rosservice call /area_manager/add_area "myArea:
   ray: 2.0
   poly:
     points:
-    - {x: 0, y: -1, z: 0}
-    - {x: 0.75, y: -1, z: 0}
-    - {x: 0.75, y: 0.1, z: 0}
-    - {x: 0, y: 0.1, z: 0}
-    - {x: 0, y: -1, z: 0}
+    - {x: -0.1, y: -0.2, z: 0}
+    - {x: 0.75, y: -0.2, z: 0}
+    - {x: 0.75, y: 1, z: 0}
+    - {x: -0.1, y: 1, z: 0}
+    - {x: -0.1, y: -0.2, z: 0}
   insideEntities: [0]"
 
 
