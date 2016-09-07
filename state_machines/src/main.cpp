@@ -17,13 +17,14 @@ The state machines manager keeps trace of the activity of each agent.
 #include "supervisor_msgs/ActionMSList.h"
 #include "supervisor_msgs/ActionList.h"
 #include <std_msgs/Bool.h>
+#include <std_msgs/String.h>
 
 
 string robotState;
 string robotName;
 ros::NodeHandle* node;
 
-string objectRobot_;
+string objectRobot_, humanObject_;
 double weightRobot_ = 0.0;
 bool stopableRobot_ = true;
 bool actionPerformed = false;
@@ -39,6 +40,7 @@ vector<supervisor_msgs::ActionMS> actions;
 vector<supervisor_msgs::Action> actionsRobotReady, actionsXReady;
 
 ros::Publisher* unexpected_pub;
+ros::Publisher* head_focus_pub;
 
 /*
 Main function of the robot state machine
@@ -87,10 +89,23 @@ void robotStateMachine(){
         msg.object = object;
         msg.stopable = stopable;
         robot_pub.publish(msg);
+
+        agentsState[robotName] = robotState;
+
+        std_msgs::String msg_head;
+        if(agentsState["HERAKLES_HUMAN1"] == "ACTING"){
+            msg_head.data == humanObject_;
+        }else if(robotState == "ACTING"){
+            msg_head.data == object;
+        }else{
+            msg_head.data == "HERAKLES_HUMAN1";
+
+        }
+        head_focus_pub->publish(msg_head);
+
         ros::spinOnce();
         loop_rate.sleep();
 
-        agentsState[robotName] = robotState;
     }
 
 }
@@ -153,10 +168,13 @@ void humanStateMachine(string human_name){
         msg.importancy = weight;
         msg.object = object;
         human_pub.publish(msg);
+
+        humanObject_ = object;
+        agentsState[human_name] = humanState;
+
         ros::spinOnce();
   		loop_rate.sleep();
 
-        agentsState[human_name] = humanState;
 	}
 
 }
@@ -223,7 +241,9 @@ int main (int argc, char **argv)
   ros::Subscriber subActionsXReady = node_.subscribe("plan_executor/actions_x_ready", 1, xReadyCallback);
 
   ros::Publisher _unexpected_pub = node_.advertise<std_msgs::Bool>("state_machine/unexpected_action", 1);
+  ros::Publisher _head_focus_pub = node_.advertise<std_msgs::String>("supervisor/head_focus", 1);
   unexpected_pub = &_unexpected_pub;
+  head_focus_pub = &_head_focus_pub;
 
   node_.getParam("/robot/name", robotName);
   ros::service::waitForService("mental_state/get_info", -1);
