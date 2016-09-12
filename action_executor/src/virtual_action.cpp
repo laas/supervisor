@@ -434,7 +434,7 @@ bool VirtualAction::execAction(int actionId, bool shouldOpen, Server* action_ser
             return false;
          }
          if(it->agent == robotName_){
-             ROS_INFO("execution: %d, %d and is %s", actionId, it->subTrajId, it->subTrajName().c_str());
+             ROS_INFO("execution: %d, %d and is %s", actionId, it->subTrajId, it->subTrajName.c_str());
             if(it->subTrajName == "grasp"){
                 closeGripper(it->armId, action_server);
                 string hand;
@@ -528,7 +528,7 @@ Function which close a gripper
 */
 bool VirtualAction::closeGripper(int armId, Server* action_server){
 
-    bool finishedBeforeTimeout;
+    /*bool finishedBeforeTimeout;
     if(armId == 0){//right arm
        pr2motion::Gripper_Right_OperateGoal gripper_goal;
        gripper_goal.goal_mode.value=pr2motion::pr2motion_GRIPPER_MODE::pr2motion_GRIPPER_CLOSE;
@@ -560,7 +560,31 @@ bool VirtualAction::closeGripper(int armId, Server* action_server){
     }
 
 
-   return true;
+   return true;*/
+
+   bool finishedBeforeTimeout;
+      pr2_controllers_msgs::Pr2GripperCommandGoal open_cmd;
+      open_cmd.command.position = 0.0;
+      open_cmd.command.max_effort = -1.0;
+      if(armId == 0){//right arm
+           connector_->rightGripperMoving_ = true;
+          connector_->gripper_right->sendGoal(open_cmd);
+          finishedBeforeTimeout = connector_->gripper_right->waitForResult(ros::Duration(waitActionServer_));
+           connector_->gripperRightOpen_= false;
+            connector_->rightGripperMoving_ = false;
+       }else{
+           connector_->leftGripperMoving_ = true;
+      connector_->gripper_left->sendGoal(open_cmd);
+          finishedBeforeTimeout = connector_->gripper_left->waitForResult(ros::Duration(waitActionServer_));
+           connector_->leftGripperMoving_ = false;
+           connector_->gripperLeftOpen_= false;
+       }
+       if(!finishedBeforeTimeout){
+         ROS_INFO("[action_executor] gripper Action did not finish before the time out.");
+           return false;
+       }
+
+       return true;
 
 }
 
@@ -570,7 +594,7 @@ Function which open a gripper
 */
 bool VirtualAction::openGripper(int armId, Server* action_server){
 
-    bool finishedBeforeTimeout;
+    /* finishedBeforeTimeout;
     if(armId == 0){//right arm
        pr2motion::Gripper_Right_OperateGoal gripper_goal;
        gripper_goal.goal_mode.value=pr2motion::pr2motion_GRIPPER_MODE::pr2motion_GRIPPER_OPEN;
@@ -597,7 +621,32 @@ bool VirtualAction::openGripper(int armId, Server* action_server){
        connector_->gripperLeftOpen_= true;
     }
 
-   return true;
+   return true;*/
+
+    bool finishedBeforeTimeout;
+       pr2_controllers_msgs::Pr2GripperCommandGoal open_cmd;
+       open_cmd.command.position = 0.08;
+       open_cmd.command.max_effort = -1.0;
+       if(armId == 0){//right arm
+        connector_->rightGripperMoving_ = true;
+           connector_->gripper_right->sendGoal(open_cmd);
+           finishedBeforeTimeout = connector_->gripper_right->waitForResult(ros::Duration(waitActionServer_));
+            connector_->gripperRightOpen_= true;
+             connector_->rightGripperMoving_ = false;
+        }else{
+        connector_->leftGripperMoving_ = true;
+       connector_->gripper_left->sendGoal(open_cmd);
+           finishedBeforeTimeout = connector_->gripper_left->waitForResult(ros::Duration(waitActionServer_));
+        connector_->leftGripperMoving_ = false;
+        connector_->gripperLeftOpen_= true;
+        }
+        if(!finishedBeforeTimeout){
+          ROS_INFO("[action_executor] gripper Action did not finish before the time out.");
+            return false;
+        }
+
+        return true;
+
 
 }
 
