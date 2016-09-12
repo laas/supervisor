@@ -434,6 +434,7 @@ bool VirtualAction::execAction(int actionId, bool shouldOpen, Server* action_ser
             return false;
          }
          if(it->agent == robotName_){
+             ROS_INFO("execution: %d, %d and is %s", actionId, it->subTrajId, it->subTrajName().c_str());
             if(it->subTrajName == "grasp"){
                 closeGripper(it->armId, action_server);
                 string hand;
