@@ -197,7 +197,7 @@ bool PickAndDrop::exec(Server* action_server){
                     return false;
                 }
             }
-            bool exec = execAction(actionId_, false, action_server);
+            bool exec = execAction(nextActionId_, false, action_server);
             if(exec){
                 return true;
             }else if(connector_->refineOrder_){
