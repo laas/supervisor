@@ -93,13 +93,11 @@ void robotStateMachine(){
         agentsState[robotName] = robotState;
 
         std_msgs::String msg_head;
+        msg_head.data = "HERAKLES_HUMAN1";
         if(agentsState["HERAKLES_HUMAN1"] == "ACTING"){
-            msg_head.data == humanObject_;
+            msg_head.data = humanObject_;
         }else if(robotState == "ACTING"){
-            msg_head.data == object;
-        }else{
-            msg_head.data == "HERAKLES_HUMAN1";
-
+            msg_head.data = object;
         }
         head_focus_pub->publish(msg_head);
 
