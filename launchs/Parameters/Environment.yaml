@@ -44,4 +44,4 @@ environment:
             x: 0.2146
             y: 0.4036
             z: 0.75
-            rotation: false
+            rotation: true
