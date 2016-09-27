@@ -80,8 +80,8 @@ geometry_msgs::Point getPoseAgent(string agent){
         toaster_msgs::HumanListStamped humanList  = *(ros::topic::waitForMessage<toaster_msgs::HumanListStamped>("pdg/humanList",ros::Duration(1)));
         for(vector<toaster_msgs::Human>::iterator it = humanList.humanList.begin(); it != humanList.humanList.end(); it++){
           if(it->meAgent.meEntity.id == agent){
-             for(vector<toaster_msgs::Joint>::iterator itj = it->meAgent.skeletonJoint.begin(); itj != it->meAgent.skeletonJoint.end(); it++){
-                 if(itj->meEntity.id == "rightHand"){
+             for(vector<toaster_msgs::Joint>::iterator itj = it->meAgent.skeletonJoint.begin(); itj != it->meAgent.skeletonJoint.end(); itj++){
+                 if(itj->meEntity.id == "head"){
                     return itj->meEntity.pose.position;
                  }
              }
@@ -105,6 +105,7 @@ void headFocus(const std_msgs::String::ConstPtr& msg){
     string target = msg->data;
 
     geometry_msgs::Point pose;
+   
     if(target == "HERAKLES_HUMAN1"){
         pose = getPoseAgent(target);
     }else{

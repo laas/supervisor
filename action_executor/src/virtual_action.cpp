@@ -37,6 +37,9 @@ Function which look for the refinement of an object
 */
 string VirtualAction::refineObject(string object, bool uniqueSupport){
 
+   ROS_WARN("object locked in refine: %s", connector_->objectLocked_.c_str());
+ 
+
     //First we look for all possible refinement
     string topic = "/highLevelRefinement/" + object;
     vector<string> possibleObjects;
@@ -46,14 +49,19 @@ string VirtualAction::refineObject(string object, bool uniqueSupport){
     double bestCost = 0.0;
     string objectStored = "NULL";
     for(vector<string>::iterator it = possibleObjects.begin(); it != possibleObjects.end(); it++){
+        if(*it != connector_->objectLocked_){
         vector<toaster_msgs::Fact> factsTocheck;
         toaster_msgs::Fact fact;
-        if(uniqueSupport){
+        if(uniqueSupport || isManipulableObject(object)){
             fact.subjectId = "NULL";
             fact.property = "isOn";
             fact.targetId = *it;
             factsTocheck.push_back(fact);
         }
+        fact.subjectId = *it;
+            fact.property = "isOn";
+            fact.targetId = "NULL";
+            factsTocheck.push_back(fact);
         fact.subjectId = *it;
         fact.property = "isReachableBy";
         fact.targetId = robotName_;
@@ -64,6 +72,7 @@ string VirtualAction::refineObject(string object, bool uniqueSupport){
             if(connector_->humanDistances_[*it] > bestCost){
                 objectStored = *it;
             }
+        }
         }
     }
 
@@ -478,6 +487,12 @@ bool VirtualAction::executeTrajectory(int actionId, int actionSubId, int armId, 
 
    connector_->acGTP_->sendGoal(goal);
    bool finishedBeforeTimeout = connector_->acGTP_->waitForResult(ros::Duration(waitActionServer_));
+ 
+   if(connector_->refineOrder_){
+      ROS_WARN("[DEBUG] refine order true");
+ }else{
+     ROS_WARN("[DEBUG] refine order false");
+}
 
    if (finishedBeforeTimeout){
      if(armId == 0){//right arm

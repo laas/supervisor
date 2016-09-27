@@ -14,6 +14,7 @@ MoveTo::MoveTo(supervisor_msgs::Action action, Connector* connector) : VirtualAc
 		ROS_WARN("[action_executor] Wrong parameters number, should be: position");
 	}
     originalAction_ = action;
+    connector_->objectFocus_ = "NULL";
 }
 
 bool MoveTo::preconditions(){

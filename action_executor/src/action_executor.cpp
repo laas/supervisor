@@ -283,8 +283,8 @@ void agentFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
                 }
             }
             //fill cost maps
-            if(it->subjectId == robotRightHand){
-                connector_->robotDistances_[it->targetId] = it->doubleValue;
+            if(it->subjectId == humanRightHand){
+                connector_->humanDistances_[it->targetId] = it->doubleValue;
                 if(it->targetId == connector_->objectToWatch_){
                     if(it->doubleValue < toWatchThreshold){
                         connector_->refineOrder_ = true;
@@ -292,8 +292,8 @@ void agentFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
                         connector_->refineOrder_ = false;
                     }
                 }
-            }else if(it->subjectId == humanRightHand){
-                connector_->humanDistances_[it->targetId] = it->doubleValue;
+            }else if(it->subjectId == robotRightHand){
+                connector_->robotDistances_[it->targetId] = it->doubleValue;
             }
         }
     }
@@ -323,10 +323,13 @@ int main (int argc, char **argv)
 
   node.getParam("humanSafetyJoint", humanSafetyJoint);
   node.getParam("safetyThreshold", safetyThreshold);
-  node.getParam("toWatchThreshold", toWatchThreshold);
+  node.getParam("/toWatchThreshold", toWatchThreshold);
   node.getParam("robot/toasterName", robotToaster);
   node.getParam("robot/hands/right", robotRightHand);
   node.getParam("humanRightHand", humanRightHand);
+
+ ROS_WARN("to watch: %f", toWatchThreshold);
+
    
   Connector connector;
   connector_ = &connector;

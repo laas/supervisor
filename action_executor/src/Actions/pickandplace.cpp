@@ -18,6 +18,7 @@ PickAndPlace::PickAndPlace(supervisor_msgs::Action action, Connector* connector)
     }
     connector->weightFocus_ = 0.8;
     connector->stopableFocus_ = false;
+    connector_->objectLocked_ = "";
     originalAction_ = action;
 }
 
@@ -46,7 +47,7 @@ bool PickAndPlace::preconditions(){
       }
    }
    connector_->objectFocus_ = object_;
-   connector_->objectToWatch_ = object_;
+   //connector_->objectToWatch_ = object_;
    //TODO: add check of possible refinement for the support?
 
    //Then we check if  the object is reachable
@@ -86,7 +87,7 @@ bool PickAndPlace::plan(){
     }
 
     string actionName;
-    if(isManipulableObject(support_)){
+    if(isManipulableObject(support_) || support_ == "PLACEMAT_1" || support_ == "PLACEMAT_2"){
         gtp_ros_msg::Obj support;
         support.actionKey = "supportObject";
         support.objectName = support_;
@@ -193,7 +194,7 @@ bool PickAndPlace::exec(Server* action_server){
              }else{
                   object_ = refinedObject;
                   connector_->objectFocus_ = object_;
-                  connector_->objectToWatch_ = object_;
+                  //connector_->objectToWatch_ = object_;
                   bool plan = this->plan();
                   if(!plan){
                       return false;
@@ -206,10 +207,10 @@ bool PickAndPlace::exec(Server* action_server){
 
     if(firstTask){
         while(true){
-        if(gripperEmpty_  && !simu_){
+       /* if(gripperEmpty_  && !simu_){
             ROS_WARN("[action_executor] Robot failed to pick (gripper empty)");
             return false;
-        }
+        }*/
         //We refine the support if needed
         if(!supportRefined_){
             bool uniqueSupport;
@@ -218,6 +219,7 @@ bool PickAndPlace::exec(Server* action_server){
             }else{
                 uniqueSupport = false;
             }
+            ROS_WARN("object locked: %s", connector_->objectLocked_.c_str());
             string refinedObject = refineObject(support_, uniqueSupport);
             if(refinedObject == "NULL"){
                 ROS_WARN("[action_executor] No possible refinement for object: %s", support_.c_str());
@@ -225,6 +227,7 @@ bool PickAndPlace::exec(Server* action_server){
             }else{
                  support_ = refinedObject;
             }
+            ROS_INFO("support refined: %s", support_.c_str());
         }
         connector_->objectFocus_ = support_;
         connector_->objectToWatch_ = support_;
@@ -251,7 +254,7 @@ bool PickAndPlace::exec(Server* action_server){
             }
 
             string actionName;
-            if(isManipulableObject(support_)){
+            if(isManipulableObject(support_) || support_ == "PLACEMAT_1" || support_ == "PLACEMAT_2"){
                 gtp_ros_msg::Obj support;
                 support.actionKey = "supportObject";
                 support.objectName = support_;
@@ -345,15 +348,15 @@ bool PickAndPlace::exec(Server* action_server){
              string topic = "/highLevelName/";
              topic = topic + support_;
              node_.getParam(topic, support_);
-             string refinedObject = refineObject(support_, false);
+            /* string refinedObject = refineObject(support_, false);
              if(refinedObject == "NULL"){
-                 ROS_WARN("[action_executor] No possible refinement for object: %s", object_.c_str());
+                 ROS_WARN("[action_executor] No possible refinement for support: %s", support_.c_str());
                  return false;
              }else{
                   support_ = refinedObject;
                   connector_->objectFocus_ = support_;
                   connector_->objectToWatch_ = support_;
-             }
+             }*/
         }else{
             return false;
         }
