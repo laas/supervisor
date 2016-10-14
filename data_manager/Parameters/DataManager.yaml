@@ -1,0 +1,4 @@
+---
+data_manager:
+    actions_todo_topics: ['plan_maintainer/actions_todo', 'game_player/actions_todo']
+    previous_actions_topics: []

@@ -11,9 +11,11 @@ find_package(catkin REQUIRED COMPONENTS
   toaster_msgs
 )
 
-#add_message_files(
-#   FILES
-#)
+add_message_files(
+   FILES
+    Action.msg
+    ActionsList.msg
+)
 
 #add_service_files(
 #  FILES
