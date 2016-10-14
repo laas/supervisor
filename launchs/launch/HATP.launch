@@ -8,10 +8,10 @@
 	
 	<!-- Call the script from hatponboard -->
 	<include file="$(find hatponboard)/scripts/hatponboard.launch"> <!-- pass_all_args="true" > -->
-		<arg name="verbosity_level" value="$(arg verbosity_level)" />
-		<arg name="database_mode" value="$(arg database_mode)" />
-		<arg name="toaster_database" value="$(arg toaster_database)" />
-		<arg name="toaster_agent" value="$(arg toaster_agent)" />
+            <arg name="verbosity_level" value="$(arg verbosity_level)" />
+            <arg name="database_mode" value="$(arg database_mode)" />
+            <arg name="toaster_database" value="$(arg toaster_database)" />
+            <arg name="toaster_agent" value="$(arg toaster_agent)" />
 	</include>
 	
 	<!-- Start the two interfaces -->

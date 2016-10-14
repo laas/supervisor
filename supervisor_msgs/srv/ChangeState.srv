@@ -1,8 +1,0 @@
-string type
-string goal
-Plan plan
-Action action
-string state
-string agent
----
-bool answer

@@ -1,8 +1,8 @@
 <launch>
 
     <!-- Launch gazebo -->
-	<include file="$(find gazebo_ros)/launch/empty_world.launch"/>
-	<include file="$(find pr2_gazebo)/launch/pr2.launch"/>
+    <include file="$(find gazebo_ros)/launch/empty_world.launch"/>
+    <include file="$(find pr2_gazebo)/launch/pr2.launch"/>
 	
     <!-- Launch map server and navigation -->
     <node name="map_server" pkg="map_server" type="map_server" args="$(env ROBOTPKG_BASE)/manips/pr2-scripts/shell-scripts/data/adream_RDC_complet.yaml" output="screen" />

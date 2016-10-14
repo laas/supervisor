@@ -1,5 +1,0 @@
-bool report
-string objectLocked
-string agentLocked
----
-bool answer
