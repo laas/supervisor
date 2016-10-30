@@ -14,6 +14,7 @@ catkin_package(
 
 include_directories(
   include
+  ${catkin_INCLUDE_DIRS}
 )
 
 add_executable(data_manager src/main.cpp)
@@ -22,3 +23,4 @@ target_link_libraries(
   ${catkin_LIBRARIES}
 )
 
+add_dependencies(data_manager supervisor_msgs_generate_messages_cpp)
