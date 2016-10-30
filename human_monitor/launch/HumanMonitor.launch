@@ -1,0 +1,6 @@
+<launch>
+    <rosparam command="load" file="$(find human_monitor)/Parameters/HumanMonitor.yaml" />
+    <rosparam command="load" file="$(find launchs)/Parameters/Entities.yaml" />
+
+    <node name="human_monitor" pkg="human_monitor" type="human_monitor" output="screen" />  <!-- Launch the human monitor -->
+</launch>

@@ -14,8 +14,13 @@
 *   - The list of previous actions
 * For each data, the node can:
 *   - concatenate data from several topics (topics name in param)
-*   - add a data to a list (must be published on /data_manager/add_data/'data_name')
-*   - remove a data to a list (must be published on /data_manager/rm_data/'data_name')
+*   - add a data to a list (must be published on /data_manager/add_data/<data_name>)
+*   - remove a data to a list (must be published on /data_manager/rm_data/<data_name>)
+*
+* \section Suscribed topics
+*   - topics name in param
+*   - /data_manager/add_data/<data_name>
+*   - /data_manager/rm_data/<data_name>
 *
 * \section Published topics
 *   - supervisor/actions_todo
