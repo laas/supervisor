@@ -46,11 +46,29 @@ bool areActionsEqual(supervisor_msgs::Action action1, supervisor_msgs::Action ac
     }
 
     //Compare parameters
-    if(action1.parameters.size() != action2.parameters.size()){
+    if(action1.parameter_keys.size() != action1.parameter_values.size()){
+        ROS_WARN("[data_manager] Invalid action parameters: nb keys should be equal to nb values!");
         return false;
     }
-    for(int i = 0; i < action1.parameters.size(); i++){
-        if(action1.parameters[i] != action2.parameters[i]){
+    if(action2.parameter_keys.size() != action2.parameter_values.size()){
+        ROS_WARN("[data_manager] Invalid action parameters: nb keys should be equal to nb values!");
+        return false;
+    }
+    if(action1.parameter_keys.size() != action2.parameter_keys.size()){
+        return false;
+    }
+    for(int i = 0; i < action1.parameter_keys.size(); i++){
+        bool found = false;
+        for(int j = 0; j < action2.parameter_keys.size(); j++){
+            if(action1.parameter_keys[i] == action2.parameter_keys[j]){
+                if(action1.parameter_values[i] != action2.parameter_values[j]){
+                    return false;
+                }
+                found = true;
+                break;
+            }
+        }
+        if(!found){
             return false;
         }
     }
