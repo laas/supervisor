@@ -21,6 +21,9 @@
 *   - /human_monitor/current_humans_action
 *   - /data_manager/add_data/previous_actions
 *
+* \section Services
+*   - /human_monitor/human_action_simu: supervisor_msgs/HumanAction
+*
 * \section Parameters
 *  - human_monitor/shouldDetect: boolean which indicate if the actions detection should be activated
    - human_monitor/rightHand: the name of the toaster human right hand
