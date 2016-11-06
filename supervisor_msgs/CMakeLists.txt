@@ -15,11 +15,15 @@ add_message_files(
    FILES
     Action.msg
     ActionsList.msg
+    Plan.msg
+    Link.msg
 )
 
-#add_service_files(
-#  FILES
-#)
+add_service_files(
+  FILES
+    HumanAction.srv
+    NewPlan.srv
+)
 
 # add_action_files(
 #   FILES

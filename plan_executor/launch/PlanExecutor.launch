@@ -1,0 +1,5 @@
+<launch>
+    <rosparam command="load" file="$(find plan_executor)/Parameters/PlanExecutor.yaml" />
+
+    <node name="plan_executor" pkg="plan_executor" type="plan_executor" output="screen" />  <!-- Launch the plan executor -->
+</launch>
