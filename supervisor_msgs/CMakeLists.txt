@@ -17,9 +17,10 @@ add_message_files(
     ActionsList.msg
 )
 
-#add_service_files(
-#  FILES
-#)
+add_service_files(
+  FILES
+    HumanAction.srv
+)
 
 # add_action_files(
 #   FILES
