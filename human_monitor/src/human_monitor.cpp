@@ -41,6 +41,8 @@ void HumanMonitor::humanPick(std::string agent, std::string object){
     action.parameter_keys.push_back("object");
     action.parameter_values.push_back(object);
     action.actors.push_back(agent);
+    action.focusTarget = object;
+    action.ackNeeded = false;
 
     //we publish the action in the current publisher
     supervisor_msgs::ActionsList msg_current;
@@ -100,6 +102,8 @@ void HumanMonitor::humanPlace(std::string agent, std::string object, std::string
     action.parameter_keys.push_back("support");
     action.parameter_values.push_back(support);
     action.actors.push_back(agent);
+    action.focusTarget = support;
+    action.ackNeeded = true;
 
     //we publish the action in the current publisher
     supervisor_msgs::ActionsList msg_current;
@@ -207,6 +211,8 @@ void HumanMonitor::humanDrop(std::string agent, std::string object, std::string 
     action.parameter_keys.push_back("container");
     action.parameter_values.push_back(container);
     action.actors.push_back(agent);
+    action.focusTarget = container;
+    action.ackNeeded = true;
 
     //we publish the action in the current publisher
     supervisor_msgs::ActionsList msg_current;
