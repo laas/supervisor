@@ -42,6 +42,8 @@ private Q_SLOTS:
 
     void on_pushButtonPlaceBlack_clicked();
 
+    void on_pushButtonPlacePlacemat_clicked();
+
 public:
     Ui::MainWindow ui;
 

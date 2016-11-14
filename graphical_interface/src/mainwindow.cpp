@@ -234,3 +234,35 @@ void MainWindow::on_pushButtonPlaceBlack_clicked(){
 
     objectInHand_ = "NULL";
 }
+
+
+void MainWindow::on_pushButtonPlacePlacemat_clicked(){
+
+    if(objectInHand_ == "NULL"){
+        ROS_WARN("No object in hand!");
+        return;
+    }
+
+    ROS_INFO("Human places %s on the placemat red", objectInHand_.c_str());
+
+    //create the action
+    supervisor_msgs::Action action;
+    action.name = "place";
+    action.actors.push_back("HERAKLES_HUMAN1");
+    action.parameter_keys.push_back("object");
+    action.parameter_values.push_back(objectInHand_);
+    action.parameter_keys.push_back("support");
+    action.parameter_values.push_back("PLACEMAT_RED");
+
+
+    //Call the human monitor
+    supervisor_msgs::HumanAction srv;
+    srv.request.action = action;
+    srv.request.agent = "HERAKLES_HUMAN1";
+    if (!human_client_.call(srv)){
+     ROS_ERROR("[graphical_interface] Failed to call service human_monitor/human_action_simu");
+    }
+
+    objectInHand_ = "NULL";
+}
+
