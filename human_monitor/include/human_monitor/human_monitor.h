@@ -35,6 +35,7 @@ private:
     std::vector<std::pair<std::string, std::string> > attachments_; /**< objects the agents have in hand*/
     std::vector<std::string> manipulableObjects_; /**< list of manipulable objects*/
     std::vector<std::string> supportObjects_; /**< list of support objects*/
+    std::vector<std::string> usedSupportObjects_; /**< list of support objects already used*/
     std::vector<std::string> containerObjects_; /**< list of container objects*/
     std::string humanHand_; /**< name of the human hand*/
     ros::Publisher previous_pub_; /**< publisher of previous actions*/

@@ -1,6 +1,6 @@
 <launch>
     <include file="$(find data_manager)/launch/DataManager.launch"/>
-    <include file="$(find data_manager)/launch/HumanMonitor.launch"/>
-    <include file="$(find data_manager)/launch/PlanExecutor.launch"/>
-    <include file="$(find data_manager)/launch/GraphicalInterface.launch"/>
+    <include file="$(find human_monitor)/launch/HumanMonitor.launch"/>
+    <include file="$(find plan_executor)/launch/PlanExecutor.launch"/>
+    <include file="$(find graphical_interface)/launch/GraphicalInterface.launch"/>
 </launch>

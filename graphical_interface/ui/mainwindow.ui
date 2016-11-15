@@ -157,6 +157,19 @@
      <string>PLACEMAT</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="pushButtonSetEnv">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>20</y>
+      <width>171</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Set Env</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

@@ -94,6 +94,8 @@ void HumanMonitor::humanPlace(std::string agent, std::string object, std::string
 
     ROS_INFO("[human_monitor] %s has placed %s on %s", agent.c_str(), object.c_str(), support.c_str());
 
+    usedSupportObjects_.push_back(support);
+
     //we create the corresponding action
     supervisor_msgs::Action action;
     action.name = "place";

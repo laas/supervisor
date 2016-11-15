@@ -14,6 +14,8 @@
 
 
 #include "supervisor_msgs/HumanAction.h"
+#include "toaster_msgs/SetEntityPose.h"
+#include "toaster_msgs/ObjectListStamped.h"
 
 class MainWindow : public QMainWindow {
 Q_OBJECT
@@ -43,6 +45,8 @@ private Q_SLOTS:
     void on_pushButtonPlaceBlack_clicked();
 
     void on_pushButtonPlacePlacemat_clicked();
+
+    void on_pushButtonSetEnv_clicked();
 
 public:
     Ui::MainWindow ui;
