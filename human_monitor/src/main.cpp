@@ -114,6 +114,19 @@ void agentFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
     }
 
 }
+
+/**
+* \brief Reset the current support
+* @param msg bool
+* */
+void resetSupport(const std_msgs::Bool::ConstPtr& msg){
+
+
+    hm_->currentSupport_ = hm_->initialSupport_;
+    hm_->usedObjects_.clear();
+
+}
+
 /**
  * \brief Main function
  * */
@@ -137,8 +150,8 @@ int main (int argc, char **argv)
   hm_ = &hm;
 
 
-  ros::ServiceServer service_action = node.advertiseService("human_monitor/human_action_simu", humaActionSimu); //allows the simulation to tell that a human has done an action
-
+  ros::ServiceServer service_action = node.advertiseService("human_monitor/human_action_simu", humaActionSimu); //allows the simulation to tell that a human has done an action  
+  ros::Subscriber sub_reset = node.subscribe("human_monitor/reset_current_support", 1, resetSupport);//reset current support
   ros::Subscriber sub = node.subscribe("agent_monitor/factList", 1, agentFactListCallback);
 
   ROS_INFO("[human_monitor] Ready");

@@ -15,6 +15,7 @@
 #include "toaster_msgs/RemoveFromHand.h"
 #include "toaster_msgs/SetEntityPose.h"
 #include "toaster_msgs/ObjectListStamped.h"
+#include "std_msgs/Bool.h"
 
 
 class HumanMonitor{
@@ -28,6 +29,10 @@ public:
     bool isManipulableObject(std::string object);
     bool isSupportObject(std::string support);
     bool isContainerObject(std::string container);
+
+    std::string currentSupport_; /**< current support considering*/
+    std::string initialSupport_; /**< initial support considering*/
+    std::vector<std::string> usedObjects_; /**< list of objects already used*/
 protected:
 
 private:

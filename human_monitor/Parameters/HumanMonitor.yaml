@@ -10,3 +10,4 @@ human_monitor:
     replacementSupport:
         PLACEMAT_1: TABLE_4
         PLACEMAT_2: TABLE_4
+    initialSupport: "PLACEMAT_RED"

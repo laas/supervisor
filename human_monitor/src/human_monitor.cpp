@@ -15,9 +15,12 @@ HumanMonitor::HumanMonitor(ros::NodeHandle* node){
     node_->getParam("/entities/supports", supportObjects_);
     node_->getParam("/entities/containers", containerObjects_);
     node_->getParam("/human_monitor/rightHand", humanHand_);
+    node_->getParam("/human_monitor/initialSupport", initialSupport_);
+    currentSupport_ = initialSupport_;
 
     previous_pub_ = node_->advertise<supervisor_msgs::ActionsList>("/human_monitor/current_humans_action", 1);
     current_pub_ = node_->advertise<supervisor_msgs::ActionsList>("/data_manager/add_data/previous_actions", 1);
+
 }
 
 /**
@@ -95,6 +98,8 @@ void HumanMonitor::humanPlace(std::string agent, std::string object, std::string
     ROS_INFO("[human_monitor] %s has placed %s on %s", agent.c_str(), object.c_str(), support.c_str());
 
     usedSupportObjects_.push_back(support);
+    currentSupport_ = object;
+    usedObjects_.push_back(object);
 
     //we create the corresponding action
     supervisor_msgs::Action action;
@@ -296,6 +301,12 @@ std::pair<bool, std::string> HumanMonitor::hasInHand(std::string agent){
  * */
 bool HumanMonitor::isManipulableObject(std::string object){
 
+    for(std::vector<std::string>::iterator it = usedObjects_.begin(); it != usedObjects_.end(); it++){
+       if(*it == object){
+          return false;
+       }
+    }
+
    //Then we check if the object is in the list
    for(std::vector<std::string>::iterator it = manipulableObjects_.begin(); it != manipulableObjects_.end(); it++){
       if(*it == object){
@@ -314,14 +325,20 @@ bool HumanMonitor::isManipulableObject(std::string object){
  * */
 bool HumanMonitor::isSupportObject(std::string support){
 
-   //Then we check if the object is in the list
+   /*/Then we check if the object is in the list
    for(std::vector<std::string>::iterator it = supportObjects_.begin(); it != supportObjects_.end(); it++){
       if(*it == support){
          return true;
       }
    }
 
-   return false;
+   return false;*/
+
+    if(support == currentSupport_){
+        return true;
+    }else{
+        return false;
+    }
 
 }
 
@@ -342,3 +359,4 @@ bool HumanMonitor::isContainerObject(std::string container){
    return false;
 
 }
+

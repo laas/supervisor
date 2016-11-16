@@ -294,85 +294,89 @@ bool robotAction(supervisor_msgs::HumanAction::Request  &req, supervisor_msgs::H
  * @param res result of the service
  * @return true
  * */
-bool humanAction(supervisor_msgs::HumanAction::Request  &req, supervisor_msgs::HumanAction::Response &res){
-    //we look in the human actions
-    std::pair<bool, int> humanAction = isInList(req.action, humanActionsReady);
-    if(humanAction.first){
-        actionsDone.push_back(humanAction.second);
-        std::vector<supervisor_msgs::Action> newHumanActions;
-        for(std::vector<supervisor_msgs::Action>::iterator it = humanActionsReady.begin(); it != humanActionsReady.end(); it++){
-            if(!(humanAction.second == it->id)){
-                newHumanActions.push_back(*it);
-            }
-        }
-        humanActionsReady = newHumanActions;
-        evaluatePlan();
-    }else{
-        //we look if it is the begining of a ready action
-        bool beg = false;
-        supervisor_msgs::Action globalAction;
-        if(req.action.name == "pick"){
-            //look for object picked
-            std::string object;
-            if(req.action.parameter_keys.size() != req.action.parameter_values.size()){
-                ROS_WARN("[plan_executor] Invalid action parameters: nb keys should be equal to nb values!");
-            }else{
-                for(int i = 0; i < req.action.parameter_keys.size(); i++){
-                    if(req.action.parameter_keys[i] == "object"){
-                        object = req.action.parameter_values[i];
-                    }
+void humanAction(const supervisor_msgs::ActionsList::ConstPtr& msg){
+
+    std::vector<supervisor_msgs::Action> actions = msg->actions;
+    for(std::vector<supervisor_msgs::Action>::iterator ita = actions.begin(); ita != actions.end(); ita++){
+        //we look in the human actions
+        std::pair<bool, int> humanAction = isInList(*ita, humanActionsReady);
+        if(humanAction.first){
+            actionsDone.push_back(humanAction.second);
+            std::vector<supervisor_msgs::Action> newHumanActions;
+            for(std::vector<supervisor_msgs::Action>::iterator it = humanActionsReady.begin(); it != humanActionsReady.end(); it++){
+                if(!(humanAction.second == it->id)){
+                    newHumanActions.push_back(*it);
                 }
             }
-            //compare to ready action
-            for(std::vector<supervisor_msgs::Action>::iterator it = humanActionsReady.begin(); it != humanActionsReady.end(); it++){
-                if(it->name == "pickandplace" || it->name == "pickanddrop"){
-                    if(it->parameter_keys.size() != it->parameter_values.size()){
-                        ROS_WARN("[plan_executor] Invalid action parameters: nb keys should be equal to nb values!");
-                    }else{
-                        for(int i = 0; i < it->parameter_keys.size(); i++){
-                            if(it->parameter_keys[i] == "object"){
-                                if(it->parameter_values[i] == object){
-                                    //we found a corresponding action
-                                    beg = true;
-                                    globalAction = *it;
+            humanActionsReady = newHumanActions;
+            evaluatePlan();
+        }else{
+            //we look if it is the begining of a ready action
+            bool beg = false;
+            supervisor_msgs::Action globalAction;
+            if(ita->name == "pick"){
+                //look for object picked
+                std::string object;
+                if(ita->parameter_keys.size() != ita->parameter_values.size()){
+                    ROS_WARN("[plan_executor] Invalid action parameters: nb keys should be equal to nb values!");
+                }else{
+                    for(int i = 0; i < ita->parameter_keys.size(); i++){
+                        if(ita->parameter_keys[i] == "object"){
+                            object = ita->parameter_values[i];
+                        }
+                    }
+                }
+                //compare to ready action
+                for(std::vector<supervisor_msgs::Action>::iterator it = humanActionsReady.begin(); it != humanActionsReady.end(); it++){
+                    if(it->name == "pickandplace" || it->name == "pickanddrop"){
+                        if(it->parameter_keys.size() != it->parameter_values.size()){
+                            ROS_WARN("[plan_executor] Invalid action parameters: nb keys should be equal to nb values!");
+                        }else{
+                            for(int i = 0; i < it->parameter_keys.size(); i++){
+                                if(it->parameter_keys[i] == "object"){
+                                    if(it->parameter_values[i] == object){
+                                        //we found a corresponding action
+                                        beg = true;
+                                        globalAction = *it;
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-        }
-        if(beg){
-            //we replace this action by its end (e.g. place for pickandplace)
-            std::vector<supervisor_msgs::Action> newHumanActions;
-            for(std::vector<supervisor_msgs::Action>::iterator it = humanActionsReady.begin(); it != humanActionsReady.end(); it++){
-                if(globalAction.id == it->id){
-                    supervisor_msgs::Action newAction = *it;
-                    if(newAction.name == "pickandplace"){
-                        newAction.name = "place";
-                    }else if(newAction.name == "pickanddrop"){
-                        newAction.name = "drop";
+            if(beg){
+                //we replace this action by its end (e.g. place for pickandplace)
+                std::vector<supervisor_msgs::Action> newHumanActions;
+                for(std::vector<supervisor_msgs::Action>::iterator it = humanActionsReady.begin(); it != humanActionsReady.end(); it++){
+                    if(globalAction.id == it->id){
+                        supervisor_msgs::Action newAction = *it;
+                        if(newAction.name == "pickandplace"){
+                            newAction.name = "place";
+                            newAction = addHeadFocus(newAction);
+                        }else if(newAction.name == "pickanddrop"){
+                            newAction.name = "drop";
+                            newAction = addHeadFocus(newAction);
+                        }
+                        newHumanActions.push_back(newAction);
+                    }else{
+                        newHumanActions.push_back(*it);
                     }
-                    newHumanActions.push_back(newAction);
-                }else{
-                    newHumanActions.push_back(*it);
                 }
+                humanActionsReady = newHumanActions;
+            }else{
+                //need replan
+                robotActionsReady.clear();
+                robotActionsPlanned.clear();
+                agentXActionsReady.clear();
+                agentXActionsPlanned.clear();
+                humanActionsReady.clear();
+                humanActionsPlanned.clear();
+                actionsDone.clear();
+                links.clear();
             }
-            humanActionsReady = newHumanActions;
-        }else{
-            //need replan
-            robotActionsReady.clear();
-            robotActionsPlanned.clear();
-            agentXActionsReady.clear();
-            agentXActionsPlanned.clear();
-            humanActionsReady.clear();
-            humanActionsPlanned.clear();
-            actionsDone.clear();
-            links.clear();
         }
     }
-
-    return true;
 }
 
 /**
@@ -386,9 +390,10 @@ int main (int argc, char **argv)
   ros::Rate loop_rate(30);
   node->getParam("/robot/name", robotName_);
 
+
   ros::ServiceServer service_new_plan = _node.advertiseService("plan_executor/newPlan", newPlan); //a new plan has been computed
   ros::ServiceServer service_robot_action = _node.advertiseService("plan_executor/robot_action", robotAction); //the robot did an action
-  ros::ServiceServer service_human_action = _node.advertiseService("plan_executor/human_action", humanAction); //the human did an action
+  ros::Subscriber sub_human_action = _node.subscribe("/human_monitor/current_humans_action", 1, humanAction);
 
   ros::Publisher next_human = node->advertise<supervisor_msgs::ActionsList>("/plan_executor/next_humans_actions", 1);
 

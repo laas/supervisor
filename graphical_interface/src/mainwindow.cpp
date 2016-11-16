@@ -273,6 +273,8 @@ void MainWindow::on_pushButtonSetEnv_clicked(){
     toaster_msgs::SetEntityPose srv;
     double x, y, z;
 
+    ros::Publisher reset_support = node_.advertise<std_msgs::Bool>("human_monitor/reset_current_support", 1);
+
     toaster_msgs::ObjectListStamped objectList;
     std::string objectRef;
     double xRef,yRef,zRef;
@@ -325,5 +327,66 @@ void MainWindow::on_pushButtonSetEnv_clicked(){
              ROS_ERROR("Failed to call service pdg/set_entity_pose");
             }
     }
+    std_msgs::Bool msg;
+    msg.data = true;
+    reset_support.publish(msg);
 }
 
+void MainWindow::on_pushButtonNewPlan_clicked(){
+
+    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::NewPlan>("plan_executor/newPlan");
+    supervisor_msgs::NewPlan srv;
+
+    std::string initalPlacement, first, second, third, fourth;
+    node_.getParam("/graphical_interface/initialPlacement", initalPlacement);
+    node_.getParam("/graphical_interface/firstObject", first);
+    node_.getParam("/graphical_interface/secondObject", second);
+    node_.getParam("/graphical_interface/thirdObject", third);
+    node_.getParam("/graphical_interface/fourthObject", fourth);
+
+    supervisor_msgs::Plan plan;
+
+    supervisor_msgs::Action action;
+    action.name = "pickandplace";
+    action.actors.push_back("HERAKLES_HUMAN1");
+    action.id = 1;
+    action.parameter_keys.push_back("object");
+    action.parameter_values.push_back(first);
+    action.parameter_keys.push_back("support");
+    action.parameter_values.push_back(initalPlacement);
+    plan.actions.push_back(action);
+    action.parameter_values.clear();
+    action.id = 2;
+    action.parameter_values.push_back(second);
+    action.parameter_values.push_back(first);
+    plan.actions.push_back(action);
+    action.parameter_values.clear();
+    action.id = 3;
+    action.parameter_values.push_back(third);
+    action.parameter_values.push_back(second);
+    plan.actions.push_back(action);
+    action.parameter_values.clear();
+    action.id = 4;
+    action.parameter_values.push_back(fourth);
+    action.parameter_values.push_back(third);
+    plan.actions.push_back(action);
+
+    supervisor_msgs::Link link;
+    link.origin = 1;
+    link.following = 2;
+    plan.links.push_back(link);
+    link.origin = 2;
+    link.following = 3;
+    plan.links.push_back(link);
+    link.origin = 3;
+    link.following = 4;
+    plan.links.push_back(link);
+
+
+    srv.request.plan = plan;
+
+    if (!client.call(srv)){
+      ROS_ERROR("Failed to call service plan_executor/newPlan");
+     }
+
+}

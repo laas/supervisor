@@ -1,1 +1,7 @@
 ---
+graphical_interface:
+    initialPlacement: "PLACEMAT_RED"
+    firstObject: "BLUE_CUBE"
+    secondObject: "GREEN_CUBE2"
+    thirdObject: "RED_CUBE"
+    fourthObject: "BLACK_CUBE"

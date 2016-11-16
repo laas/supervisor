@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>593</width>
-    <height>311</height>
+    <height>443</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -168,6 +168,19 @@
     </property>
     <property name="text">
      <string>Set Env</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButtonNewPlan">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>280</y>
+      <width>171</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>New plan</string>
     </property>
    </widget>
   </widget>
