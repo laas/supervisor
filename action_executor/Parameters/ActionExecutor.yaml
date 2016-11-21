@@ -1,0 +1,11 @@
+---
+action_executor:
+    restPosition:
+        right: 'manipulationPoseRight'
+        left: 'manipulationPoseLeft'
+    shouldUseRightHand: true
+    nbPlanMaxGTP: 3
+    humanSafetyJoint: 'rightHand'
+    safetyThreshold: 0.5
+    gripperThreshold: 0.01
+
