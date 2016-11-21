@@ -281,7 +281,7 @@ VirtualAction* ActionExecutor::initializeAction(supervisor_msgs::Action action) 
     connector_.stopOrder_ = false;
 
     if(action.name == "pick"){
-        //act = new Pick(action, &connector_);
+        act = new Pick(action, &connector_);
     }else{
         ROS_WARN("[action_executor] Unknown action");
     }

@@ -4,6 +4,8 @@
 #include "action_executor/connector.h"
 #include "action_executor/virtual_action.h"
 
+#include "action_executor/Actions/pick.h"
+
 typedef actionlib::SimpleActionServer<supervisor_msgs::ActionExecutorAction> Server;
 
 class ActionExecutor{

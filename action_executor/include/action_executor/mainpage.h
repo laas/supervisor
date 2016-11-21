@@ -40,6 +40,8 @@
 * - toaster_msgs
 * - supervisor_msgs
 * - action_lib
+* - pr2motion
+* - gtp_msgs
 *
 * Run dependencies
 * - Toaster
