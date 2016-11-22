@@ -40,6 +40,11 @@ protected:
    bool isGripperEmpty(std::string arm);
 private:
 
+   ros::ServiceClient client_db_execute_; /**< toaster client for database execute commands*/
+   ros::ServiceClient client_put_hand_; /**< toaster client to put objects in hand*/
+   ros::ServiceClient client_remove_hand_; /**< toaster client to remove objects from hand*/
+   ros::ServiceClient client_set_pose_; /**< toaster client to set entities poses*/
+   ros::ServiceClient client_gtp_traj_; /**< gtp client to publish a traj*/
 };
 
 #endif // VIRTUALACTION_H

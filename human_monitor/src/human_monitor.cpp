@@ -18,6 +18,10 @@ HumanMonitor::HumanMonitor(ros::NodeHandle* node){
 
     previous_pub_ = node_->advertise<supervisor_msgs::ActionsList>("/human_monitor/current_humans_action", 1);
     current_pub_ = node_->advertise<supervisor_msgs::ActionsList>("/data_manager/add_data/previous_actions", 1);
+
+    client_put_hand_ = node_->serviceClient<toaster_msgs::PutInHand>("pdg/put_in_hand");
+    client_remove_hand_ = node_->serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
+    client_set_pose_ = node_->serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
 }
 
 /**
@@ -47,14 +51,12 @@ void HumanMonitor::humanPick(std::string agent, std::string object){
     msg_current.actions.push_back(action);
     current_pub_.publish(msg_current);
 
-    ros::ServiceClient put_in_hand = node_->serviceClient<toaster_msgs::PutInHand>("pdg/put_in_hand");
-
     //put the object in the hand of the agent
     toaster_msgs::PutInHand srv_putInHand;
     srv_putInHand.request.objectId = object;
     srv_putInHand.request.agentId = agent;
     srv_putInHand.request.jointName = humanHand_;
-    if (!put_in_hand.call(srv_putInHand)){
+    if (!client_put_hand_.call(srv_putInHand)){
      ROS_ERROR("[human_monitor] Failed to call service pdg/put_in_hand");
     }
 
@@ -106,13 +108,10 @@ void HumanMonitor::humanPlace(std::string agent, std::string object, std::string
     msg_current.actions.push_back(action);
     current_pub_.publish(msg_current);
 
-    ros::ServiceClient remove_from_hand = node_->serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
-    ros::ServiceClient set_entity_pose = node_->serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
-
     //remove the object from the hand of the agent
     toaster_msgs::RemoveFromHand srv_rmFromHand;
    srv_rmFromHand.request.objectId = object;
-   if (!remove_from_hand.call(srv_rmFromHand)){
+   if (!client_remove_hand_.call(srv_rmFromHand)){
      ROS_ERROR("[human_monitor] Failed to call service pdg/remove_from_hand");
     }
 
@@ -154,7 +153,7 @@ void HumanMonitor::humanPlace(std::string agent, std::string object, std::string
     srv_setPose.request.pose.orientation.y = 0.0;
     srv_setPose.request.pose.orientation.z = 0.0;
     srv_setPose.request.pose.orientation.w = 1.0;
-    if (!set_entity_pose.call(srv_setPose)){
+    if (!client_set_pose_.call(srv_setPose)){
      ROS_ERROR("[human_monitor] Failed to call service pdg/set_entity_pose");
     }
 
@@ -213,13 +212,10 @@ void HumanMonitor::humanDrop(std::string agent, std::string object, std::string 
     msg_current.actions.push_back(action);
     current_pub_.publish(msg_current);
 
-    ros::ServiceClient remove_from_hand = node_->serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
-    ros::ServiceClient set_entity_pose = node_->serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
-
     //remove the object from the hand of the agent
     toaster_msgs::RemoveFromHand srv_rmFromHand;
    srv_rmFromHand.request.objectId = object;
-   if (!remove_from_hand.call(srv_rmFromHand)){
+   if (!client_remove_hand_.call(srv_rmFromHand)){
      ROS_ERROR("[human_monitor] Failed to call service pdg/remove_from_hand");
     }
 
@@ -253,7 +249,7 @@ void HumanMonitor::humanDrop(std::string agent, std::string object, std::string 
     srv_setPose.request.pose.orientation.y = 0.0;
     srv_setPose.request.pose.orientation.z = 0.0;
     srv_setPose.request.pose.orientation.w = 1.0;
-    if (!set_entity_pose.call(srv_setPose)){
+    if (!client_set_pose_.call(srv_setPose)){
      ROS_ERROR("[human_monitor] Failed to call service pdg/set_entity_pose");
     }
 

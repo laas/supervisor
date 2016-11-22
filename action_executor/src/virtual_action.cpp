@@ -14,6 +14,12 @@ VirtualAction::VirtualAction(Connector* connector){
 
    connector_ = connector;
    gripperEmpty_ = false;
+
+   client_db_execute_ = connector_->node_->serviceClient<toaster_msgs::ExecuteDB>("database_manager/execute");
+   client_put_hand_ = connector_->node_->serviceClient<toaster_msgs::PutInHand>("pdg/put_in_hand");
+   client_remove_hand_ = connector_->node_->serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
+   client_set_pose_ = connector_->node_->serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
+   client_gtp_traj_ = connector_->node_->serviceClient<gtp_ros_msgs::PublishTraj>("gtp/publishTraj");
 }
 
 /**
@@ -89,12 +95,11 @@ bool VirtualAction::isContainerObject(std::string container){
  * */
 bool VirtualAction::ArePreconditionsChecked(std::vector<toaster_msgs::Fact> precs){
 
-    ros::ServiceClient client = connector_->node_->serviceClient<toaster_msgs::ExecuteDB>("database_manager/execute");
     toaster_msgs::ExecuteDB srv;
     srv.request.command = "ARE_IN_TABLE";
     srv.request.agent = connector_->robotName_;
     srv.request.facts = precs;
-    if (client.call(srv)){
+    if (client_db_execute_.call(srv)){
         return srv.response.boolAnswer;
     }else{
        ROS_ERROR("[action_executor] Failed to call service database_manager/execute");
@@ -109,8 +114,6 @@ bool VirtualAction::ArePreconditionsChecked(std::vector<toaster_msgs::Fact> prec
  * */
 void VirtualAction::PutInHand(std::string object, std::string hand, int gtpId){
 
-    ros::ServiceClient client = connector_->node_->serviceClient<toaster_msgs::PutInHand>("pdg/put_in_hand");
-
     //put the object in the hand of the robot
     std::string robotHand;
     std::string handTopic = "/supervisor/robot/hands/" + hand;
@@ -119,7 +122,7 @@ void VirtualAction::PutInHand(std::string object, std::string hand, int gtpId){
     srv.request.objectId = object;
     srv.request.agentId = connector_->robotToaster_;
     srv.request.jointName = robotHand;
-    if (!client.call(srv)){
+    if (!client_put_hand_.call(srv)){
      ROS_ERROR("[action_executor] Failed to call service pdg/put_in_hand");
     }
     //remember the gtp id of the grasp
@@ -133,12 +136,10 @@ void VirtualAction::PutInHand(std::string object, std::string hand, int gtpId){
  * */
 void VirtualAction::RemoveFromHand(std::string object){
 
-    ros::ServiceClient client = connector_->node_->serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
-
     //remove the object from the hand of the robot
     toaster_msgs::RemoveFromHand srv;
     srv.request.objectId = object;
-    if (!client.call(srv)){
+    if (!client_remove_hand_.call(srv)){
      ROS_ERROR("[action_executor] Failed to call service pdg/remove_from_hand");
     }
 
@@ -183,8 +184,6 @@ bool VirtualAction::isGripperEmpty(std::string arm){
  * */
 void VirtualAction::PutOnSupport(std::string object, std::string support){
 
-    ros::ServiceClient client = connector_->node_->serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
-
     double objectHeight, supportHeight;
     std::string objectHeightTopic = "/entities/objectsHeight/bottom/" + object;
     std::string supportHeightTopic = "/entities/objectsHeight/top/" + support;
@@ -212,7 +211,7 @@ void VirtualAction::PutOnSupport(std::string object, std::string support){
     srv.request.pose.orientation.y = 0.0;
     srv.request.pose.orientation.z = 0.0;
     srv.request.pose.orientation.w = 1.0;
-    if (!client.call(srv)){
+    if (!client_set_pose_.call(srv)){
      ROS_ERROR("Failed to call service pdg/set_entity_pose");
     }
 
@@ -224,8 +223,6 @@ void VirtualAction::PutOnSupport(std::string object, std::string support){
  * @param container the container where to place
  * */
 void VirtualAction::PutInContainer(std::string object, std::string container){
-
-   ros::ServiceClient client = connector_->node_->serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
 
     toaster_msgs::ObjectListStamped objectList;
     double x,y,z;
@@ -248,7 +245,7 @@ void VirtualAction::PutInContainer(std::string object, std::string container){
     srv.request.pose.orientation.y = 0.0;
     srv.request.pose.orientation.z = 0.0;
     srv.request.pose.orientation.w = 1.0;
-    if (!client.call(srv)){
+    if (!client_set_pose_.call(srv)){
      ROS_ERROR("Failed to call service pdg/set_entity_pose");
     }
 
@@ -358,12 +355,11 @@ bool VirtualAction::execAction(int actionId, std::vector<gtp_ros_msgs::SubSoluti
  * */
 bool VirtualAction::executeTrajectory(int actionId, int actionSubId, int armId, Server* action_server){
 
-   ros::ServiceClient client = connector_->node_->serviceClient<gtp_ros_msgs::PublishTraj>("pdg/publishTraj");
    gtp_ros_msgs::PublishTraj srv;
    srv.request.actionId.taskId = actionId;
    srv.request.actionId.alternativeId = 0;
    srv.request.subSolutionId = actionSubId;
-   if (client.call(srv)){
+   if (client_gtp_traj_.call(srv)){
        if(armId == 0){//right arm
           pr2motion::Arm_Right_MoveGoal arm_goal_right;
           arm_goal_right.traj_mode.value=pr2motion::pr2motion_TRAJ_MODE::pr2motion_TRAJ_GATECH;
@@ -397,7 +393,7 @@ bool VirtualAction::executeTrajectory(int actionId, int actionSubId, int armId, 
 
        }
    }else{
-      ROS_ERROR("[action_executor] Failed to call pdg/publishTraj");
+      ROS_ERROR("[action_executor] Failed to call gtp/publishTraj");
       return false;
    }
 

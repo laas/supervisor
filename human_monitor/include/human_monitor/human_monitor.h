@@ -39,7 +39,9 @@ private:
     std::string humanHand_; /**< name of the human hand*/
     ros::Publisher previous_pub_; /**< publisher of previous actions*/
     ros::Publisher current_pub_; /**< publisher of humans current actions*/
-
+    ros::ServiceClient client_put_hand_; /**< toaster client to put objects in hand*/
+    ros::ServiceClient client_remove_hand_; /**< toaster client to remove objects from hand*/
+    ros::ServiceClient client_set_pose_; /**< toaster client to set entities poses*/
 };
 
 #endif // HUMANMONITOR_H
