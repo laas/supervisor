@@ -104,6 +104,7 @@ void agentFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
                         }
                     }else{
                         if(it->doubleValue < pickThreshold && hm_->isManipulableObject(it->targetId)){
+
                             hm_->humanPick(it->subjectOwnerId, it->targetId);
                             humanEngaged[it->subjectOwnerId] = it->targetId;
                         }
@@ -120,7 +121,6 @@ void agentFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
 * @param msg bool
 * */
 void resetSupport(const std_msgs::Bool::ConstPtr& msg){
-
 
     hm_->currentSupport_ = hm_->initialSupport_;
     hm_->usedObjects_.clear();

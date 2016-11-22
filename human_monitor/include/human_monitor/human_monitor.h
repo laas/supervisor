@@ -46,6 +46,10 @@ private:
     ros::Publisher previous_pub_; /**< publisher of previous actions*/
     ros::Publisher current_pub_; /**< publisher of humans current actions*/
 
+    ros::ServiceClient client_in_hand_;/**< toaster client to put an object in hand*/
+    ros::ServiceClient client_remove_hand_;/**< toaster client to put an object in hand*/
+    ros::ServiceClient clien_set_pose_;/**< toaster client to set an entity pose*/
+
 };
 
 #endif // HUMANMONITOR_H

@@ -6,7 +6,7 @@ human_monitor:
         pick: 0.20
         place: 0.30
         drop: 0.40
-        disengage: 0.20
+        disengage: 0.2
     replacementSupport:
         PLACEMAT_1: TABLE_4
         PLACEMAT_2: TABLE_4
