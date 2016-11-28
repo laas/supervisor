@@ -27,7 +27,7 @@ include_directories(
 
 link_directories(${pr2motion-genom3_LIBRARY_DIRS})
 
-add_executable(action_executor src/main.cpp src/action_executor.cpp src/virtual_action.cpp src/Actions/pick.cpp)
+add_executable(action_executor src/main.cpp src/action_executor.cpp src/virtual_action.cpp src/Actions/pick.cpp src/Actions/place.cpp)
 target_link_libraries(
   action_executor
   ${catkin_LIBRARIES}

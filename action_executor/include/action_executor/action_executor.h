@@ -5,6 +5,7 @@
 #include "action_executor/virtual_action.h"
 
 #include "action_executor/Actions/pick.h"
+#include "action_executor/Actions/place.h"
 
 typedef actionlib::SimpleActionServer<supervisor_msgs::ActionExecutorAction> Server;
 

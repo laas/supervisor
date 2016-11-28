@@ -282,7 +282,9 @@ VirtualAction* ActionExecutor::initializeAction(supervisor_msgs::Action action) 
 
     if(action.name == "pick"){
         act = new Pick(action, &connector_);
-    }else{
+    }else if(action.name == "place"){
+        act = new Place(action, &connector_);
+    }{
         ROS_WARN("[action_executor] Unknown action");
     }
 

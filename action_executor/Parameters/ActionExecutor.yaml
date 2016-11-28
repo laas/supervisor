@@ -8,4 +8,12 @@ action_executor:
     humanSafetyJoint: 'rightHand'
     safetyThreshold: 0.5
     gripperThreshold: 0.01
+    planningSupport:
+        TABLE_4: 'PLACEMAT_RED'
+    points:
+        TABLE_4:
+            RED_CUBE:
+                x: 0.0
+                y: 0.0
+                theta: 0.0
 

@@ -19,6 +19,11 @@ Template::Template(supervisor_msgs::Action action, Connector* connector) : Virtu
     //here we fill the actions parameters (e.g. object) with the action definition
 }
 
+/**
+ * \brief Precondition of the template action:
+ *    - describe here the preconditions
+ * @return true if the preconditions are checked
+ * */
 bool Template::preconditions(){
 
     //here we check action preconditions
@@ -30,7 +35,12 @@ bool Template::preconditions(){
 
 }
 
-bool Pick::plan(){
+/**
+ * \brief Planning the template action:
+ *    - describe here the planning process
+ * @return true if the planning succeed
+ * */
+bool Template::plan(){
 
    //Here we fill the needed information for gtp (fill free to use other planner if needed)
    std::vector<gtp_ros_msgs::Role> agents;
@@ -52,7 +62,12 @@ bool Pick::plan(){
     return true;
 }
 
-bool Pick::exec(Server* action_server){
+/**
+ * \brief Execution of the template action:
+ *    - describe here the execution process
+ * @return true if the execution succeed
+ * */
+bool Template::exec(Server* action_server){
 
    //Here we execute the action
    //This line simply execute the solution given by gtp
@@ -60,7 +75,12 @@ bool Pick::exec(Server* action_server){
 
 }
 
-bool Pick::post(){
+/**
+ * \brief Post conditions of the template action:
+ *    - describe here the post conditions
+ * @return true if the post-conditions are ok
+ * */
+bool Template::post(){
 
     //Here we check/apply post conditions
 

@@ -25,6 +25,13 @@ Pick::Pick(supervisor_msgs::Action action, Connector* connector) : VirtualAction
     }
 }
 
+/**
+ * \brief Precondition of the pick action:
+ *    - the object should be a manipulable object
+ *    - the object should be reachable by the agent
+ *    - the agent should not have any object in hand
+ * @return true if the preconditions are checked
+ * */
 bool Pick::preconditions(){
 
     //First we check if the object is a known manipulable object
@@ -49,6 +56,11 @@ bool Pick::preconditions(){
 
 }
 
+/**
+ * \brief Planning the pick action:
+ *    - ask a gtp plan
+ * @return true if the planning succeed
+ * */
 bool Pick::plan(){
 
    std::vector<gtp_ros_msgs::Role> agents;
@@ -75,20 +87,28 @@ bool Pick::plan(){
 
    if(gtpActionId_ == -1){
        return false;
-    }else{
-       subSolutions_ = answer.second;
-       return true;
     }
 
-    return true;
+   subSolutions_ = answer.second;
+   return true;
 }
 
+/**
+ * \brief Execution of the pick action:
+ *    - execute gtp plan
+ * @return true if the execution succeed
+ * */
 bool Pick::exec(Server* action_server){
 
    return execAction(gtpActionId_, subSolutions_, true, action_server);
 
 }
 
+/**
+ * \brief Post conditions of the pick action:
+ *    - chek if the gripper is not empty
+ * @return true if the post-conditions are ok
+ * */
 bool Pick::post(){
 
     //Check gripper position (completly close or not)
