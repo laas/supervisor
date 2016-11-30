@@ -22,9 +22,10 @@ add_service_files(
     HumanAction.srv
 )
 
-# add_action_files(
-#   FILES
- #)
+ add_action_files(
+   FILES
+    ActionExecutor.action
+ )
 
 generate_messages(
    DEPENDENCIES

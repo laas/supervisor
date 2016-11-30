@@ -1,0 +1,4 @@
+<launch>
+    <include file="$(find action_executor)/launch/ActionExecutor.launch"/>
+    <node name="test_pickandplace" pkg="tests" type="tests" output="screen" />  <!-- Launch the action executor tester -->
+</launch>

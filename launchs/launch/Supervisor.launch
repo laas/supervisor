@@ -1,5 +1,5 @@
 <launch>
     <include file="$(find data_manager)/launch/DataManager.launch"/>
-    <include file="$(find data_manager)/launch/HumanMonitor.launch"/>
-    <include file="$(find data_manager)/launch/ActionExecutor.launch"/>
+    <include file="$(find human_monitor)/launch/HumanMonitor.launch"/>
+    <include file="$(find action_executor)/launch/ActionExecutor.launch"/>
 </launch>

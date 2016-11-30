@@ -20,6 +20,12 @@ VirtualAction::VirtualAction(Connector* connector){
    client_remove_hand_ = connector_->node_->serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
    client_set_pose_ = connector_->node_->serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
    client_gtp_traj_ = connector_->node_->serviceClient<gtp_ros_msgs::PublishTraj>("gtp/publishTraj");
+
+   connector_->timePlan_ = 0.0;
+   connector_->timeGTP_ = 0.0;
+   connector_->timeExec_ = 0.0;
+   connector_->timeDB_ = 0.0;
+   connector_->timeToaster_ = 0.0;
 }
 
 /**
@@ -99,7 +105,11 @@ bool VirtualAction::ArePreconditionsChecked(std::vector<toaster_msgs::Fact> prec
     srv.request.command = "ARE_IN_TABLE";
     srv.request.agent = connector_->robotName_;
     srv.request.facts = precs;
+    ros::Time start = ros::Time::now();
     if (client_db_execute_.call(srv)){
+        ros::Time end = ros::Time::now();
+        ros::Duration d = start - end;
+        connector_->timeDB_ = connector_->timeDB_ + d.toSec();
         return srv.response.boolAnswer;
     }else{
        ROS_ERROR("[action_executor] Failed to call service database_manager/execute");
@@ -122,9 +132,13 @@ void VirtualAction::PutInHand(std::string object, std::string hand, int gtpId){
     srv.request.objectId = object;
     srv.request.agentId = connector_->robotToaster_;
     srv.request.jointName = robotHand;
+    ros::Time start = ros::Time::now();
     if (!client_put_hand_.call(srv)){
      ROS_ERROR("[action_executor] Failed to call service pdg/put_in_hand");
     }
+    ros::Time end = ros::Time::now();
+    ros::Duration d = start - end;
+    connector_->timeToaster_ = connector_->timeToaster_ + d.toSec();
     //remember the gtp id of the grasp
     connector_->idGrasp_ = gtpId;
 
@@ -139,9 +153,13 @@ void VirtualAction::RemoveFromHand(std::string object){
     //remove the object from the hand of the robot
     toaster_msgs::RemoveFromHand srv;
     srv.request.objectId = object;
+    ros::Time start = ros::Time::now();
     if (!client_remove_hand_.call(srv)){
      ROS_ERROR("[action_executor] Failed to call service pdg/remove_from_hand");
     }
+    ros::Time end = ros::Time::now();
+    ros::Duration d = start - end;
+    connector_->timeToaster_ = connector_->timeToaster_ + d.toSec();
 
 }
 
@@ -158,7 +176,11 @@ bool VirtualAction::isGripperEmpty(std::string arm){
     connector_->node_->getParam(gripperTopic, gripperJoint);
     connector_->node_->getParam("/action_executor/gripperThreshold", gripperThreshold);
     toaster_msgs::RobotListStamped list;
+    ros::Time start = ros::Time::now();
     list  = *(ros::topic::waitForMessage<toaster_msgs::RobotListStamped>("pdg/robotList",ros::Duration(1)));
+    ros::Time end = ros::Time::now();
+    ros::Duration d = start - end;
+    connector_->timeToaster_ = connector_->timeToaster_ + d.toSec();
     for(std::vector<toaster_msgs::Robot>::iterator it = list.robotList.begin(); it != list.robotList.end(); it++){
       if(it->meAgent.meEntity.id == connector_->robotName_){
           for(std::vector<toaster_msgs::Joint>::iterator itj = it->meAgent.skeletonJoint.begin(); itj != it->meAgent.skeletonJoint.end(); itj++){
@@ -191,7 +213,11 @@ void VirtualAction::PutOnSupport(std::string object, std::string support){
     connector_->node_->getParam(supportHeightTopic, supportHeight);
     toaster_msgs::ObjectListStamped objectList;
     double x,y,z;
+    ros::Time start = ros::Time::now();
     objectList  = *(ros::topic::waitForMessage<toaster_msgs::ObjectListStamped>("pdg/objectList",ros::Duration(1)));
+    ros::Time end = ros::Time::now();
+    ros::Duration d = start - end;
+    connector_->timeToaster_ = connector_->timeToaster_ + d.toSec();
     for(std::vector<toaster_msgs::Object>::iterator it = objectList.objectList.begin(); it != objectList.objectList.end(); it++){
      if(it->meEntity.id == support){
         x = it->meEntity.pose.position.x;
@@ -211,9 +237,13 @@ void VirtualAction::PutOnSupport(std::string object, std::string support){
     srv.request.pose.orientation.y = 0.0;
     srv.request.pose.orientation.z = 0.0;
     srv.request.pose.orientation.w = 1.0;
+    start = ros::Time::now();
     if (!client_set_pose_.call(srv)){
      ROS_ERROR("Failed to call service pdg/set_entity_pose");
     }
+    end = ros::Time::now();
+    d = start - end;
+    connector_->timeToaster_ = connector_->timeToaster_ + d.toSec();
 
 }
 
@@ -226,7 +256,11 @@ void VirtualAction::PutInContainer(std::string object, std::string container){
 
     toaster_msgs::ObjectListStamped objectList;
     double x,y,z;
+    ros::Time start = ros::Time::now();
     objectList  = *(ros::topic::waitForMessage<toaster_msgs::ObjectListStamped>("pdg/objectList",ros::Duration(1)));
+    ros::Time end = ros::Time::now();
+    ros::Duration d = start - end;
+    connector_->timeToaster_ = connector_->timeToaster_ + d.toSec();
     for(std::vector<toaster_msgs::Object>::iterator it = objectList.objectList.begin(); it != objectList.objectList.end(); it++){
      if(it->meEntity.id == container){
         x = it->meEntity.pose.position.x;
@@ -245,9 +279,13 @@ void VirtualAction::PutInContainer(std::string object, std::string container){
     srv.request.pose.orientation.y = 0.0;
     srv.request.pose.orientation.z = 0.0;
     srv.request.pose.orientation.w = 1.0;
+    start = ros::Time::now();
     if (!client_set_pose_.call(srv)){
      ROS_ERROR("Failed to call service pdg/set_entity_pose");
     }
+    end = ros::Time::now();
+    d = start - end;
+    connector_->timeToaster_ = connector_->timeToaster_ + d.toSec();
 
 }
 
@@ -284,7 +322,11 @@ std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > VirtualAction::planGTP(s
   int nbTry = 0;
   while(nbTry < connector_->nbPlanMax_){
      connector_->acGTP_->sendGoal(goal);
+     ros::Time start = ros::Time::now();
      bool finishedBeforeTimeout = connector_->acGTP_->waitForResult(ros::Duration(connector_->waitActionServer_));
+     ros::Time end = ros::Time::now();
+     ros::Duration d = start - end;
+     connector_->timePlan_ = connector_->timePlan_ + d.toSec();
      if (finishedBeforeTimeout) {
        if(connector_->acGTP_->getResult()->result.success){
            res.first = connector_->acGTP_->getResult()->result.id.taskId;
@@ -359,12 +401,17 @@ bool VirtualAction::executeTrajectory(int actionId, int actionSubId, int armId, 
    srv.request.actionId.taskId = actionId;
    srv.request.actionId.alternativeId = 0;
    srv.request.subSolutionId = actionSubId;
+   ros::Time start = ros::Time::now();
    if (client_gtp_traj_.call(srv)){
+       ros::Time end = ros::Time::now();
+       ros::Duration d = start - end;
+       connector_->timeGTP_ = connector_->timeGTP_ + d.toSec();
        if(armId == 0){//right arm
           pr2motion::Arm_Right_MoveGoal arm_goal_right;
           arm_goal_right.traj_mode.value=pr2motion::pr2motion_TRAJ_MODE::pr2motion_TRAJ_GATECH;
           arm_goal_right.path_mode.value=pr2motion::pr2motion_PATH_MODE::pr2motion_PATH_PORT;
           connector_->rightArmMoving_ = true;
+          ros::Time start = ros::Time::now();
           connector_->PR2motion_arm_right_->sendGoal(arm_goal_right,  boost::bind(&VirtualAction::moveRightArm, this, _1, _2),
                                                      Client_Right_Arm::SimpleActiveCallback(),  Client_Right_Arm::SimpleFeedbackCallback());
           while(connector_->rightArmMoving_ == true){
@@ -374,12 +421,16 @@ bool VirtualAction::executeTrajectory(int actionId, int actionSubId, int armId, 
                   return false;
               }
           }
+          ros::Time end = ros::Time::now();
+          ros::Duration d = start - end;
+          connector_->timeExec_ = connector_->timeExec_ + d.toSec();
           connector_->rightArmPose_ = "unknown";
        }else{
           pr2motion::Arm_Left_MoveGoal arm_goal_left;
           arm_goal_left.traj_mode.value=pr2motion::pr2motion_TRAJ_MODE::pr2motion_TRAJ_GATECH;
           arm_goal_left.path_mode.value=pr2motion::pr2motion_PATH_MODE::pr2motion_PATH_PORT;
           connector_->leftArmMoving_ = true;
+          ros::Time start = ros::Time::now();
           connector_->PR2motion_arm_left_->sendGoal(arm_goal_left,  boost::bind(&VirtualAction::moveLeftArm, this, _1, _2),
                                                      Client_Left_Arm::SimpleActiveCallback(),  Client_Left_Arm::SimpleFeedbackCallback());
           while(connector_->leftArmMoving_ == true){
@@ -389,6 +440,9 @@ bool VirtualAction::executeTrajectory(int actionId, int actionSubId, int armId, 
                   return false;
               }
           }
+          ros::Time end = ros::Time::now();
+          ros::Duration d = start - end;
+          connector_->timeExec_ = connector_->timeExec_ + d.toSec();
           connector_->leftArmPose_ = "unknown";
 
        }
@@ -416,6 +470,7 @@ bool VirtualAction::closeGripper(int armId, Server* action_server){
        pr2motion::Gripper_Right_OperateGoal gripper_goal;
        gripper_goal.goal_mode.value=pr2motion::pr2motion_GRIPPER_MODE::pr2motion_GRIPPER_CLOSE;
        connector_->rightGripperMoving_ = true;
+       ros::Time start = ros::Time::now();
        connector_->PR2motion_gripper_right_->sendGoal(gripper_goal,  boost::bind(&VirtualAction::moveRightGripper, this, _1, _2),
                                                   Client_Right_Gripper::SimpleActiveCallback(),  Client_Right_Gripper::SimpleFeedbackCallback());
        while(connector_->rightGripperMoving_ == true){
@@ -425,11 +480,15 @@ bool VirtualAction::closeGripper(int armId, Server* action_server){
                return false;
            }
        }
+       ros::Time end = ros::Time::now();
+       ros::Duration d = start - end;
+       connector_->timeExec_ = connector_->timeExec_ + d.toSec();
        gripperEmpty_  = isGripperEmpty("right");
     }else{
        pr2motion::Gripper_Left_OperateGoal gripper_goal;
        gripper_goal.goal_mode.value=pr2motion::pr2motion_GRIPPER_MODE::pr2motion_GRIPPER_CLOSE;
        connector_->leftGripperMoving_ = true;
+       ros::Time start = ros::Time::now();
        connector_->PR2motion_gripper_left_->sendGoal(gripper_goal,  boost::bind(&VirtualAction::moveLeftGripper, this, _1, _2),
                                                   Client_Left_Gripper::SimpleActiveCallback(),  Client_Left_Gripper::SimpleFeedbackCallback());
        while(connector_->leftGripperMoving_ == true){
@@ -439,6 +498,9 @@ bool VirtualAction::closeGripper(int armId, Server* action_server){
                return false;
            }
        }
+       ros::Time end = ros::Time::now();
+       ros::Duration d = start - end;
+       connector_->timeExec_ = connector_->timeExec_ + d.toSec();
        gripperEmpty_  = isGripperEmpty("left");
     }
 
@@ -462,7 +524,11 @@ bool VirtualAction::openGripper(int armId, Server* action_server){
        gripper_goal.goal_mode.value=pr2motion::pr2motion_GRIPPER_MODE::pr2motion_GRIPPER_OPEN;
        connector_->rightGripperMoving_ = true;
        connector_->PR2motion_gripper_right_->sendGoal(gripper_goal);
+       ros::Time start = ros::Time::now();
        finishedBeforeTimeout = connector_->PR2motion_gripper_right_->waitForResult(ros::Duration(connector_->waitActionServer_));
+       ros::Time end = ros::Time::now();
+       ros::Duration d = start - end;
+       connector_->timeExec_ = connector_->timeExec_ + d.toSec();
        connector_->rightGripperMoving_ = false;
        if(!finishedBeforeTimeout){
          ROS_INFO("[action_executor] PR2motion Action did not finish before the time out.");
@@ -474,7 +540,11 @@ bool VirtualAction::openGripper(int armId, Server* action_server){
        gripper_goal.goal_mode.value=pr2motion::pr2motion_GRIPPER_MODE::pr2motion_GRIPPER_OPEN;
        connector_->leftGripperMoving_ = true;
        connector_->PR2motion_gripper_left_->sendGoal(gripper_goal);
+       ros::Time start = ros::Time::now();
        finishedBeforeTimeout = connector_->PR2motion_gripper_left_->waitForResult(ros::Duration(connector_->waitActionServer_));
+       ros::Time end = ros::Time::now();
+       ros::Duration d = start - end;
+       connector_->timeExec_ = connector_->timeExec_ + d.toSec();
        connector_->leftGripperMoving_ = false;
        if(!finishedBeforeTimeout){
          ROS_INFO("[action_executor] PR2motion Action did not finish before the time out.");

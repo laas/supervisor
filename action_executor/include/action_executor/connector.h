@@ -74,6 +74,13 @@ struct Connector{
     actionlib::SimpleActionClient<pr2motion::Arm_Left_MoveAction>* PR2motion_arm_left_;/**< pr2motion left arm action server*/
     actionlib::SimpleActionClient<pr2motion::Gripper_Right_OperateAction>* PR2motion_gripper_right_;/**< pr2motion right gripper action server*/
     actionlib::SimpleActionClient<pr2motion::Gripper_Left_OperateAction>* PR2motion_gripper_left_;/**< pr2motion left gripper action server*/
+
+    double timeDB_;/**< time spent in the database*/
+    double timePlan_;/**< time spent in the planning*/
+    double timeExec_;/**< time spent in the execution*/
+    double timeGTP_;/**< time spent in other gtp actions*/
+    double timeToaster_;/**< time spent in other gtp actions*/
+    ros::Time timerStart_;/**< timer set at the begining of the action*/
 };
 
 #endif // CONNECTOR_H
