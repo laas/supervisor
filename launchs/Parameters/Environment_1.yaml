@@ -1,0 +1,30 @@
+---
+environment:
+    referenceObject: 'TABLE_4'
+    pdgObjects: ['RED_CUBE', 'BLUE_CUBE', 'BLACK_CUBE', 'GREEN_CUBE2', 'PLACEMAT_RED']
+    objectsRelativePose:
+        PLACEMAT_RED:
+            x: 0.0
+            y: 0.0
+            z: 0.73
+            rotation: false
+        RED_CUBE:
+            x: 0.5
+            y: 0.2
+            z: 0.73
+            rotation: false
+        BLUE_CUBE:
+            x: 0.2
+            y: 0.2
+            z: 0.73
+            rotation: false
+        BLACK_CUBE:
+            x: -0.2
+            y: 0.2
+            z: 0.73
+            rotation: false
+        GREEN_CUBE2:
+            x: -0.5
+            y: 0.2
+            z: 0.73
+            rotation: false
