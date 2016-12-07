@@ -1,0 +1,10 @@
+<launch>
+    <rosparam command="load" file="$(find adream_hri_experiments)/parameters/move3d_common.yaml" />
+    <rosparam command="load" file="$(find adream_hri_experiments)/parameters/PR2_dof_corresp.yaml" />
+
+    <env name="ROSCONSOLE_CONFIG_FILE"
+    value="$(find adream_hri_experiments)/parameters/debug_console.conf"/>
+
+    <node name="gtp" pkg="gtp" type="gtp" output="screen"/> <!-- Launch the gtp node -->
+
+</launch>
