@@ -6,6 +6,14 @@
 
 #include "action_executor/Actions/pick.h"
 #include "action_executor/Actions/place.h"
+#include "action_executor/Actions/placeReachable.h"
+#include "action_executor/Actions/drop.h"
+#include "action_executor/Actions/scan.h"
+#include "action_executor/Actions/moveTo.h"
+#include "action_executor/Actions/pickAndPlace.h"
+#include "action_executor/Actions/pickAndPlaceReachable.h"
+#include "action_executor/Actions/pickAndDrop.h"
+
 
 typedef actionlib::SimpleActionServer<supervisor_msgs::ActionExecutorAction> Server;
 

@@ -7,6 +7,7 @@
 class Pick: public VirtualAction{
 public:
     Pick(supervisor_msgs::Action action, Connector* connector);
+    Pick() {}
     virtual bool preconditions();
     virtual bool plan();
     virtual bool exec(Server* action_server);

@@ -6,6 +6,7 @@
 class VirtualAction{
 public:
     VirtualAction(Connector* connector);
+    VirtualAction() {}
     ~VirtualAction() {}
     virtual bool preconditions() = 0;
     virtual bool plan() = 0;
