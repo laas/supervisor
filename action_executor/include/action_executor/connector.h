@@ -64,6 +64,7 @@ struct Connector{
     bool simu_;/**< indicates if in simu or not*/
     double waitActionServer_;/**< time to wait for an action server*/
     int nbPlanMax_;/**< nb max to try to plan*/
+    bool noExec_;/**< flag true if we should not perform action execution*/
 
     int previousId_;/**< previous gtp id*/
     int idGrasp_;/**< gtp id of the previous grasp*/

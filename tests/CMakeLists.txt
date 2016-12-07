@@ -15,6 +15,7 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  $ENV{ROBOTPKG_BASE}/include
 )
 
 add_executable(test_pickandplace src/test_pickandplace.cpp)

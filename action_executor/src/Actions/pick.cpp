@@ -63,6 +63,9 @@ bool Pick::preconditions(){
  * */
 bool Pick::plan(){
 
+    //FOR TESTS ONLY
+    //connector_->previousId_  = -1;
+
    std::vector<gtp_ros_msgs::Role> agents;
    gtp_ros_msgs::Role role;
    role.role = "mainAgent";

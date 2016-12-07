@@ -35,6 +35,7 @@ action_server_(*node, name,
     connector_.node_->getParam("/supervisor/robot/name", connector_.robotName_);
     connector_.node_->getParam("/action_executor/nbPlanMaxGTP", connector_.nbPlanMax_);
     connector_.node_->getParam("/supervisor/robot/toasterName", connector_.robotToaster_);
+    connector_.node_->getParam("/action_executor/noExec", connector_.noExec_);
 
     //Init action clients
     ROS_INFO("[action_executor] Waiting for gtp actions server.");
@@ -350,7 +351,7 @@ VirtualAction* ActionExecutor::initializeAction(supervisor_msgs::Action action) 
         act = new Pick(action, &connector_);
     }else if(action.name == "place"){
         act = new Place(action, &connector_);
-    }{
+    }else{
         ROS_WARN("[action_executor] Unknown action");
     }
 
