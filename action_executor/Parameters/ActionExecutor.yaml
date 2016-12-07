@@ -1,5 +1,6 @@
 ---
 action_executor:
+    noExec: true
     restPosition:
         right: 'manipulationPoseRight'
         left: 'manipulationPoseLeft'
