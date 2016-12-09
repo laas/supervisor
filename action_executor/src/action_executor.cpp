@@ -25,6 +25,7 @@ action_server_(*node, name,
     connector_.leftGripperMoving_ = false;
     connector_.torsoMoving_ = false;
     connector_.stopOrder_ = false;
+    connector_.refineOrder_ = false;
     connector_.rightArmPose_ = "unknown";
     connector_.leftArmPose_ = "unknown";
     connector_.node_->getParam("/action_executor/restPosition/right", connector_.rightArmRestPose_);
@@ -36,6 +37,9 @@ action_server_(*node, name,
     connector_.node_->getParam("/action_executor/nbPlanMaxGTP", connector_.nbPlanMax_);
     connector_.node_->getParam("/supervisor/robot/toasterName", connector_.robotToaster_);
     connector_.node_->getParam("/action_executor/noExec", connector_.noExec_);
+    connector_.node_->getParam("/action_executor/humanCost", connector_.humanCost_);
+
+    initHighLevelNames();
 
     //Init action clients
     ROS_INFO("[action_executor] Waiting for gtp actions server.");
@@ -149,14 +153,14 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
         return;
     }
 
-    isActing_ = true;
-    currentAction_ = goal->action;
+    connector_.isActing_ = true;
+    connector_.currentAction_ = goal->action;
 
     //Checking preconditions
     feedback_.state = "PREC";
     action_server_.publishFeedback(feedback_);
     if(!act->preconditions()){
-        isActing_ = false;
+        connector_.isActing_ = false;
         result_.report = false;
         result_.shouldRetractRight = false;
         result_.shouldRetractLeft = false;
@@ -180,7 +184,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
     }
 
     if(action_server_.isPreemptRequested() || connector_.stopOrder_){
-        isActing_ = false;
+        connector_.isActing_ = false;
         result_.state = "PREEMPTED";
         result_.report = false;
         result_.shouldRetractRight = false;
@@ -201,7 +205,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
     feedback_.state = "PLAN";
     action_server_.publishFeedback(feedback_);
     if(!act->plan()){
-        isActing_ = false;
+        connector_.isActing_ = false;
         result_.report = false;
         result_.shouldRetractRight = false;
         result_.shouldRetractLeft = false;
@@ -225,7 +229,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
     }
 
     if(action_server_.isPreemptRequested() || connector_.stopOrder_){
-        isActing_ = false;
+        connector_.isActing_ = false;
         now = ros::Time::now();
         ros::Duration d = now - connector_.timerStart_;
         result_.timeTot = d.toSec();
@@ -246,7 +250,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
     feedback_.state = "EXEC";
     action_server_.publishFeedback(feedback_);
     if(!act->exec(&action_server_)){
-        isActing_ = false;
+        connector_.isActing_ = false;
         result_.report = false;
         now = ros::Time::now();
         ros::Duration d = now - connector_.timerStart_;
@@ -281,7 +285,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
     feedback_.state = "POST";
     action_server_.publishFeedback(feedback_);
     if(!act->post()){
-        isActing_ = false;
+        connector_.isActing_ = false;
         result_.report = false;
         now = ros::Time::now();
         ros::Duration d = now - connector_.timerStart_;
@@ -329,7 +333,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
     }else{
         result_.shouldRetractLeft = false;
     }
-    isActing_ = false;
+    connector_.isActing_ = false;
     result_.report = true;
     result_.state = "OK";
     action_server_.setSucceeded(result_);
@@ -370,4 +374,22 @@ VirtualAction* ActionExecutor::initializeAction(supervisor_msgs::Action action) 
     }
 
     return act;
+}
+
+/**
+ * \brief Initialize the high level name maps based on params
+ * */
+void ActionExecutor::initHighLevelNames() {
+
+    std::vector<std::string> manipulableObjects;
+    connector_.node_->getParam("/entities/objects", manipulableObjects);
+    for(std::vector<std::string>::iterator it = manipulableObjects.begin(); it != manipulableObjects.end(); it++){
+        std::string paramName = "/entities/highLevelName/" + *it;
+        if(connector_.node_->hasParam(paramName)){
+            connector_.node_->getParam(paramName, connector_.highLevelRefinment_[*it]);
+            for(std::vector<std::string>::iterator ith = connector_.highLevelRefinment_[*it].begin(); ith != connector_.highLevelRefinment_[*it].end(); ith++){
+                connector_.highLevelNames_[*it] = *ith;
+            }
+        }
+    }
 }

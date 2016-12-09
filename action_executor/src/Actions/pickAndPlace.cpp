@@ -43,6 +43,7 @@ PickAndPlace::PickAndPlace(supervisor_msgs::Action action, Connector* connector)
 
 /**
  * \brief Precondition of the pick and place action:
+ *    - look for an object refinment if needed
  *    - the object should be a manipulable object
  *    - the support should be a support object
  *    - the object should be reachable by the agent
@@ -50,6 +51,27 @@ PickAndPlace::PickAndPlace(supervisor_msgs::Action action, Connector* connector)
  * @return true if the preconditions are checked
  * */
 bool PickAndPlace::preconditions(){
+
+    if(!isRefined(object_)){
+        //we look for a refinment
+        std::vector<toaster_msgs::Fact> conditions;
+        toaster_msgs::Fact fact;
+        fact.subjectId = "NULL";
+        fact.property = "isOn";
+        fact.targetId = "OBJECT";
+        conditions.push_back(fact);
+        fact.subjectId = "OBJECT";
+        fact.property = "isReachableBy";
+        fact.targetId = connector_->robotName_;
+        conditions.push_back(fact);
+        std::string newObject  = findRefinment(object_, conditions, "NULL");
+        //we update the current action
+        if(newObject != "NULL"){
+            initialObject_ = object_;
+            std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), object_, newObject);
+            object_ = newObject;
+        }
+    }
 
     //First we check if the object is a known manipulable object
     if(!isManipulableObject(object_)){
@@ -87,6 +109,11 @@ bool PickAndPlace::preconditions(){
 bool PickAndPlace::plan(){
 
     if(pickAction_.plan()){
+        pickId_ = connector_->previousId_;
+        if(!isRefined(support_)){
+            //we postpone the support decision
+           return true;
+        }
         return placeAction_.plan();
     }
 
@@ -95,12 +122,43 @@ bool PickAndPlace::plan(){
 
 /**
  * \brief Execution of the pick and place place action:
+ *    - look for a support refinment if needed
  *    - execute the pick action then the place
  * @return true if the execution succeed
  * */
 bool PickAndPlace::exec(Server* action_server){
 
+    placeId_ = connector_->previousId_;
+    connector_->previousId_  = pickId_;
     if(pickAction_.exec(action_server) && pickAction_.post()){
+        //look for a support
+        if(!isRefined(support_)){
+            //we look for a refinment
+            std::vector<toaster_msgs::Fact> conditions;
+            toaster_msgs::Fact fact;
+            if(isManipulableObject(support_) || isUniqueSupport(support_)){
+                fact.subjectId = "NULL";
+                fact.property = "isOn";
+                fact.targetId = "OBJECT";
+                conditions.push_back(fact);
+            }
+            fact.subjectId = "OBJECT";
+            fact.property = "isReachableBy";
+            fact.targetId = connector_->robotName_;
+            conditions.push_back(fact);
+            std::string newObject  = findRefinment(support_, conditions, "NULL");
+            //we update the current action
+            if(newObject != "NULL"){
+                initialSupport_ = support_;
+                std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), support_, newObject);
+                support_ = newObject;
+                if(placeAction_.plan()){
+                    return placeAction_.exec(action_server);
+                }
+            }
+            return false;
+        }
+        connector_->previousId_  = placeId_;
         return placeAction_.exec(action_server);
     }
 

@@ -27,12 +27,34 @@ Pick::Pick(supervisor_msgs::Action action, Connector* connector) : VirtualAction
 
 /**
  * \brief Precondition of the pick action:
+ *    - look for an object refinment if needed
  *    - the object should be a manipulable object
  *    - the object should be reachable by the agent
  *    - the agent should not have any object in hand
  * @return true if the preconditions are checked
  * */
 bool Pick::preconditions(){
+
+    if(!isRefined(object_)){
+        //we look for a refinment
+        std::vector<toaster_msgs::Fact> conditions;
+        toaster_msgs::Fact fact;
+        fact.subjectId = "NULL";
+        fact.property = "isOn";
+        fact.targetId = "OBJECT";
+        conditions.push_back(fact);
+        fact.subjectId = "OBJECT";
+        fact.property = "isReachableBy";
+        fact.targetId = connector_->robotName_;
+        conditions.push_back(fact);
+        std::string newObject  = findRefinment(object_, conditions, "NULL");
+        //we update the current action
+        if(newObject != "NULL"){
+            initialObject_ = object_;
+            std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), object_, newObject);
+            object_ = newObject;
+        }
+    }
 
     //First we check if the object is a known manipulable object
     if(!isManipulableObject(object_)){
@@ -66,6 +88,7 @@ bool Pick::plan(){
     //FOR TESTS ONLY
     //connector_->previousId_  = -1;
 
+   std::vector<gtp_ros_msgs::ActionId> attachments;
    std::vector<gtp_ros_msgs::Role> agents;
    gtp_ros_msgs::Role role;
    role.role = "mainAgent";
@@ -85,7 +108,7 @@ bool Pick::plan(){
        datas.push_back(data);
    }
 
-   std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > answer = planGTP("pick", agents, objects, datas, points);
+   std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > answer = planGTP("pick", agents, objects, datas, points, attachments);
    gtpActionId_ = answer.first;
 
    if(gtpActionId_ == -1){
@@ -103,7 +126,39 @@ bool Pick::plan(){
  * */
 bool Pick::exec(Server* action_server){
 
-   return execAction(gtpActionId_, subSolutions_, true, action_server);
+   while(true){
+       if(execAction(gtpActionId_, subSolutions_, true, action_server)){
+           return true;
+       }else if(connector_->refineOrder_ ){
+           connector_->previousId_  = -1;
+           //we look for a refinment
+           std::vector<toaster_msgs::Fact> conditions;
+           toaster_msgs::Fact fact;
+           fact.subjectId = "NULL";
+           fact.property = "isOn";
+           fact.targetId = "OBJECT";
+           conditions.push_back(fact);
+           fact.subjectId = "OBJECT";
+           fact.property = "isReachableBy";
+           fact.targetId = connector_->robotName_;
+           conditions.push_back(fact);
+           std::string newObject  = findRefinment(initialObject_, conditions, object_);
+           //we update the current action
+           if(newObject != "NULL"){
+               std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), object_, newObject);
+               object_ = newObject;
+               if(!this->plan()){
+                   return false;
+               }
+           }else{
+               ROS_WARN("[action_executor] No possible refinement for object: %s", object_.c_str());
+               return false;
+           }
+       }else{
+           connector_->previousId_  = -1;
+           return false;
+       }
+   }
 
 }
 
@@ -117,6 +172,7 @@ bool Pick::post(){
     //Check gripper position (completly close or not)
     if(gripperEmpty_  && !connector_->simu_){
         ROS_WARN("[action_executor] Robot failed to pick (gripper empty)");
+        connector_->previousId_  = -1;
         return false;
     }
 

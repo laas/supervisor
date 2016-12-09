@@ -18,6 +18,9 @@ private:
     Pick pickAction_; /**< pick part of the action*/
     PlaceReachable placeAction_; /**< place part of the action*/
     std::string support_; /**< support where to place the object*/
+    std::string initialSupport_; /**< given high level support when there is one*/
+    int pickId_; /**< gtp id of the pick action*/
+    int placeId_; /**< gtp id of the place action*/
 
 
 };

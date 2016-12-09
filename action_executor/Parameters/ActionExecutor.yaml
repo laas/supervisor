@@ -8,6 +8,7 @@ action_executor:
     nbPlanMaxGTP: 3
     humanSafetyJoint: 'rightHand'
     safetyThreshold: 0.5
+    toWatchThreshold: 0.5
     gripperThreshold: 0.01
     planningSupport:
         TABLE_4: 'PLACEMAT_RED'
@@ -17,4 +18,7 @@ action_executor:
                 x: 0.0
                 y: 0.0
                 theta: 0.0
+    humanCost: 'HERAKLES_HUMAN1'
+    uniqueSupports:
+        - 'PLACEMAT_RED'
 

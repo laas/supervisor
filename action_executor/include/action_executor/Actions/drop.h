@@ -15,6 +15,7 @@ protected:
 
 private:
     std::string container_; /**< container where to drop the object*/
+    std::string initialContainer_; /**< given high level container when there is one*/
 
 
 };

@@ -80,3 +80,16 @@ entities:
              WALLE_TAPE: 0.105
              IKEA_SHELF_LIGHT_1: 0.00
              IKEA_SHELF_DARK: 0.00
+    highLevelName:
+        RED_CUBE:
+            - 'RED_CUBE'
+            - 'RED_CUBE1'
+            - 'RED_CUBE2'
+        GREEN_CUBE:
+            - 'GREEN_CUBE'
+            - 'GREEN_CUBE1'
+            - 'GREEN_CUBE2'
+        BLUE_CUBE:
+            - 'BLUE_CUBE'
+            - 'BLUE_CUBE1'
+            - 'BLUE_CUBE2'

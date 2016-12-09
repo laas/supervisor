@@ -39,6 +39,7 @@ Place::Place(supervisor_msgs::Action action, Connector* connector) : VirtualActi
 
 /**
  * \brief Precondition of the place action:
+ *    - look for a support refinment if needed
  *    - check if we have a previous grasp for the object
  *    - the object should be a manipulable object
  *    - the support should be a support object
@@ -47,6 +48,29 @@ Place::Place(supervisor_msgs::Action action, Connector* connector) : VirtualActi
  * @return true if the preconditions are checked
  * */
 bool Place::preconditions(){
+
+    if(!isRefined(support_)){
+        //we look for a refinment
+        std::vector<toaster_msgs::Fact> conditions;
+        toaster_msgs::Fact fact;
+        if(isManipulableObject(support_) || isUniqueSupport(support_)){
+            fact.subjectId = "NULL";
+            fact.property = "isOn";
+            fact.targetId = "OBJECT";
+            conditions.push_back(fact);
+        }
+        fact.subjectId = "OBJECT";
+        fact.property = "isReachableBy";
+        fact.targetId = connector_->robotName_;
+        conditions.push_back(fact);
+        std::string newObject  = findRefinment(support_, conditions, "NULL");
+        //we update the current action
+        if(newObject != "NULL"){
+            initialSupport_ = support_;
+            std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), support_, newObject);
+            support_ = newObject;
+        }
+    }
 
     //First we check if the object is a known manipulable object
     if(!isManipulableObject(object_)){
@@ -86,6 +110,7 @@ bool Place::preconditions(){
  * */
 bool Place::plan(){
 
+    std::vector<gtp_ros_msgs::ActionId> attachments;
     //If there is no previous task we look for a previous grasp
     if(connector_->previousId_ == -1){
         if(connector_->idGrasp_ == -1){
@@ -93,6 +118,10 @@ bool Place::plan(){
            return false;
         }else{
             //TODO: add attachment in GTP
+            gtp_ros_msgs::ActionId attach;
+            attach.taskId = connector_->idGrasp_;
+            attach.alternativeId = 0;
+            attachments.push_back(attach);
         }
     }
 
@@ -177,7 +206,7 @@ bool Place::plan(){
            }
         }
     }
-    std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > answer = planGTP(actionName, agents, objects, datas, points);
+    std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > answer = planGTP(actionName, agents, objects, datas, points, attachments);
     gtpActionId_ = answer.first;
 
     if(gtpActionId_ == -1){
@@ -195,7 +224,41 @@ bool Place::plan(){
  * */
 bool Place::exec(Server* action_server){
 
-   return execAction(gtpActionId_, subSolutions_, false, action_server);
+    while(true){
+        if(execAction(gtpActionId_, subSolutions_, false, action_server)){
+            return true;
+        }else if(connector_->refineOrder_ ){
+            connector_->previousId_  = -1;
+            //we look for a refinment
+            std::vector<toaster_msgs::Fact> conditions;
+            toaster_msgs::Fact fact;
+            if(isManipulableObject(support_) || isUniqueSupport(support_)){
+                fact.subjectId = "NULL";
+                fact.property = "isOn";
+                fact.targetId = "OBJECT";
+                conditions.push_back(fact);
+            }
+            fact.subjectId = "OBJECT";
+            fact.property = "isReachableBy";
+            fact.targetId = connector_->robotName_;
+            conditions.push_back(fact);
+            std::string newObject  = findRefinment(initialSupport_, conditions, support_);
+            //we update the current action
+            if(newObject != "NULL"){
+                std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), support_, newObject);
+                support_ = newObject;
+                if(!this->plan()){
+                    return false;
+                }
+            }else{
+                ROS_WARN("[action_executor] No possible refinement for support: %s", support_.c_str());
+                return false;
+            }
+        }else{
+            connector_->previousId_  = -1;
+            return false;
+        }
+    }
 
 }
 

@@ -18,6 +18,9 @@ private:
     Pick pickAction_; /**< pick part of the action*/
     Drop dropAction_; /**< drop part of the action*/
     std::string container_; /**< container where to drop the object*/
+    std::string initialContainer_; /**< given high level container when there is one*/
+    int pickId_; /**< gtp id of the pick action*/
+    int dropId_; /**< gtp id of the drop action*/
 
 
 };

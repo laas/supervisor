@@ -82,6 +82,17 @@ struct Connector{
     double timeGTP_;/**< time spent in other gtp actions*/
     double timeToaster_;/**< time spent in other gtp actions*/
     ros::Time timerStart_;/**< timer set at the begining of the action*/
+
+    bool isActing_; /**< Flag indicating if the robot is executing an action*/
+    supervisor_msgs::Action currentAction_; /**< Current action executed by the robot*/
+
+    std::map<std::string, std::string> highLevelNames_; /**< high level names of objects*/
+    std::map<std::string, std::vector<std::string> > highLevelRefinment_; /**< possible refinment for high level names*/
+    std::string humanCost_; /**< human in which one we apply the cost*/
+    std::map<std::string, double> humanDistances_; /**< distance between objects and the chosen human*/
+    std::string objectToWatch_; /**< object to monitor*/
+    bool refineOrder_; /**< flag to indicate we should look for an other refinment for the object to watch*/
+
 };
 
 #endif // CONNECTOR_H

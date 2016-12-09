@@ -8,7 +8,7 @@
 ros::NodeHandle* node_;
 ActionExecutor* executor_;
 std::string humanSafetyJoint_;
-double safetyThreshold_;
+double safetyThreshold_, toWatchThreshold_;
 
 /**
  * \brief Service to stop the current action
@@ -18,7 +18,7 @@ double safetyThreshold_;
  * */
 bool stopOrder(std_srvs::Empty::Request  &req, std_srvs::Empty::Response &res){
 
-   if(executor_->isActing_){
+   if(executor_->connector_.isActing_){
     executor_->connector_.stopOrder_ = true;
    }
 
@@ -31,15 +31,24 @@ bool stopOrder(std_srvs::Empty::Request  &req, std_srvs::Empty::Response &res){
  * */
 void agentFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
 
-    if(executor_->isActing_){
+    if(executor_->connector_.isActing_){
         std::vector<toaster_msgs::Fact> distanceFacts = msg->factList;
         for(std::vector<toaster_msgs::Fact>::iterator it = distanceFacts.begin(); it != distanceFacts.end(); it++){
             if(it->property == "Distance"){
-                if(it->subjectId == humanSafetyJoint_ && it->targetId == executor_->connector_.robotToaster_){
-                    if(it->doubleValue < safetyThreshold_){
-                        executor_->connector_.stopOrder_ = true;
-                    }else{
-                        executor_->connector_.stopOrder_ = false;
+                if(it->subjectId == humanSafetyJoint_){
+                    executor_->connector_.humanDistances_[it->targetId] = it->doubleValue;
+                    if(it->targetId == executor_->connector_.robotToaster_){
+                        if(it->doubleValue < safetyThreshold_){
+                            executor_->connector_.stopOrder_ = true;
+                        }else{
+                            executor_->connector_.stopOrder_ = false;
+                        }
+                    }else if(it->targetId == executor_->connector_.objectToWatch_){
+                        if(it->doubleValue < toWatchThreshold_){
+                            executor_->connector_.refineOrder_ = true;
+                        }else{
+                            executor_->connector_.refineOrder_ = false;
+                        }
                     }
                 }
             }
@@ -71,6 +80,7 @@ int main (int argc, char **argv)
 
   node.getParam("/action_executor/humanSafetyJoint", humanSafetyJoint_);
   node.getParam("/action_executor/safetyThreshold", safetyThreshold_);
+  node.getParam("/action_executor/toWatchThreshold", toWatchThreshold_);
 
   ActionExecutor executor("supervisor/action_executor", node_);
   executor_ = &executor;
@@ -86,8 +96,8 @@ int main (int argc, char **argv)
 
   while(node.ok()){
       ros::spinOnce();
-      if(executor.isActing_){
-          current_pub_.publish(executor.currentAction_);
+      if(executor.connector_.isActing_){
+          current_pub_.publish(executor.connector_.currentAction_);
       }
       loop_rate.sleep();
   }

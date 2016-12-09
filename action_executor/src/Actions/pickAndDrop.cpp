@@ -43,6 +43,7 @@ PickAndDrop::PickAndDrop(supervisor_msgs::Action action, Connector* connector) :
 
 /**
  * \brief Precondition of the pick and drop action:
+ *    - look for an object refinment if needed
  *    - the object should be a manipulable object
  *    - the container should be a container object
  *    - the object should be reachable by the agent
@@ -50,6 +51,28 @@ PickAndDrop::PickAndDrop(supervisor_msgs::Action action, Connector* connector) :
  * @return true if the preconditions are checked
  * */
 bool PickAndDrop::preconditions(){
+
+    if(!isRefined(object_)){
+        //we look for a refinment
+        std::vector<toaster_msgs::Fact> conditions;
+        toaster_msgs::Fact fact;
+        fact.subjectId = "NULL";
+        fact.property = "isOn";
+        fact.targetId = "OBJECT";
+        conditions.push_back(fact);
+        fact.subjectId = "OBJECT";
+        fact.property = "isReachableBy";
+        fact.targetId = connector_->robotName_;
+        conditions.push_back(fact);
+        std::string newObject  = findRefinment(object_, conditions, "NULL");
+        //we update the current action
+        if(newObject != "NULL"){
+            initialObject_ = object_;
+            std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), object_, newObject);
+            object_ = newObject;
+        }
+    }
+
 
     //First we check if the object is a known manipulable object
     if(!isManipulableObject(object_)){
@@ -87,6 +110,11 @@ bool PickAndDrop::preconditions(){
 bool PickAndDrop::plan(){
 
     if(pickAction_.plan()){
+        pickId_ = connector_->previousId_;
+        if(!isRefined(container_)){
+            //we postpone the container decision
+           return true;
+        }
         return dropAction_.plan();
     }
 
@@ -96,11 +124,36 @@ bool PickAndDrop::plan(){
 /**
  * \brief Execution of the pick and drop place action:
  *    - execute the pick action then the drop
+ *    - look for a container refinment if needed
  * @return true if the execution succeed
  * */
 bool PickAndDrop::exec(Server* action_server){
 
+    dropId_ = connector_->previousId_;
+    connector_->previousId_  = pickId_;
     if(pickAction_.exec(action_server) && pickAction_.post()){
+        //look for a container
+        if(!isRefined(container_)){
+            //we look for a refinment
+            std::vector<toaster_msgs::Fact> conditions;
+            toaster_msgs::Fact fact;
+            fact.subjectId = "OBJECT";
+            fact.property = "isReachableBy";
+            fact.targetId = connector_->robotName_;
+            conditions.push_back(fact);
+            std::string newObject  = findRefinment(container_, conditions, "NULL");
+            //we update the current action
+            if(newObject != "NULL"){
+                initialContainer_ = container_;
+                std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), container_, newObject);
+                container_ = newObject;
+                if(dropAction_.plan()){
+                    return dropAction_.exec(action_server);
+                }
+            }
+            return false;
+        }
+        connector_->previousId_  = dropId_;
         return dropAction_.exec(action_server);
     }
 

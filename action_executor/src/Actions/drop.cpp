@@ -38,6 +38,7 @@ Drop::Drop(supervisor_msgs::Action action, Connector* connector) : VirtualAction
 
 /**
  * \brief Precondition of the drop action:
+ *    - look for a container refinment if needed
  *    - the object should be a manipulable object
  *    - the container should be a container object
  *    - the container should be reachable by the agent
@@ -45,6 +46,23 @@ Drop::Drop(supervisor_msgs::Action action, Connector* connector) : VirtualAction
  * @return true if the preconditions are checked
  * */
 bool Drop::preconditions(){
+
+    if(!isRefined(container_)){
+        //we look for a refinment
+        std::vector<toaster_msgs::Fact> conditions;
+        toaster_msgs::Fact fact;
+        fact.subjectId = "OBJECT";
+        fact.property = "isReachableBy";
+        fact.targetId = connector_->robotName_;
+        conditions.push_back(fact);
+        std::string newObject  = findRefinment(container_, conditions, "NULL");
+        //we update the current action
+        if(newObject != "NULL"){
+            initialContainer_ = container_;
+            std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), container_, newObject);
+            container_ = newObject;
+        }
+    }
 
     //First we check if the object is a known manipulable object
     if(!isManipulableObject(object_)){
@@ -82,6 +100,7 @@ bool Drop::preconditions(){
  * */
 bool Drop::plan(){
 
+    std::vector<gtp_ros_msgs::ActionId> attachments;
     //If there is no previous task we look for a previous grasp
     if(connector_->previousId_ == -1){
         if(connector_->idGrasp_ == -1){
@@ -115,7 +134,7 @@ bool Drop::plan(){
     }
 
 
-    std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > answer = planGTP("drop", agents, objects, datas, points);
+    std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > answer = planGTP("drop", agents, objects, datas, points, attachments);
     gtpActionId_ = answer.first;
 
     if(gtpActionId_ == -1){
@@ -133,7 +152,35 @@ bool Drop::plan(){
  * */
 bool Drop::exec(Server* action_server){
 
-   return execAction(gtpActionId_, subSolutions_, false, action_server);
+    while(true){
+        if(execAction(gtpActionId_, subSolutions_, false, action_server)){
+            return true;
+        }else if(connector_->refineOrder_ ){
+            connector_->previousId_  = -1;
+            //we look for a refinment
+            std::vector<toaster_msgs::Fact> conditions;
+            toaster_msgs::Fact fact;
+            fact.subjectId = "OBJECT";
+            fact.property = "isReachableBy";
+            fact.targetId = connector_->robotName_;
+            conditions.push_back(fact);
+            std::string newObject  = findRefinment(initialContainer_, conditions, container_);
+            //we update the current action
+            if(newObject != "NULL"){
+                std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), container_, newObject);
+                container_ = newObject;
+                if(!this->plan()){
+                    return false;
+                }
+            }else{
+                ROS_WARN("[action_executor] No possible refinement for container: %s", container_.c_str());
+                return false;
+            }
+        }else{
+            connector_->previousId_  = -1;
+            return false;
+        }
+    }
 
 }
 

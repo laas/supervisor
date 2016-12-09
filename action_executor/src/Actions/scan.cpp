@@ -31,10 +31,32 @@ Scan::Scan(supervisor_msgs::Action action, Connector* connector) : VirtualAction
 
 /**
  * \brief Precondition of the scan action:
+ *    - look for an object refinment if needed
  *    - the object should be reachable by the agent
  * @return true if the preconditions are checked
  * */
 bool Scan::preconditions(){
+
+    if(!isRefined(object_)){
+        //we look for a refinment
+        std::vector<toaster_msgs::Fact> conditions;
+        toaster_msgs::Fact fact;
+        fact.subjectId = "NULL";
+        fact.property = "isOn";
+        fact.targetId = "OBJECT";
+        conditions.push_back(fact);
+        fact.subjectId = "OBJECT";
+        fact.property = "isReachableBy";
+        fact.targetId = connector_->robotName_;
+        conditions.push_back(fact);
+        std::string newObject  = findRefinment(object_, conditions, "NULL");
+        //we update the current action
+        if(newObject != "NULL"){
+            initialObject_ = object_;
+            std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), object_, newObject);
+            object_ = newObject;
+        }
+    }
 
     //We check that the object is reachable by the agent
     std::vector<toaster_msgs::Fact> precsTocheck;

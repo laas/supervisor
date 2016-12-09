@@ -21,8 +21,6 @@ class ActionExecutor{
 public:
     ActionExecutor(std::string name, ros::NodeHandle* node);
     Connector connector_; /**< Connector structure which regroups usefull information*/
-    bool isActing_; /**< Flag indicating if the robot is executing an action*/
-    supervisor_msgs::Action currentAction_; /**< Current action executed by the robot*/
 protected:
     supervisor_msgs::ActionExecutorFeedback feedback_; /**< feedback of the action*/
     supervisor_msgs::ActionExecutorResult result_; /**< result of the action*/
@@ -31,6 +29,7 @@ protected:
 private:
     void execute(const supervisor_msgs::ActionExecutorGoalConstPtr& goal);
     VirtualAction* initializeAction(supervisor_msgs::Action action);
+    void initHighLevelNames();
 
 };
 

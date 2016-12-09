@@ -61,6 +61,7 @@ bool MoveTo::plan(){
     }
 
    //Here we fill the needed information for gtp (fill free to use other planner if needed)
+   std::vector<gtp_ros_msgs::ActionId> attachments;
    std::vector<gtp_ros_msgs::Role> agents;
    gtp_ros_msgs::Role role;
    role.role = "mainAgent";
@@ -75,7 +76,7 @@ bool MoveTo::plan(){
    datas.push_back(data);
 
    //do not forget to replace action_name in the following line
-   std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > answer = planGTP("moveTo", agents, objects, datas, points);
+   std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > answer = planGTP("moveTo", agents, objects, datas, points, attachments);
    gtpActionId_ = answer.first;
 
    if(gtpActionId_ == -1){

@@ -26,6 +26,8 @@ VirtualAction::VirtualAction(Connector* connector){
    connector_->timeExec_ = 0.0;
    connector_->timeDB_ = 0.0;
    connector_->timeToaster_ = 0.0;
+
+   initialObject_ = "NULL";
 }
 
 /**
@@ -35,7 +37,7 @@ VirtualAction::VirtualAction(Connector* connector){
  * */
 bool VirtualAction::isManipulableObject(std::string object){
 
-   //first we get the manipulable object from parameters
+   //first we get the manipulable object sfrom parameters
    std::vector<std::string> manipulableObjects;
    connector_->node_->getParam("/entities/objects", manipulableObjects);
 
@@ -57,7 +59,7 @@ bool VirtualAction::isManipulableObject(std::string object){
  * */
 bool VirtualAction::isSupportObject(std::string support){
 
-   //first we get the manipulable object from parameters
+   //first we get the support objects from parameters
    std::vector<std::string> supportObjects;
    connector_->node_->getParam("/entities/supports", supportObjects);
 
@@ -79,13 +81,35 @@ bool VirtualAction::isSupportObject(std::string support){
  * */
 bool VirtualAction::isContainerObject(std::string container){
 
-   //first we get the manipulable object from parameters
+   //first we get the container objects from parameters
    std::vector<std::string> containerObjects;
    connector_->node_->getParam("/entities/containers", containerObjects);
 
    //Then we check if the object is in the list
    for(std::vector<std::string>::iterator it = containerObjects.begin(); it != containerObjects.end(); it++){
       if(*it == container){
+         return true;
+      }
+   }
+
+   return false;
+
+}
+
+/**
+ * \brief Function which return true if an object is a unique support (based on parameters)
+ * @param support the tested object
+ * @return true is the object is a unique support
+ * */
+bool VirtualAction::isUniqueSupport(std::string support){
+
+   //first we get the unique supports from parameters
+   std::vector<std::string> uniqueSupports;
+   connector_->node_->getParam("/action_executor/uniqueSupports", uniqueSupports);
+
+   //Then we check if the object is in the list
+   for(std::vector<std::string>::iterator it = uniqueSupports.begin(); it != uniqueSupports.end(); it++){
+      if(*it == support){
          return true;
       }
    }
@@ -299,7 +323,7 @@ void VirtualAction::PutInContainer(std::string object, std::string container){
  * @param points points invloved
  * @return the gtp id of the result (-1 if no result) and the corresponding subsolutions
  * */
-std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > VirtualAction::planGTP(std::string actionName, std::vector<gtp_ros_msgs::Role> agents, std::vector<gtp_ros_msgs::Role> objects, std::vector<gtp_ros_msgs::MiscData> datas, std::vector<gtp_ros_msgs::Point> points){
+std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > VirtualAction::planGTP(std::string actionName, std::vector<gtp_ros_msgs::Role> agents, std::vector<gtp_ros_msgs::Role> objects, std::vector<gtp_ros_msgs::MiscData> datas, std::vector<gtp_ros_msgs::Point> points, std::vector<gtp_ros_msgs::ActionId> attachments){
 
   std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > res;
   res.first = -1;
@@ -313,6 +337,7 @@ std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > VirtualAction::planGTP(s
   goal.request.previousAction.taskId = connector_->previousId_;
   goal.request.previousAction.alternativeId = 0;
   goal.request.computeMotionPlan = true;
+  goal.request.setAttachmentsFrom = attachments;
   if(connector_->previousId_  == -1){
       goal.request.updateBefore = true;
   }else{
@@ -358,7 +383,7 @@ bool VirtualAction::execAction(int actionId, std::vector<gtp_ros_msgs::SubSoluti
         openGripper(subSolutions[0].armId, action_server);
     }
     for(std::vector<gtp_ros_msgs::SubSolution>::iterator it = subSolutions.begin(); it != subSolutions.end(); it++){
-     if(action_server->isPreemptRequested()|| connector_->stopOrder_){
+     if(action_server->isPreemptRequested() || connector_->stopOrder_ || connector_->refineOrder_){
         return false;
      }
      if(it->agent == connector_->robotName_){
@@ -421,7 +446,7 @@ bool VirtualAction::executeTrajectory(int actionId, int actionSubId, int armId, 
                                                      Client_Right_Arm::SimpleActiveCallback(),  Client_Right_Arm::SimpleFeedbackCallback());
           while(connector_->rightArmMoving_ == true){
               //wait for preempted request or end of the action
-              if(action_server->isPreemptRequested() || connector_->stopOrder_){
+              if(action_server->isPreemptRequested() || connector_->stopOrder_ || connector_->refineOrder_){
                   connector_->PR2motion_arm_right_->cancelGoal();
                   return false;
               }
@@ -440,7 +465,7 @@ bool VirtualAction::executeTrajectory(int actionId, int actionSubId, int armId, 
                                                      Client_Left_Arm::SimpleActiveCallback(),  Client_Left_Arm::SimpleFeedbackCallback());
           while(connector_->leftArmMoving_ == true){
               //wait for preempted request or end of the action
-              if(action_server->isPreemptRequested() || connector_->stopOrder_){
+              if(action_server->isPreemptRequested() || connector_->stopOrder_ || connector_->refineOrder_){
                   connector_->PR2motion_arm_left_->cancelGoal();
                   return false;
               }
@@ -485,7 +510,7 @@ bool VirtualAction::closeGripper(int armId, Server* action_server){
                                                   Client_Right_Gripper::SimpleActiveCallback(),  Client_Right_Gripper::SimpleFeedbackCallback());
        while(connector_->rightGripperMoving_ == true){
            //wait for preempted request or end of the action
-           if(action_server->isPreemptRequested() || connector_->stopOrder_){
+           if(action_server->isPreemptRequested() || connector_->stopOrder_ || connector_->refineOrder_){
                connector_->PR2motion_gripper_right_->cancelGoal();
                return false;
            }
@@ -503,7 +528,7 @@ bool VirtualAction::closeGripper(int armId, Server* action_server){
                                                   Client_Left_Gripper::SimpleActiveCallback(),  Client_Left_Gripper::SimpleFeedbackCallback());
        while(connector_->leftGripperMoving_ == true){
            //wait for preempted request or end of the action
-           if(action_server->isPreemptRequested() || connector_->stopOrder_){
+           if(action_server->isPreemptRequested() || connector_->stopOrder_ || connector_->refineOrder_    ){
                connector_->PR2motion_gripper_left_->cancelGoal();
                return false;
            }
@@ -592,7 +617,7 @@ void VirtualAction::moveLeftArm(const actionlib::SimpleClientGoalState& state, c
         connector_->leftArmMoving_ = false;
 }
 
-/**
+/**toCheck
  * \brief Called once when the goal of the right gripper action client completes
  * @param state state of the action server
  * @param result result of the action server
@@ -610,4 +635,96 @@ void VirtualAction::moveRightGripper(const actionlib::SimpleClientGoalState& sta
 void VirtualAction::moveLeftGripper(const actionlib::SimpleClientGoalState& state, const pr2motion::Gripper_Left_OperateResultConstPtr& result){
 
         connector_->leftGripperMoving_ = false;
+}
+
+/**
+ * \brief Function which return true if an object is not a high level object
+ * @param object the tested object
+ * @return true is not a high level object
+ * */
+bool VirtualAction::isRefined(std::string object){
+
+   if(connector_->highLevelRefinment_.find(object) == connector_->highLevelRefinment_.end()){
+       return true;
+   }
+
+   return false;
+
+}
+
+/**
+ * \brief Function which look for a refinment for an object
+ * @param object the high level object
+ * @param conditions facts the object need to respect
+ * @return the new object or NULL if not
+ * */
+std::string VirtualAction::findRefinment(std::string object, std::vector<toaster_msgs::Fact> conditions, std::string forbiddenObject){
+
+    std::string res = "NULL";
+    double bestCost = 0.0;
+    //we look for all possible refinment for the object
+    std::vector<toaster_msgs::Fact> toCheck;
+    for(std::vector<std::string>::iterator it = connector_->highLevelRefinment_[object].begin(); it != connector_->highLevelRefinment_[object].end(); it++){
+        //we check the condition for the object
+        if(*it == forbiddenObject){
+            continue;
+        }
+        for(std::vector<toaster_msgs::Fact>::iterator itc = conditions.begin(); itc != conditions .end(); itc++){
+            //we replace OBJECT by the object name
+            toaster_msgs::Fact fact = *itc;
+            if(itc->subjectId == "OBJECT"){
+                fact.subjectId = object;
+            }
+            if(itc->targetId == "OBJECT"){
+                fact.targetId = object;
+            }
+            toCheck.push_back(fact);
+        }
+    }
+    std::vector<std::string> inDB = AreFactsInDB(toCheck);
+    int c = 0;
+    for(std::vector<std::string>::iterator it = connector_->highLevelRefinment_[object].begin(); it != connector_->highLevelRefinment_[object].end(); it++){
+        //if the preconditions are checked for this object
+        if(*it == forbiddenObject){
+            continue;
+        }
+        bool ok = true;
+        for(int i = c; i < c + conditions.size(); i++){
+            if(inDB[i] == "false"){
+                ok = false;
+                break;
+            }
+        }
+        c = c + conditions.size();
+        if(ok){
+            //we look for the cost of this object
+            if(connector_->humanDistances_[*it] > bestCost){
+                res = *it;
+                bestCost = connector_->humanDistances_[*it];
+            }
+        }
+    }
+
+    return res;
+}
+
+/**
+ * \brief Function which check if facts are in db individually
+ * @param facts list of facts to check
+ * @return vector of bool which indicates if each fact is in the db
+ * */
+std::vector<std::string> VirtualAction::AreFactsInDB(std::vector<toaster_msgs::Fact> facts){
+
+    std::vector<std::string> res;
+    toaster_msgs::ExecuteDB srv;
+    srv.request.command = "ARE_IN_TABLE";
+    srv.request.type = "INDIV";
+    srv.request.agent = connector_->robotName_;
+    srv.request.facts = facts;
+    if (client_db_execute_.call(srv)){
+        res = srv.response.results;
+    }else{
+       ROS_ERROR("[action_executor] Failed to call service database_manager/execute");
+    }
+    return res;
 }

@@ -15,6 +15,7 @@ protected:
 
 private:
     std::string support_; /**< support where to place the object*/
+    std::string initialSupport_; /**< given high level support when there is one*/
     std::string targetAgent_; /**< agent the object should be reachable by*/
     std::string replacementSupport_; /**< replacement support to use for planning*/
 
