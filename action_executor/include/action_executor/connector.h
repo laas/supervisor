@@ -76,6 +76,12 @@ struct Connector{
     actionlib::SimpleActionClient<pr2motion::Gripper_Right_OperateAction>* PR2motion_gripper_right_;/**< pr2motion right gripper action server*/
     actionlib::SimpleActionClient<pr2motion::Gripper_Left_OperateAction>* PR2motion_gripper_left_;/**< pr2motion left gripper action server*/
 
+    ros::ServiceClient client_db_execute_; /**< toaster client for database execute commands*/
+    ros::ServiceClient client_put_hand_; /**< toaster client to put objects in hand*/
+    ros::ServiceClient client_remove_hand_; /**< toaster client to remove objects from hand*/
+    ros::ServiceClient client_set_pose_; /**< toaster client to set entities poses*/
+    ros::ServiceClient client_gtp_traj_; /**< gtp client to publish a traj*/
+
     double timeDB_;/**< time spent in the database*/
     double timePlan_;/**< time spent in the planning*/
     double timeExec_;/**< time spent in the execution*/

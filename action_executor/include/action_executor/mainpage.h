@@ -11,6 +11,15 @@
 * This node allows the robot to execute high level actions.
 * The actions currently implemented are:
 *   - Pick
+*   - Place
+*   - Drop
+*   - Move to
+*   - Place reachable
+*   - Scan
+*   - Pick and drop
+*   - Pick and place
+*   - Pick and place reachable
+*
 * For action the node:
 *   - checks its precondition
 *   - plans the necessary trajectories
@@ -34,6 +43,8 @@
   - action_executor/humanSafetyJoint: human joint to monitor for safety during action execution
   - action_executor/safetyThreshold: distance to human safety joint under which one the robot should stop
   - action_executor/gripperThreshold: value under which one the gripper is considered empty
+  - action_executor/humanCost: human considered to compute costs
+  - action_executor/uniqueSupports: support which can only have one object on it
 *
 * \section Dependencies
 * Build dependecies:

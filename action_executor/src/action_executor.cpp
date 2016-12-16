@@ -41,6 +41,14 @@ action_server_(*node, name,
 
     initHighLevelNames();
 
+    //Init services
+    connector_.client_db_execute_ = connector_.node_->serviceClient<toaster_msgs::ExecuteDB>("database_manager/execute");
+    connector_.client_put_hand_ = connector_.node_->serviceClient<toaster_msgs::PutInHand>("pdg/put_in_hand");
+    connector_.client_remove_hand_ = connector_.node_->serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
+    connector_.client_set_pose_ = connector_.node_->serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
+    connector_.client_gtp_traj_ = connector_.node_->serviceClient<gtp_ros_msgs::PublishTraj>("gtp/publishTraj");
+
+
     //Init action clients
     ROS_INFO("[action_executor] Waiting for gtp actions server.");
     connector_.acGTP_ = new actionlib::SimpleActionClient<gtp_ros_msgs::PlanAction>("gtp_server", true);

@@ -15,12 +15,6 @@ VirtualAction::VirtualAction(Connector* connector){
    connector_ = connector;
    gripperEmpty_ = false;
 
-   client_db_execute_ = connector_->node_->serviceClient<toaster_msgs::ExecuteDB>("database_manager/execute");
-   client_put_hand_ = connector_->node_->serviceClient<toaster_msgs::PutInHand>("pdg/put_in_hand");
-   client_remove_hand_ = connector_->node_->serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
-   client_set_pose_ = connector_->node_->serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
-   client_gtp_traj_ = connector_->node_->serviceClient<gtp_ros_msgs::PublishTraj>("gtp/publishTraj");
-
    connector_->timePlan_ = 0.0;
    connector_->timeGTP_ = 0.0;
    connector_->timeExec_ = 0.0;
@@ -130,7 +124,7 @@ bool VirtualAction::ArePreconditionsChecked(std::vector<toaster_msgs::Fact> prec
     srv.request.agent = connector_->robotName_;
     srv.request.facts = precs;
     ros::Time start = ros::Time::now();
-    if (client_db_execute_.call(srv)){
+    if (connector_->client_db_execute_.call(srv)){
         ros::Time end = ros::Time::now();
         ros::Duration d = end - start;
         connector_->timeDB_ = connector_->timeDB_ + d.toSec();
@@ -157,7 +151,7 @@ void VirtualAction::PutInHand(std::string object, std::string hand, int gtpId){
     srv.request.agentId = connector_->robotToaster_;
     srv.request.jointName = robotHand;
     ros::Time start = ros::Time::now();
-    if (!client_put_hand_.call(srv)){
+    if (!connector_->client_put_hand_.call(srv)){
      ROS_ERROR("[action_executor] Failed to call service pdg/put_in_hand");
     }
     ros::Time end = ros::Time::now();
@@ -178,7 +172,7 @@ void VirtualAction::RemoveFromHand(std::string object){
     toaster_msgs::RemoveFromHand srv;
     srv.request.objectId = object;
     ros::Time start = ros::Time::now();
-    if (!client_remove_hand_.call(srv)){
+    if (!connector_->client_remove_hand_.call(srv)){
      ROS_ERROR("[action_executor] Failed to call service pdg/remove_from_hand");
     }
     ros::Time end = ros::Time::now();
@@ -262,7 +256,7 @@ void VirtualAction::PutOnSupport(std::string object, std::string support){
     srv.request.pose.orientation.z = 0.0;
     srv.request.pose.orientation.w = 1.0;
     start = ros::Time::now();
-    if (!client_set_pose_.call(srv)){
+    if (!connector_->client_set_pose_.call(srv)){
      ROS_ERROR("Failed to call service pdg/set_entity_pose");
     }
     end = ros::Time::now();
@@ -304,7 +298,7 @@ void VirtualAction::PutInContainer(std::string object, std::string container){
     srv.request.pose.orientation.z = 0.0;
     srv.request.pose.orientation.w = 1.0;
     start = ros::Time::now();
-    if (!client_set_pose_.call(srv)){
+    if (!connector_->client_set_pose_.call(srv)){
      ROS_ERROR("Failed to call service pdg/set_entity_pose");
     }
     end = ros::Time::now();
@@ -432,7 +426,7 @@ bool VirtualAction::executeTrajectory(int actionId, int actionSubId, int armId, 
    srv.request.actionId.alternativeId = 0;
    srv.request.subSolutionId = actionSubId;
    ros::Time start = ros::Time::now();
-   if (client_gtp_traj_.call(srv)){
+   if (connector_->client_gtp_traj_.call(srv)){
        ros::Time end = ros::Time::now();
        ros::Duration d = end - start;
        connector_->timeGTP_ = connector_->timeGTP_ + d.toSec();
@@ -721,7 +715,7 @@ std::vector<std::string> VirtualAction::AreFactsInDB(std::vector<toaster_msgs::F
     srv.request.type = "INDIV";
     srv.request.agent = connector_->robotName_;
     srv.request.facts = facts;
-    if (client_db_execute_.call(srv)){
+    if (connector_->client_db_execute_.call(srv)){
         res = srv.response.results;
     }else{
        ROS_ERROR("[action_executor] Failed to call service database_manager/execute");
