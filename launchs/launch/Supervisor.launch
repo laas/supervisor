@@ -2,4 +2,5 @@
     <include file="$(find data_manager)/launch/DataManager.launch"/>
     <include file="$(find human_monitor)/launch/HumanMonitor.launch"/>
     <include file="$(find action_executor)/launch/ActionExecutor.launch"/>
+    <include file="$(find graphical_interface)/launch/GraphicalInterface.launch"/>
 </launch>

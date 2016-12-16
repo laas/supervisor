@@ -1,0 +1,19 @@
+---
+graphical_interface:
+    databaseTab: true
+    actionTab: true
+    humanTab: true
+    possibleActions:
+        - 'pick'
+        - 'place'
+        - 'placeReachable'
+        - 'drop'
+        - 'scan'
+        - 'pickAndPlace'
+        - 'pickAndPlaceReachable'
+        - 'pickAndDrop'
+        - 'moveTo'
+    moveToPositions:
+        - 'manipulationPoseRight'
+        - 'manipulationPoseLeft'
+
