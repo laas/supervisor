@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package>
+  <name>goal_manager</name>
+  <version>0.0.0</version>
+  <description>The goal_manager package</description>
+  <maintainer email="sdevin@laas.fr">sdevin</maintainer>
+  <license>TODO</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>toaster_msgs</build_depend>
+  <build_depend>message_generation</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>supervisor_msgs</build_depend>
+  <run_depend>toaster_msgs</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>supervisor_msgs</run_depend>
+  <export>
+  </export>
+</package>

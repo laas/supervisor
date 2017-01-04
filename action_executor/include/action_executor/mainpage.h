@@ -2,7 +2,7 @@
 * @brief Main page of the action executor doxygen documentation
 *
 */
-/** \mainpage Data Manager
+/** \mainpage Action Executor
 *
 * @authors Sandra Devin (sdevin@laas.fr)
 *

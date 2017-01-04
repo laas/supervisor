@@ -15,11 +15,13 @@ add_message_files(
    FILES
     Action.msg
     ActionsList.msg
+    GoalsList.msg
 )
 
 add_service_files(
   FILES
     HumanAction.srv
+    String.srv
 )
 
  add_action_files(
