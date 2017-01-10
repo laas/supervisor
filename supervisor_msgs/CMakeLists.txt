@@ -16,6 +16,7 @@ add_message_files(
     Action.msg
     ActionsList.msg
     GoalsList.msg
+    Goal.msg
 )
 
 add_service_files(

@@ -13,10 +13,15 @@ The goal manager allows to choose a goal to execute
 #include <vector>
 #include <ros/ros.h>
 
+#include "toaster_msgs/ExecuteDB.h"
+#include "std_srvs/Trigger.h"
+
+#include "supervisor_msgs/Goal.h"
 #include "supervisor_msgs/GoalsList.h"
 #include "supervisor_msgs/String.h"
 
 ros::NodeHandle* node_;
+std::string robotName_;
 
 std::string currentGoal_;
 std::vector<std::string> previousGoals_;
@@ -26,6 +31,49 @@ bool changed;
 
 std::vector<std::string> goals_;
 std::vector<std::string> status_;
+
+std::vector<supervisor_msgs::Goal> possibleGoals_;
+
+ros::ServiceClient* client_db_execute_;
+ros::ServiceClient* client_stop_plan_;
+
+
+/**
+ * \brief Function which initialize the list of goals from the goal in param
+ * */
+void initGoals(){
+
+    std::vector<std::string> names;
+    node_->getParam("/goal_manager/goals/names", names);
+    for(std::vector<std::string>::iterator it = names.begin(); it != names.end(); it++){
+        //for each goal we retreive its actors and objective
+        std::string actorsTopic = "/goal_manager/goals/" + *it + "_actors";
+        std::vector<std::string> actors;
+        node_->getParam(actorsTopic, actors);
+        std::string objectiveTopic = "/goal_manager/goals/" + *it + "_objective";
+        std::vector<std::string> objective;
+        node_->getParam(objectiveTopic, objective);
+        //we transform the objective into facts
+        std::vector<toaster_msgs::Fact> obj;
+        for(std::vector<std::string>::iterator ob = objective.begin(); ob != objective.end(); ob++){
+            int beg = ob->find(',');
+            int end = ob->find(',', beg+1);
+            toaster_msgs::Fact fact;
+            fact.subjectId = ob->substr(0, beg);
+            fact.property = ob->substr(beg+1, end - beg - 1);
+            fact.propertyType = "state";
+            fact.targetId = ob->substr(end+1, ob->size() - end - 1);
+            obj.push_back(fact);
+        }
+        //we then fill the goal list
+        supervisor_msgs::Goal goal;
+        goal.name = *it;
+        goal.actors = actors;
+        goal.objective = obj;
+        possibleGoals_.push_back(goal);
+    }
+
+}
 
 /**
  * \brief Service to add a new goal
@@ -58,6 +106,20 @@ bool newGoal(supervisor_msgs::String::Request  &req, supervisor_msgs::String::Re
         }
     }
 
+    //check if the goal is a possibl goal
+    bool find = false;
+    for(std::vector<supervisor_msgs::Goal>::iterator it = possibleGoals_.begin(); it != possibleGoals_.end(); it++){
+        if(it->name == currentGoal_){
+            find = true;
+            break;
+        }
+    }
+    if(!find){
+        ROS_WARN("[goal_manager] Goal not in the known goal!");
+        res.success = false;
+        return true;
+    }
+
     //add the goal to the pending list
     pendingGoals_.push_back(req.data);
     ROS_INFO("[goal_manager] Goal added to the pending list");
@@ -86,12 +148,21 @@ bool cancelGoal(supervisor_msgs::String::Request  &req, supervisor_msgs::String:
     //It is the current goal?
     if(currentGoal_ == req.data){
             ROS_INFO("[goal_manager] Stopping current goal");
-            /** @todo send stop order to lower level */
-            ROS_INFO("[goal_manager] Current goal stopped");
-            currentGoal_ = "NONE";
-            changed = true;
-            res.success = true;
-            return true;
+            std_srvs::Trigger srv;
+            if(client_stop_plan_->call(srv)){
+                if(srv.response.success){
+                    ROS_INFO("[goal_manager] Current goal stopped");
+                    currentGoal_ = "NONE";
+                    changed = true;
+                    res.success = true;
+                }else{
+                    ROS_WARN("[goal_manager] Failed to stop the goal!");
+                    res.success = false;
+                }
+                return true;
+            }else{
+               ROS_ERROR("[goal_manager] Failed to call service plan_elaboration/stop");
+            }
     }
 
     //look in the pending goals
@@ -127,10 +198,29 @@ bool endGoal(supervisor_msgs::String::Request  &req, supervisor_msgs::String::Re
         return true;
     }
 
-    bool obj = true;
+    //Look for the goal objective
+    std::vector<toaster_msgs::Fact> obj;
+    for(std::vector<supervisor_msgs::Goal>::iterator it = possibleGoals_.begin(); it != possibleGoals_.end(); it++){
+        if(it->name == currentGoal_){
+            obj = it->objective;
+            break;
+        }
+    }
+    //Look if the objective of the goal is in the robot knowledge
+    bool isIn;
     std::string status;
-    /** @todo check if the objectives of the goal are in the robot knowledge */
-    if(obj){
+    toaster_msgs::ExecuteDB srv;
+    srv.request.command = "ARE_IN_TABLE";
+    srv.request.agent = robotName_;
+    srv.request.facts = obj;
+    if (client_db_execute_->call(srv)){
+        isIn =  srv.response.boolAnswer;
+    }else{
+       ROS_ERROR("[goal_manager] Failed to call service database_manager/execute");
+    }
+
+    //Publish the result
+    if(isIn){
         ROS_INFO("[goal_manager] Goal succeed: %s", currentGoal_.c_str());
         status = "DONE";
     }else{
@@ -160,8 +250,12 @@ int main (int argc, char **argv)
 
   ROS_INFO("[goal_manager] Init");
 
+  initGoals();
+
   currentGoal_ = "NONE";
   changed = false;
+
+  node_->getParam("/supervisor/robot/name", robotName_);
 
   //We create the publishers
   ros::Publisher goals_pub = node.advertise<supervisor_msgs::GoalsList>("goal_manager/goalsList", 1);
@@ -169,6 +263,11 @@ int main (int argc, char **argv)
   ros::ServiceServer service_new = node.advertiseService("goal_manager/new_goal", newGoal); //add a new goal
   ros::ServiceServer service_cancel = node.advertiseService("goal_manager/cancel_goal", cancelGoal); //cancel a goal
   ros::ServiceServer service_end = node.advertiseService("goal_manager/end_goal", cancelGoal); //end a goal
+
+  ros::ServiceClient client_db_execute = node_->serviceClient<toaster_msgs::ExecuteDB>("database_manager/execute");
+  client_db_execute_ = &client_db_execute;
+  ros::ServiceClient client_stop_plan = node_->serviceClient<std_srvs::Trigger>("plan_elaboration/stop");
+  client_stop_plan_  = &client_stop_plan;
 
   ROS_INFO("[goal_manager] Ready");
 
