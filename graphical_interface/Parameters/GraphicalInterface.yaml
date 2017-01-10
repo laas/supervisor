@@ -1,5 +1,6 @@
 ---
 graphical_interface:
+    goalTab: true
     databaseTab: true
     actionTab: true
     humanTab: true

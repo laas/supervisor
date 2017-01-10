@@ -14,6 +14,7 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     node_.getParam("/supervisor/robot/name", robotName_);
     node_.getParam("/supervisor/simu", simu_);
     node_.getParam("/supervisor/waitActionServer", waitActionServer_);
+    node_.getParam("/graphical_interface/goalTab", goalTab_);
     node_.getParam("/graphical_interface/databaseTab", databaseTab_);
     node_.getParam("/graphical_interface/actionTab", actionTab_);
     node_.getParam("/graphical_interface/humanTab", humanTab_);
@@ -69,18 +70,32 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
         ui.comboBoxPositionAction->addItem(it->c_str());
     }
 
+    //we retrieve the possible goals from param of the .yaml file
+    std::vector<std::string> goals;
+    node_.getParam("/goal_manager/goals/names", goals);
+    for(std::vector<std::string>::iterator it = goals.begin(); it != goals.end(); it++){
+        ui.comboBoxGoals->addItem(it->c_str());
+    }
+
+
 
     //desactivate tabs if needed
-    if(!databaseTab_){
+    if(goalTab_){
         ui.Interface->setTabEnabled(0, false);
     }
 
-    if(actionTab_){
+    if(!databaseTab_){
         ui.Interface->setTabEnabled(1, false);
     }
 
-    if(humanTab_){
+    if(actionTab_){
         ui.Interface->setTabEnabled(2, false);
+        ROS_INFO("[graphical_interface] Waiting action client");
+        actionClient_.waitForServer();
+    }
+
+    if(humanTab_){
+        ui.Interface->setTabEnabled(3, false);
     }
 
     client_set_db_ = node_.serviceClient<toaster_msgs::SetInfoDB>("database_manager/set_info");
@@ -89,6 +104,8 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     client_stop_action_ = node_.serviceClient<std_srvs::Empty>("action_executor/stop");
     client_detach_object_ = node_.serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
     client_human_action_ = node_.serviceClient<toaster_msgs::RemoveFromHand>("human_monitor/human_action_simu");
+    client_send_goal_ = node_.serviceClient<supervisor_msgs::String>("goal_manager/new_goal");
+    client_cancel_goal_ = node_.serviceClient<supervisor_msgs::String>("goal_manager/cancel_goal");
 
 }
 
@@ -260,6 +277,20 @@ void MainWindow::on_pushButtonPrintAllDB_clicked()
 
 }
 
+/**
+ * \brief Push button to print all facts in an agent table
+ * */
+void MainWindow::on_pushButtonResetDB_clicked()
+{
+    toaster_msgs::ExecuteDB srv;
+    srv.request.command = "EMPTY";
+    srv.request.type = "ALL";
+    if (!client_execute_db_.call(srv)){
+        ROS_ERROR("[graphical_interface] Failed to call service database_manager/execute");
+    }
+
+}
+
 
 /** ***************************************
  * Action Tab
@@ -362,4 +393,34 @@ void MainWindow::on_pushButtonDetachHuman_clicked()
         ROS_ERROR("[graphical_interface] Failed to call service pdg/remove_from_hand");
     }
 
+}
+
+/** ***************************************
+ * Goal Tab
+ * ****************************************/
+
+/**
+ * \brief Push button to send a new goal
+ * */
+void MainWindow::on_pushButtonSendGoal_clicked(){
+
+    //we goal the corresponding service
+    supervisor_msgs::String srv;
+    srv.request.data = ui.comboBoxGoals->currentText().toStdString();
+    if (!client_send_goal_.call(srv)){
+        ROS_ERROR("[graphical_interface] Failed to call service goal_manager/new_goal");
+    }
+}
+
+/**
+ * \brief Push button to cancel a goal
+ * */
+void MainWindow::on_pushButtonCancelGoal_clicked()
+{
+    //we goal the corresponding service
+    supervisor_msgs::String srv;
+    srv.request.data = ui.comboBoxGoals->currentText().toStdString();
+    if (!client_cancel_goal_.call(srv)){
+        ROS_ERROR("[graphical_interface] Failed to call service goal_manager/cancel_goal");
+    }
 }

@@ -24,6 +24,7 @@
 
 #include "supervisor_msgs/ActionExecutorAction.h"
 #include "supervisor_msgs/HumanAction.h"
+#include "supervisor_msgs/String.h"
 
 class MainWindow : public QMainWindow {
 Q_OBJECT
@@ -54,6 +55,12 @@ private Q_SLOTS:
 
     void on_pushButtonDetachHuman_clicked();
 
+    void on_pushButtonSendGoal_clicked();
+
+    void on_pushButtonCancelGoal_clicked();
+
+    void on_pushButtonResetDB_clicked();
+
 public:
     Ui::MainWindowDesign ui; /**< Main windows design*/
     ros::NodeHandle node_; /**< Node handle*/
@@ -63,6 +70,7 @@ private:
     bool simu_; /**< flag to indicate simu or not*/
     std::string robotName_; /**< name of the robot*/
 
+    bool goalTab_; /**< flag to indicate the goals tab is activated*/
     bool databaseTab_; /**< flag to indicate the database tab is activated*/
     bool actionTab_; /**< flag to indicate the action tab is activated*/
     bool humanTab_; /**< flag to indicate the human action tab is activated*/
@@ -73,6 +81,8 @@ private:
     ros::ServiceClient client_stop_action_; /**< client to stop an action*/
     ros::ServiceClient client_detach_object_; /**< client to detach an object from hand*/
     ros::ServiceClient client_human_action_; /**< client to execute human action*/
+    ros::ServiceClient client_send_goal_; /**< client to send a new goal*/
+    ros::ServiceClient client_cancel_goal_; /**< client to cancel a goal*/
 
     actionlib::SimpleActionClient<supervisor_msgs::ActionExecutorAction> actionClient_; /**< action executor client*/
 };
