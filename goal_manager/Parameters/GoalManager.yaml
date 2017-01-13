@@ -1,9 +1,7 @@
 ---
 goal_manager:
     goals:
-        names: ['CLEAN','STACK','TEST', 'SCAN']
-        CLEAN_actors: ['PR2_ROBOT', 'HERAKLES_HUMAN1']
-        CLEAN_objective: ['NULL,isOn,TABLE_4']
+        names: ['STACK', 'BLOCKS', 'SCAN']
         STACK_actors: ['PR2_ROBOT', 'HERAKLES_HUMAN1']
         STACK_objective: ['RED_CUBE,isOn,PLACEMAT_RED',
                         'BLACK_CUBE,isOn,RED_CUBE',
@@ -16,3 +14,11 @@ goal_manager:
                         'BLUE_CUBE,isIn,BLUE_TRASHBIN',
                         'BLUE_CUBE2,isIn,BLUE_TRASHBIN',
                         'BLUE_CUBE3,isIn,BLUE_TRASHBIN',]
+        BLOCKS_actors: ['PR2_ROBOT', 'HERAKLES_HUMAN1']
+        BLOCKS_objective: ['RED_CUBE1,isOn,PLACEMAT1',
+                           'RED_CUBE2,isOn,PLACEMAT2',
+                           'STICK,isOn,RED_CUBE1',
+                           'STICK,isOn,RED_CUBE2',
+                           'BLUE_CUBE1,isOn,STICK',
+                           'GREEN_CUBE,isOn,BLUE_CUBE1',
+                           'BLUE_CUBE2,isOn,GREEN_CUBE']

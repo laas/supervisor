@@ -14,7 +14,6 @@ The goal manager allows to choose a goal to execute
 #include <ros/ros.h>
 
 #include "toaster_msgs/ExecuteDB.h"
-#include "std_srvs/Trigger.h"
 
 #include "supervisor_msgs/Goal.h"
 #include "supervisor_msgs/GoalsList.h"
@@ -35,7 +34,6 @@ std::vector<std::string> status_;
 std::vector<supervisor_msgs::Goal> possibleGoals_;
 
 ros::ServiceClient* client_db_execute_;
-ros::ServiceClient* client_stop_plan_;
 
 
 /**
@@ -148,21 +146,10 @@ bool cancelGoal(supervisor_msgs::String::Request  &req, supervisor_msgs::String:
     //It is the current goal?
     if(currentGoal_ == req.data){
             ROS_INFO("[goal_manager] Stopping current goal");
-            std_srvs::Trigger srv;
-            if(client_stop_plan_->call(srv)){
-                if(srv.response.success){
-                    ROS_INFO("[goal_manager] Current goal stopped");
-                    currentGoal_ = "NONE";
-                    changed = true;
-                    res.success = true;
-                }else{
-                    ROS_WARN("[goal_manager] Failed to stop the goal!");
-                    res.success = false;
-                }
-                return true;
-            }else{
-               ROS_ERROR("[goal_manager] Failed to call service plan_elaboration/stop");
-            }
+            changed = true;
+            currentGoal_ = "STOP";
+            res.success = true;
+            return true;
     }
 
     //look in the pending goals
@@ -190,6 +177,21 @@ bool cancelGoal(supervisor_msgs::String::Request  &req, supervisor_msgs::String:
  * */
 bool endGoal(supervisor_msgs::String::Request  &req, supervisor_msgs::String::Response &res){
 
+    //If we were in stopping process
+    if(currentGoal_ == "STOP"){
+        if(req.data == "OK"){
+            //the goal has been stopped
+            currentGoal_ = "NONE";
+            ROS_INFO("[goal_manager] Goal stopped");
+        }else{
+            //else the name of the goal is returned
+            currentGoal_ = req.data;
+            ROS_INFO("[goal_manager] Failed to stop the current goal");
+        }
+        res.success = true;
+        return true;
+
+    }
 
     //Check if the goal is the current goal
     if(currentGoal_ != req.data){
@@ -266,8 +268,6 @@ int main (int argc, char **argv)
 
   ros::ServiceClient client_db_execute = node_->serviceClient<toaster_msgs::ExecuteDB>("database_manager/execute");
   client_db_execute_ = &client_db_execute;
-  ros::ServiceClient client_stop_plan = node_->serviceClient<std_srvs::Trigger>("plan_elaboration/stop");
-  client_stop_plan_  = &client_stop_plan;
 
   ROS_INFO("[goal_manager] Ready");
 
