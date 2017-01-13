@@ -1,0 +1,9 @@
+string type
+string subType
+string receiver
+bool waitForAnswer
+Action action
+toaster_msgs/Fact fact
+---
+bool boolAnswer
+

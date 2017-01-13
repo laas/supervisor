@@ -1,0 +1,5 @@
+<launch>
+    <rosparam command="load" file="$(find plan_elaboration)/Parameters/PlanElaboration.yaml" />
+
+    <node name="plan_elaboration" pkg="plan_elaboration" type="plan_elaboration" output="screen" />  <!-- Launch the plan elaboration -->
+</launch>

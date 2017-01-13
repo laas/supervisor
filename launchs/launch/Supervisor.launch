@@ -4,4 +4,5 @@
     <include file="$(find action_executor)/launch/ActionExecutor.launch"/>
     <include file="$(find graphical_interface)/launch/GraphicalInterface.launch"/>
     <include file="$(find goal_manager)/launch/GoalManager.launch"/>
+    <include file="$(find plan_elaboration)/launch/PlanElaboration.launch"/>
 </launch>

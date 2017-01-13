@@ -17,12 +17,16 @@ add_message_files(
     ActionsList.msg
     GoalsList.msg
     Goal.msg
+    SharedPlan.msg
+    Link.msg
 )
 
 add_service_files(
   FILES
     HumanAction.srv
     String.srv
+    EndPlan.srv
+    Ask.srv
 )
 
  add_action_files(
