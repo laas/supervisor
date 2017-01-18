@@ -16,8 +16,8 @@ HumanMonitor::HumanMonitor(ros::NodeHandle* node){
     node_->getParam("/entities/containers", containerObjects_);
     node_->getParam("/human_monitor/rightHand", humanHand_);
 
-    previous_pub_ = node_->advertise<supervisor_msgs::ActionsList>("/human_monitor/current_humans_action", 1);
-    current_pub_ = node_->advertise<supervisor_msgs::ActionsList>("/data_manager/add_data/previous_actions", 1);
+    current_pub_ = node_->advertise<supervisor_msgs::ActionsList>("/human_monitor/current_humans_action", 1);
+    previous_pub_ = node_->advertise<supervisor_msgs::ActionsList>("/data_manager/add_data/previous_actions", 1);
 
     client_put_hand_ = node_->serviceClient<toaster_msgs::PutInHand>("pdg/put_in_hand");
     client_remove_hand_ = node_->serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
@@ -68,6 +68,7 @@ void HumanMonitor::humanPick(std::string agent, std::string object){
 
     //we publish the action in the previous publisher
     supervisor_msgs::ActionsList msg_previous;
+    action.succeed = true;
     msg_previous.actions.push_back(action);
     previous_pub_.publish(msg_previous);
 }
