@@ -14,7 +14,6 @@ ros::NodeHandle* node_;
 PlanElaboration* pe_;
 supervisor_msgs::SharedPlan currentPlan_;
 bool hasPlan_;
-bool isStopping_;
 ros::ServiceClient* client_goal_;
 ros::ServiceClient* client_stop_plan_;
 
@@ -45,11 +44,22 @@ void goalsListCallback(const supervisor_msgs::GoalsList::ConstPtr& msg){
             }
         }else if(pe_->currentGoal_ != "NONE" && msg->currentGoal == "STOP"){
             //stop order: transmit it to the plan maintainer
-            isStopping_ = true;
-            std_srvs::Trigger srv;
-            if (!client_stop_plan_->call(srv)){
-               ROS_ERROR("[plan_elaboration] Failed to call service plan_maintainer/stop");
+            std_srvs::Trigger srv_stop;
+            supervisor_msgs::String srv;
+            if (client_stop_plan_->call(srv_stop)){
+                if(srv_stop.response.success){
+                    srv.request.data = "OK";
+                }else{
+                    srv.request.data = pe_->currentGoal_;
+                }
+            }else{
+                ROS_ERROR("[plan_elaboration] Failed to call service plan_maintainer/stop");
+                srv.request.data = pe_->currentGoal_;
             }
+            if (!client_goal_->call(srv)){
+               ROS_ERROR("[plan_elaboration] Failed to call service goal_manager/end_goal");
+            }
+            pe_->currentGoal_ = "NONE";
         }
     }
 }
@@ -64,24 +74,13 @@ bool endPlan(supervisor_msgs::EndPlan::Request  &req, supervisor_msgs::EndPlan::
 
     if(req.success){
         //tell to the goal manager that the plan succeed
-        if(isStopping_){
-            supervisor_msgs::String srv;
-            srv.request.data = "OK";
-            if (!client_goal_->call(srv)){
-               ROS_ERROR("[plan_elaboration] Failed to call service goal_manager/end_goal");
-            }
-            pe_->currentGoal_ = "NONE";
-            isStopping_ = false;
-        }
-        return true;
-    }else if(isStopping_){
-        //we transmit the failure
         supervisor_msgs::String srv;
-        srv.request.data = pe_->currentGoal_;
+        srv.request.data = "OK";
         if (!client_goal_->call(srv)){
            ROS_ERROR("[plan_elaboration] Failed to call service goal_manager/end_goal");
         }
-        isStopping_ = false;
+        pe_->currentGoal_ = "NONE";
+        return true;
     }
 
     if(req.evaluate){
@@ -122,7 +121,6 @@ int main (int argc, char **argv)
   pe_ = &pe;
 
   hasPlan_ = false;
-  isStopping_ = false;
 
   ros::Subscriber sub_goal = node.subscribe("/goal_manager/goalsList", 1, goalsListCallback);
 
