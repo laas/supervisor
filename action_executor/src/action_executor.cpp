@@ -41,6 +41,8 @@ action_server_(*node, name,
 
     initHighLevelNames();
 
+    previous_pub_ = connector_.node_->advertise<supervisor_msgs::ActionsList>("/data_manager/add_data/previous_actions", 1);
+
     //Init services
     connector_.client_db_execute_ = connector_.node_->serviceClient<toaster_msgs::ExecuteDB>("database_manager/execute");
     connector_.client_put_hand_ = connector_.node_->serviceClient<toaster_msgs::PutInHand>("pdg/put_in_hand");
@@ -129,6 +131,12 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
         result_.timePlan = connector_.timePlan_;
         result_.timeExec = connector_.timeExec_;
         result_.timeGTP = connector_.timeGTP_;
+        //we publish the action in the previous publisher
+        supervisor_msgs::ActionsList msg_previous;
+        supervisor_msgs::Action actionToPublish = goal->action;
+        actionToPublish.succeed = false;
+        msg_previous.actions.push_back(actionToPublish);
+        previous_pub_.publish(msg_previous);
         action_server_.setAborted(result_);
         return;
     }
@@ -158,6 +166,12 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
         result_.timeGTP = connector_.timeGTP_;
         action_server_.setAborted(result_);
         ROS_INFO("[action_executor] Action failed at creation");
+        //we publish the action in the previous publisher
+        supervisor_msgs::ActionsList msg_previous;
+        supervisor_msgs::Action actionToPublish = goal->action;
+        actionToPublish.succeed = false;
+        msg_previous.actions.push_back(actionToPublish);
+        previous_pub_.publish(msg_previous);
         return;
     }
 
@@ -188,6 +202,11 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
             action_server_.setPreempted(result_);
             ROS_INFO("[action_executor] Action stoped");
         }
+        //we publish the action in the previous publisher
+        supervisor_msgs::ActionsList msg_previous;
+        connector_.currentAction_.succeed = false;
+        msg_previous.actions.push_back(connector_.currentAction_);
+        previous_pub_.publish(msg_previous);
         return;
     }
 
@@ -206,6 +225,11 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
         result_.timeGTP = connector_.timeGTP_;
         action_server_.setPreempted(result_);
         ROS_INFO("[action_executor] Action stoped");
+        //we publish the action in the previous publisher
+        supervisor_msgs::ActionsList msg_previous;
+        connector_.currentAction_.succeed = false;
+        msg_previous.actions.push_back(connector_.currentAction_);
+        previous_pub_.publish(msg_previous);
         return;
     }
 
@@ -233,6 +257,11 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
             action_server_.setPreempted(result_);
             ROS_INFO("[action_executor] Action stoped");
         }
+        //we publish the action in the previous publisher
+        supervisor_msgs::ActionsList msg_previous;
+        connector_.currentAction_.succeed = false;
+        msg_previous.actions.push_back(connector_.currentAction_);
+        previous_pub_.publish(msg_previous);
         return;
     }
 
@@ -251,6 +280,11 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
         result_.shouldRetractLeft = false;
         action_server_.setPreempted(result_);
         ROS_INFO("[action_executor] Action stoped");
+        //we publish the action in the previous publisher
+        supervisor_msgs::ActionsList msg_previous;
+        connector_.currentAction_.succeed = false;
+        msg_previous.actions.push_back(connector_.currentAction_);
+        previous_pub_.publish(msg_previous);
         return;
     }
 
@@ -286,6 +320,11 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
             action_server_.setPreempted(result_);
             ROS_INFO("[action_executor] Action stoped");
         }
+        //we publish the action in the previous publisher
+        supervisor_msgs::ActionsList msg_previous;
+        connector_.currentAction_.succeed = false;
+        msg_previous.actions.push_back(connector_.currentAction_);
+        previous_pub_.publish(msg_previous);
         return;
     }
 
@@ -321,6 +360,11 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
             action_server_.setPreempted(result_);
             ROS_INFO("[action_executor] Action stoped");
         }
+        //we publish the action in the previous publisher
+        supervisor_msgs::ActionsList msg_previous;
+        connector_.currentAction_.succeed = false;
+        msg_previous.actions.push_back(connector_.currentAction_);
+        previous_pub_.publish(msg_previous);
         return;
     }
 
@@ -344,6 +388,11 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
     connector_.isActing_ = false;
     result_.report = true;
     result_.state = "OK";
+    //we publish the action in the previous publisher
+    supervisor_msgs::ActionsList msg_previous;
+    connector_.currentAction_.succeed = true;
+    msg_previous.actions.push_back(connector_.currentAction_);
+    previous_pub_.publish(msg_previous);
     action_server_.setSucceeded(result_);
     ROS_INFO("[action_executor] Action succeed");
 }

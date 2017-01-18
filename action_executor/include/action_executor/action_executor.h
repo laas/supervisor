@@ -25,6 +25,7 @@ protected:
     supervisor_msgs::ActionExecutorFeedback feedback_; /**< feedback of the action*/
     supervisor_msgs::ActionExecutorResult result_; /**< result of the action*/
     Server action_server_; /**< action server*/
+    ros::Publisher previous_pub_; /**< publisher of previous actions*/
 
 private:
     void execute(const supervisor_msgs::ActionExecutorGoalConstPtr& goal);
