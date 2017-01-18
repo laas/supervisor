@@ -8,9 +8,9 @@ PlanElaboration::PlanElaboration(ros::NodeHandle* node)
     currentGoal_ = "NONE";
     node_ = node;
     node_->getParam("/robot/name", robotName_);;
-    node_->getParam("/plan_elaboration/AgentX", agentX_);
-    node_->getParam("/plan_elaboration/Omni", omni_);
-    node_->getParam("/plan_elaboration/mainPartner", mainPartner_);
+    node_->getParam("/supervisor/AgentX", agentX_);
+    node_->getParam("/supervisor/Omni", omni_);
+    node_->getParam("/supervisor/mainPartner", mainPartner_);
     node_->getParam("/plan_elaboration/Agents", agentList_);
 
     client_db_execute_  = node_->serviceClient<toaster_msgs::ExecuteDB>("database_manager/execute");
