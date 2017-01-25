@@ -10,12 +10,14 @@ Main class of the plan maintainer
 #include <vector>
 #include <map>
 #include <ros/ros.h>
+#include "boost/algorithm/string.hpp"
 
 #include "std_srvs/Trigger.h"
 
 #include "supervisor_msgs/SharedPlan.h"
 #include "supervisor_msgs/ActionsList.h"
 #include "supervisor_msgs/EndPlan.h"
+
 
 
 ros::NodeHandle* node_;
@@ -118,41 +120,62 @@ void updatePlan(){
  * */
 supervisor_msgs::Action isInList(supervisor_msgs::Action action, std::vector<supervisor_msgs::Action> actions){
 
+    bool hasAgentXAction = false;
+    bool hasAction = false;
+    supervisor_msgs::Action toReturn;
     for(std::vector<supervisor_msgs::Action>::iterator it = actions.begin(); it != actions.end(); it++){
         bool find = true;
-        if(action.name != it->name){
-            find = false;
-        }else{
-            if(action.actors.size() != it->actors.size()){
-                find = false;
-            }else{
-                for(int i = 0; i < action.actors.size(); i++){
-                    if(action.actors[i] != it->actors[i]){
-                        find = false;
+        if(action.name == it->name || (action.name == "pick" && boost::contains(it->name, "pick"))){
+            if(action.name == "pick" && it->name != "pick"){
+                //we only check the object
+                std::string object;
+                for(int i = 0; i < action.parameter_keys.size(); i++){
+                    if(action.parameter_keys[i] == "object"){
+                        object = action.parameter_values[i];
                         break;
                     }
                 }
-                if(find){
-                    if(action.parameter_values.size() != it->parameter_values.size()){
-                        find = false;
-                    }else{
-                        for(int i = 0; i < action.parameter_values.size(); i++){
-                            if(highLevelNames_[action.parameter_values[i]] != highLevelNames_[it->parameter_values[i]]){
-                                find = false;
-                                break;
-                            }
+                for(int i = 0; i < it->parameter_keys.size(); i++){
+                    if(it->parameter_keys[i] == "object"){
+                        if(it->parameter_values[i] != object){
+                            find = false;
+                        }
+                    }
+                }
+            }else{
+                if(action.parameter_values.size() != it->parameter_values.size()){
+                    find = false;
+                }else{
+                    for(int i = 0; i < action.parameter_values.size(); i++){
+                        if(highLevelNames_[action.parameter_values[i]] != highLevelNames_[it->parameter_values[i]]){
+                            find = false;
+                            break;
                         }
                     }
                 }
             }
+        }else{
+            find = false;
         }
         if(find){
-            return *it;
+            //we keep in priority actions from the actior, then agentX actions, then others
+            if(action.actors[0] == it->actors[0]){
+                return *it;
+            }else if(!hasAgentXAction && it->actors[0] == xAgent_){
+                hasAgentXAction = true;
+                hasAction = true;
+                toReturn = *it;
+            }else if(!hasAction){
+                hasAction = true;
+                toReturn = *it;
+            }
         }
     }
 
-    supervisor_msgs::Action toReturn;
-    toReturn.id = -1;
+    if(!hasAction){
+        toReturn.id = -1;
+    }
+
     return toReturn;
 }
 
@@ -224,7 +247,18 @@ void checkAction(supervisor_msgs::Action action, std::string actor){
                 plannedRobotAction_ = plannedAction;
             }else{
                 //for humans, we do not consider for now actions in progress, only previous actions
-                previousActions_.push_back(plannedAction);
+                if(action.name == "pick" && plannedAction.name != "pick"){
+                    //if the action was a pick, we replace the todo action by a place
+                    for(std::vector<supervisor_msgs::Action>::iterator it = todoActions_.begin(); it != todoActions_.end(); it++){
+                        if(it->id == plannedAction.id){
+                            //we remove the pickand from the name
+                            std::string newName = it->name.substr(7);
+                            it->name = newName;
+                        }
+                    }
+                }else{
+                    previousActions_.push_back(plannedAction);
+                }
             }
         }else if(plannedAction.actors[0] == xAgent_){
             //the plan need to be re-evaluate
@@ -246,6 +280,13 @@ void checkAction(supervisor_msgs::Action action, std::string actor){
                ROS_ERROR("[plan_maintainer] Failed to call service plan_elaboration/end_plan");
             }
             endCurrentPlan();
+            //if the action was the robot one, we stop the robot action
+            if(plannedAction.id == plannedRobotAction_.id){
+                std_srvs::Trigger srv;
+                if (!client_stop_action_->call(srv)){
+                    ROS_ERROR("[plan_elaboration] Failed to call service robot_decision/stop");
+                }
+            }
         }
     }
 }
