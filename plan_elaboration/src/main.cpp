@@ -89,6 +89,12 @@ bool endPlan(supervisor_msgs::EndPlan::Request  &req, supervisor_msgs::EndPlan::
         pe_->dom_->agentLocked_ = req.agentLocked;
     }
 
+    if(req.forgiveAction){
+        //the plan needs to be evaluate
+        pe_->dom_->objectForgive_ = req.objectLocked;
+        pe_->dom_->agentForgive_ = req.agentLocked;
+    }
+
     //we look for a new plan
     std::pair<bool, supervisor_msgs::SharedPlan> plan = pe_->findPlan();
     if(plan.first){

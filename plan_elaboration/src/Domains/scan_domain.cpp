@@ -20,6 +20,10 @@ std::vector<toaster_msgs::Fact> ScanDomain::computeSpecificFacts(std::vector<toa
 
     facts = computeScanArea(facts);
 
+    facts = computeForgiveFacts(facts);
+
+    facts = computeLockedFacts(facts);
+
     return facts;
 }
 
