@@ -1,0 +1,5 @@
+---
+robot_decision:
+    mode: negotiation #negotiation or adaptation
+    timeAdaptation: 2.0
+    timeWaitHuman: 5.0

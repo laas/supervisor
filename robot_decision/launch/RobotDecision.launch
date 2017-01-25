@@ -1,0 +1,7 @@
+<launch>
+    <rosparam command="load" file="$(find robot_decision)/Parameters/RobotDecision.yaml" />
+    <rosparam command="load" file="$(find launchs)/Parameters/General.yaml" />
+    <rosparam command="load" file="$(find launchs)/Parameters/Entities.yaml" />
+
+    <node name="robot_decision" pkg="robot_decision" type="robot_decision" output="screen" />  <!-- Launch the robot decision -->
+</launch>
