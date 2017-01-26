@@ -27,6 +27,7 @@ add_service_files(
     String.srv
     EndPlan.srv
     Ask.srv
+    GiveInfo.srv
 )
 
  add_action_files(
