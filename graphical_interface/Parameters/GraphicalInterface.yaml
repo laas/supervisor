@@ -4,6 +4,7 @@ graphical_interface:
     databaseTab: true
     actionTab: true
     humanTab: true
+    dialogueTab: true
     possibleActions:
         - 'pick'
         - 'place'

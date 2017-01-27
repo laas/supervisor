@@ -17,7 +17,8 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     node_.getParam("/graphical_interface/goalTab", goalTab_);
     node_.getParam("/graphical_interface/databaseTab", databaseTab_);
     node_.getParam("/graphical_interface/actionTab", actionTab_);
-    node_.getParam("/graphical_interface/humanTab", humanTab_);
+    node_.getParam("/graphical_interface/humanTab", dialogueTab_);
+    node_.getParam("/graphical_interface/dialogueTab", humanTab_);
 
     //we retrieve the possible agents from param of the .yaml file
     std::vector<std::string> agents;
@@ -26,6 +27,7 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
         if(*it != robotName_){
             ui.comboBoxAgentAction->addItem(it->c_str());
             ui.comboBoxHuman->addItem(it->c_str());
+            ui.comboBoxHumanDia->addItem(it->c_str());
         }
         ui.comboBoxAgentDB->addItem(it->c_str());
     }
@@ -80,7 +82,7 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
 
 
     //desactivate tabs if needed
-    if(goalTab_){
+    if(!goalTab_){
         ui.Interface->setTabEnabled(0, false);
     }
 
@@ -88,14 +90,18 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
         ui.Interface->setTabEnabled(1, false);
     }
 
-    if(actionTab_){
+    if(!actionTab_){
         ui.Interface->setTabEnabled(2, false);
         ROS_INFO("[graphical_interface] Waiting action client");
         actionClient_.waitForServer();
     }
 
-    if(humanTab_){
+    if(!humanTab_){
         ui.Interface->setTabEnabled(3, false);
+    }
+
+    if(!dialogueTab_){
+        ui.Interface->setTabEnabled(4, false);
     }
 
     client_set_db_ = node_.serviceClient<toaster_msgs::SetInfoDB>("database_manager/set_info");
@@ -106,6 +112,11 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     client_human_action_ = node_.serviceClient<toaster_msgs::RemoveFromHand>("human_monitor/human_action_simu");
     client_send_goal_ = node_.serviceClient<supervisor_msgs::String>("goal_manager/new_goal");
     client_cancel_goal_ = node_.serviceClient<supervisor_msgs::String>("goal_manager/cancel_goal");
+    client_say_ = node_.serviceClient<supervisor_msgs::String>("dialogue_node/say");
+    client_give_info_ = node_.serviceClient<supervisor_msgs::GiveInfo>("dialogue_node/give_info");
+
+
+    boolPub_ = node_.advertise<std_msgs::Bool>("graphical_interface/boolAnswer", 1);
 
 }
 
@@ -423,4 +434,85 @@ void MainWindow::on_pushButtonCancelGoal_clicked()
     if (!client_cancel_goal_.call(srv)){
         ROS_ERROR("[graphical_interface] Failed to call service goal_manager/cancel_goal");
     }
+}
+
+/** ***************************************
+ * Dialogue Tab
+ * ****************************************/
+
+/**
+ * \brief Push button to say a sentence
+ * */
+void MainWindow::on_pushButtonSay_clicked()
+{
+
+    //we get the sentence
+    std::string sentence = ui.textDia->toPlainText().toStdString();
+
+    //we send it to the dialogue module
+    supervisor_msgs::String srv;
+    srv.request.data = sentence;
+    if (!client_say_.call(srv)){
+        ROS_ERROR("[graphical_interface] Failed to call service dialogue_node/say");
+    }
+}
+
+/**
+ * \brief Push button to give a fact to the robot (simulated dialogue)
+ * */
+void MainWindow::on_pushButtonHumanSay_clicked()
+{
+    //we get the fact content
+    std::string subject = ui.textSubjectDia->toPlainText().toStdString();
+    if(subject == ""){
+        ROS_WARN("[graphical_interface] No subject specified: NULL instead");
+        subject = "NULL";
+    }
+    std::string target = ui.textTargetDia->toPlainText().toStdString();
+    if(target == ""){
+        ROS_WARN("[graphical_interface] No target specified: NULL instead");
+        target = "NULL";
+    }
+    std::string property = ui.textPropertyDia->toPlainText().toStdString();
+    if(property == ""){
+        ROS_ERROR("[graphical_interface] No property specified: abort");
+        return;
+    }
+    toaster_msgs::Fact fact;
+    fact.subjectId = subject;
+    fact.property = property;
+    fact.targetId = target;
+
+    //we send it to the dialogue module
+    supervisor_msgs::GiveInfo srv;
+    srv.request.toRobot = true;
+    srv.request.type = "FACT";
+    srv.request.partner = ui.comboBoxHumanDia->currentText().toStdString();
+    srv.request.fact = fact;
+    if (!client_give_info_.call(srv)){
+        ROS_ERROR("[graphical_interface] Failed to call service dialogue_node/say");
+    }
+}
+
+/**
+ * \brief Push button to say yes
+ * */
+void MainWindow::on_pushButtonYes_clicked()
+{
+
+    std_msgs::Bool msg;
+    msg.data = true;
+    boolPub_.publish(msg);
+}
+
+/**
+ * \brief Push button to say no
+ * */
+void MainWindow::on_pushButtonNo_clicked()
+{
+
+    std_msgs::Bool msg;
+    msg.data = false;
+    boolPub_.publish(msg);
+
 }

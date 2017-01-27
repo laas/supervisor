@@ -12,14 +12,18 @@
 *
 * \section Tabs
 * The following tabs are available and can be activated/desactivated through parameters
+*  - Goals management
 *  - Database management
 *  - Robot actions management
 *  - Humans actions management
+*  - Dialogue management
 *
 * \section Parameters
 *  - graphical_interface/databaseTab: activate the database management tab
 *  - graphical_interface/actionTab: activate the robot actions management tab
 *  - graphical_interface/humanTab: activate the human actions management tab
+*  - graphical_interface/goalTab: activate the goals management tab
+*  - graphical_interface/dialogueTab: activate the dialogue management tab
 *  - graphical_interface/possibleActions: possible actions the robot can execute
 *  - graphical_interface/moveToPositions: possible moveTo positions for the robot
 * Need launchs/Entities.yaml and launchs/General.yaml to run

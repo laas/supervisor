@@ -16,6 +16,7 @@
 #include <actionlib/client/terminal_state.h>
 
 #include "std_srvs/Empty.h"
+#include "std_msgs/Bool.h"
 
 #include "toaster_msgs/SetInfoDB.h"
 #include "toaster_msgs/GetInfoDB.h"
@@ -25,6 +26,7 @@
 #include "supervisor_msgs/ActionExecutorAction.h"
 #include "supervisor_msgs/HumanAction.h"
 #include "supervisor_msgs/String.h"
+#include "supervisor_msgs/GiveInfo.h"
 
 class MainWindow : public QMainWindow {
 Q_OBJECT
@@ -61,6 +63,14 @@ private Q_SLOTS:
 
     void on_pushButtonResetDB_clicked();
 
+    void on_pushButtonSay_clicked();
+
+    void on_pushButtonHumanSay_clicked();
+
+    void on_pushButtonYes_clicked();
+
+    void on_pushButtonNo_clicked();
+
 public:
     Ui::MainWindowDesign ui; /**< Main windows design*/
     ros::NodeHandle node_; /**< Node handle*/
@@ -74,6 +84,7 @@ private:
     bool databaseTab_; /**< flag to indicate the database tab is activated*/
     bool actionTab_; /**< flag to indicate the action tab is activated*/
     bool humanTab_; /**< flag to indicate the human action tab is activated*/
+    bool dialogueTab_; /**< flag to indicate the human dialogue tab is activated*/
 
     ros::ServiceClient client_set_db_; /**< client of set info db service*/
     ros::ServiceClient client_get_db_; /**< client of get info db service*/
@@ -83,8 +94,12 @@ private:
     ros::ServiceClient client_human_action_; /**< client to execute human action*/
     ros::ServiceClient client_send_goal_; /**< client to send a new goal*/
     ros::ServiceClient client_cancel_goal_; /**< client to cancel a goal*/
+    ros::ServiceClient client_say_; /**< client to say a sentence*/
+    ros::ServiceClient client_give_info_; /**< client to give an info to the dialogue module*/
 
     actionlib::SimpleActionClient<supervisor_msgs::ActionExecutorAction> actionClient_; /**< action executor client*/
+
+    ros::Publisher boolPub_; /**< publisher for the bool topic*/
 };
 
 
