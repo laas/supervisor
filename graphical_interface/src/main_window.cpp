@@ -63,6 +63,7 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     node_.getParam("/graphical_interface/possibleActions", possibleActions);
     for(std::vector<std::string>::iterator it = possibleActions.begin(); it != possibleActions.end(); it++){
         ui.comboBoxNameAction->addItem(it->c_str());
+        ui.comboBoxNameActionHuman->addItem(it->c_str());
     }
 
     //we retrieve the possible positions from param of the .yaml file
@@ -109,7 +110,7 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     client_execute_db_ = node_.serviceClient<toaster_msgs::ExecuteDB>("database_manager/execute");
     client_stop_action_ = node_.serviceClient<std_srvs::Empty>("action_executor/stop");
     client_detach_object_ = node_.serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
-    client_human_action_ = node_.serviceClient<toaster_msgs::RemoveFromHand>("human_monitor/human_action_simu");
+    client_human_action_ = node_.serviceClient<supervisor_msgs::HumanAction>("human_monitor/human_action_simu");
     client_send_goal_ = node_.serviceClient<supervisor_msgs::String>("goal_manager/new_goal");
     client_cancel_goal_ = node_.serviceClient<supervisor_msgs::String>("goal_manager/cancel_goal");
     client_say_ = node_.serviceClient<supervisor_msgs::String>("dialogue_node/say");
@@ -274,7 +275,7 @@ void MainWindow::on_pushButtonPrintAllDB_clicked()
     //we ask all facts
     toaster_msgs::GetInfoDB srv;
     srv.request.type = "FACT";
-    srv.request.subType = "ALL";
+    srv.request.subType = "CURRENT";
     srv.request.agentId = ui.comboBoxAgentDB->currentText().toStdString();
     if (client_get_db_.call(srv)){
         std::string toPrint;
@@ -288,8 +289,31 @@ void MainWindow::on_pushButtonPrintAllDB_clicked()
 
 }
 
+
+
 /**
- * \brief Push button to print all facts in an agent table
+ * \brief Push button to print all facts in the planning table
+ * */
+void MainWindow::on_pushButtonPrintPlanning_clicked()
+{
+    //we ask all facts
+    toaster_msgs::GetInfoDB srv;
+    srv.request.type = "FACT";
+    srv.request.subType = "PLANNING";
+    if (client_get_db_.call(srv)){
+        std::string toPrint;
+        for(std::vector<toaster_msgs::Fact>::iterator it = srv.response.resFactList.factList.begin(); it != srv.response.resFactList.factList.end(); it++){
+            toPrint = toPrint + it->subjectId.c_str() + " " + it->property.c_str() + " " + it->targetId.c_str() + "\n";
+        }
+        ui.textDB->setText(QString::fromStdString(toPrint));
+    }else{
+        ROS_ERROR("[graphical_interface] Failed to call service database_manager/get_info");
+    }
+
+}
+
+/**
+ * \brief Push button to reset the database
  * */
 void MainWindow::on_pushButtonResetDB_clicked()
 {
@@ -381,6 +405,13 @@ void MainWindow::on_pushButtonExecuteHuman_clicked()
     action.parameter_values.push_back(ui.comboBoxSupportHuman->currentText().toStdString());
     action.parameter_keys.push_back("container");
     action.parameter_values.push_back(ui.comboBoxContainerHuman->currentText().toStdString());
+
+    if(action.name == "placeStick" || action.name == "pickandplaceStick"){
+        action.parameter_keys.push_back("support1");
+        action.parameter_values.push_back("RED_CUBE1");
+        action.parameter_keys.push_back("support2");
+        action.parameter_values.push_back("RED_CUBE2");
+    }
 
     //we send it to the action executor
     supervisor_msgs::HumanAction srv;

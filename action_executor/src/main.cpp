@@ -31,12 +31,12 @@ bool stopOrder(std_srvs::Empty::Request  &req, std_srvs::Empty::Response &res){
  * */
 void agentFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
 
-    if(executor_->connector_.isActing_){
-        std::vector<toaster_msgs::Fact> distanceFacts = msg->factList;
-        for(std::vector<toaster_msgs::Fact>::iterator it = distanceFacts.begin(); it != distanceFacts.end(); it++){
-            if(it->property == "Distance"){
-                if(it->subjectId == humanSafetyJoint_){
-                    executor_->connector_.humanDistances_[it->targetId] = it->doubleValue;
+    std::vector<toaster_msgs::Fact> distanceFacts = msg->factList;
+    for(std::vector<toaster_msgs::Fact>::iterator it = distanceFacts.begin(); it != distanceFacts.end(); it++){
+        if(it->property == "Distance"){
+            if(it->subjectId == humanSafetyJoint_){
+                executor_->connector_.humanDistances_[it->targetId] = it->doubleValue;
+                if(executor_->connector_.isActing_){
                     if(it->targetId == executor_->connector_.robotToaster_){
                         if(it->doubleValue < safetyThreshold_){
                             executor_->connector_.stopOrder_ = true;
@@ -88,8 +88,6 @@ int main (int argc, char **argv)
   ros::Subscriber sub = node.subscribe("agent_monitor/factList", 1, agentFactListCallback);
   ros::Subscriber sub_human_action = node.subscribe("human_monitor/current_humans_action", 1, humanActionCallback);
 
-  ros::Publisher current_pub_ = node_->advertise<supervisor_msgs::Action>("/action_executor/current_robot_action", 1);
-
   ros::ServiceServer service_stop = node.advertiseService("action_executor/stop", stopOrder); //stop the execution
 
   ROS_INFO("[action_executor] Ready");
@@ -97,7 +95,7 @@ int main (int argc, char **argv)
   while(node.ok()){
       ros::spinOnce();
       if(executor.connector_.isActing_){
-          current_pub_.publish(executor.connector_.currentAction_);
+          executor_->current_pub_.publish(executor.connector_.currentAction_);
       }
       loop_rate.sleep();
   }

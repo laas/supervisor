@@ -8,12 +8,13 @@ graphical_interface:
     possibleActions:
         - 'pick'
         - 'place'
-        - 'placeReachable'
+        - 'placereachable'
+        - 'placeStick'
         - 'drop'
         - 'scan'
-        - 'pickAndPlace'
-        - 'pickAndPlaceReachable'
-        - 'pickAndDrop'
+        - 'pickandplace'
+        - 'pickandplaceReachable'
+        - 'pickanddrop'
         - 'moveTo'
     moveToPositions:
         - 'manipulationPoseRight'

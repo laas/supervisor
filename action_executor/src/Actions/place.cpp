@@ -276,5 +276,22 @@ bool Place::post(){
         PutOnSupport(object_, support_);
     }
 
+    //add isOn facts: to remove when MS
+    std::vector<toaster_msgs::Fact> toAdd;
+    toaster_msgs::Fact fact;
+    fact.subjectId = object_;
+    fact.property = "isOn";
+    fact.targetId = support_;
+    toAdd.push_back(fact);
+
+    toaster_msgs::SetInfoDB srv;
+    srv.request.agentId = connector_->robotName_;
+    srv.request.facts = toAdd;
+    srv.request.infoType = "FACT";
+    srv.request.add = true;
+    if(!connector_->client_db_set_.call(srv)){
+        ROS_ERROR("[action_executor] Failed to call service database_manager/set_info");
+    }
+
     return true;
 }

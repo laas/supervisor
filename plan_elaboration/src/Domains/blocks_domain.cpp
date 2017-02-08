@@ -5,7 +5,7 @@
  * */
 BlocksDomain::BlocksDomain(ros::NodeHandle* node) : VirtualDomain(node)
 {
-    node_->getParam("/plan_elaboration/domains/SCAN/areaStack", areaStack_);
+    node_->getParam("/plan_elaboration/domains/BLOCKS/areaStack", areaStack_);
     isHighLevelDomain_ = true;
 }
 
@@ -24,6 +24,8 @@ std::vector<toaster_msgs::Fact> BlocksDomain::computeSpecificFacts(std::vector<t
     facts = computeStack(facts);
 
     facts = computeOwnAndAccess(facts);
+    
+    facts = computeForgiveFacts(facts);
 
     facts = computeLockedFacts(facts);
 

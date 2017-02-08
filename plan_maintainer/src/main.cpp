@@ -23,13 +23,15 @@ Main class of the plan maintainer
 ros::NodeHandle* node_;
 std::string robotName_, xAgent_;
 std::vector<supervisor_msgs::Action> oldMsgPrevious_, previousActions_, humansProgressActions_, todoActions_, plannedActions_;
-supervisor_msgs::Action robotProgressAction_, plannedRobotAction_;
+supervisor_msgs::Action robotProgressAction_, plannedRobotAction_, toTreatRobotResult_;
 bool robotActing_;
 std::vector<supervisor_msgs::Link> links;
 std::map<std::string, std::string> highLevelNames_;
+std::map<std::string, std::vector<std::string> > highLevelRefinment_;
 int currentPlan_;
 ros::ServiceClient* client_stop_action_;
 ros::ServiceClient* client_end_plan_;
+int lastPlanId_;
 
 
 /**
@@ -37,44 +39,40 @@ ros::ServiceClient* client_end_plan_;
  * */
 void fillHighLevelNames(){
 
-    //we retrieve the list objects from param and fill the map with their high level name
-    std::vector<std::string> objects;
-    node_->getParam("/entities/objects", objects);
-    for(std::vector<std::string>::iterator it = objects.begin(); it != objects.end(); it++){
-        std::string topic = "/highLevelName/" + *it;
-        std::string highLevelName;
-        if(node_->hasParam(topic)){
-            node_->getParam(topic, highLevelName);
-        }else{
-            highLevelName = *it;
+    std::vector<std::string> manipulableObjects;
+    node_->getParam("/entities/objects", manipulableObjects);
+    for(std::vector<std::string>::iterator it = manipulableObjects.begin(); it != manipulableObjects.end(); it++){
+        highLevelNames_[*it] = *it;
+        std::string paramName = "/entities/highLevelName/" + *it;
+        if(node_->hasParam(paramName)){
+            node_->getParam(paramName, highLevelRefinment_[*it]);
         }
-        highLevelNames_[*it] = highLevelName;
     }
-    //same for supports
-    std::vector<std::string> support;
-    node_->getParam("/entities/supports", support);
-    for(std::vector<std::string>::iterator it = support.begin(); it != support.end(); it++){
-        std::string topic = "/highLevelName/" + *it;
-        std::string highLevelName;
-        if(node_->hasParam(topic)){
-            node_->getParam(topic, highLevelName);
-        }else{
-            highLevelName = *it;
+
+    std::vector<std::string> supportObjects;
+    node_->getParam("/entities/supports", supportObjects);
+    for(std::vector<std::string>::iterator it = supportObjects.begin(); it != supportObjects.end(); it++){
+        highLevelNames_[*it] = *it;
+        std::string paramName = "/entities/highLevelName/" + *it;
+        if(node_->hasParam(paramName)){
+            node_->getParam(paramName, highLevelRefinment_[*it]);
         }
-        highLevelNames_[*it] = highLevelName;
     }
-    //same for containers
-    std::vector<std::string> container;
-    node_->getParam("/entities/containers", container);
-    for(std::vector<std::string>::iterator it = container.begin(); it != container.end(); it++){
-        std::string topic = "/highLevelName/" + *it;
-        std::string highLevelName;
-        if(node_->hasParam(topic)){
-            node_->getParam(topic, highLevelName);
-        }else{
-            highLevelName = *it;
+
+    std::vector<std::string> containerObjects;
+    node_->getParam("/entities/containers", containerObjects);
+    for(std::vector<std::string>::iterator it = containerObjects.begin(); it != containerObjects.end(); it++){
+        highLevelNames_[*it] = *it;
+        std::string paramName = "/entities/highLevelName/" + *it;
+        if(node_->hasParam(paramName)){
+            node_->getParam(paramName, highLevelRefinment_[*it]);
         }
-        highLevelNames_[*it] = highLevelName;
+    }
+
+    for(std::map<std::string, std::vector<std::string> >::iterator it = highLevelRefinment_.begin(); it != highLevelRefinment_.end(); it++){
+        for(std::vector<std::string>::iterator ith = it->second.begin(); ith != it->second.end(); ith++){
+            highLevelNames_[*ith] = it->first;
+        }
     }
 }
 
@@ -83,7 +81,27 @@ void fillHighLevelNames(){
  * */
 void updatePlan(){
 
-    for(std::vector<supervisor_msgs::Action>::iterator it = plannedActions_.begin(); it != plannedActions_.end(); it++){
+    std::vector<supervisor_msgs::Action> newPlanned, newTodo, toCheck;
+    toCheck.insert(toCheck.begin(),plannedActions_.begin(),plannedActions_.end());
+    toCheck.insert(toCheck.begin(),todoActions_.begin(),todoActions_.end());
+    for(std::vector<supervisor_msgs::Action>::iterator it = toCheck.begin(); it != toCheck.end(); it++){
+        bool executed = false;
+        if(it->id == plannedRobotAction_.id){
+            //the is in execution
+            executed = true;
+            continue;
+        }else{
+            for(std::vector<supervisor_msgs::Action>::iterator itd = previousActions_.begin(); itd != previousActions_.end(); itd++){
+                if(it->id == itd->id){
+                    //the action has been executed
+                    executed = true;
+                    break;
+                }
+            }
+        }
+        if(executed){
+            continue;
+        }
         bool linksOk = true;
         for(std::vector<supervisor_msgs::Link>::iterator itl = links.begin(); itl != links.end(); itl++){
             if(itl->following == it->id){
@@ -101,10 +119,14 @@ void updatePlan(){
         }
         if(linksOk){
             /** @todo check if the preconditions are ok (how to manage the x agent?)*/
-            todoActions_.push_back(*it);
+            newTodo.push_back(*it);
+        }else{
+            newPlanned.push_back(*it);
         }
 
     }
+    plannedActions_ = newPlanned;
+    todoActions_ = newTodo;
 
     /** @todo check if the todo actions are still feasible*/
     /** @todo check if no more todo/in progress actions in the plan*/
@@ -137,7 +159,7 @@ supervisor_msgs::Action isInList(supervisor_msgs::Action action, std::vector<sup
                 }
                 for(int i = 0; i < it->parameter_keys.size(); i++){
                     if(it->parameter_keys[i] == "object"){
-                        if(it->parameter_values[i] != object){
+                        if(highLevelNames_[it->parameter_values[i]] != highLevelNames_[object]){
                             find = false;
                         }
                     }
@@ -158,7 +180,7 @@ supervisor_msgs::Action isInList(supervisor_msgs::Action action, std::vector<sup
             find = false;
         }
         if(find){
-            //we keep in priority actions from the actior, then agentX actions, then others
+            //we keep in priority actions from the actor, then agentX actions, then others
             if(action.actors[0] == it->actors[0]){
                 return *it;
             }else if(!hasAgentXAction && it->actors[0] == xAgent_){
@@ -260,18 +282,39 @@ void checkAction(supervisor_msgs::Action action, std::string actor){
                     previousActions_.push_back(plannedAction);
                 }
             }
-        }else if(plannedAction.actors[0] == xAgent_){
-            //the plan need to be re-evaluate
-            supervisor_msgs::EndPlan srv;
-            srv.request.success = false;
-            srv.request.evaluate = true;
-            srv.request.objectLocked = getLockedObject(action);
-            srv.request.agentLocked = actor;
-            if (!client_end_plan_->call(srv)){
-               ROS_ERROR("[plan_maintainer] Failed to call service plan_elaboration/end_plan");
+        }else if(actor != robotName_ && plannedAction.actors[0] == xAgent_){
+            if(action.name == "pick" && plannedAction.name != "pick"){
+                //if the action was a pick, we replace the todo action by a place
+                for(std::vector<supervisor_msgs::Action>::iterator it = todoActions_.begin(); it != todoActions_.end(); it++){
+                    if(it->id == plannedAction.id){
+                        //we remove the pickand from the name
+                        std::string newName = it->name.substr(7);
+                        it->name = newName;
+                    }
+                }
+                //the plan need to be re-evaluate
+                supervisor_msgs::EndPlan srv;
+                srv.request.success = false;
+                srv.request.evaluate = true;
+                srv.request.objectLocked = getLockedObject(action);
+                srv.request.agentLocked = actor;
+                if (!client_end_plan_->call(srv)){
+                   ROS_ERROR("[plan_maintainer] Failed to call service plan_elaboration/end_plan");
+                }
+                endCurrentPlan();
+            }else{
+                //the plan need to be re-evaluate
+                supervisor_msgs::EndPlan srv;
+                srv.request.success = false;
+                srv.request.evaluate = true;
+                srv.request.objectLocked = getLockedObject(action);
+                srv.request.agentLocked = actor;
+                if (!client_end_plan_->call(srv)){
+                   ROS_ERROR("[plan_maintainer] Failed to call service plan_elaboration/end_plan");
+                }
+                endCurrentPlan();
             }
-            endCurrentPlan();
-        }else{
+        }else if(actor != robotName_){
             //it is a unexpected action, a new plan is needed
             supervisor_msgs::EndPlan srv;
             srv.request.success = false;
@@ -287,6 +330,8 @@ void checkAction(supervisor_msgs::Action action, std::string actor){
                     ROS_ERROR("[plan_elaboration] Failed to call service robot_decision/stop");
                 }
             }
+        }else if(currentPlan_ != -1){
+            endCurrentPlan();
         }
     }
 }
@@ -296,8 +341,9 @@ void checkAction(supervisor_msgs::Action action, std::string actor){
  * */
 void checkCurrentActions(){
 
-    if(!robotActing_){
+    if(robotActing_){
         checkAction(robotProgressAction_, robotName_);
+        updatePlan();
     }
 }
 
@@ -307,19 +353,23 @@ void checkCurrentActions(){
  * */
 void planCallback(const supervisor_msgs::SharedPlan::ConstPtr& msg){
 
-    if(currentPlan_ == -1){
+    if(currentPlan_ == -1 && msg->id > lastPlanId_){
         //a new plan arrived!
         currentPlan_ = msg->id;
+        lastPlanId_ = msg->id;
         plannedActions_ = msg->actions;
         links = msg->links;
         updatePlan();
         checkCurrentActions();
-    }else if(currentPlan_ != msg->id){
+    }else if(currentPlan_ != -1 && msg->id > currentPlan_){
         //the plan changed
         endCurrentPlan();
+        currentPlan_ = msg->id;
         plannedActions_= msg->actions;
+        lastPlanId_ = msg->id;
         links = msg->links;
         updatePlan();
+        checkCurrentActions();
     }
 
 
@@ -332,11 +382,31 @@ void planCallback(const supervisor_msgs::SharedPlan::ConstPtr& msg){
  * */
 void robotActionCallback(const supervisor_msgs::Action::ConstPtr& msg){
 
-    if(!robotActing_){
+    if(!robotActing_ && msg->name != "" && toTreatRobotResult_.id == msg->id){
+        //the action is already over, we treat the result
+        if(!toTreatRobotResult_.succeed && currentPlan_ != -1){
+            //the action failed, a new plan is needed
+            supervisor_msgs::EndPlan srv;
+            srv.request.success = false;
+            srv.request.evaluate = false;
+            if (!client_end_plan_->call(srv)){
+               ROS_ERROR("[plan_maintainer] Failed to call service plan_elaboration/end_plan");
+            }
+            endCurrentPlan();
+        }else if(currentPlan_ != -1){
+            //the action succeed, we update the plan
+            checkAction(robotProgressAction_, robotName_);
+            previousActions_.push_back(plannedRobotAction_);
+            updatePlan();
+        }
+    }
+
+    if(!robotActing_ && msg->name != "" && msg->id != robotProgressAction_.id){
         //its a new action!
         robotActing_ = true;
         robotProgressAction_ = *msg;
         checkAction(robotProgressAction_, robotName_);
+        updatePlan();
     }
 
 }
@@ -356,7 +426,7 @@ void previousActionCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
             if(robotActing_ && robotProgressAction_.id == currentActions[i].id){
                 //it was the robot current action
                 robotActing_ = false;
-                if(!currentActions[i].succeed){
+                if(!currentActions[i].succeed && currentPlan_ != -1){
                     //the action failed, a new plan is needed
                     supervisor_msgs::EndPlan srv;
                     srv.request.success = false;
@@ -365,12 +435,14 @@ void previousActionCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                        ROS_ERROR("[plan_maintainer] Failed to call service plan_elaboration/end_plan");
                     }
                     endCurrentPlan();
-                }else{
+                }else if(currentPlan_ != -1){
                     //the action succeed, we update the plan
                     previousActions_.push_back(plannedRobotAction_);
                     updatePlan();
                 }
-            }else{
+            }else if(!robotActing_ && currentActions[i].actors[0] == robotName_){
+                toTreatRobotResult_ = currentActions[i];
+            }else if(currentPlan_ != -1){
                 //it is not the robot action
                 checkAction(currentActions[i], currentActions[i].actors[0]);
                 if(currentPlan_ != -1){
@@ -414,10 +486,12 @@ int main (int argc, char **argv)
   ros::NodeHandle node;
   node_ = &node;
   ros::Rate loop_rate(30);
-  node_->getParam("/robot/name", robotName_);
+  node_->getParam("supervisor/robot/name", robotName_);
   node_->getParam("/supervisor/AgentX", xAgent_);
   fillHighLevelNames();
   currentPlan_ = -1;
+  lastPlanId_ = -1;
+
   robotActing_ = false;
 
   ros::Subscriber sub_plan = node_->subscribe("plan_elaboration/plan", 1, planCallback);
@@ -432,7 +506,7 @@ int main (int argc, char **argv)
   client_stop_action_ = &client_stop_action;
 
 
-  ros::Publisher todo_actions = node_->advertise<supervisor_msgs::ActionsList>("/plan_maintainer/todo_actions", 1);
+  ros::Publisher todo_actions = node_->advertise<supervisor_msgs::ActionsList>("/plan_maintainer/actions_todo", 1);
   ros::Publisher planned_actions = node_->advertise<supervisor_msgs::ActionsList>("/plan_maintainer/planned_actions", 1);
   ROS_INFO("[plan_maintainer] plan_maintainer ready");
 
@@ -440,7 +514,7 @@ int main (int argc, char **argv)
       ros::spinOnce();
       supervisor_msgs::ActionsList msg;
       msg.actions = todoActions_;
-      planned_actions.publish(msg);
+      todo_actions.publish(msg);
       msg.actions = plannedActions_;
       planned_actions.publish(msg);
       loop_rate.sleep();

@@ -71,6 +71,8 @@ private Q_SLOTS:
 
     void on_pushButtonNo_clicked();
 
+    void on_pushButtonPrintPlanning_clicked();
+
 public:
     Ui::MainWindowDesign ui; /**< Main windows design*/
     ros::NodeHandle node_; /**< Node handle*/

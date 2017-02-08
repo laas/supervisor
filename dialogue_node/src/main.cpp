@@ -595,6 +595,7 @@ bool giveInfo(supervisor_msgs::GiveInfo::Request  &req, supervisor_msgs::GiveInf
  * */
 bool ask(supervisor_msgs::Ask::Request  &req, supervisor_msgs::Ask::Response &res){
 
+
     if(req.type == "ACTION"){
         if(req.subType == "CAN"){
             askCanAction(req.action, req.receiver);

@@ -37,6 +37,12 @@ bool humaActionSimu(supervisor_msgs::HumanAction::Request  &req, supervisor_msgs
          if(req.action.parameter_keys[i] == "container"){
              params["container"] = req.action.parameter_values[i];
          }
+         if(req.action.parameter_keys[i] == "support1"){
+             params["support1"] = req.action.parameter_values[i];
+         }
+         if(req.action.parameter_keys[i] == "support2"){
+             params["support2"] = req.action.parameter_values[i];
+         }
     }
 
     //we send the action
@@ -66,6 +72,16 @@ bool humaActionSimu(supervisor_msgs::HumanAction::Request  &req, supervisor_msgs
             return true;
         }
        hm_->humanDrop(req.agent, params["object"], params["container"]);
+    }else if(req.action.name == "placeStick"){
+        if(params.find("object") == params.end()){
+            ROS_ERROR("[human_monitor] No object to place!");
+            return true;
+        }
+        if(params.find("support1") == params.end() || params.find("support2") == params.end()){
+            ROS_ERROR("[human_monitor] No support to place!");
+            return true;
+        }
+       hm_->humanPlaceStick(req.agent, params["object"], params["support1"], params["support2"]);
     }else{
        ROS_ERROR("[human_monitor] Unknown action name");
     }

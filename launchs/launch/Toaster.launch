@@ -5,5 +5,5 @@
 	<node name="toaster_visualizer" pkg="toaster_visualizer" type="toaster_visualizer" output="screen" />  <!-- Launch the visualization of toaster -->
         <node name="toaster_simu" pkg="toaster_simu" type="toaster_simu" output="screen" />  <!-- Launch toaster simu -->
         <include file="$(find database_manager)/launch/Database.launch"/>
-	<node name="rviz" pkg="rqt_rviz" type="rqt_rviz" output="screen"/>  <!-- Launch rviz -->
+        <include file="$(find move3d_facts)/launch/Move3DFacts.launch"/>
 </launch>

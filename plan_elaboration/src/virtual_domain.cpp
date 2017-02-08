@@ -18,10 +18,10 @@ std::vector<toaster_msgs::Fact> VirtualDomain::computeLockedFacts(std::vector<to
 
     std::vector<toaster_msgs::Fact> toReturn = facts;
     toaster_msgs::Fact toAdd;
-    toAdd.subjectId = objectLocked_;
-    toAdd.property = "isLockedBy";
+    toAdd.subjectId = agentLocked_;
+    toAdd.property = "shouldPerform";
     toAdd.propertyType = "state";
-    toAdd.targetId = agentLocked_;
+    toAdd.targetId = objectLocked_;
     toReturn.push_back(toAdd);
 
     return toReturn;
@@ -35,10 +35,10 @@ std::vector<toaster_msgs::Fact> VirtualDomain::computeForgiveFacts(std::vector<t
 
     std::vector<toaster_msgs::Fact> toReturn = facts;
     toaster_msgs::Fact toAdd;
-    toAdd.subjectId = objectLocked_;
+    toAdd.subjectId = objectForgive_;
     toAdd.property = "isForgivenFor";
     toAdd.propertyType = "state";
-    toAdd.targetId = agentLocked_;
+    toAdd.targetId = agentForgive_;
     toReturn.push_back(toAdd);
 
     return toReturn;

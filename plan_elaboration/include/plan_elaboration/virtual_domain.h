@@ -14,6 +14,7 @@ public:
     VirtualDomain(ros::NodeHandle* node);
     ~VirtualDomain() {};
     virtual std::vector<toaster_msgs::Fact> computeSpecificFacts(std::vector<toaster_msgs::Fact> facts) = 0;
+    std::string goal_; /**< current goal corresponding to the domain*/
     std::string agentLocked_; /**< agent locked for evaluation*/
     std::string objectLocked_; /**< object locked for evaluation*/
     std::string agentForgive_; /**< agent locked for forgiven actions*/

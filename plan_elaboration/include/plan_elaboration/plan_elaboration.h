@@ -30,6 +30,7 @@ public:
     PlanElaboration(ros::NodeHandle* node);
     VirtualDomain* dom_; /**< Domain use for facts computation*/
     std::string currentGoal_; /**< current goal of the robot*/
+    bool domainInitialized_; /**< flag to say if the domain is initialized for the current goal*/
 
     std::pair<bool, supervisor_msgs::SharedPlan> findPlan();
 private:
@@ -41,6 +42,9 @@ private:
     std::string mainPartner_; /**< name of the main partner considered for planning*/
     std::vector<toaster_msgs::Fact> robotFacts_; /**< world state from the robot point of view*/
     std::map<std::string, std::string> highLevelNames_; /**< map for higl level names objects*/
+    std::map<std::string, std::vector<std::string> > highLevelRefinment_; /**< possible refinment for high level names*/
+    int planId_; /**< previous given id for a new plan*/
+    int nbMaxTry_; /**< nb max try to get a plan*/
 
     ros::ServiceClient client_db_execute_; /**< client for the database execute service*/
     ros::ServiceClient client_db_set_; /**< client for the database set info service*/

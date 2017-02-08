@@ -70,7 +70,15 @@ bool PickAndPlace::preconditions(){
             initialObject_ = object_;
             std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), object_, newObject);
             object_ = newObject;
+            pickAction_.object_ = object_;
+            pickAction_.initialObject_ = initialObject_;
+            placeAction_.object_ = object_;
+            placeAction_.initialObject_ = initialObject_;
+        }else{
+            ROS_WARN("[action_executor] No possible refinment!");
+           return false;
         }
+
     }
 
     //First we check if the object is a known manipulable object
@@ -92,10 +100,12 @@ bool PickAndPlace::preconditions(){
     fact.property = "isReachableBy";
     fact.targetId = connector_->robotName_;
     precsTocheck.push_back(fact);
-    fact.subjectId = support_;
-    fact.property = "isReachableBy";
-    fact.targetId = connector_->robotName_;
-    precsTocheck.push_back(fact);
+    if(isRefined(support_)){
+        fact.subjectId = support_;
+        fact.property = "isReachableBy";
+        fact.targetId = connector_->robotName_;
+        precsTocheck.push_back(fact);
+    }
 
     return ArePreconditionsChecked(precsTocheck);
 
@@ -109,7 +119,8 @@ bool PickAndPlace::preconditions(){
 bool PickAndPlace::plan(){
 
     if(pickAction_.plan()){
-        pickId_ = connector_->previousId_;
+        pickId_ = pickAction_.gtpActionId_;
+        connector_->previousId_ = pickId_;
         if(!isRefined(support_)){
             //we postpone the support decision
            return true;
@@ -128,7 +139,6 @@ bool PickAndPlace::plan(){
  * */
 bool PickAndPlace::exec(Server* action_server){
 
-    placeId_ = connector_->previousId_;
     connector_->previousId_  = pickId_;
     if(pickAction_.exec(action_server) && pickAction_.post()){
         //look for a support
@@ -152,12 +162,21 @@ bool PickAndPlace::exec(Server* action_server){
                 initialSupport_ = support_;
                 std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), support_, newObject);
                 support_ = newObject;
+                placeAction_.support_ = support_;
+                placeAction_.initialSupport_ = initialSupport_;
                 if(placeAction_.plan()){
                     return placeAction_.exec(action_server);
+                }else{
+                    ROS_WARN("[action_executor] No plan for place!");
+                   return false;
                 }
+            }else{
+                ROS_WARN("[action_executor] No possible refinment for placement!");
+               return false;
             }
             return false;
         }
+        placeId_ = placeAction_.gtpActionId_;
         connector_->previousId_  = placeId_;
         return placeAction_.exec(action_server);
     }

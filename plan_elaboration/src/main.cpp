@@ -16,6 +16,7 @@ supervisor_msgs::SharedPlan currentPlan_;
 bool hasPlan_;
 ros::ServiceClient* client_goal_;
 ros::ServiceClient* client_stop_plan_;
+bool needPlan_;
 
 /**
  * \brief Callback of the goal list
@@ -24,9 +25,10 @@ ros::ServiceClient* client_stop_plan_;
 void goalsListCallback(const supervisor_msgs::GoalsList::ConstPtr& msg){
 
     if(msg->changed){
-        if(pe_->currentGoal_ == "NONE" && msg->currentGoal != "NONE"){
+        if(pe_->currentGoal_ == "NONE" && msg->currentGoal != "NONE" && msg->currentGoal != "STOP"){
             //a new goal arrived
             pe_->currentGoal_ = msg->currentGoal;
+            pe_->domainInitialized_ = false;
             //look for a plan
             std::pair<bool, supervisor_msgs::SharedPlan> plan = pe_->findPlan();
             if(plan.first){
@@ -96,20 +98,7 @@ bool endPlan(supervisor_msgs::EndPlan::Request  &req, supervisor_msgs::EndPlan::
     }
 
     //we look for a new plan
-    std::pair<bool, supervisor_msgs::SharedPlan> plan = pe_->findPlan();
-    if(plan.first){
-        //publish the plan
-        currentPlan_ = plan.second;
-    }else{
-        hasPlan_ = false;
-        //return failure to the goal manager
-        supervisor_msgs::String srv;
-        srv.request.data = pe_->currentGoal_;
-        if (!client_goal_->call(srv)){
-           ROS_ERROR("[plan_elaboration] Failed to call service goal_manager/end_goal");
-        }
-        pe_->currentGoal_ = "NONE";
-    }
+    needPlan_ = true;
 
     return true;
 }
@@ -127,6 +116,7 @@ int main (int argc, char **argv)
   pe_ = &pe;
 
   hasPlan_ = false;
+  needPlan_ = false;
 
   ros::Subscriber sub_goal = node.subscribe("/goal_manager/goalsList", 1, goalsListCallback);
 
@@ -144,6 +134,23 @@ int main (int argc, char **argv)
 
   while(node.ok()){
     ros::spinOnce();
+    if(needPlan_){
+        std::pair<bool, supervisor_msgs::SharedPlan> plan = pe_->findPlan();
+        if(plan.first){
+            //publish the plan
+            currentPlan_ = plan.second;
+        }else{
+            hasPlan_ = false;
+            //return failure to the goal manager
+            supervisor_msgs::String srv;
+            srv.request.data = pe_->currentGoal_;
+            if (!client_goal_->call(srv)){
+               ROS_ERROR("[plan_elaboration] Failed to call service goal_manager/end_goal");
+            }
+            pe_->currentGoal_ = "NONE";
+        }
+        needPlan_ = false;
+    }
     if(hasPlan_){
         plan_pub.publish(currentPlan_);
     }

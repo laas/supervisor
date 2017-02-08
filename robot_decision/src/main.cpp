@@ -27,10 +27,12 @@ std::string robotName_, robotState_, xAgent_, mainPartner_;
 Client* actionClient_;
 supervisor_msgs::Action currentAction_;
 std::map<std::string, std::string> highLevelNames_;
+std::map<std::string, std::vector<std::string> > highLevelRefinment_;
 std::string mode_;
 bool timerStarted_;
 std::clock_t start_;
 double timeAdaptation_, timeWaitHuman_;
+int previousManagedAction_;
 
 
 /**
@@ -38,44 +40,40 @@ double timeAdaptation_, timeWaitHuman_;
  * */
 void fillHighLevelNames(){
 
-    //we retrieve the list objects from param and fill the map with their high level name
-    std::vector<std::string> objects;
-    node_->getParam("/entities/objects", objects);
-    for(std::vector<std::string>::iterator it = objects.begin(); it != objects.end(); it++){
-        std::string topic = "/highLevelName/" + *it;
-        std::string highLevelName;
-        if(node_->hasParam(topic)){
-            node_->getParam(topic, highLevelName);
-        }else{
-            highLevelName = *it;
+    std::vector<std::string> manipulableObjects;
+    node_->getParam("/entities/objects", manipulableObjects);
+    for(std::vector<std::string>::iterator it = manipulableObjects.begin(); it != manipulableObjects.end(); it++){
+        highLevelNames_[*it] = *it;
+        std::string paramName = "/entities/highLevelName/" + *it;
+        if(node_->hasParam(paramName)){
+            node_->getParam(paramName, highLevelRefinment_[*it]);
         }
-        highLevelNames_[*it] = highLevelName;
     }
-    //same for supports
-    std::vector<std::string> support;
-    node_->getParam("/entities/supports", support);
-    for(std::vector<std::string>::iterator it = support.begin(); it != support.end(); it++){
-        std::string topic = "/highLevelName/" + *it;
-        std::string highLevelName;
-        if(node_->hasParam(topic)){
-            node_->getParam(topic, highLevelName);
-        }else{
-            highLevelName = *it;
+
+    std::vector<std::string> supportObjects;
+    node_->getParam("/entities/supports", supportObjects);
+    for(std::vector<std::string>::iterator it = supportObjects.begin(); it != supportObjects.end(); it++){
+        highLevelNames_[*it] = *it;
+        std::string paramName = "/entities/highLevelName/" + *it;
+        if(node_->hasParam(paramName)){
+            node_->getParam(paramName, highLevelRefinment_[*it]);
         }
-        highLevelNames_[*it] = highLevelName;
     }
-    //same for containers
-    std::vector<std::string> container;
-    node_->getParam("/entities/containers", container);
-    for(std::vector<std::string>::iterator it = container.begin(); it != container.end(); it++){
-        std::string topic = "/highLevelName/" + *it;
-        std::string highLevelName;
-        if(node_->hasParam(topic)){
-            node_->getParam(topic, highLevelName);
-        }else{
-            highLevelName = *it;
+
+    std::vector<std::string> containerObjects;
+    node_->getParam("/entities/containers", containerObjects);
+    for(std::vector<std::string>::iterator it = containerObjects.begin(); it != containerObjects.end(); it++){
+        highLevelNames_[*it] = *it;
+        std::string paramName = "/entities/highLevelName/" + *it;
+        if(node_->hasParam(paramName)){
+            node_->getParam(paramName, highLevelRefinment_[*it]);
         }
-        highLevelNames_[*it] = highLevelName;
+    }
+
+    for(std::map<std::string, std::vector<std::string> >::iterator it = highLevelRefinment_.begin(); it != highLevelRefinment_.end(); it++){
+        for(std::vector<std::string>::iterator ith = it->second.begin(); ith != it->second.end(); ith++){
+            highLevelNames_[*ith] = it->first;
+        }
     }
 }
 
@@ -94,7 +92,7 @@ std::string getLockedObject(supervisor_msgs::Action action){
                 return action.parameter_values[i];
             }
         }
-    }else if(action.name == "place"){
+    }else if(action.name == "place" || action.name == "placereachable"){
         for(int i = 0; i < action.parameter_keys.size(); i++){
             if(action.parameter_keys[i] == "support"){
                 return action.parameter_values[i];
@@ -120,6 +118,9 @@ std::string getLockedObject(supervisor_msgs::Action action){
 bool isIdendicalAction(supervisor_msgs::Action action, std::vector<supervisor_msgs::Action> actionsTodo){
 
     for(std::vector<supervisor_msgs::Action>::iterator it = actionsTodo.begin(); it != actionsTodo.end(); it++){
+        if(action.id == it->id){
+            continue;
+        }
         bool find = true;
         if(action.name != it->name){
             find = false;
@@ -167,8 +168,9 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
 
     std::vector<supervisor_msgs::Action> actionsTodo = msg->actions;
 
-    bool isWaiting = false;
     if(robotState_ == "IDLE" && actionsTodo.size() > 0){
+        bool isWaiting = false;
+
         supervisor_msgs::Action action;
         bool hasXAction = false;
         bool hasRobotAction = false;
@@ -184,9 +186,15 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                 action = *it;
             }
         }
+        if(action.id == previousManagedAction_ && !timerStarted_){
+            //we wait for the todo list update
+            return;
+        }
+        previousManagedAction_ = action.id;
         if(hasRobotAction){
             //we execute the action
             supervisor_msgs::ActionExecutorGoal goal;
+            action.actors[0] = robotName_;
             goal.action = action;
             actionClient_->sendGoal(goal,  &actionDone, Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
             robotState_ = "ACTING";
@@ -197,12 +205,23 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
             if(isIdendicalAction(action, actionsTodo)){
                 //if there is more than once this action to attribute we execute the action
                 supervisor_msgs::ActionExecutorGoal goal;
+                action.actors[0] = robotName_;
                 goal.action = action;
                 actionClient_->sendGoal(goal,  &actionDone, Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
                 robotState_ = "ACTING";
                 currentAction_ = action;
+
+                supervisor_msgs::EndPlan srv;
+                srv.request.success = false;
+                srv.request.evaluate = true;
+                srv.request.objectLocked = getLockedObject(action);
+                srv.request.agentLocked = robotName_;
+                if (!client_end_plan_->call(srv)){
+                   ROS_ERROR("[plan_maintainer] Failed to call service plan_elaboration/end_plan");
+                }
             }else{
                 //we try to attribute the action
+                /** @todo check the possible actors*/
                 std::vector<std::string> possibleActors;
                 if(possibleActors.size() == 1){
                     supervisor_msgs::EndPlan srv;
@@ -216,12 +235,23 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                     if(possibleActors[0] == robotName_){
                         //and we execute the action
                         supervisor_msgs::ActionExecutorGoal goal;
+                        action.actors[0] = robotName_;
                         goal.action = action;
                         actionClient_->sendGoal(goal,  &actionDone, Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
                         robotState_ = "ACTING";
                         currentAction_ = action;
+
+                        supervisor_msgs::EndPlan srv;
+                        srv.request.success = false;
+                        srv.request.evaluate = true;
+                        srv.request.objectLocked = getLockedObject(action);
+                        srv.request.agentLocked = robotName_;
+                        if (!client_end_plan_->call(srv)){
+                           ROS_ERROR("[plan_maintainer] Failed to call service plan_elaboration/end_plan");
+                        }
                     }
-                }else if(possibleActors.size() > 1){
+                //}else if(possibleActors.size() > 1){
+                }else{
                     if(mode_ == "negotiation"){
                         supervisor_msgs::Ask srv_ask;
                         srv_ask.request.type = "ACTION";
@@ -242,6 +272,13 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                               }
                           }else{
                               //the partner does not want to perform the action: the robot does it
+                              supervisor_msgs::ActionExecutorGoal goal;
+                              action.actors[0] = robotName_;
+                              goal.action = action;
+                              actionClient_->sendGoal(goal,  &actionDone, Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
+                              robotState_ = "ACTING";
+                              currentAction_ = action;
+
                               supervisor_msgs::EndPlan srv;
                               srv.request.success = false;
                               srv.request.evaluate = true;
@@ -250,12 +287,6 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                               if (!client_end_plan_->call(srv)){
                                  ROS_ERROR("[plan_maintainer] Failed to call service plan_elaboration/end_plan");
                               }
-                              //and we execute the action
-                              supervisor_msgs::ActionExecutorGoal goal;
-                              goal.action = action;
-                              actionClient_->sendGoal(goal,  &actionDone, Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
-                              robotState_ = "ACTING";
-                              currentAction_ = action;
                           }
                         }else{
                           ROS_ERROR("Failed to call service dialogue_node/ask");
@@ -270,7 +301,13 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                             double duration = (clock() - start_ ) / (double) CLOCKS_PER_SEC;
                             if(duration >= timeAdaptation_){
                                 //the partner does not perform it, the robot does it
-                                timerStarted_ = false;
+                                supervisor_msgs::ActionExecutorGoal goal;
+                                action.actors[0] = robotName_;
+                                goal.action = action;
+                                actionClient_->sendGoal(goal,  &actionDone, Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
+                                robotState_ = "ACTING";
+                                currentAction_ = action;
+
                                 supervisor_msgs::EndPlan srv;
                                 srv.request.success = false;
                                 srv.request.evaluate = true;
@@ -279,12 +316,7 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                                 if (!client_end_plan_->call(srv)){
                                    ROS_ERROR("[plan_maintainer] Failed to call service plan_elaboration/end_plan");
                                 }
-                                //and we execute the action
-                                supervisor_msgs::ActionExecutorGoal goal;
-                                goal.action = action;
-                                actionClient_->sendGoal(goal,  &actionDone, Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
-                                robotState_ = "ACTING";
-                                currentAction_ = action;
+                                timerStarted_ = false;
                             }
                         }
                     }else{
@@ -315,11 +347,12 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                 }
             }
         }
+
+        if(!isWaiting){
+            timerStarted_ = false;
+        }
     }
 
-    if(!isWaiting){
-        timerStarted_ = false;
-    }
 
 }
 
@@ -363,11 +396,12 @@ int main (int argc, char **argv)
   node.getParam("supervisor/AgentX", xAgent_);
   node.getParam("robot_decision/mode", mode_);
   node_->getParam("/supervisor/mainPartner", mainPartner_);
-  node_->getParam("/supervisor/timeAdaptation", timeAdaptation_);
-  node_->getParam("/supervisor/timeWaitHuman", timeWaitHuman_);
+  node_->getParam("/robot_decision/timeAdaptation", timeAdaptation_);
+  node_->getParam("/robot_decision/timeWaitHuman", timeWaitHuman_);
 
   robotState_ = "IDLE";
   timerStarted_ = false;
+  previousManagedAction_ = -1;
 
   fillHighLevelNames();
 

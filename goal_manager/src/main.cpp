@@ -104,16 +104,16 @@ bool newGoal(supervisor_msgs::String::Request  &req, supervisor_msgs::String::Re
         }
     }
 
-    //check if the goal is a possibl goal
+    //check if the goal is a possible goal
     bool find = false;
     for(std::vector<supervisor_msgs::Goal>::iterator it = possibleGoals_.begin(); it != possibleGoals_.end(); it++){
-        if(it->name == currentGoal_){
+        if(it->name == req.data){
             find = true;
             break;
         }
     }
     if(!find){
-        ROS_WARN("[goal_manager] Goal not in the known goal!");
+        ROS_WARN("[goal_manager] Goal %s not in the known goal!", currentGoal_.c_str());
         res.success = false;
         return true;
     }
@@ -136,6 +136,8 @@ bool newGoal(supervisor_msgs::String::Request  &req, supervisor_msgs::String::Re
  * */
 bool cancelGoal(supervisor_msgs::String::Request  &req, supervisor_msgs::String::Response &res){
 
+    ROS_WARN("[DEBUG] In cancelled");
+    changed = true;
     //Check the data
     if(req.data == ""){
         ROS_WARN("[goal_manager] No goal specified!");
@@ -264,7 +266,7 @@ int main (int argc, char **argv)
 
   ros::ServiceServer service_new = node.advertiseService("goal_manager/new_goal", newGoal); //add a new goal
   ros::ServiceServer service_cancel = node.advertiseService("goal_manager/cancel_goal", cancelGoal); //cancel a goal
-  ros::ServiceServer service_end = node.advertiseService("goal_manager/end_goal", cancelGoal); //end a goal
+  ros::ServiceServer service_end = node.advertiseService("goal_manager/end_goal", endGoal); //end a goal
 
   ros::ServiceClient client_db_execute = node_->serviceClient<toaster_msgs::ExecuteDB>("database_manager/execute");
   client_db_execute_ = &client_db_execute;

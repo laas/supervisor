@@ -142,6 +142,23 @@ bool VirtualAction::ArePreconditionsChecked(std::vector<toaster_msgs::Fact> prec
  * */
 void VirtualAction::PutInHand(std::string object, std::string hand, int gtpId){
 
+    //add hasInHand facts: to remove when MS
+    std::vector<toaster_msgs::Fact> toAdd;
+    toaster_msgs::Fact fact;
+    fact.subjectId = connector_->robotName_;
+    fact.property = "hasInHand";
+    fact.targetId = object;
+    toAdd.push_back(fact);
+
+    toaster_msgs::SetInfoDB srv_fact;
+    srv_fact.request.agentId = connector_->robotName_;
+    srv_fact.request.facts = toAdd;
+    srv_fact.request.infoType = "FACT";
+    srv_fact.request.add = true;
+    if(!connector_->client_db_set_.call(srv_fact)){
+        ROS_ERROR("[action_executor] Failed to call service database_manager/set_info");
+    }
+
     //put the object in the hand of the robot
     std::string robotHand;
     std::string handTopic = "/supervisor/robot/hand/" + hand;
@@ -167,6 +184,23 @@ void VirtualAction::PutInHand(std::string object, std::string hand, int gtpId){
  * @param object the object to remove
  * */
 void VirtualAction::RemoveFromHand(std::string object){
+
+    //remove hasInHand facts: to remove when MS
+    std::vector<toaster_msgs::Fact> toRm;
+    toaster_msgs::Fact fact;
+    fact.subjectId = connector_->robotName_;
+    fact.property = "hasInHand";
+    fact.targetId = "NULL";
+    toRm.push_back(fact);
+
+    toaster_msgs::SetInfoDB srv_fact;
+    srv_fact.request.agentId = connector_->robotName_;
+    srv_fact.request.facts = toRm;
+    srv_fact.request.infoType = "FACT";
+    srv_fact.request.add = false;
+    if(!connector_->client_db_set_.call(srv_fact)){
+        ROS_ERROR("[action_executor] Failed to call service database_manager/set_info");
+    }
 
     //remove the object from the hand of the robot
     toaster_msgs::RemoveFromHand srv;
@@ -257,11 +291,12 @@ void VirtualAction::PutOnSupport(std::string object, std::string support){
     srv.request.pose.orientation.w = 1.0;
     start = ros::Time::now();
     if (!connector_->client_set_pose_.call(srv)){
-     ROS_ERROR("Failed to call service pdg/set_entity_pose");
+     ROS_ERROR("Failed to call service toaster_simu/set_entity_pose");
     }
     end = ros::Time::now();
     d = end - start;
     connector_->timeToaster_ = connector_->timeToaster_ + d.toSec();
+
 
 }
 
@@ -319,7 +354,7 @@ void VirtualAction::PutInContainer(std::string object, std::string container){
  * */
 std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > VirtualAction::planGTP(std::string actionName, std::vector<gtp_ros_msgs::Role> agents, std::vector<gtp_ros_msgs::Role> objects, std::vector<gtp_ros_msgs::MiscData> datas, std::vector<gtp_ros_msgs::Point> points, std::vector<gtp_ros_msgs::ActionId> attachments){
 
-  std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > res;
+    std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > res;
   res.first = -1;
 
   gtp_ros_msgs::PlanGoal goal;
@@ -638,11 +673,11 @@ void VirtualAction::moveLeftGripper(const actionlib::SimpleClientGoalState& stat
  * */
 bool VirtualAction::isRefined(std::string object){
 
-   if(connector_->highLevelRefinment_.find(object) == connector_->highLevelRefinment_.end()){
-       return true;
+   if(connector_->highLevelRefinment_[object].size() > 0){
+       return false;
    }
 
-   return false;
+   return true;
 
 }
 
@@ -663,18 +698,19 @@ std::string VirtualAction::findRefinment(std::string object, std::vector<toaster
         if(*it == forbiddenObject){
             continue;
         }
-        for(std::vector<toaster_msgs::Fact>::iterator itc = conditions.begin(); itc != conditions .end(); itc++){
+        for(std::vector<toaster_msgs::Fact>::iterator itc = conditions.begin(); itc != conditions.end(); itc++){
             //we replace OBJECT by the object name
             toaster_msgs::Fact fact = *itc;
             if(itc->subjectId == "OBJECT"){
-                fact.subjectId = object;
+                fact.subjectId = *it;
             }
             if(itc->targetId == "OBJECT"){
-                fact.targetId = object;
+                fact.targetId = *it;
             }
             toCheck.push_back(fact);
         }
     }
+    //we only call the database once for all objects
     std::vector<std::string> inDB = AreFactsInDB(toCheck);
     int c = 0;
     for(std::vector<std::string>::iterator it = connector_->highLevelRefinment_[object].begin(); it != connector_->highLevelRefinment_[object].end(); it++){

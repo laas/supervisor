@@ -16,6 +16,7 @@
 #include "toaster_msgs/RobotListStamped.h"
 #include "toaster_msgs/ObjectListStamped.h"
 #include "toaster_msgs/SetEntityPose.h"
+#include "toaster_msgs/SetInfoDB.h"
 
 #include <gtp_ros_msgs/PlanAction.h>
 #include <gtp_ros_msgs/PublishTraj.h>
@@ -81,6 +82,7 @@ struct Connector{
     ros::ServiceClient client_remove_hand_; /**< toaster client to remove objects from hand*/
     ros::ServiceClient client_set_pose_; /**< toaster client to set entities poses*/
     ros::ServiceClient client_gtp_traj_; /**< gtp client to publish a traj*/
+    ros::ServiceClient client_db_set_; /**< toaster client for database set info commands*/
 
     double timeDB_;/**< time spent in the database*/
     double timePlan_;/**< time spent in the planning*/

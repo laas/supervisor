@@ -42,13 +42,20 @@ action_server_(*node, name,
     initHighLevelNames();
 
     previous_pub_ = connector_.node_->advertise<supervisor_msgs::ActionsList>("/data_manager/add_data/previous_actions", 1);
+    current_pub_ = connector_.node_->advertise<supervisor_msgs::Action>("/action_executor/current_robot_action", 1);
 
     //Init services
     connector_.client_db_execute_ = connector_.node_->serviceClient<toaster_msgs::ExecuteDB>("database_manager/execute");
+    connector_.client_db_set_ = connector_.node_->serviceClient<toaster_msgs::SetInfoDB>("database_manager/set_info");
     connector_.client_put_hand_ = connector_.node_->serviceClient<toaster_msgs::PutInHand>("pdg/put_in_hand");
     connector_.client_remove_hand_ = connector_.node_->serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
-    connector_.client_set_pose_ = connector_.node_->serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
     connector_.client_gtp_traj_ = connector_.node_->serviceClient<gtp_ros_msgs::PublishTraj>("gtp/publishTraj");
+
+    if(connector_.simu_){
+        connector_.client_set_pose_ = connector_.node_->serviceClient<toaster_msgs::SetEntityPose>("toaster_simu/set_entity_pose");
+    }else{
+        connector_.client_set_pose_ = connector_.node_->serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
+    }
 
 
     //Init action clients
@@ -175,8 +182,10 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
         return;
     }
 
+    //publishing the current action
     connector_.isActing_ = true;
     connector_.currentAction_ = goal->action;
+    current_pub_.publish(connector_.currentAction_);
 
     //Checking preconditions
     feedback_.state = "PREC";
@@ -412,7 +421,7 @@ VirtualAction* ActionExecutor::initializeAction(supervisor_msgs::Action action) 
         act = new Pick(action, &connector_);
     }else if(action.name == "place"){
         act = new Place(action, &connector_);
-    }else if(action.name == "placeReachable"){
+    }else if(action.name == "placereachable"){
         act = new PlaceReachable(action, &connector_);
     }else if(action.name == "drop"){
         act = new Drop(action, &connector_);
@@ -420,11 +429,11 @@ VirtualAction* ActionExecutor::initializeAction(supervisor_msgs::Action action) 
         act = new Scan(action, &connector_);
     }else if(action.name == "moveTo"){
         act = new MoveTo(action, &connector_);
-    }else if(action.name == "pickAndPlace"){
+    }else if(action.name == "pickandplace"){
         act = new PickAndPlace(action, &connector_);
-    }else if(action.name == "pickAndPlaceReachable"){
+    }else if(action.name == "pickandplacereachable"){
         act = new PickAndPlaceReachable(action, &connector_);
-    }else if(action.name == "pickAndDrop"){
+    }else if(action.name == "pickanddrop"){
         act = new PickAndDrop(action, &connector_);
     }else{
         ROS_WARN("[action_executor] Unknown action");
@@ -441,12 +450,36 @@ void ActionExecutor::initHighLevelNames() {
     std::vector<std::string> manipulableObjects;
     connector_.node_->getParam("/entities/objects", manipulableObjects);
     for(std::vector<std::string>::iterator it = manipulableObjects.begin(); it != manipulableObjects.end(); it++){
+        connector_.highLevelNames_[*it] = *it;
         std::string paramName = "/entities/highLevelName/" + *it;
         if(connector_.node_->hasParam(paramName)){
             connector_.node_->getParam(paramName, connector_.highLevelRefinment_[*it]);
-            for(std::vector<std::string>::iterator ith = connector_.highLevelRefinment_[*it].begin(); ith != connector_.highLevelRefinment_[*it].end(); ith++){
-                connector_.highLevelNames_[*it] = *ith;
-            }
+        }
+    }
+
+    std::vector<std::string> supportObjects;
+    connector_.node_->getParam("/entities/supports", supportObjects);
+    for(std::vector<std::string>::iterator it = supportObjects.begin(); it != supportObjects.end(); it++){
+        connector_.highLevelNames_[*it] = *it;
+        std::string paramName = "/entities/highLevelName/" + *it;
+        if(connector_.node_->hasParam(paramName)){
+            connector_.node_->getParam(paramName, connector_.highLevelRefinment_[*it]);
+        }
+    }
+
+    std::vector<std::string> containerObjects;
+    connector_.node_->getParam("/entities/containers", containerObjects);
+    for(std::vector<std::string>::iterator it = containerObjects.begin(); it != containerObjects.end(); it++){
+        connector_.highLevelNames_[*it] = *it;
+        std::string paramName = "/entities/highLevelName/" + *it;
+        if(connector_.node_->hasParam(paramName)){
+            connector_.node_->getParam(paramName, connector_.highLevelRefinment_[*it]);
+        }
+    }
+
+    for(std::map<std::string, std::vector<std::string> >::iterator it = connector_.highLevelRefinment_.begin(); it != connector_.highLevelRefinment_.end(); it++){
+        for(std::vector<std::string>::iterator ith = it->second.begin(); ith != it->second.end(); ith++){
+            connector_.highLevelNames_[*ith] = it->first;
         }
     }
 }

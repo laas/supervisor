@@ -17,13 +17,14 @@ public:
     void moveLeftArm(const actionlib::SimpleClientGoalState& state, const pr2motion::Arm_Left_MoveResultConstPtr& result);
     void moveRightGripper(const actionlib::SimpleClientGoalState& state, const pr2motion::Gripper_Right_OperateResultConstPtr& result);
     void moveLeftGripper(const actionlib::SimpleClientGoalState& state, const pr2motion::Gripper_Left_OperateResultConstPtr& result);
+
+    std::string object_; /**< object of the action*/
+    std::string initialObject_; /**< given high level object when there is one*/
+    int gtpActionId_; /**< id of the gtp task*/
 protected:
    Connector* connector_; /**< connector structure pointer*/
 
-   std::string object_; /**< object of the action*/
-   std::string initialObject_; /**< given high level object when there is one*/
    bool gripperEmpty_; /**< indicates if the gripper is empty after closing it*/
-   int gtpActionId_; /**< id of the gtp task*/
    std::vector<gtp_ros_msgs::SubSolution> subSolutions_; /**< subSolutions of the gtp task*/
 
    bool isManipulableObject(std::string object);

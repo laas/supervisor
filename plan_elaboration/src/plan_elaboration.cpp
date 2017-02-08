@@ -7,16 +7,23 @@ PlanElaboration::PlanElaboration(ros::NodeHandle* node)
 {
     currentGoal_ = "NONE";
     node_ = node;
-    node_->getParam("/robot/name", robotName_);;
+    node_->getParam("supervisor/robot/name", robotName_);;
     node_->getParam("/supervisor/AgentX", agentX_);
     node_->getParam("/supervisor/Omni", omni_);
     node_->getParam("/supervisor/mainPartner", mainPartner_);
     node_->getParam("/plan_elaboration/Agents", agentList_);
+    node_->getParam("/plan_elaboration/nbMaxTry", nbMaxTry_);
+
+    planId_ = 0;
+
+    domainInitialized_ = false;
 
     client_db_execute_  = node_->serviceClient<toaster_msgs::ExecuteDB>("database_manager/execute");
     client_db_set_ = node_->serviceClient<toaster_msgs::SetInfoDB>("database_manager/set_info");
     client_hatp_ = node_->serviceClient<hatp_msgs::PlanningRequest>("hatp/planner");
-    client_ask_ = node_->serviceClient<supervisor_msgs::Ask>("dialogue/ask");
+    client_ask_ = node_->serviceClient<supervisor_msgs::Ask>("dialogue_node/ask");
+
+    fillHighLevelNames();
 
 }
 
@@ -25,44 +32,40 @@ PlanElaboration::PlanElaboration(ros::NodeHandle* node)
  * */
 void PlanElaboration::fillHighLevelNames(){
 
-    //we retrieve the list objects from param and fill the map with their high level name
-    std::vector<std::string> objects;
-    node_->getParam("/entities/objects", objects);
-    for(std::vector<std::string>::iterator it = objects.begin(); it != objects.end(); it++){
-        std::string topic = "/highLevelName/" + *it;
-        std::string highLevelName;
-        if(node_->hasParam(topic)){
-            node_->getParam(topic, highLevelName);
-        }else{
-            highLevelName = *it;
+    std::vector<std::string> manipulableObjects;
+    node_->getParam("/entities/objects", manipulableObjects);
+    for(std::vector<std::string>::iterator it = manipulableObjects.begin(); it != manipulableObjects.end(); it++){
+        highLevelNames_[*it] = *it;
+        std::string paramName = "/entities/highLevelName/" + *it;
+        if(node_->hasParam(paramName)){
+            node_->getParam(paramName, highLevelRefinment_[*it]);
         }
-        highLevelNames_[*it] = highLevelName;
     }
-    //same for supports
-    std::vector<std::string> support;
-    node_->getParam("/entities/supports", support);
-    for(std::vector<std::string>::iterator it = support.begin(); it != support.end(); it++){
-        std::string topic = "/highLevelName/" + *it;
-        std::string highLevelName;
-        if(node_->hasParam(topic)){
-            node_->getParam(topic, highLevelName);
-        }else{
-            highLevelName = *it;
+
+    std::vector<std::string> supportObjects;
+    node_->getParam("/entities/supports", supportObjects);
+    for(std::vector<std::string>::iterator it = supportObjects.begin(); it != supportObjects.end(); it++){
+        highLevelNames_[*it] = *it;
+        std::string paramName = "/entities/highLevelName/" + *it;
+        if(node_->hasParam(paramName)){
+            node_->getParam(paramName, highLevelRefinment_[*it]);
         }
-        highLevelNames_[*it] = highLevelName;
     }
-    //same for containers
-    std::vector<std::string> container;
-    node_->getParam("/entities/containers", container);
-    for(std::vector<std::string>::iterator it = container.begin(); it != container.end(); it++){
-        std::string topic = "/highLevelName/" + *it;
-        std::string highLevelName;
-        if(node_->hasParam(topic)){
-            node_->getParam(topic, highLevelName);
-        }else{
-            highLevelName = *it;
+
+    std::vector<std::string> containerObjects;
+    node_->getParam("/entities/containers", containerObjects);
+    for(std::vector<std::string>::iterator it = containerObjects.begin(); it != containerObjects.end(); it++){
+        highLevelNames_[*it] = *it;
+        std::string paramName = "/entities/highLevelName/" + *it;
+        if(node_->hasParam(paramName)){
+            node_->getParam(paramName, highLevelRefinment_[*it]);
         }
-        highLevelNames_[*it] = highLevelName;
+    }
+
+    for(std::map<std::string, std::vector<std::string> >::iterator it = highLevelRefinment_.begin(); it != highLevelRefinment_.end(); it++){
+        for(std::vector<std::string>::iterator ith = it->second.begin(); ith != it->second.end(); ith++){
+            highLevelNames_[*ith] = it->first;
+        }
     }
 }
 
@@ -83,6 +86,8 @@ VirtualDomain* PlanElaboration::initializeDomain(std::string goal){
         dom = new DefaultDomain(node_);
     }
 
+    dom->goal_ = goal;
+
     return dom;
 }
 
@@ -93,10 +98,14 @@ VirtualDomain* PlanElaboration::initializeDomain(std::string goal){
 std::pair<bool, supervisor_msgs::SharedPlan> PlanElaboration::findPlan(){
 
     std::pair<bool, supervisor_msgs::SharedPlan> answer;
-    dom_ = initializeDomain(currentGoal_);
+    if(!domainInitialized_){
+        domainInitialized_ = true;
+        dom_ = initializeDomain(currentGoal_);
+    }
 
     //Ask HATP a plan
     bool needPlan = true;
+    int nbTry = 0;
     while(needPlan){
         //Fill the planning database
         setPlanningTable(robotName_);
@@ -132,8 +141,11 @@ std::pair<bool, supervisor_msgs::SharedPlan> PlanElaboration::findPlan(){
                 //else a new info has been given, we start again the proces of looking for a plan
             }
         }else{
-            needPlan = false;
-            answer.first = false;
+            nbTry ++;
+            if(nbTry >= nbMaxTry_){
+                needPlan = false;
+                answer.first = false;
+            }
         }
     }
 
@@ -188,7 +200,6 @@ void PlanElaboration::setPlanningTable(std::string agent){
     std::vector<std::string> planningFactNames;
     std::string planningFactTopic = "plan_elaboration/domains/" + currentGoal_ + "/facts";
     node_->getParam(planningFactTopic, planningFactNames);
-
 
     //we ask to the database these facts in the agent table
     std::string sqlOrder = "SELECT subject_id, predicate, target_id from fact_table_" + agent + " where predicate=";
@@ -249,24 +260,14 @@ bool PlanElaboration::isInVector(std::vector<std::string> list, std::string elem
 std::vector<toaster_msgs::Fact> PlanElaboration::computeAgentXFacts(std::vector<toaster_msgs::Fact> facts){
 
     std::vector<toaster_msgs::Fact> result;
-    std::string topic, highLevelIt, highLevelIt2;
-    bool highLevelName;
 
     for(std::vector<toaster_msgs::Fact>::iterator it = facts.begin(); it != facts.end(); it++){
         result.push_back(*it);
-        if(isInVector(agentList_, it->subjectId) && it->targetId != dom_->objectLocked_){
+        if(isInVector(agentList_, it->subjectId) && highLevelNames_[it->targetId] != highLevelNames_[dom_->objectLocked_]){
             bool added = false;
-            //if the other object has an high level name we look for other object with high level names
-            highLevelIt = highLevelNames_[it->targetId];
             for(std::vector<toaster_msgs::Fact>::iterator it2 = it+1; it2 != facts.end(); it2++){
-                if(it2->targetId != dom_->objectLocked_){
-                    highLevelIt2 = highLevelNames_[it2->targetId];
-                    if(highLevelIt2 == it2->targetId){
-                        highLevelName = false;
-                    }else{
-                        highLevelName = true;
-                    }
-                    if(it2->property == it->property && highLevelIt2 == highLevelIt && isInVector(agentList_, it2->subjectId) && it2->subjectId != it->subjectId){
+                if(highLevelNames_[it2->targetId] != highLevelNames_[dom_->objectLocked_]){
+                    if(it2->property == it->property && highLevelNames_[it2->targetId] ==  highLevelNames_[it->targetId] && isInVector(agentList_, it2->subjectId) && it2->subjectId != it->subjectId){
                         result.push_back(*it2);
                         if(!added){
                             toaster_msgs::Fact toAdd;
@@ -275,39 +276,29 @@ std::vector<toaster_msgs::Fact> PlanElaboration::computeAgentXFacts(std::vector<
                             toAdd.propertyType = "state";
                             toAdd.targetId = it->targetId;
                             result.push_back(toAdd);
-                            //TODO remove when HATP ok
+                            /** @todo remove when HATP ok*/
                             toAdd.subjectId = "AGENTX2";
                             result.push_back(toAdd);
                             added = true;
                         }
-                        if(highLevelName){
-                            toaster_msgs::Fact toAdd;
-                            toAdd.subjectId = agentX_;
-                            toAdd.property = it->property;
-                            toAdd.propertyType = "state";
-                            toAdd.targetId = it2->targetId;
-                            result.push_back(toAdd);
-                            toAdd.subjectId = "AGENTX2";
-                            result.push_back(toAdd);
-                        }
+                        toaster_msgs::Fact toAdd;
+                        toAdd.subjectId = agentX_;
+                        toAdd.property = it->property;
+                        toAdd.propertyType = "state";
+                        toAdd.targetId = it2->targetId;
+                        result.push_back(toAdd);
+                        toAdd.subjectId = "AGENTX2";
+                        result.push_back(toAdd);
                         facts.erase(it2);
                         it2--;
                     }
                 }
             }
-        }else if(isInVector(agentList_, it->targetId) && it->subjectId != dom_->objectLocked_){
+        }else if(isInVector(agentList_, it->targetId) && highLevelNames_[it->subjectId] != highLevelNames_[dom_->objectLocked_]){
             bool added = false;
-            //if the other object has an high level name we look for other objects with high level names
-            highLevelIt = highLevelNames_[it->targetId];
             for(std::vector<toaster_msgs::Fact>::iterator it2 = it+1; it2 != facts.end(); it2++){
-                if(it2->subjectId != dom_->objectLocked_){
-                    highLevelIt2 = highLevelNames_[it2->targetId];
-                    if(highLevelIt2 == it2->targetId){
-                        highLevelName = false;
-                    }else{
-                        highLevelName = true;
-                    }
-                    if(it2->property == it->property && highLevelIt2 == highLevelIt && isInVector(agentList_, it2->targetId) && it2->targetId != it->targetId){
+                if(highLevelNames_[it2->subjectId] != highLevelNames_[dom_->objectLocked_]){
+                    if(it2->property == it->property && highLevelNames_[it2->subjectId] == highLevelNames_[it->subjectId] && isInVector(agentList_, it2->targetId) && it2->targetId != it->targetId){
                         result.push_back(*it2);
                         if(!added){
                             toaster_msgs::Fact toAdd;
@@ -320,16 +311,14 @@ std::vector<toaster_msgs::Fact> PlanElaboration::computeAgentXFacts(std::vector<
                             result.push_back(toAdd);
                             added = true;
                         }
-                        if(highLevelName){
-                            toaster_msgs::Fact toAdd;
-                            toAdd.subjectId = it2->subjectId;
-                            toAdd.property = it->property;
-                            toAdd.propertyType = "state";
-                            toAdd.targetId = agentX_;
-                            result.push_back(toAdd);
-                            toAdd.targetId = "AGENTX2";
-                            result.push_back(toAdd);
-                        }
+                        toaster_msgs::Fact toAdd;
+                        toAdd.subjectId = it2->subjectId;
+                        toAdd.property = it->property;
+                        toAdd.propertyType = "state";
+                        toAdd.targetId = agentX_;
+                        result.push_back(toAdd);
+                        toAdd.targetId = "AGENTX2";
+                        result.push_back(toAdd);
                         facts.erase(it2);
                         it2--;
                     }
@@ -455,6 +444,8 @@ supervisor_msgs::SharedPlan PlanElaboration::convertPlan(hatp_msgs::Plan plan){
 
    supervisor_msgs::SharedPlan newPlan;
    newPlan.goal = currentGoal_;
+   newPlan.id = planId_;
+   planId_ ++;
    for(std::vector<hatp_msgs::Task>::iterator it = plan.tasks.begin(); it != plan.tasks.end(); it++){
       if(it->type){//the task is an action and not a method
           //TODO: to remove when good HATP domain
@@ -475,8 +466,7 @@ supervisor_msgs::SharedPlan PlanElaboration::convertPlan(hatp_msgs::Plan plan){
             action.parameter_values = it->parameters;
           }
           //get the parameters keys from param
-          std::string paramTopic = "highLevelActions/";
-          paramTopic = paramTopic + action.name + "_param";
+          std::string paramTopic = "highLevelActions/" + action.name + "_param";
           node_->getParam(paramTopic, action.parameter_keys );
           if(action.parameter_values.size() != action.parameter_keys.size()){
               ROS_ERROR("[plan_elaboration] Incorrect action parameters");

@@ -1,6 +1,6 @@
 ---
 human_monitor:
-    shouldDetect: true
+    shouldDetect: false
     rightHand: 'rightHand'
     threshold:
         pick: 0.20
