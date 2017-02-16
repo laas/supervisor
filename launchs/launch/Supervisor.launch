@@ -8,4 +8,5 @@
     <include file="$(find plan_maintainer)/launch/PlanMaintainer.launch"/>
     <include file="$(find robot_decision)/launch/RobotDecision.launch"/>
     <include file="$(find dialogue_node)/launch/DialogueNode.launch"/>
+    <include file="$(find human_simulator)/launch/HumanSimulator.launch"/>
 </launch>

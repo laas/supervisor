@@ -6,6 +6,7 @@ Simple dialogue node
 **/
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 #include <map>
@@ -31,11 +32,16 @@ Simple dialogue node
 ros::NodeHandle* node_;
 bool shoudlSpeak_;
 std::string robotName_;
-double timeToWait_;
+double timeToWait_, speakTime_;
 std::vector<std::pair<std::string, std::pair<toaster_msgs::Fact, bool> > > toSayFacts;
 std::vector<std::pair<std::string, std::pair<supervisor_msgs::Action, std::string> > > toSayActions;
 std::vector<std::pair<std::string, std::pair<supervisor_msgs::SharedPlan, std::string> > > toSayPlans;
 std::vector<std::pair<std::string, supervisor_msgs::SharedPlan> > toSharePlans;
+ros::Publisher ask_pub_;
+ros::Publisher inform_pub_;
+std::ofstream logFile_;
+int nbVerb_;
+std::string nbExp_;
 
 #ifdef ACAPELA
 double waitActionServer;
@@ -400,6 +406,99 @@ void askCanAction(supervisor_msgs::Action action, std::string receiver){
 
     //We verbalize the sentence
     saySentence(sentence, receiver);
+    ros::Duration(speakTime_).sleep();
+
+    //publich in a topic for simulation reaction
+    inform_pub_.publish(action);
+}
+
+/**
+ * \brief Inform that the robot will perform an action
+ * @param action the action to perform
+ * @param receiver the person to talk to (not used for now)
+ * */
+void informAction(supervisor_msgs::Action action, std::string receiver){
+
+    /** @todo: find a better way to do this */
+
+    std::string sentence;
+    if(action.name == "pick"){
+        std::string objectTopic, objectName;
+        bool objectFound = false;
+        for(int i = 0; i < action.parameter_keys.size(); i++){
+            if(action.parameter_keys[i] == "object"){
+                objectTopic = "dialogue_node/entitiesTranslation/" + action.parameter_values[i];
+                node_->getParam(objectTopic, objectName);
+                objectFound = true;
+            }
+        }
+        if(!objectFound){
+            ROS_ERROR("[dialogue_node] Missing object for pick action");
+            return;
+        }
+        sentence = "I will pick the " + objectName;
+    }else if(action.name == "place" || action.name == "pickandplace"){
+        std::string objectTopic, supportTopic, objectName, supportName;
+        bool objectFound = false;
+        for(int i = 0; i < action.parameter_keys.size(); i++){
+            if(action.parameter_keys[i] == "object"){
+                objectTopic = "dialogue_node/entitiesTranslation/" + action.parameter_values[i];
+                node_->getParam(objectTopic, objectName);
+                objectFound = true;
+            }
+        }
+        if(!objectFound){
+            ROS_ERROR("[dialogue_node] Missing object for place action");
+            return;
+        }
+        bool supportFound = false;
+        for(int i = 0; i < action.parameter_keys.size(); i++){
+            if(action.parameter_keys[i] == "support"){
+                supportTopic = "dialogue_node/entitiesTranslation/" + action.parameter_values[i];
+                node_->getParam(supportTopic, supportName);
+                supportFound = true;
+            }
+        }
+        if(!supportFound){
+            ROS_ERROR("[dialogue_node] Missing support for place action");
+            return;
+        }
+        sentence = "I will place the " + objectName + " on the " + supportName;
+    }else if(action.name == "drop" || action.name == "pickanddrop"){
+        std::string objectTopic, containerTopic, objectName, containerName;
+        bool objectFound = false;
+        for(int i = 0; i < action.parameter_keys.size(); i++){
+            if(action.parameter_keys[i] == "object"){
+                objectTopic = "dialogue_node/entitiesTranslation/" + action.parameter_values[i];
+                node_->getParam(objectTopic, objectName);
+                objectFound = true;
+            }
+        }
+        if(!objectFound){
+            ROS_ERROR("[dialogue_node] Missing object for drop action");
+            return;
+        }
+        bool containerFound = false;
+        for(int i = 0; i < action.parameter_keys.size(); i++){
+            if(action.parameter_keys[i] == "container"){
+                containerTopic = "dialogue_node/entitiesTranslation/" + action.parameter_values[i];
+                node_->getParam(containerTopic, containerName);
+                containerFound = true;
+            }
+        }
+        if(!containerFound){
+            ROS_ERROR("[dialogue_node] Missing container for drop action");
+            return;
+        }
+        sentence = "I will put the " + objectName + " in the " + containerName;
+    }
+
+    //We verbalize the sentence
+    saySentence(sentence, receiver);
+    ros::Duration(speakTime_).sleep();
+
+    //publich in a topic for simulation reaction
+    inform_pub_.publish(action);
 }
 
 
@@ -485,6 +584,11 @@ void askWantAction(supervisor_msgs::Action action, std::string receiver){
 
     //We verbalize the sentence
     saySentence(sentence, receiver);
+    ros::Duration(speakTime_).sleep();
+
+    //publich in a topic for simulation answer
+    ask_pub_.publish(action);
+
 }
 
 
@@ -601,7 +705,10 @@ bool ask(supervisor_msgs::Ask::Request  &req, supervisor_msgs::Ask::Response &re
             askCanAction(req.action, req.receiver);
         }else if(req.subType == "WANT"){
             askWantAction(req.action, req.receiver);
+        }else if(req.subType == "INFORM"){
+            informAction(req.action, req.receiver);
         }
+        nbVerb_ ++;
     }else if(req.type == "FACT"){
         askFact(req.fact, req.receiver);
     }else{
@@ -664,11 +771,21 @@ int main (int argc, char **argv)
   node_->getParam("dialogue_node/shouldSpeak", shoudlSpeak_);
   node_->getParam("supervisor/robot/name", robotName_);
   node_->getParam("dialogue_node/timeWaitAnswer", timeToWait_);
+  node_->getParam("dialogue_node/speakTime", speakTime_);
+  node_->getParam("supervisor/nbExp", nbExp_);
 
   //Services declarations
   ros::ServiceServer service_say = node_->advertiseService("dialogue_node/say", say); //say a sentence
   ros::ServiceServer service_give = node_->advertiseService("dialogue_node/give_info", giveInfo); //give an information
   ros::ServiceServer service_ask = node_->advertiseService("dialogue_node/ask", ask); //give an information
+
+  ask_pub_ = node.advertise<supervisor_msgs::Action>("dialogue_node/asked_action", 1);
+  inform_pub_ = node.advertise<supervisor_msgs::Action>("dialogue_node/inform_action", 1);
+
+  nbVerb_ = 0;
+
+  std::string filePath = "/home/sdevin/catkin_ws/src/supervisor/launchs/logs/dia_" + nbExp_ + ".dat";
+  logFile_.open(filePath.c_str() , std::ios::out|std::ios::trunc);
 
   #ifdef ACAPELA
   initAcapela();
@@ -696,6 +813,9 @@ int main (int argc, char **argv)
       toSharePlans.clear();
       loop_rate.sleep();
   }
+
+  logFile_ << "nbVerb: " << nbVerb_ << std::endl;
+  logFile_.close();
 
   return 0;
 }

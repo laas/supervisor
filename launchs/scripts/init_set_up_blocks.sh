@@ -9,7 +9,7 @@ orientation:
   z: 0.0,
   w: 1.0}}}"
 
-rosservice call /toaster_simu/set_entity_pose "{id: 'GREEN_CUBE', ownerId: '', type: 'object', pose:
+rosservice call /toaster_simu/set_entity_pose "{id: 'GREEN_CUBE1', ownerId: '', type: 'object', pose:
 {position:
   {x: 4.5,
   y: 3.7,
@@ -19,6 +19,7 @@ orientation:
   y: 0.0,
   z: 0.0,
   w: 1.0}}}"
+ 
 
 rosservice call /toaster_simu/set_entity_pose "{id: 'BLUE_CUBE1', ownerId: '', type: 'object', pose:
 {position:
@@ -69,7 +70,8 @@ rosservice call /database_manager/execute "{command: 'EMPTY', type: 'ALL', facts
 rosservice call /database_manager/set_info "{add: true, infoType: 'FACT', agentId: 'PR2_ROBOT', facts: [
     {property: 'type', propertyType: 'state', subProperty: '', subjectId: 'RED_CUBE1', targetId: 'CUBE', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
     , {property: 'type', propertyType: 'state', subProperty: '', subjectId: 'RED_CUBE2', targetId: 'CUBE', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
-    , {property: 'type', propertyType: 'state', subProperty: '', subjectId: 'GREEN_CUBE', targetId: 'CUBE', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
+    , {property: 'type', propertyType: 'state', subProperty: '', subjectId: 'GREEN_CUBE1', targetId: 'CUBE', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
+    , {property: 'type', propertyType: 'state', subProperty: '', subjectId: 'GREEN_CUBE2', targetId: 'CUBE', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
     , {property: 'type', propertyType: 'state', subProperty: '', subjectId: 'BLUE_CUBE1', targetId: 'CUBE', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
     , {property: 'type', propertyType: 'state', subProperty: '', subjectId: 'BLUE_CUBE2', targetId: 'CUBE', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
     , {property: 'type', propertyType: 'state', subProperty: '', subjectId: 'STICK', targetId: 'STICK', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
@@ -85,7 +87,8 @@ rosservice call /database_manager/set_info "{add: true, infoType: 'FACT', agentI
 rosservice call /database_manager/set_info "{add: true, infoType: 'FACT', agentId: 'PR2_ROBOT', facts: [
     {property: 'genericName', propertyType: 'state', subProperty: '', subjectId: 'RED_CUBE1', targetId: 'RED_CUBE', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
     , {property: 'genericName', propertyType: 'state', subProperty: '', subjectId: 'RED_CUBE2', targetId: 'RED_CUBE', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
-    , {property: 'genericName', propertyType: 'state', subProperty: '', subjectId: 'GREEN_CUBE', targetId: 'GREEN_CUBE', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
+    , {property: 'genericName', propertyType: 'state', subProperty: '', subjectId: 'GREEN_CUBE1', targetId: 'GREEN_CUBE', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
+    , {property: 'genericName', propertyType: 'state', subProperty: '', subjectId: 'GREEN_CUBE2', targetId: 'GREEN_CUBE', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
     , {property: 'genericName', propertyType: 'state', subProperty: '', subjectId: 'BLUE_CUBE1', targetId: 'BLUE_CUBE', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
     , {property: 'genericName', propertyType: 'state', subProperty: '', subjectId: 'BLUE_CUBE2', targetId: 'BLUE_CUBE', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}
     , {property: 'genericName', propertyType: 'state', subProperty: '', subjectId: 'STICK', targetId: 'STICK', subjectOwnerId: '', targetOwnerId: '', valueType: false, factObservability: 0.0, doubleValue: 0.0, stringValue: '', confidence: 0.0, time: 0, timeStart: 0, timeEnd: 0}

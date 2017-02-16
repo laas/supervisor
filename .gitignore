@@ -34,3 +34,5 @@
 *.files
 *.includes
 *.autosave
+
+logs/

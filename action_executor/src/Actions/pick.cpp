@@ -126,6 +126,24 @@ bool Pick::plan(){
  * */
 bool Pick::exec(Server* action_server){
 
+
+   ros::Duration(connector_->pickTime_).sleep();
+   ros::Time start = ros::Time::now();
+   double d = 0.0;
+   while(d < connector_->pickTime_){
+       if(connector_->stopOrder_){
+            return false;
+       }
+       ros::Time now = ros::Time::now();
+       ros::Duration dur = now - start;
+       d = dur.toSec();
+   }
+   std_msgs::String msg;
+   msg.data = object_;
+   connector_->pick_pub_.publish(msg);
+   PutInHand(object_, "right", -1);
+   return true;
+
    while(true){
        if(execAction(gtpActionId_, subSolutions_, true, action_server)){
            return true;

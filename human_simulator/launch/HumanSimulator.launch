@@ -1,0 +1,5 @@
+<launch>
+    <rosparam command="load" file="$(find human_simulator)/Parameters/HumanSimulator.yaml" />
+
+    <node name="human_simulator" pkg="human_simulator" type="human_simulator" output="screen" />  <!-- Launch the data manager -->
+</launch>

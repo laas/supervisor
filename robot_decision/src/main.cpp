@@ -7,6 +7,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <fstream>
 #include <ros/ros.h>
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/client/terminal_state.h>
@@ -29,11 +30,14 @@ supervisor_msgs::Action currentAction_;
 std::map<std::string, std::string> highLevelNames_;
 std::map<std::string, std::vector<std::string> > highLevelRefinment_;
 std::string mode_;
-bool timerStarted_;
-std::clock_t start_;
+bool timerStarted_, shouldInformRobot_, shouldInformHuman_;
+ros::Time start_;
 double timeAdaptation_, timeWaitHuman_;
 int previousManagedAction_;
-
+supervisor_msgs::Action waitingAction_;
+std::ofstream logFile_;
+int nbWait_;
+std::string nbExp_;
 
 /**
  * \brief Fill the highLevelNames map from param
@@ -192,6 +196,18 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
         }
         previousManagedAction_ = action.id;
         if(hasRobotAction){
+            //if needed we inform
+            if(shouldInformRobot_){
+                supervisor_msgs::Ask srv_ask;
+                srv_ask.request.type = "ACTION";
+                srv_ask.request.subType = "INFORM";
+                srv_ask.request.action = action;
+                srv_ask.request.receiver = mainPartner_;
+                srv_ask.request.waitForAnswer = false;
+                if (!client_ask_->call(srv_ask)){
+                  ROS_ERROR("Failed to call service dialogue_node/ask");
+                }
+            }
             //we execute the action
             supervisor_msgs::ActionExecutorGoal goal;
             action.actors[0] = robotName_;
@@ -294,11 +310,13 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                     }else if(mode_ == "adaptation"){
                         //we wait few time to see if the partner performs the action, if not the robot does it
                         isWaiting = true;
-                        if(!timerStarted_){
-                            start_ = clock();
+                        if(!timerStarted_ || action.id != waitingAction_.id){
+                            waitingAction_ = action;
+                            start_ = ros::Time::now();;
                             timerStarted_ = true;
                         }else{
-                            double duration = (clock() - start_ ) / (double) CLOCKS_PER_SEC;
+                            ros::Duration d = ros::Time::now() - start_;
+                            double duration = d.toSec();
                             if(duration >= timeAdaptation_){
                                 //the partner does not perform it, the robot does it
                                 supervisor_msgs::ActionExecutorGoal goal;
@@ -327,13 +345,39 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
         }else{
             //there is only actions to do for the human
             isWaiting = true;
-            if(!timerStarted_){
-                start_ = clock();
+            if(!timerStarted_ || actionsTodo[0].id != waitingAction_.id){
+                //inform if needed
+                if(shouldInformHuman_){
+                    supervisor_msgs::Ask srv_ask;
+                    srv_ask.request.type = "ACTION";
+                    srv_ask.request.subType = "CAN";
+                    srv_ask.request.action = actionsTodo[0];
+                    srv_ask.request.receiver = mainPartner_;
+                    srv_ask.request.waitForAnswer = false;
+                    if (!client_ask_->call(srv_ask)){
+                      ROS_ERROR("Failed to call service dialogue_node/ask");
+                    }
+                }
+                waitingAction_ = actionsTodo[0];
+                start_ = ros::Time::now();
                 timerStarted_ = true;
             }else{
-                double duration = (clock() - start_ ) / (double) CLOCKS_PER_SEC;
+                ros::Duration d = ros::Time::now() - start_;
+                double duration = d.toSec();
                 if(duration >= timeWaitHuman_){
-                    //the partner does not perform its action, we look for another plan
+                    nbWait_ ++;
+                    //we ask the partner to perform the action
+                    supervisor_msgs::Ask srv_ask;
+                    srv_ask.request.type = "ACTION";
+                    srv_ask.request.subType = "CAN";
+                    srv_ask.request.action = actionsTodo[0];
+                    srv_ask.request.receiver = mainPartner_;
+                    srv_ask.request.waitForAnswer = false;
+                    if (!client_ask_->call(srv_ask)){
+                      ROS_ERROR("Failed to call service dialogue_node/ask");
+                    }
+                    start_ = ros::Time::now();
+                    /*/the partner does not perform its action, we look for another plan
                     timerStarted_ = false;
                     supervisor_msgs::EndPlan srv;
                     srv.request.success = false;
@@ -343,7 +387,7 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                     srv.request.agentLocked = mainPartner_;
                     if (!client_end_plan_->call(srv)){
                        ROS_ERROR("[plan_maintainer] Failed to call service plan_elaboration/end_plan");
-                    }
+                    }*/
                 }
             }
         }
@@ -398,12 +442,19 @@ int main (int argc, char **argv)
   node_->getParam("/supervisor/mainPartner", mainPartner_);
   node_->getParam("/robot_decision/timeAdaptation", timeAdaptation_);
   node_->getParam("/robot_decision/timeWaitHuman", timeWaitHuman_);
+  node_->getParam("/robot_decision/shouldInformRobot", shouldInformRobot_);
+  node_->getParam("/robot_decision/shouldInformHuman", shouldInformHuman_);
+  node_->getParam("supervisor/nbExp", nbExp_);
 
   robotState_ = "IDLE";
   timerStarted_ = false;
   previousManagedAction_ = -1;
+  nbWait_ = 0;
 
   fillHighLevelNames();
+
+  std::string filePath = "/home/sdevin/catkin_ws/src/supervisor/launchs/logs/rd_" + nbExp_ + ".dat";
+  logFile_.open(filePath.c_str() , std::ios::out|std::ios::trunc);
 
   ros::ServiceClient client_ask = node_->serviceClient<supervisor_msgs::Ask>("dialogue_node/ask");
   client_ask_ = &client_ask;
@@ -430,4 +481,7 @@ int main (int argc, char **argv)
       /** @todo add management of arms retract*/
       loop_rate.sleep();
   }
+
+  logFile_ << "nbWait: " << nbWait_ << std::endl;
+  logFile_.close();
 }

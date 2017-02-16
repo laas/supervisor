@@ -3,6 +3,7 @@ dialogue_node:
     shouldSpeak: true
     acapelaVoice: 'tracy'
     timeWaitAnswer: 300.0
+    speakTime: 0.5
     entitiesTranslation:
         HERAKLES_HUMAN1: 'Greg'
         HERAKLES_HUMAN2: 'Bob'

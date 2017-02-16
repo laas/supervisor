@@ -223,7 +223,10 @@ void PlanElaboration::setPlanningTable(std::string agent){
         //we add specific domains fact in the world state
         std::vector<toaster_msgs::Fact> updatedFacts = dom_->computeSpecificFacts(agentFacts);
         //we get the final list of facts containing agentX capabilities
-        std::vector<toaster_msgs::Fact> finalFacts = computeAgentXFacts(updatedFacts);
+        std::vector<toaster_msgs::Fact> finalFacts = updatedFacts;
+        if(dom_->isHighLevelDomain_){
+            finalFacts = computeAgentXFacts(updatedFacts);
+        }
         //we update the planning table with these facts
         srv_set.request.infoType = "RESET_PLANNING";
         srv_set.request.facts = finalFacts;
@@ -464,6 +467,8 @@ supervisor_msgs::SharedPlan PlanElaboration::convertPlan(hatp_msgs::Plan plan){
             action.parameter_values = convertParam(it->parameters);
           }else{
             action.parameter_values = it->parameters;
+            //the first param is the name of the actor, we remove it
+            action.parameter_values.erase(action.parameter_values.begin());
           }
           //get the parameters keys from param
           std::string paramTopic = "highLevelActions/" + action.name + "_param";

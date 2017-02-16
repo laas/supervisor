@@ -37,12 +37,21 @@ action_server_(*node, name,
     connector_.node_->getParam("/action_executor/nbPlanMaxGTP", connector_.nbPlanMax_);
     connector_.node_->getParam("/supervisor/robot/toasterName", connector_.robotToaster_);
     connector_.node_->getParam("/action_executor/noExec", connector_.noExec_);
+    connector_.node_->getParam("/action_executor/pickTime", connector_.pickTime_);
+    connector_.node_->getParam("/action_executor/placeTime", connector_.placeTime_);
     connector_.node_->getParam("/action_executor/humanCost", connector_.humanCost_);
+    connector_.node_->getParam("supervisor/nbExp", connector_.nbExp_);
+
+    std::string filePath = "/home/sdevin/catkin_ws/src/supervisor/launchs/logs/ae_" + connector_.nbExp_ + ".dat";
+    connector_.logFile_.open(filePath.c_str() , std::ios::out|std::ios::trunc);
+    connector_.nbConflicts_ = 0;
+
 
     initHighLevelNames();
 
     previous_pub_ = connector_.node_->advertise<supervisor_msgs::ActionsList>("/data_manager/add_data/previous_actions", 1);
     current_pub_ = connector_.node_->advertise<supervisor_msgs::Action>("/action_executor/current_robot_action", 1);
+    connector_.pick_pub_ = connector_.node_->advertise<std_msgs::String>("/action_executor/pick", 1);
 
     //Init services
     connector_.client_db_execute_ = connector_.node_->serviceClient<toaster_msgs::ExecuteDB>("database_manager/execute");

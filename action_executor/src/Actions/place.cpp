@@ -224,6 +224,10 @@ bool Place::plan(){
  * */
 bool Place::exec(Server* action_server){
 
+    ros::Duration(connector_->placeTime_).sleep();
+    RemoveFromHand(object_);
+    return true;
+
     while(true){
         if(execAction(gtpActionId_, subSolutions_, false, action_server)){
             return true;

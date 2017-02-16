@@ -41,7 +41,7 @@ void agentFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
                         if(it->doubleValue < safetyThreshold_){
                             executor_->connector_.stopOrder_ = true;
                         }else{
-                            executor_->connector_.stopOrder_ = false;
+                            //executor_->connector_.stopOrder_ = false;
                         }
                     }else if(it->targetId == executor_->connector_.objectToWatch_){
                         if(it->doubleValue < toWatchThreshold_){
@@ -66,6 +66,19 @@ void humanActionCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
     executor_->connector_.previousId_ = -1;
 }
 
+
+/**
+ * \brief Callback of human actions
+ * @param msg the human action executed
+ * */
+void humanPickCallback(const std_msgs::String::ConstPtr& msg){
+
+    if(executor_->connector_.isActing_){
+        executor_->connector_.nbConflicts_ ++;
+        executor_->connector_.stopOrder_ = true;
+    }
+}
+
 /**
  * \brief Main function
  * */
@@ -87,6 +100,7 @@ int main (int argc, char **argv)
 
   ros::Subscriber sub = node.subscribe("agent_monitor/factList", 1, agentFactListCallback);
   ros::Subscriber sub_human_action = node.subscribe("human_monitor/current_humans_action", 1, humanActionCallback);
+  ros::Subscriber sub_human_pick = node.subscribe("human_simulator/pick", 1, humanPickCallback);
 
   ros::ServiceServer service_stop = node.advertiseService("action_executor/stop", stopOrder); //stop the execution
 
@@ -99,4 +113,7 @@ int main (int argc, char **argv)
       }
       loop_rate.sleep();
   }
+
+  executor_->connector_.logFile_ << "nbConflicts: " << executor_->connector_.nbConflicts_ << std::endl;
+  executor_->connector_.logFile_.close();
 }

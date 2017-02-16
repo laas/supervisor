@@ -1,0 +1,10 @@
+---
+human_simulator:
+    humanName: 'HERAKLES_HUMAN1'
+    mode: 'none' #all, none or half
+    objects: ['RED_CUBE', 'RED_CUBE', 'STICK', 'BLUE_CUBE', 'GREEN_CUBE', 'BLUE_CUBE']
+    supports: ['PLACEMAT', 'PLACEMAT', 'RED_CUBE', 'STICK', 'BLUE_CUBE', 'GREEN_CUBE']
+    pickTime: 2.0
+    placeTime: 2.0
+    answerTime: 0.5
+    seed: 49

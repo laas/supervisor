@@ -10,6 +10,8 @@ action_executor:
     safetyThreshold: 0.5
     toWatchThreshold: 0.5
     gripperThreshold: 0.01
+    pickTime: 10.0
+    placeTime: 10.0
     planningSupport:
         TABLE_4: 'PLACEMAT_RED'
     points:

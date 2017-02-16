@@ -80,6 +80,8 @@ bool PickAndPlace::preconditions(){
         }
 
     }
+    return true;
+
 
     //First we check if the object is a known manipulable object
     if(!isManipulableObject(object_)){
@@ -117,6 +119,8 @@ bool PickAndPlace::preconditions(){
  * @return true if the planning succeed
  * */
 bool PickAndPlace::plan(){
+
+    return true;
 
     if(pickAction_.plan()){
         pickId_ = pickAction_.gtpActionId_;
@@ -164,12 +168,12 @@ bool PickAndPlace::exec(Server* action_server){
                 support_ = newObject;
                 placeAction_.support_ = support_;
                 placeAction_.initialSupport_ = initialSupport_;
-                if(placeAction_.plan()){
+                //if(placeAction_.plan()){
                     return placeAction_.exec(action_server);
-                }else{
+                /*}else{
                     ROS_WARN("[action_executor] No plan for place!");
                    return false;
-                }
+                }*/
             }else{
                 ROS_WARN("[action_executor] No possible refinment for placement!");
                return false;

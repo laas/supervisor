@@ -9,6 +9,7 @@
 #include <actionlib/client/terminal_state.h>
 
 #include "std_srvs/Empty.h"
+#include "std_msgs/String.h"
 #include <toaster_msgs/FactList.h>
 #include "toaster_msgs/ExecuteDB.h"
 #include "toaster_msgs/PutInHand.h"
@@ -32,6 +33,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
 #include <ros/ros.h>
 
 typedef actionlib::SimpleActionServer<supervisor_msgs::ActionExecutorAction> Server;
@@ -84,6 +86,10 @@ struct Connector{
     ros::ServiceClient client_gtp_traj_; /**< gtp client to publish a traj*/
     ros::ServiceClient client_db_set_; /**< toaster client for database set info commands*/
 
+    double pickTime_;/**< time to execute a pick*/
+    double placeTime_;/**< time to execute a place*/
+    ros::Publisher pick_pub_; /**< publisher of robot pick*/
+
     double timeDB_;/**< time spent in the database*/
     double timePlan_;/**< time spent in the planning*/
     double timeExec_;/**< time spent in the execution*/
@@ -101,6 +107,10 @@ struct Connector{
     std::string objectToWatch_; /**< object to monitor*/
     bool refineOrder_; /**< flag to indicate we should look for an other refinment for the object to watch*/
 
+
+    std::ofstream logFile_;
+    std::string nbExp_;
+    int nbConflicts_;
 };
 
 #endif // CONNECTOR_H
