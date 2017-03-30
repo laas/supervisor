@@ -32,6 +32,7 @@ int currentPlan_;
 ros::ServiceClient* client_stop_action_;
 ros::ServiceClient* client_end_plan_;
 int lastPlanId_;
+bool changed_;
 
 
 /**
@@ -87,7 +88,7 @@ void updatePlan(){
     for(std::vector<supervisor_msgs::Action>::iterator it = toCheck.begin(); it != toCheck.end(); it++){
         bool executed = false;
         if(it->id == plannedRobotAction_.id){
-            //the is in execution
+            //the action is in execution
             executed = true;
             continue;
         }else{
@@ -125,6 +126,7 @@ void updatePlan(){
         }
 
     }
+    changed_ = true;
     plannedActions_ = newPlanned;
     todoActions_ = newTodo;
 
@@ -207,6 +209,7 @@ supervisor_msgs::Action isInList(supervisor_msgs::Action action, std::vector<sup
 void endCurrentPlan(){
 
     currentPlan_ = -1;
+    changed_ = true;
     previousActions_.clear();
     todoActions_.clear();
     plannedActions_.clear();
@@ -493,6 +496,7 @@ int main (int argc, char **argv)
   lastPlanId_ = -1;
 
   robotActing_ = false;
+  changed_ = false;
 
   ros::Subscriber sub_plan = node_->subscribe("plan_elaboration/plan", 1, planCallback);
   ros::Subscriber sub_robot_action = node_->subscribe("/action_executor/current_robot_action", 1, robotActionCallback);
@@ -513,10 +517,12 @@ int main (int argc, char **argv)
   while (node.ok()) {
       ros::spinOnce();
       supervisor_msgs::ActionsList msg;
+      msg.changed = changed_;
       msg.actions = todoActions_;
       todo_actions.publish(msg);
       msg.actions = plannedActions_;
       planned_actions.publish(msg);
+      changed_ = false;
       loop_rate.sleep();
   }
 

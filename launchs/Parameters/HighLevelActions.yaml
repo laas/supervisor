@@ -43,5 +43,5 @@ highLevelActions:
         moveTo_effects: []
         scan_param: ['object']
         scan_actors: ['mainAgent']
-        scan_prec: []
+        scan_prec: ['object, isReachableBy, mainAgent']
         scan_effects: ['object, isScanned, true']

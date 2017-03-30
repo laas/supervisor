@@ -20,6 +20,7 @@ Simple dialogue node
 #include "supervisor_msgs/Ask.h"
 #include "supervisor_msgs/SharedPlan.h"
 #include "supervisor_msgs/String.h"
+#include "supervisor_msgs/Info.h"
 
 
 #ifdef ACAPELA
@@ -36,6 +37,8 @@ std::vector<std::pair<std::string, std::pair<toaster_msgs::Fact, bool> > > toSay
 std::vector<std::pair<std::string, std::pair<supervisor_msgs::Action, std::string> > > toSayActions;
 std::vector<std::pair<std::string, std::pair<supervisor_msgs::SharedPlan, std::string> > > toSayPlans;
 std::vector<std::pair<std::string, supervisor_msgs::SharedPlan> > toSharePlans;
+
+ros::Publisher info_pub_;
 
 #ifdef ACAPELA
 double waitActionServer;
@@ -122,6 +125,14 @@ void giveInfoFact(toaster_msgs::Fact fact, bool isTrue, std::string receiver){
 
     //We verbalize the sentence
     saySentence(sentence, receiver);
+
+    supervisor_msgs::Info msg;
+    msg.toRobot = false;
+    msg.agent = receiver;
+    msg.type = "FACT";
+    msg.fact = fact;
+    msg.isTrue = isTrue;
+    info_pub_.publish(msg);
 }
 
 /**
@@ -167,6 +178,8 @@ void giveInfoAction(supervisor_msgs::Action action, std::string actionState, std
             sentence = actorName + " picked the " + objectName;
         }else if(actionState == "FAILED"){
             sentence = actorName + " can not pick the " + objectName;
+        }else if(actionState == "NOT_PERFORMED"){
+            sentence = actorName + " did not pick the " + objectName;
         }else{
             ROS_ERROR("[dialogue_node] Action state not supported");
             return;
@@ -215,6 +228,8 @@ void giveInfoAction(supervisor_msgs::Action action, std::string actionState, std
             sentence = actorName + " placed the " + objectName + " on the " + supportName;
         }else if(actionState == "FAILED"){
             sentence = actorName + " can not place the " + objectName + " on the " + supportName;
+        }else if(actionState == "NOT_PERFORMED"){
+            sentence = actorName + " did not place the " + objectName + " on the " + supportName;
         }else{
             ROS_ERROR("[dialogue_node] Action state not supported");
             return;
@@ -263,6 +278,8 @@ void giveInfoAction(supervisor_msgs::Action action, std::string actionState, std
             sentence = actorName + " put the " + objectName + " in the " + containerName;
         }else if(actionState == "FAILED"){
             sentence = actorName + " can not put the " + objectName + " in the " + containerName;
+        }else if(actionState == "NOT_PERFORMED"){
+            sentence = actorName + " did not put the " + objectName + " in the " + containerName;
         }else{
             ROS_ERROR("[dialogue_node] Action state not supported");
             return;
@@ -271,6 +288,18 @@ void giveInfoAction(supervisor_msgs::Action action, std::string actionState, std
 
     //We verbalize the sentence
     saySentence(sentence, receiver);
+
+    if(actionState == "DONE"){
+        action.succeed = true;
+    }else{
+        action.succeed = false;
+    }
+    supervisor_msgs::Info msg;
+    msg.toRobot = false;
+    msg.agent = receiver;
+    msg.type = "ACTION";
+    msg.action = action;
+    info_pub_.publish(msg);
 }
 
 
@@ -278,7 +307,7 @@ void giveInfoAction(supervisor_msgs::Action action, std::string actionState, std
  * \brief Give the state of a plan
  * @param plan the concerned plan
  * @param planState the state of the plan
- * @param receiver the person to talk to (not used for now)
+ * @param receiver the person to talk to
  * */
 void giveInfoPlan(supervisor_msgs::SharedPlan plan, std::string planState, std::string receiver){
 
@@ -295,6 +324,26 @@ void giveInfoPlan(supervisor_msgs::SharedPlan plan, std::string planState, std::
 
     //We verbalize the sentence
     saySentence(sentence, receiver);
+}
+
+/**
+ * \brief Give the state of a goal
+ * @param goal the concerned goal
+ * @param receiver the person to talk to
+ * */
+void giveInfoGoal(std::string goal, std::string receiver){
+
+    std::string sentence = "I am executing the goal " + goal;
+
+    //We verbalize the sentence
+    saySentence(sentence, receiver);
+
+    supervisor_msgs::Info msg;
+    msg.toRobot = false;
+    msg.agent = receiver;
+    msg.type = "GOAL";
+    msg.goal = goal;
+    info_pub_.publish(msg);
 }
 
 
@@ -549,7 +598,13 @@ bool giveInfo(supervisor_msgs::GiveInfo::Request  &req, supervisor_msgs::GiveInf
     if(req.toRobot){
         if(req.type == "FACT"){
             //We inform the mental state
-            /** @todo: publish in topic the given info */
+            supervisor_msgs::Info msg;
+            msg.toRobot = true;
+            msg.agent = req.partner;
+            msg.type = "FACT";
+            msg.fact = req.fact;
+            msg.isTrue = req.isTrue;
+            info_pub_.publish(msg);
         }else{
             ROS_ERROR("[dialogue_node] Unknown type of given info");
             return false;
@@ -580,6 +635,8 @@ bool giveInfo(supervisor_msgs::GiveInfo::Request  &req, supervisor_msgs::GiveInf
                 toPush.first = req.partner;
                 toSayPlans.push_back(toPush);
             }
+        }else if(req.type == "GOAL"){
+                giveInfoGoal(req.goal, req.partner);
         }
     }
 
@@ -602,6 +659,12 @@ bool ask(supervisor_msgs::Ask::Request  &req, supervisor_msgs::Ask::Response &re
         }else if(req.subType == "WANT"){
             askWantAction(req.action, req.receiver);
         }
+        supervisor_msgs::Info msg;
+        msg.toRobot = false;
+        msg.agent = req.receiver;
+        msg.type = "ASK_ACTION";
+        msg.action = req.action;
+        info_pub_.publish(msg);
     }else if(req.type == "FACT"){
         askFact(req.fact, req.receiver);
     }else{
@@ -669,6 +732,9 @@ int main (int argc, char **argv)
   ros::ServiceServer service_say = node_->advertiseService("dialogue_node/say", say); //say a sentence
   ros::ServiceServer service_give = node_->advertiseService("dialogue_node/give_info", giveInfo); //give an information
   ros::ServiceServer service_ask = node_->advertiseService("dialogue_node/ask", ask); //give an information
+
+
+  info_pub_ = node_->advertise<supervisor_msgs::Info>("/dialogue_node/infoGiven", 1);
 
   #ifdef ACAPELA
   initAcapela();

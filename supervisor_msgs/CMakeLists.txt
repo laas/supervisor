@@ -19,6 +19,9 @@ add_message_files(
     Goal.msg
     SharedPlan.msg
     Link.msg
+    MentalState.msg
+    MentalStatesList.msg
+    Info.msg
 )
 
 add_service_files(

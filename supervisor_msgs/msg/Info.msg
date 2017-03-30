@@ -1,12 +1,7 @@
+string agent
 bool toRobot
-string partner
 string type
 toaster_msgs/Fact fact
 bool isTrue
 Action action
-string actionState
-SharedPlan plan
-string planState
 string goal
----
-

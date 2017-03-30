@@ -8,5 +8,5 @@ human_monitor:
         drop: 0.40
         disengage: 0.50
     replacementSupport:
-        PLACEMAT_1: TABLE_4
-        PLACEMAT_2: TABLE_4
+        PLACEMAT_1: 'TABLE_4'
+        PLACEMAT_2: 'TABLE_4'

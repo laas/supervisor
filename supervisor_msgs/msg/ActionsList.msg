@@ -1,1 +1,2 @@
 Action[] actions
+bool changed

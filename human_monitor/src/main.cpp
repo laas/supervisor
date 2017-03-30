@@ -1,6 +1,8 @@
 /**
  *\author Sandra Devin (sdevin@laas.fr)
  *
+ * @todo add inference of actions based on effects of known needed actions
+ *
  * **********/
 
 

@@ -16,6 +16,7 @@ std::vector<supervisor_msgs::Action> actionsTodo, previousActions;
 std::vector<supervisor_msgs::Action> actionsTodoTopics, previousActionsTopics;
 std::vector<supervisor_msgs::Action> actionsTodoPermanent, previousActionsPermanent;
 std::vector<ros::Subscriber> todoSubs, previousSubs;
+bool previousChanged, todoChanged;
 
 /**
  * \brief Compare 2 actions
@@ -84,6 +85,9 @@ bool areActionsEqual(supervisor_msgs::Action action1, supervisor_msgs::Action ac
 void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
 
     actionsTodoTopics.insert(actionsTodoTopics.end(), msg->actions.begin(), msg->actions.end());
+    if(msg->changed){
+        todoChanged = true;
+    }
 }
 
 /**
@@ -93,6 +97,9 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
 void previousCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
 
     previousActionsTopics.insert(previousActionsTopics.end(), msg->actions.begin(), msg->actions.end());
+    if(msg->changed){
+        previousChanged = true;
+    }
 }
 
 /**
@@ -102,6 +109,7 @@ void previousCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
 void addTodoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
 
     actionsTodoPermanent.insert(actionsTodoPermanent.end(), msg->actions.begin(), msg->actions.end());
+    todoChanged = true;
 }
 
 /**
@@ -119,6 +127,7 @@ void rmTodoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
             }
         }
     }
+    todoChanged = true;
 }
 
 /**
@@ -128,6 +137,7 @@ void rmTodoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
 void addPreviousCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
 
     previousActionsPermanent.insert(previousActionsPermanent.end(), msg->actions.begin(), msg->actions.end());
+    previousChanged = true;
 }
 
 /**
@@ -145,6 +155,7 @@ void rmPreviousCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
             }
         }
     }
+    previousChanged = true;
 }
 
 /**
@@ -163,6 +174,9 @@ int main (int argc, char **argv)
   std::vector<std::string> todoTopics, previousTopic;
   node.getParam("data_manager/actions_todo_topics", todoTopics);
   node.getParam("data_manager/previous_actions_topics", previousTopic);
+
+  previousChanged = false;
+  todoChanged = false;
 
   //Then we create the readers
   ros::Subscriber sub;
@@ -194,15 +208,19 @@ int main (int argc, char **argv)
       actionsTodo.insert(actionsTodo.end(), actionsTodoTopics.begin(), actionsTodoTopics.end());
       actionsTodo.insert(actionsTodo.end(), actionsTodoPermanent.begin(), actionsTodoPermanent.end());
       msg_todo.actions = actionsTodo;
+      msg_todo.changed = todoChanged;
       todo_pub.publish(msg_todo);
       supervisor_msgs::ActionsList msg_previous;
       previousActions.insert(previousActions.end(), previousActionsTopics.begin(), previousActionsTopics.end());
       previousActions.insert(previousActions.end(), previousActionsPermanent.begin(), previousActionsPermanent.end());
       msg_previous.actions = previousActions;
+      msg_previous.changed = previousChanged;
       previous_pub.publish(msg_previous);
 
 
       //we clean lists
+      previousChanged = false;
+      todoChanged = false;
       actionsTodo.clear();
       previousActions.clear();
       actionsTodoTopics.clear();
