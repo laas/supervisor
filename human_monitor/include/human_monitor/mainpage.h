@@ -12,17 +12,18 @@
 * The actions implemented are:
 *   - Pick
 *   - Place
+*   - Place on Stick
 *   - Drop
 *
 * \section Suscribed topics
-*   - /agent_manager/factList
+*   - /agent_manager/factList: toaster facts on agents (toaster_msgs/FactList)
 *
 * \section Published topics
-*   - /human_monitor/current_humans_action
-*   - /data_manager/add_data/previous_actions
+*   - /human_monitor/current_humans_action: current action of the humans (supervisor_msgs/ActionsList)
+*   - /data_manager/add_data/previous_actions: previous actions of the humans (supervisor_msgs/ActionsList)
 *
 * \section Services
-*   - /human_monitor/human_action_simu: supervisor_msgs/HumanAction
+*   - /human_monitor/human_action_simu: simulate an action execution (supervisor_msgs/HumanAction)
 *
 * \section Parameters
 *  - human_monitor/shouldDetect: boolean which indicate if the actions detection should be activated

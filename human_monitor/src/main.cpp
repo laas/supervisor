@@ -104,13 +104,15 @@ void agentFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
 
         for(std::vector<toaster_msgs::Fact>::iterator it = facts.begin(); it != facts.end(); it++){
             if(it->property == "Distance" && it->subjectId == humanHand){
-                if(humanEngaged.find(it->subjectOwnerId) != humanEngaged.end()){//the human just performed an action, we wait he disengages
+                if(humanEngaged.find(it->subjectOwnerId) != humanEngaged.end()){
+                    //the human just performed an action, we wait he disengages
                     if(it->targetId == humanEngaged[it->subjectOwnerId] && it->doubleValue > disengageThreshold){
                             humanEngaged.erase(it->subjectOwnerId);
                     }
                 }else{
                     std::pair<bool, std::string> ownerAttachment = hm_->hasInHand(it->subjectOwnerId);
                     if(ownerAttachment.first){
+                        //the human has an object in hand, we look for place or drop
                         if(it->targetId != ownerAttachment.second){
                           if(it->doubleValue < placeThreshold && hm_->isSupportObject(it->targetId)){
                             hm_->humanPlace(it->subjectOwnerId, ownerAttachment.second, it->targetId);
@@ -121,6 +123,7 @@ void agentFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
                           }
                         }
                     }else{
+                        //the human has no object in hand, we look for a pick
                         if(it->doubleValue < pickThreshold && hm_->isManipulableObject(it->targetId)){
                             hm_->humanPick(it->subjectOwnerId, it->targetId);
                             humanEngaged[it->subjectOwnerId] = it->targetId;

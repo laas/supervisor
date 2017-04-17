@@ -12,6 +12,7 @@ Class allowing the execution of a move to position action
  * */
 MoveTo::MoveTo(supervisor_msgs::Action action, Connector* connector) : VirtualAction(connector){
 
+    //looking for the parameters of the action
     bool foundArm = false;
     bool foundPos = false;
     for(int i=0; i<=action.parameter_keys.size();i++){
@@ -60,7 +61,7 @@ bool MoveTo::plan(){
          return true;
     }
 
-   //Here we fill the needed information for gtp (fill free to use other planner if needed)
+   //ask gtp a plan
    std::vector<gtp_ros_msgs::ActionId> attachments;
    std::vector<gtp_ros_msgs::Role> agents;
    gtp_ros_msgs::Role role;
@@ -75,7 +76,6 @@ bool MoveTo::plan(){
    data.value = position_;
    datas.push_back(data);
 
-   //do not forget to replace action_name in the following line
    std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > answer = planGTP("moveTo", agents, objects, datas, points, attachments);
    gtpActionId_ = answer.first;
 
@@ -103,6 +103,7 @@ bool MoveTo::exec(Server* action_server){
          return true;
     }
 
+    //convert the armId in pr2motion format
     int armId;
     if(arm_ == "right"){
         armId = 0;
@@ -110,6 +111,7 @@ bool MoveTo::exec(Server* action_server){
         armId = 1;
     }
 
+    //for moveTo, the solution is only one trajectory
     return executeTrajectory(gtpActionId_, 0, armId, action_server);
 
 }

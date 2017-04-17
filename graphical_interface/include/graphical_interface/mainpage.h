@@ -18,6 +18,9 @@
 *  - Humans actions management
 *  - Dialogue management
 *
+* \section Published topics
+*   - graphical_interface/boolAnswer: answer to a bool question (yes/no buttons) (std_msgs/Bool)
+*
 * \section Parameters
 *  - graphical_interface/databaseTab: activate the database management tab
 *  - graphical_interface/actionTab: activate the robot actions management tab

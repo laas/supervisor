@@ -47,6 +47,7 @@ private:
     ros::ServiceClient client_remove_hand_; /**< toaster client to remove objects from hand*/
     ros::ServiceClient client_set_pose_; /**< toaster client to set entities poses*/
     ros::ServiceClient client_set_info_; /**< toaster client to set info in the database*/
+    int currentId_; /**< current id for humans actions*/
 };
 
 #endif // HUMANMONITOR_H

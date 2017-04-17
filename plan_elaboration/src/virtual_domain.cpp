@@ -6,6 +6,7 @@
 VirtualDomain::VirtualDomain(ros::NodeHandle* node)
 {
     node_ = node;
+    node_->getParam("supervisor/robot/name", robotName_);
 
 }
 

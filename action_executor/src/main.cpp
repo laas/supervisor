@@ -35,15 +35,18 @@ void agentFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
     for(std::vector<toaster_msgs::Fact>::iterator it = distanceFacts.begin(); it != distanceFacts.end(); it++){
         if(it->property == "Distance"){
             if(it->subjectId == humanSafetyJoint_){
+                //keep distance from object to the human safety joints
                 executor_->connector_.humanDistances_[it->targetId] = it->doubleValue;
                 if(executor_->connector_.isActing_){
                     if(it->targetId == executor_->connector_.robotToaster_){
+                        //check if the robot should stop for safety reasons
                         if(it->doubleValue < safetyThreshold_){
                             executor_->connector_.stopOrder_ = true;
                         }else{
                             executor_->connector_.stopOrder_ = false;
                         }
                     }else if(it->targetId == executor_->connector_.objectToWatch_){
+                        //check if the robot should change its object refinement
                         if(it->doubleValue < toWatchThreshold_){
                             executor_->connector_.refineOrder_ = true;
                         }else{
@@ -94,7 +97,8 @@ int main (int argc, char **argv)
 
   while(node.ok()){
       ros::spinOnce();
-      if(executor.connector_.isActing_){
+      //publish the current action
+      if(executor.connector_.isActing_ && executor.connector_.currentAction_.name != "moveTo" && executor.connector_.currentAction_.name != ""){
           executor_->current_pub_.publish(executor.connector_.currentAction_);
       }
       loop_rate.sleep();

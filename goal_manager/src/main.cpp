@@ -136,7 +136,6 @@ bool newGoal(supervisor_msgs::String::Request  &req, supervisor_msgs::String::Re
  * */
 bool cancelGoal(supervisor_msgs::String::Request  &req, supervisor_msgs::String::Response &res){
 
-    ROS_WARN("[DEBUG] In cancelled");
     changed = true;
     //Check the data
     if(req.data == ""){

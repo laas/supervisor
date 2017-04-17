@@ -12,6 +12,7 @@ Class allowing the execution of a place reachable action
  * */
 PlaceReachable::PlaceReachable(supervisor_msgs::Action action, Connector* connector) : VirtualAction(connector){
 
+    //we look for the action parameters
     bool foundObj = false;
     bool foundSup = false;
     bool foundAg = false;
@@ -59,7 +60,7 @@ PlaceReachable::PlaceReachable(supervisor_msgs::Action action, Connector* connec
 bool PlaceReachable::preconditions(){
 
     if(!isRefined(support_)){
-        //we look for a refinment
+        //if the support is not refined, we look fo a refinement
         std::vector<toaster_msgs::Fact> conditions;
         toaster_msgs::Fact fact;
         if(isManipulableObject(support_) || isUniqueSupport(support_)){
@@ -78,8 +79,15 @@ bool PlaceReachable::preconditions(){
             initialSupport_ = support_;
             std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), support_, newObject);
             support_ = newObject;
+        }else{
+            ROS_WARN("[action_executor] No possible refinement for support: %s", support_.c_str());
+            return false;
         }
     }
+
+    //the robot should look at the support
+    connector_->currentAction_.headFocus = support_;
+    connector_->currentAction_.shouldKeepFocus = false;
 
     //First we check if the object is a known manipulable object
     if(!isManipulableObject(object_)){
@@ -133,6 +141,7 @@ bool PlaceReachable::plan(){
         }
     }
 
+    //ask gtp a plan
     std::vector<gtp_ros_msgs::Role> agents;
     gtp_ros_msgs::Role role;
     role.role = "mainAgent";
@@ -192,7 +201,7 @@ bool PlaceReachable::exec(Server* action_server){
             return true;
         }else if(connector_->refineOrder_ ){
             connector_->previousId_  = -1;
-            //we look for a refinment
+            //the chosen object is already taken, we look for another refinement
             std::vector<toaster_msgs::Fact> conditions;
             toaster_msgs::Fact fact;
             if(isManipulableObject(support_) || isUniqueSupport(support_)){
@@ -210,6 +219,7 @@ bool PlaceReachable::exec(Server* action_server){
             if(newObject != "NULL"){
                 std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), support_, newObject);
                 support_ = newObject;
+                connector_->currentAction_.headFocus = support_;
                 if(!this->plan()){
                     return false;
                 }

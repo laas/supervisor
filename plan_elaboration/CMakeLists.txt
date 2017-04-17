@@ -20,7 +20,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(plan_elaboration src/main.cpp src/plan_elaboration.cpp src/virtual_domain.cpp src/Domains/default_domain.cpp src/Domains/scan_domain.cpp src/Domains/blocks_domain.cpp)
+add_executable(plan_elaboration src/main.cpp src/plan_elaboration.cpp src/virtual_domain.cpp src/Domains/default_domain.cpp src/Domains/scan_domain.cpp src/Domains/blocks_domain.cpp src/Domains/scan_us_domain.cpp)
 target_link_libraries( 
   plan_elaboration
   ${catkin_LIBRARIES}

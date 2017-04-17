@@ -31,7 +31,7 @@ VirtualAction::VirtualAction(Connector* connector){
  * */
 bool VirtualAction::isManipulableObject(std::string object){
 
-   //first we get the manipulable object sfrom parameters
+   //first we get the manipulable objects from parameters
    std::vector<std::string> manipulableObjects;
    connector_->node_->getParam("/entities/objects", manipulableObjects);
 
@@ -142,12 +142,13 @@ bool VirtualAction::ArePreconditionsChecked(std::vector<toaster_msgs::Fact> prec
  * */
 void VirtualAction::PutInHand(std::string object, std::string hand, int gtpId){
 
-    //add hasInHand facts: to remove when MS
+    //add the fact that the object is in the robot hand
     std::vector<toaster_msgs::Fact> toAdd;
     toaster_msgs::Fact fact;
-    fact.subjectId = connector_->robotName_;
-    fact.property = "hasInHand";
-    fact.targetId = object;
+    fact.subjectId = object;
+    fact.property = "isHoldBy";
+    fact.targetId = connector_->robotName_;
+    fact.factObservability = 1.0;
     toAdd.push_back(fact);
 
     toaster_msgs::SetInfoDB srv_fact;
@@ -185,12 +186,12 @@ void VirtualAction::PutInHand(std::string object, std::string hand, int gtpId){
  * */
 void VirtualAction::RemoveFromHand(std::string object){
 
-    //remove hasInHand facts: to remove when MS
+    //remove the fact that the object is in the robot hand
     std::vector<toaster_msgs::Fact> toRm;
     toaster_msgs::Fact fact;
-    fact.subjectId = connector_->robotName_;
-    fact.property = "hasInHand";
-    fact.targetId = "NULL";
+    fact.subjectId = "NULL";
+    fact.property = "isHoldBy";
+    fact.targetId = connector_->robotName_;
     toRm.push_back(fact);
 
     toaster_msgs::SetInfoDB srv_fact;
@@ -222,6 +223,7 @@ void VirtualAction::RemoveFromHand(std::string object){
  * */
 bool VirtualAction::isGripperEmpty(std::string arm){
 
+    //check the robot gripper position (if it is too much closed, it is empty)
     std::string gripperJoint;
     double gripperThreshold;
     std::string gripperTopic = "/supervisor/robot/gripperJoint/"+ arm;
@@ -355,7 +357,13 @@ void VirtualAction::PutInContainer(std::string object, std::string container){
 std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > VirtualAction::planGTP(std::string actionName, std::vector<gtp_ros_msgs::Role> agents, std::vector<gtp_ros_msgs::Role> objects, std::vector<gtp_ros_msgs::MiscData> datas, std::vector<gtp_ros_msgs::Point> points, std::vector<gtp_ros_msgs::ActionId> attachments){
 
     std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > res;
-  res.first = -1;
+
+    if(connector_->noPlanning_){
+        res.first = 0;
+        return res;
+    }
+
+    res.first = -1;
 
   gtp_ros_msgs::PlanGoal goal;
   goal.request.taskType = actionName;
@@ -408,9 +416,15 @@ std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > VirtualAction::planGTP(s
  * */
 bool VirtualAction::execAction(int actionId, std::vector<gtp_ros_msgs::SubSolution> subSolutions, bool shouldOpen, Server* action_server){
 
-    if(shouldOpen && ((subSolutions[0].armId== 0 && !connector_->gripperRightOpen_) || (subSolutions[0].armId== 1 && !connector_->gripperLeftOpen_))){//the robot should have the gripper open to execute the trajectory
+    if(connector_->noPlanning_){
+        return true;
+    }
+
+    //the robot should have the gripper open to execute the trajectory
+    if(shouldOpen && ((subSolutions[0].armId== 0 && !connector_->gripperRightOpen_) || (subSolutions[0].armId== 1 && !connector_->gripperLeftOpen_))){
         openGripper(subSolutions[0].armId, action_server);
     }
+
     for(std::vector<gtp_ros_msgs::SubSolution>::iterator it = subSolutions.begin(); it != subSolutions.end(); it++){
      if(action_server->isPreemptRequested() || connector_->stopOrder_ || connector_->refineOrder_){
         return false;
@@ -646,7 +660,7 @@ void VirtualAction::moveLeftArm(const actionlib::SimpleClientGoalState& state, c
         connector_->leftArmMoving_ = false;
 }
 
-/**toCheck
+/**
  * \brief Called once when the goal of the right gripper action client completes
  * @param state state of the action server
  * @param result result of the action server

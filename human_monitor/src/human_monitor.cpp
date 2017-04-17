@@ -10,7 +10,10 @@ author Sandra Devin
  * @param node pointer to the node handle
  * */
 HumanMonitor::HumanMonitor(ros::NodeHandle* node){
+
     node_ = node;
+
+    //Initialize the parameters
     node_->getParam("/entities/objects", manipulableObjects_);
     node_->getParam("/entities/supports", supportObjects_);
     node_->getParam("/entities/containers", containerObjects_);
@@ -18,14 +21,19 @@ HumanMonitor::HumanMonitor(ros::NodeHandle* node){
     node_->getParam("/supervisor/robot/name", robotName_);
     node_->getParam("/human_monitor/rightHand", humanHand_);
 
+    currentId_ = -2;
+
+    //Initialize the publishers
     current_pub_ = node_->advertise<supervisor_msgs::ActionsList>("/human_monitor/current_humans_action", 1);
     previous_pub_ = node_->advertise<supervisor_msgs::ActionsList>("/data_manager/add_data/previous_actions", 1);
 
+    //Initialize the clients
     client_put_hand_ = node_->serviceClient<toaster_msgs::PutInHand>("pdg/put_in_hand");
     client_remove_hand_ = node_->serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
     client_set_pose_ = node_->serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
     client_set_info_ = node_->serviceClient<toaster_msgs::SetInfoDB>("database_manager/set_info");
 
+    //if we are in simulation, the objects position are manager by toaster_simu, else by pdg
     if(simu_){
         client_set_pose_ = node_->serviceClient<toaster_msgs::SetEntityPose>("toaster_simu/set_entity_pose");
     }else{
@@ -55,6 +63,9 @@ void HumanMonitor::humanPick(std::string agent, std::string object){
     action.parameter_keys.push_back("object");
     action.parameter_values.push_back(object);
     action.actors.push_back(agent);
+    action.headFocus = object;
+    action.id = currentId_;
+    currentId_--; //we use negative id to distinguish from robot actions
 
     //we publish the action in the current publisher
     supervisor_msgs::ActionsList msg_current;
@@ -75,23 +86,6 @@ void HumanMonitor::humanPick(std::string agent, std::string object){
     attach.first = agent;
     attach.second = object;
     attachments_.push_back(attach);
-
-    //add hasInHand facts: to remove when MS
-    std::vector<toaster_msgs::Fact> toAdd;
-    toaster_msgs::Fact fact;
-    fact.subjectId = agent;
-    fact.property = "hasInHand";
-    fact.targetId = object;
-    toAdd.push_back(fact);
-
-    toaster_msgs::SetInfoDB srv;
-    srv.request.agentId = robotName_;
-    srv.request.facts = toAdd;
-    srv.request.infoType = "FACT";
-    srv.request.add = true;
-    if(!client_set_info_.call(srv)){
-        ROS_ERROR("[human_monitor] Failed to call service database_manager/set_info");
-    }
 
     //we publish the action in the previous publisher
     supervisor_msgs::ActionsList msg_previous;
@@ -130,6 +124,9 @@ void HumanMonitor::humanPlace(std::string agent, std::string object, std::string
     action.parameter_keys.push_back("support");
     action.parameter_values.push_back(support);
     action.actors.push_back(agent);
+    action.headFocus = support;
+    action.id = currentId_;
+    currentId_--; //we use negative id to distinguish from robot actions
 
     //we publish the action in the current publisher
     supervisor_msgs::ActionsList msg_current;
@@ -199,38 +196,9 @@ void HumanMonitor::humanPlace(std::string agent, std::string object, std::string
         action.parameter_values.push_back(replacementTopic);
     }
 
-    //add isOn facts: to remove when MS
-    std::vector<toaster_msgs::Fact> toAdd;
-    toaster_msgs::Fact fact;
-    fact.subjectId = object;
-    fact.property = "isOn";
-    fact.targetId = support;
-    toAdd.push_back(fact);
-
-    toaster_msgs::SetInfoDB srv;
-    srv.request.agentId = robotName_;
-    srv.request.facts = toAdd;
-    srv.request.infoType = "FACT";
-    srv.request.add = true;
-    if(!client_set_info_.call(srv)){
-        ROS_ERROR("[human_monitor] Failed to call service database_manager/set_info");
-    }
-
-    //remove hasInHand facts: to remove when MS
-    std::vector<toaster_msgs::Fact> toRm;
-    fact.subjectId = agent;
-    fact.property = "hasInHand";
-    fact.targetId = "NULL";
-    toRm.push_back(fact);
-
-    srv.request.facts = toRm;
-    srv.request.add = false;
-    if(!client_set_info_.call(srv)){
-        ROS_ERROR("[human_monitor] Failed to call service database_manager/set_info");
-    }
-
     //we publish the action in the previous publisher
     supervisor_msgs::ActionsList msg_previous;
+    action.succeed = true;
     msg_previous.actions.push_back(action);
     previous_pub_.publish(msg_previous);
 }
@@ -264,6 +232,9 @@ void HumanMonitor::humanDrop(std::string agent, std::string object, std::string 
     action.parameter_keys.push_back("container");
     action.parameter_values.push_back(container);
     action.actors.push_back(agent);
+    action.headFocus = container;
+    action.id = currentId_;
+    currentId_--; //we use negative id to distinguish from robot actions
 
     //we publish the action in the current publisher
     supervisor_msgs::ActionsList msg_current;
@@ -314,6 +285,7 @@ void HumanMonitor::humanDrop(std::string agent, std::string object, std::string 
 
     //we publish the action in the previous publisher
     supervisor_msgs::ActionsList msg_previous;
+    action.succeed = true;
     msg_previous.actions.push_back(action);
     previous_pub_.publish(msg_previous);
 }
@@ -351,6 +323,9 @@ void HumanMonitor::humanPlaceStick(std::string agent, std::string object, std::s
     action.parameter_keys.push_back("support2");
     action.parameter_values.push_back(support2);
     action.actors.push_back(agent);
+    action.headFocus = support1;
+    action.id = currentId_;
+    currentId_--; //we use negative id to distinguish from robot actions
 
     //we publish the action in the current publisher
     supervisor_msgs::ActionsList msg_current;
@@ -409,40 +384,9 @@ void HumanMonitor::humanPlaceStick(std::string agent, std::string object, std::s
      ROS_ERROR("[human_monitor] Failed to call service pdg/set_entity_pose");
     }
 
-    //add isOn facts: to remove when MS
-    std::vector<toaster_msgs::Fact> toAdd;
-    toaster_msgs::Fact fact;
-    fact.subjectId = object;
-    fact.property = "isOn";
-    fact.targetId = support1;
-    toAdd.push_back(fact);
-    fact.targetId = support2;
-    toAdd.push_back(fact);
-
-    toaster_msgs::SetInfoDB srv;
-    srv.request.agentId = robotName_;
-    srv.request.facts = toAdd;
-    srv.request.infoType = "FACT";
-    srv.request.add = true;
-    if(!client_set_info_.call(srv)){
-        ROS_ERROR("[human_monitor] Failed to call service database_manager/set_info");
-    }
-
-    //remove hasInHand facts: to remove when MS
-    std::vector<toaster_msgs::Fact> toRm;
-    fact.subjectId = agent;
-    fact.property = "hasInHand";
-    fact.targetId = "NULL";
-    toRm.push_back(fact);
-;
-    srv.request.facts = toRm;
-    srv.request.add = false;
-    if(!client_set_info_.call(srv)){
-        ROS_ERROR("[human_monitor] Failed to call service database_manager/set_info");
-    }
-
     //we publish the action in the previous publisher
     supervisor_msgs::ActionsList msg_previous;
+    action.succeed = true;
     msg_previous.actions.push_back(action);
     previous_pub_.publish(msg_previous);
 }

@@ -23,6 +23,7 @@ public:
 
 protected:
     ros::NodeHandle* node_; /**< Node handle*/
+    std::string robotName_; /**< name of the robot */
 
     std::vector<toaster_msgs::Fact> computeLockedFacts(std::vector<toaster_msgs::Fact> facts);
     std::vector<toaster_msgs::Fact> computeForgiveFacts(std::vector<toaster_msgs::Fact> facts);

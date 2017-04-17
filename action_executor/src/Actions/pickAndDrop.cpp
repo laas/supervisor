@@ -18,6 +18,7 @@ PickAndDrop::PickAndDrop(supervisor_msgs::Action action, Connector* connector) :
     Drop* drop = new Drop(action, connector);
     dropAction_ = *drop;
 
+    //we look for the action parameters
     bool foundObj = false;
     bool foundCont = false;
     for(int i=0; i<=action.parameter_keys.size();i++){
@@ -53,7 +54,7 @@ PickAndDrop::PickAndDrop(supervisor_msgs::Action action, Connector* connector) :
 bool PickAndDrop::preconditions(){
 
     if(!isRefined(object_)){
-        //we look for a refinment
+        //if the object is not refined, we look fo a refinement
         std::vector<toaster_msgs::Fact> conditions;
         toaster_msgs::Fact fact;
         fact.subjectId = "NULL";
@@ -70,9 +71,15 @@ bool PickAndDrop::preconditions(){
             initialObject_ = object_;
             std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), object_, newObject);
             object_ = newObject;
+        }else{
+            ROS_WARN("[action_executor] No possible refinement for object: %s", object_.c_str());
+            return false;
         }
     }
 
+    //the robot should first look at the object
+    connector_->currentAction_.headFocus = object_;
+    connector_->currentAction_.shouldKeepFocus = false;
 
     //First we check if the object is a known manipulable object
     if(!isManipulableObject(object_)){
@@ -93,10 +100,12 @@ bool PickAndDrop::preconditions(){
     fact.property = "isReachableBy";
     fact.targetId = connector_->robotName_;
     precsTocheck.push_back(fact);
-    fact.subjectId = container_;
-    fact.property = "isReachableBy";
-    fact.targetId = connector_->robotName_;
-    precsTocheck.push_back(fact);
+    if(isRefined(container_)){
+        fact.subjectId = container_;
+        fact.property = "isReachableBy";
+        fact.targetId = connector_->robotName_;
+        precsTocheck.push_back(fact);
+    }
 
     return ArePreconditionsChecked(precsTocheck);
 
@@ -110,7 +119,9 @@ bool PickAndDrop::preconditions(){
 bool PickAndDrop::plan(){
 
     if(pickAction_.plan()){
-        pickId_ = connector_->previousId_;
+        //we first plan the pick
+        pickId_ = pickAction_.gtpActionId_;
+        connector_->previousId_ = pickId_;
         if(!isRefined(container_)){
             //we postpone the container decision
            return true;
@@ -129,10 +140,14 @@ bool PickAndDrop::plan(){
  * */
 bool PickAndDrop::exec(Server* action_server){
 
+    if (connector_->noExec_){
+        ros::Duration(0.5).sleep();
+    }
+
     dropId_ = connector_->previousId_;
     connector_->previousId_  = pickId_;
     if(pickAction_.exec(action_server) && pickAction_.post()){
-        //look for a container
+        //look for a container if it was not refined
         if(!isRefined(container_)){
             //we look for a refinment
             std::vector<toaster_msgs::Fact> conditions;
@@ -147,12 +162,16 @@ bool PickAndDrop::exec(Server* action_server){
                 initialContainer_ = container_;
                 std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), container_, newObject);
                 container_ = newObject;
+                //the robot should then look at the container
+                connector_->currentAction_.headFocus = container_;
                 if(dropAction_.plan()){
                     return dropAction_.exec(action_server);
                 }
             }
             return false;
         }
+        //the robot should then look at the container
+        connector_->currentAction_.headFocus = container_;
         connector_->previousId_  = dropId_;
         return dropAction_.exec(action_server);
     }

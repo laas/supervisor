@@ -12,6 +12,7 @@ Class allowing the execution of a pick action
  * */
 Pick::Pick(supervisor_msgs::Action action, Connector* connector) : VirtualAction(connector){
 
+    //looking for the parameters of the action
     bool found = false;
     for(int i=0; i<=action.parameter_keys.size();i++){
         if(action.parameter_keys[i] == "object"){
@@ -35,6 +36,7 @@ Pick::Pick(supervisor_msgs::Action action, Connector* connector) : VirtualAction
  * */
 bool Pick::preconditions(){
 
+    //if the object is not refined, we look fo a refinement
     if(!isRefined(object_)){
         //we look for a refinment
         std::vector<toaster_msgs::Fact> conditions;
@@ -53,8 +55,15 @@ bool Pick::preconditions(){
             initialObject_ = object_;
             std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), object_, newObject);
             object_ = newObject;
+        }else{
+            ROS_WARN("[action_executor] No possible refinement for object: %s", object_.c_str());
+            return false;
         }
     }
+
+    //the robot should look at the object
+    connector_->currentAction_.headFocus = object_;
+    connector_->currentAction_.shouldKeepFocus = false;
 
     //First we check if the object is a known manipulable object
     if(!isManipulableObject(object_)){
@@ -88,35 +97,36 @@ bool Pick::plan(){
     //FOR TESTS ONLY
     connector_->previousId_  = -1;
 
-   std::vector<gtp_ros_msgs::ActionId> attachments;
-   std::vector<gtp_ros_msgs::Role> agents;
-   gtp_ros_msgs::Role role;
-   role.role = "mainAgent";
-   role.name = connector_->robotName_;
-   agents.push_back(role);
-   std::vector<gtp_ros_msgs::Role> objects;
-   role.role = "mainObject";
-   role.name = object_;
-   objects.push_back(role);
-   std::vector<gtp_ros_msgs::Point> points;
-   std::vector<gtp_ros_msgs::MiscData> datas;
+    //we ask gtp a plan
+    std::vector<gtp_ros_msgs::ActionId> attachments;
+    std::vector<gtp_ros_msgs::Role> agents;
+    gtp_ros_msgs::Role role;
+    role.role = "mainAgent";
+    role.name = connector_->robotName_;
+    agents.push_back(role);
+    std::vector<gtp_ros_msgs::Role> objects;
+    role.role = "mainObject";
+    role.name = object_;
+    objects.push_back(role);
+    std::vector<gtp_ros_msgs::Point> points;
+    std::vector<gtp_ros_msgs::MiscData> datas;
 
-   if(connector_->shouldUseRightHand_){
-       gtp_ros_msgs::MiscData data;
-       data.key = "hand";
-       data.value = "right";
-       datas.push_back(data);
-   }
-
-   std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > answer = planGTP("pick", agents, objects, datas, points, attachments);
-   gtpActionId_ = answer.first;
-
-   if(gtpActionId_ == -1){
-       return false;
+    if(connector_->shouldUseRightHand_){
+    gtp_ros_msgs::MiscData data;
+    data.key = "hand";
+    data.value = "right";
+    datas.push_back(data);
     }
 
-   subSolutions_ = answer.second;
-   return true;
+    std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > answer = planGTP("pick", agents, objects, datas, points, attachments);
+    gtpActionId_ = answer.first;
+
+    if(gtpActionId_ == -1){
+    return false;
+    }
+
+    subSolutions_ = answer.second;
+    return true;
 }
 
 /**
@@ -131,7 +141,7 @@ bool Pick::exec(Server* action_server){
            return true;
        }else if(connector_->refineOrder_ ){
            connector_->previousId_  = -1;
-           //we look for a refinment
+           //the chosen object is already taken, we look for another refinement
            std::vector<toaster_msgs::Fact> conditions;
            toaster_msgs::Fact fact;
            fact.subjectId = "NULL";
@@ -147,6 +157,7 @@ bool Pick::exec(Server* action_server){
            if(newObject != "NULL"){
                std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), object_, newObject);
                object_ = newObject;
+               connector_->currentAction_.headFocus = object_;
                if(!this->plan()){
                    return false;
                }

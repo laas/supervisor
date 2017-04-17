@@ -5,3 +5,4 @@ Action[] todoActions
 Action[] plannedActions
 Action[] previousActions
 Action currentRobotAction
+int32 nextPrevId

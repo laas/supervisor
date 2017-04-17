@@ -46,6 +46,7 @@ public:
 private:
     ros::NodeHandle* node_; /**< Node handle*/
     ros::ServiceClient client_db_ ; /**< Client for the set info service of the database*/
+    std::vector<std::string> nonObservableFacts_; /**< list of non observable facts*/
 
     void fillHighLevelNames();
     bool areFactsInTable(std::vector<toaster_msgs::Fact> facts, std::string agent, bool highLevel);

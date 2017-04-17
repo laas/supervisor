@@ -11,6 +11,7 @@ ros::NodeHandle* node_;
 MsManager* ms_;
 bool needCheckEffect_, needCheckPrec_, needCheckGoal_;
 std::vector<supervisor_msgs::Action> oldMsgPrevious_;
+int prevId_;
 
 /**
  * \brief Callback of the database tables
@@ -45,40 +46,54 @@ void goalCallback(const supervisor_msgs::GoalsList::ConstPtr& msg){
  * */
 void prevCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
 
-    if(msg->changed){
-        //look for the new action added to the previous list and check if the agents are aware of the action
-        std::vector<supervisor_msgs::Action> currentActions = msg->actions;
-        if(currentActions.size() > oldMsgPrevious_.size()){
-            //the action(s) performed are at the end of the list
-            for(int i = oldMsgPrevious_.size(); i < currentActions.size(); i++){
-                for(std::vector<supervisor_msgs::MentalState>::iterator itms = ms_->msList_.begin(); itms != ms_->msList_.end(); itms++){
-                    //check if the agents sees the action
-                    bool canSee = ms_->canSee(itms->agentName, currentActions[i].actors[0]);
-                    supervisor_msgs::Action newAction;
-                    if(ms_->currentRobotAction_.id == currentActions[i].id){
-                        //it was the robot current action
-                        newAction = ms_->currentRobotAction_;
-                        newAction.succeed = currentActions[i].succeed;
-                        ms_->currentRobotAction_.id = -1;
-                        if(canSee){
-                            itms->currentRobotAction.id = -1;
-                            itms->previousActions.push_back(newAction);
+    //look for the new action added to the previous list and check if the agents are aware of the action
+    std::vector<supervisor_msgs::Action> currentActions = msg->actions;
+    if(currentActions.size() > oldMsgPrevious_.size()){
+        //the action(s) performed are at the end of the list
+        for(int i = oldMsgPrevious_.size(); i < currentActions.size(); i++){
+            prevId_ = currentActions[i].id;
+            supervisor_msgs::Action action = ms_->addPrecsAndEffects(currentActions[i]);
+            if(action.succeed){
+                ms_->addEffects(action, ms_->robotName_);
+            }
+            for(std::vector<supervisor_msgs::MentalState>::iterator itms = ms_->msList_.begin(); itms != ms_->msList_.end(); itms++){
+                //check if the agents sees the action
+                bool canSee = ms_->canSee(itms->agentName, action.actors[0]);
+                supervisor_msgs::Action newAction;
+                if(ms_->currentRobotAction_.id == action.id){
+                    //it was the robot current action
+                    newAction = action;
+                    ms_->currentRobotAction_.id = -1;
+                    if(canSee){
+                        itms->currentRobotAction.id = -1;
+                        itms->previousActions.push_back(newAction);
+                        if(newAction.succeed){
                             ms_->addEffects(newAction, itms->agentName);
                         }
-                    }else if(canSee){
-                        if(ms_->currentPlan_.id != -1){
-                            //check if the action is from the plan
-                            supervisor_msgs::Action inPlanAction = ms_->isInList(currentActions[i], itms->todoActions);
-                            if(inPlanAction.id != -1){
-                                if(inPlanAction.actors[0] == ms_->agentX_){
-                                    inPlanAction.actors[0] = currentActions[i].actors[0];
-                                }
-                                newAction = inPlanAction;
-                                newAction.succeed = currentActions[i].succeed;
+                    }
+                }else if(canSee){
+                    if(ms_->currentPlan_.id != -1){
+                        //check if the action is from the plan
+                        supervisor_msgs::Action inPlanAction = ms_->isInList(action, itms->todoActions);
+                        if(inPlanAction.id != -1){
+                            if(inPlanAction.actors[0] == ms_->agentX_){
+                                inPlanAction.actors[0] = action.actors[0];
                             }
+                            newAction = inPlanAction;
+                            newAction.succeed = action.succeed;
                         }else{
-                            newAction = ms_->addPrecsAndEffects(currentActions[i]);
-                            newAction.succeed = currentActions[i].succeed;
+                            newAction = action;
+                        }
+                    }else{
+                        newAction = action;
+                    }
+                    if(newAction.succeed){
+                        if(action.name == "pick" && newAction.name != "pick"){
+                            //take pick effects
+                            newAction.name = "pick";
+                            newAction.effects.clear();
+                            newAction.precs.clear();
+                            newAction = ms_->addPrecsAndEffects(newAction);
                         }
                         itms->previousActions.push_back(newAction);
                         ms_->addEffects(newAction, itms->agentName);
@@ -98,7 +113,7 @@ void prevCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
 void planCallback(const supervisor_msgs::SharedPlan::ConstPtr& msg){
 
     if(msg->id != ms_->currentPlan_.id){
-        if(ms_->currentPlan_.id != -1){
+        if(msg->id != -1){
             //end current plan for all agents
             std::vector<supervisor_msgs::Action> planActions = msg->actions;
             for(std::vector<supervisor_msgs::MentalState>::iterator itms = ms_->msList_.begin(); itms != ms_->msList_.end(); itms++){
@@ -121,6 +136,12 @@ void planCallback(const supervisor_msgs::SharedPlan::ConstPtr& msg){
                     }
                 }
             }
+        }else{
+            //end current plan for all agents
+            for(std::vector<supervisor_msgs::MentalState>::iterator itms = ms_->msList_.begin(); itms != ms_->msList_.end(); itms++){
+                itms->plannedActions.clear();
+                itms->todoActions.clear();
+            }
         }
         needCheckPrec_ = true;
         ms_->currentPlan_ = *msg;
@@ -133,14 +154,18 @@ void planCallback(const supervisor_msgs::SharedPlan::ConstPtr& msg){
  * */
 void robotActionCallback(const supervisor_msgs::Action::ConstPtr& msg){
 
-    if(ms_->currentRobotAction_.id = msg->id){
+    //it is a new action
+    if(ms_->currentRobotAction_.id != msg->id){
         supervisor_msgs::Action newAction = ms_->addPrecsAndEffects(*msg);
          ms_->currentRobotAction_ = newAction;
-         for(std::vector<supervisor_msgs::MentalState>::iterator itms = ms_->msList_.begin(); itms != ms_->msList_.end(); itms++){
-             if(ms_->canSee(itms->agentName, ms_->robotName_)){
-                 itms->currentRobotAction = newAction;
-             }
-         }
+    }
+    //we check for each agent if he is aware of the action
+    for(std::vector<supervisor_msgs::MentalState>::iterator itms = ms_->msList_.begin(); itms != ms_->msList_.end(); itms++){
+        if(itms->currentRobotAction.id != msg->id){
+            if(ms_->canSee(itms->agentName, ms_->robotName_)){
+                itms->currentRobotAction = ms_->currentRobotAction_;
+            }
+        }
     }
 }
 
@@ -161,7 +186,6 @@ void infoCallback(const supervisor_msgs::Info::ConstPtr& msg){
     }else if(msg->type == "ACTION"){
         for(std::vector<supervisor_msgs::MentalState>::iterator itms = ms_->msList_.begin(); itms != ms_->msList_.end(); itms++){
             if(itms->agentName == msg->agent){
-                //check if the agents sees the action
                 supervisor_msgs::Action newAction;
                 if(ms_->currentRobotAction_.id == msg->action.id){
                     //it was the robot current action
@@ -169,8 +193,7 @@ void infoCallback(const supervisor_msgs::Info::ConstPtr& msg){
                     newAction.succeed = msg->action.succeed;
                     ms_->currentRobotAction_.id = -1;
                     itms->currentRobotAction.id = -1;
-                }
-                if(ms_->currentPlan_.id != -1){
+                }else if(ms_->currentPlan_.id != -1){
                     //check if the action is from the plan
                     supervisor_msgs::Action inPlanAction = ms_->isInList(msg->action, itms->todoActions);
                     if(inPlanAction.id != -1){
@@ -240,6 +263,7 @@ int main (int argc, char **argv)
   needCheckEffect_ = false;
   needCheckGoal_ = false;
   needCheckPrec_ = false;
+  prevId_ =-1;
 
   ros::Subscriber sub_db = node_->subscribe("database_manager/tables", 1, dbCallback);
   ros::Subscriber sub_goal = node_->subscribe("goal_manager/goalsList", 1, goalCallback);
@@ -259,12 +283,15 @@ int main (int argc, char **argv)
       while(needCheckEffect_ || needCheckGoal_ || needCheckPrec_){
         if(needCheckEffect_){
             needCheckPrec_ = needCheckPrec_ || ms_->checkEffects();
+            needCheckEffect_ = false;
         }
         if(needCheckPrec_){
             needCheckEffect_ = needCheckEffect_ || ms_->checkPrecs();
+            needCheckPrec_ = false;
         }
         if(needCheckGoal_){
             ms_->checkGoals();
+            needCheckGoal_ = false;
         }
         changed = true;
       }
@@ -272,10 +299,8 @@ int main (int argc, char **argv)
       supervisor_msgs::MentalStatesList toPublish;
       toPublish.mentalStates = ms_->msList_;
       toPublish.changed = changed;
+      toPublish.prevId = prevId_;
       ms_pub.publish(toPublish);
-      needCheckEffect_ = false;
-      needCheckGoal_ = false;
-      needCheckPrec_ = false;
 
       loop_rate.sleep();
   }

@@ -18,6 +18,7 @@ PickAndPlace::PickAndPlace(supervisor_msgs::Action action, Connector* connector)
     Place* place = new Place(action, connector);
     placeAction_ = *place;
 
+    //we look for the action parameters
     bool foundObj = false;
     bool foundSup = false;
     for(int i=0; i<=action.parameter_keys.size();i++){
@@ -53,7 +54,7 @@ PickAndPlace::PickAndPlace(supervisor_msgs::Action action, Connector* connector)
 bool PickAndPlace::preconditions(){
 
     if(!isRefined(object_)){
-        //we look for a refinment
+        //if the object is not refined, we look fo a refinement
         std::vector<toaster_msgs::Fact> conditions;
         toaster_msgs::Fact fact;
         fact.subjectId = "NULL";
@@ -75,11 +76,15 @@ bool PickAndPlace::preconditions(){
             placeAction_.object_ = object_;
             placeAction_.initialObject_ = initialObject_;
         }else{
-            ROS_WARN("[action_executor] No possible refinment!");
-           return false;
+            ROS_WARN("[action_executor] No possible refinement for object: %s", object_.c_str());
+            return false;
         }
 
     }
+
+    //the robot should first look at the object
+    connector_->currentAction_.headFocus = object_;
+    connector_->currentAction_.shouldKeepFocus = false;
 
     //First we check if the object is a known manipulable object
     if(!isManipulableObject(object_)){
@@ -119,6 +124,7 @@ bool PickAndPlace::preconditions(){
 bool PickAndPlace::plan(){
 
     if(pickAction_.plan()){
+        //we first plan the pick
         pickId_ = pickAction_.gtpActionId_;
         connector_->previousId_ = pickId_;
         if(!isRefined(support_)){
@@ -139,9 +145,13 @@ bool PickAndPlace::plan(){
  * */
 bool PickAndPlace::exec(Server* action_server){
 
+    if (connector_->noExec_){
+        ros::Duration(0.5).sleep();
+    }
+
     connector_->previousId_  = pickId_;
     if(pickAction_.exec(action_server) && pickAction_.post()){
-        //look for a support
+        //look for a support if it was not refined
         if(!isRefined(support_)){
             //we look for a refinment
             std::vector<toaster_msgs::Fact> conditions;
@@ -164,6 +174,8 @@ bool PickAndPlace::exec(Server* action_server){
                 support_ = newObject;
                 placeAction_.support_ = support_;
                 placeAction_.initialSupport_ = initialSupport_;
+                //the robot should then look at the container
+                connector_->currentAction_.headFocus = support_;
                 if(placeAction_.plan()){
                     return placeAction_.exec(action_server);
                 }else{
@@ -178,6 +190,8 @@ bool PickAndPlace::exec(Server* action_server){
         }
         placeId_ = placeAction_.gtpActionId_;
         connector_->previousId_  = placeId_;
+        //the robot should then look at the container
+        connector_->currentAction_.headFocus = support_;
         return placeAction_.exec(action_server);
     }
 

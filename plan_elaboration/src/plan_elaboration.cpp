@@ -5,24 +5,28 @@
  * */
 PlanElaboration::PlanElaboration(ros::NodeHandle* node)
 {
+    //Initialize parameters
     currentGoal_ = "NONE";
     node_ = node;
-    node_->getParam("supervisor/robot/name", robotName_);;
+    node_->getParam("supervisor/robot/name", robotName_);
     node_->getParam("/supervisor/AgentX", agentX_);
     node_->getParam("/supervisor/Omni", omni_);
     node_->getParam("/supervisor/mainPartner", mainPartner_);
     node_->getParam("/plan_elaboration/Agents", agentList_);
     node_->getParam("/plan_elaboration/nbMaxTry", nbMaxTry_);
+    node_->getParam("/plan_elaboration/toIgnoreFactsForXAgent", toIgnoreFactsForXAgent_);
 
     planId_ = 0;
 
     domainInitialized_ = false;
 
+    //Initialise clients
     client_db_execute_  = node_->serviceClient<toaster_msgs::ExecuteDB>("database_manager/execute");
     client_db_set_ = node_->serviceClient<toaster_msgs::SetInfoDB>("database_manager/set_info");
     client_hatp_ = node_->serviceClient<hatp_msgs::PlanningRequest>("hatp/planner");
     client_ask_ = node_->serviceClient<supervisor_msgs::Ask>("dialogue_node/ask");
 
+    //Intialize high level names (from param)
     fillHighLevelNames();
 
 }
@@ -82,6 +86,8 @@ VirtualDomain* PlanElaboration::initializeDomain(std::string goal){
         dom = new BlocksDomain(node_);
     }else if(goal == "SCAN"){
         dom = new ScanDomain(node_);
+    }else if(goal == "SCAN_US"){
+        dom = new ScanUsDomain(node_);
     }else{
         dom = new DefaultDomain(node_);
     }
@@ -263,11 +269,16 @@ std::vector<toaster_msgs::Fact> PlanElaboration::computeAgentXFacts(std::vector<
 
     for(std::vector<toaster_msgs::Fact>::iterator it = facts.begin(); it != facts.end(); it++){
         result.push_back(*it);
+        if(isInVector(toIgnoreFactsForXAgent_, it->property)){
+            continue;
+        }
         if(isInVector(agentList_, it->subjectId) && highLevelNames_[it->targetId] != highLevelNames_[dom_->objectLocked_]){
+            //the fact concerns an agent and not the locked object
             bool added = false;
             for(std::vector<toaster_msgs::Fact>::iterator it2 = it+1; it2 != facts.end(); it2++){
                 if(highLevelNames_[it2->targetId] != highLevelNames_[dom_->objectLocked_]){
-                    if(it2->property == it->property && highLevelNames_[it2->targetId] ==  highLevelNames_[it->targetId] && isInVector(agentList_, it2->subjectId) && it2->subjectId != it->subjectId){
+                    if(it2->property == it->property && highLevelNames_[it2->targetId] ==  highLevelNames_[it->targetId] && isInVector(agentList_, it2->subjectId) && (it2->subjectId != it->subjectId || added)){
+                        //we find another similar fact for another agent, so we add a fact for the x agent
                         result.push_back(*it2);
                         if(!added){
                             toaster_msgs::Fact toAdd;
@@ -295,10 +306,12 @@ std::vector<toaster_msgs::Fact> PlanElaboration::computeAgentXFacts(std::vector<
                 }
             }
         }else if(isInVector(agentList_, it->targetId) && highLevelNames_[it->subjectId] != highLevelNames_[dom_->objectLocked_]){
+            //the fact concerns an agent and not the locked object
             bool added = false;
             for(std::vector<toaster_msgs::Fact>::iterator it2 = it+1; it2 != facts.end(); it2++){
                 if(highLevelNames_[it2->subjectId] != highLevelNames_[dom_->objectLocked_]){
-                    if(it2->property == it->property && highLevelNames_[it2->subjectId] == highLevelNames_[it->subjectId] && isInVector(agentList_, it2->targetId) && it2->targetId != it->targetId){
+                    if(it2->property == it->property && highLevelNames_[it2->subjectId] == highLevelNames_[it->subjectId] && isInVector(agentList_, it2->targetId) && (it2->targetId != it->targetId || added)){
+                        //we find another similar fact for another agent, so we add a fact for the x agent
                         result.push_back(*it2);
                         if(!added){
                             toaster_msgs::Fact toAdd;
@@ -469,7 +482,11 @@ supervisor_msgs::SharedPlan PlanElaboration::convertPlan(hatp_msgs::Plan plan){
           std::string paramTopic = "highLevelActions/" + action.name + "_param";
           node_->getParam(paramTopic, action.parameter_keys );
           if(action.parameter_values.size() != action.parameter_keys.size()){
-              ROS_ERROR("[plan_elaboration] Incorrect action parameters");
+              ROS_ERROR("[plan_elaboration] Incorrect action parameters for action: %s", action.name.c_str());
+              ROS_ERROR("[plan_elaboration] parameters are:");
+              for(std::vector<std::string>::iterator itp = action.parameter_values.end(); itp != action.parameter_values.end(); itp++){
+                  ROS_ERROR("                %s", itp->c_str());
+              }
           }
           newPlan.actions.push_back(action);
        }
@@ -641,3 +658,50 @@ bool PlanElaboration::factsAreIn(toaster_msgs::Fact fact, std::vector<toaster_ms
     return true;
 }
 
+/**
+ * \brief Find the object to lock corresponding to a high level object for an agent
+ * @param object the initial object
+ * @param agent the agent name
+ * @return the corresponding object to lock
+ * */
+std::string PlanElaboration::getLockedObject(std::string object, std::string agent){
+
+    /** @todo find proper way to do this function (not depending of isReachable fact)*/
+
+    if(highLevelNames_[object] != object){
+        //the object is already refined
+        return object;
+    }
+
+    //create vector of isReachable facts for each possible refinement
+    std::vector<std::string> possibleObjects = highLevelRefinment_[object];
+    std::vector<toaster_msgs::Fact> toTest;
+    for(std::vector<std::string>::iterator it = possibleObjects.begin(); it != possibleObjects.end(); it++){
+        toaster_msgs::Fact fact;
+        fact.subjectId = *it;
+        fact.property = "isReachebleBy";
+        fact.targetId = agent;
+        toTest.push_back(fact);
+    }
+
+    //ask to the database if each is reachable fact is in the robot table
+    std::vector<std::string> res;
+    toaster_msgs::ExecuteDB srv;
+    srv.request.command = "ARE_IN_TABLE";
+    srv.request.type = "INDIV";
+    srv.request.agent = robotName_;
+    srv.request.facts = toTest;
+    if (client_db_execute_.call(srv)){
+        res = srv.response.results;
+    }else{
+       ROS_ERROR("[action_executor] Failed to call service database_manager/execute");
+       return object;
+    }
+
+    for(int i = 0; i < res.size(); i++){
+        if(res[i] == "true"){
+            //the corresponding object is reachable by the agent, we lock it
+            return possibleObjects[i];
+        }
+    }
+}

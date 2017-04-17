@@ -8,4 +8,6 @@
     <include file="$(find plan_maintainer)/launch/PlanMaintainer.launch"/>
     <include file="$(find robot_decision)/launch/RobotDecision.launch"/>
     <include file="$(find dialogue_node)/launch/DialogueNode.launch"/>
+    <include file="$(find mental_states)/launch/MentalStates.launch"/>
+    <include file="$(find simple_head_manager)/launch/SimpleHeadManager.launch"/>
 </launch>

@@ -66,6 +66,7 @@ struct Connector{
     double waitActionServer_;/**< time to wait for an action server*/
     int nbPlanMax_;/**< nb max to try to plan*/
     bool noExec_;/**< flag true if we should not perform action execution*/
+    bool noPlanning_;/**< flag true if we should not plan for action execution (can work only if noExec is also at true)*/
 
     int previousId_;/**< previous gtp id*/
     int idGrasp_;/**< gtp id of the previous grasp*/

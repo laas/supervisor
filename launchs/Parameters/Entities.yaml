@@ -8,28 +8,37 @@ entities:
         - 'RED_CUBE'
         - 'RED_CUBE1'
         - 'RED_CUBE2'
+        - 'RED_CUBE3'
         - 'BLUE_CUBE'
         - 'BLUE_CUBE1'
         - 'BLUE_CUBE2'
+        - 'BLUE_CUBE3'
         - 'BLACK_CUBE'
         - 'GREEN_CUBE'
         - 'GREEN_CUBE1'
         - 'GREEN_CUBE2'
+        - 'GREEN_CUBE3'
         - 'GREY_TAPE'
         - 'LOTR_TAPE'
         - 'WALLE_TAPE'
+        - 'RED_TAPE'
+        - 'RED_TAPE1'
+        - 'RED_TAPE2'
         - 'STICK'
     supports:
         - 'RED_CUBE'
         - 'RED_CUBE1'
         - 'RED_CUBE2'
+        - 'RED_CUBE3'
         - 'BLUE_CUBE'
         - 'BLUE_CUBE1'
         - 'BLUE_CUBE2'
+        - 'BLUE_CUBE3'
         - 'BLACK_CUBE'
         - 'GREEN_CUBE'
         - 'GREEN_CUBE1'
         - 'GREEN_CUBE2'
+        - 'GREEN_CUBE3'
         - 'TABLE_4'
         - 'IKEA_SHELF_LIGHT_1'
         - 'IKEA_SHELF_DARK'
@@ -37,30 +46,45 @@ entities:
         - 'PLACEMAT'
         - 'PLACEMAT_1'
         - 'PLACEMAT_2'
+        - 'SCAN_AREA'
+        - 'SCAN_AREA1'
+        - 'SCAN_AREA2'
         - 'STICK'
     containers:
         - 'PINK_TRASHBIN'
         - 'BLUE_TRASHBIN'
         - 'GREEN_TRASHBIN'
+        - 'GREEN_BOX'
+        - 'BLUE_BOX'
+        - 'RED_BOX'
+        - 'RED_BOX1'
+        - 'RED_BOX2'
     objectsHeight:
         top:
              RED_CUBE: 0.0265
              RED_CUBE1: 0.0265
              RED_CUBE2: 0.0265
+             RED_CUBE3: 0.0265
              BLACK_CUBE: 0.0265
              GREEN_CUBE: 0.0265
              GREEN_CUBE1: 0.0265
              GREEN_CUBE2: 0.0265
+             GREEN_CUBE3: 0.0265
              BLUE_CUBE: 0.0265
              BLUE_CUBE1: 0.0265
              BLUE_CUBE2: 0.0265
+             BLUE_CUBE3: 0.0265
              PLACEMAT_RED: 0.00
              PLACEMAT_1: 0.00
              PLACEMAT_2: 0.00
+             SCAN_AREA1: 0.00
+             SCAN_AREA2: 0.00
              TABLE_4: 0.73
              GREY_TAPE: 0.105
              LOTR_TAPE: 0.105
              WALLE_TAPE: 0.105
+             RED_TAPE1: 0.105
+             RED_TAPE2: 0.105
              IKEA_SHELF_LIGHT_1: 0.81
              IKEA_SHELF_DARK: 0.81
              STICK: 0.0265
@@ -68,20 +92,27 @@ entities:
              RED_CUBE: 0.0265
              RED_CUBE1: 0.0265
              RED_CUBE2: 0.0265
+             RED_CUBE3: 0.0265
              BLACK_CUBE: 0.0265
              GREEN_CUBE: 0.0265
              GREEN_CUBE1: 0.0265
              GREEN_CUBE2: 0.0265
+             GREEN_CUBE3: 0.0265
              BLUE_CUBE: 0.0265
              BLUE_CUBE1: 0.0265
              BLUE_CUBE2: 0.0265
+             BLUE_CUBE3: 0.0265
              PLACEMAT_RED: 0.00
              PLACEMAT_1: 0.00
              PLACEMAT_2: 0.00
+             SCAN_AREA1: 0.00
+             SCAN_AREA2: 0.00
              TABLE_4: 0.00
              GREY_TAPE: 0.105
              LOTR_TAPE: 0.105
              WALLE_TAPE: 0.105
+             RED_TAPE1: 0.105
+             RED_TAPE2: 0.105
              IKEA_SHELF_LIGHT_1: 0.00
              IKEA_SHELF_DARK: 0.00
              STICK: 0.0265
@@ -90,14 +121,26 @@ entities:
             - 'RED_CUBE'
             - 'RED_CUBE1'
             - 'RED_CUBE2'
+            - 'RED_CUBE3'
         GREEN_CUBE:
             - 'GREEN_CUBE'
             - 'GREEN_CUBE1'
             - 'GREEN_CUBE2'
+            - 'GREEN_CUBE3'
         BLUE_CUBE:
             - 'BLUE_CUBE'
             - 'BLUE_CUBE1'
             - 'BLUE_CUBE2'
+            - 'BLUE_CUBE3'
         PLACEMAT:
             - 'PLACEMAT_1'
             - 'PLACEMAT_2'
+        SCAN_AREA:
+            - 'SCAN_AREA1'
+            - 'SCAN_AREA2'
+        RED_BOX:
+            - 'RED_BOX1'
+            - 'RED_BOX2'
+        RED_TAPE:
+            - 'RED_TAPE1'
+            - 'RED_TAPE2'

@@ -2,6 +2,7 @@
 plan_elaboration:
     Agents: ['PR2_ROBOT', 'HERAKLES_HUMAN1']
     nbMaxTry: 3
+    toIgnoreFactsForXAgent: ['type', 'isActivated']
     HATP_actions:
        Pick: 'pick'
        Place: 'place'
@@ -24,4 +25,8 @@ plan_elaboration:
             areaStack: 'stackAreaTABLE_4'
             facts: ['isReachableBy', 'type', 'isOn', 'hasInHand', 'genericName','value', 'IsInArea']
             method: 'Build'
+            params: []
+        SCAN_US:
+            facts: ['isReachableBy', 'color', 'type', 'isOn', 'isIn', 'isHoldBy', 'isScan', 'isActivated', 'value']
+            method: 'ScanAll'
             params: []

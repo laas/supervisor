@@ -5,10 +5,13 @@
  * */
 MsManager::MsManager(ros::NodeHandle* node)
 {
+    //Initialize parameters
     node_ = node;
     node_->getParam("supervisor/robot/name", robotName_);
     node_->getParam("/supervisor/AgentX", agentX_);
     node_->getParam("/entities/agents", agents_);
+    node_->getParam("/mental_states/nonObservableFacts_", nonObservableFacts_);
+
     //we do not compute mental states for the robot
     for(std::vector<std::string>::iterator it = agents_.begin(); it != agents_.end(); it++){
         if(*it == robotName_){
@@ -20,9 +23,13 @@ MsManager::MsManager(ros::NodeHandle* node)
     currentPlan_.id = -1;
     currentRobotGoal_= "NONE";
 
+    //Initialize clients
     client_db_ = node_->serviceClient<toaster_msgs::SetInfoDB>("database_manager/set_info");
 
+    //Initialize high level names (from params)
     fillHighLevelNames();
+
+    //Initialize mental states
     initMentalStates();
 
 }
@@ -146,6 +153,7 @@ bool MsManager::checkPrecs(){
                     //if the action was the first half of an action we rename the remaining part
                     if(itp->name == "pick" && it->name != "pick"){
                         it->name = it->name.substr(7);//remove 'pickand' part of the name
+                        itp->id = -1;//we change the id to not consider the action done the next loop
                     }else{
                         itms->todoActions.erase(it);
                         it--;
@@ -171,7 +179,7 @@ bool MsManager::checkPrecs(){
                 if(itl->following == it->id){
                     linksOk = false;
                     for(std::vector<supervisor_msgs::Action>::iterator itd = itms->previousActions.begin(); itd != itms->previousActions.end(); itd++){
-                        if(itl->origin == itd->id){
+                        if(itl->origin == itd->id && itd->succeed){
                             linksOk = true;
                             break;
                         }
@@ -205,12 +213,12 @@ void MsManager::checkGoals(){
 
     for(std::vector<supervisor_msgs::MentalState>::iterator itms = msList_.begin(); itms != msList_.end(); itms++){
         if(itms->robotGoal != currentRobotGoal_ && canSee(itms->agentName, robotName_)){
-            itms->robotGoal == currentRobotGoal_;
+            itms->robotGoal = currentRobotGoal_;
             std::string actorsParam = "goal_manager/goals/" + currentRobotGoal_ + "_actors";
             std::vector<std::string> actors;
             node_->getParam(actorsParam, actors);
             if(isInList(actors, itms->agentName)){
-                itms->agentGoal == currentRobotGoal_;
+                itms->agentGoal = currentRobotGoal_;
             }
         }
     }
@@ -278,6 +286,10 @@ bool MsManager::areFactsInTable(std::vector<toaster_msgs::Fact> facts, std::stri
  * */
 bool MsManager::canSee(std::string agent, std::string target){
 
+    if(agent == target){
+        return true;
+    }
+
     toaster_msgs::Fact fact;
     fact.subjectId = target;
     fact.property = "isVisibleBy";
@@ -295,13 +307,38 @@ bool MsManager::canSee(std::string agent, std::string target){
  * */
 void MsManager::addEffects(supervisor_msgs::Action action, std::string agent){
 
+
+    std::vector<toaster_msgs::Fact> toAdd, toRm;
+
+    for(std::vector<toaster_msgs::Fact>::iterator it = action.effects.begin(); it != action.effects.end(); it++){
+        if(isInList(nonObservableFacts_, it->property)){
+            it->factObservability = 0.0;
+        }else{
+            it->factObservability = 1.0;
+        }
+        if(it->targetId == "NULL" || it->subjectId == "NULL"){
+            toRm.push_back(*it);
+        }else{
+            toAdd.push_back(*it);
+        }
+    }
+
     toaster_msgs::SetInfoDB srv;
     srv.request.agentId = agent;
-    srv.request.facts = action.effects;
     srv.request.infoType = "FACT";
-    srv.request.add = true;
-    if (!client_db_.call(srv)){
-     ROS_ERROR("[mental_state] Failed to call service database_manager/set_info");
+    if(toRm.size() > 0){
+        srv.request.facts = toRm;
+        srv.request.add = false;
+        if (!client_db_.call(srv)){
+         ROS_ERROR("[mental_state] Failed to call service database_manager/set_info");
+        }
+    }
+    if(toAdd.size() > 0){
+        srv.request.facts = toAdd;
+        srv.request.add = true;
+        if (!client_db_.call(srv)){
+         ROS_ERROR("[mental_state] Failed to call service database_manager/set_info");
+        }
     }
 }
 
@@ -337,7 +374,7 @@ supervisor_msgs::Action MsManager::addPrecsAndEffects(supervisor_msgs::Action ac
     std::string effectsTopic = "highLevelActions/"+ action.name + "_effects";
     std::vector<std::string> stringPrecs, stringEffects;
     node_->getParam(precsTopic, stringPrecs);
-    node_->getParam(precsTopic, stringEffects);
+    node_->getParam(effectsTopic, stringEffects);
 
     //we convert them into facts
     std::vector<toaster_msgs::Fact> highLevelPrecs, highLevelEffects;
@@ -370,6 +407,8 @@ supervisor_msgs::Action MsManager::addPrecsAndEffects(supervisor_msgs::Action ac
         fact.propertyType = it->propertyType;
         if(it->subjectId == "mainAgent"){
             fact.subjectId = action.actors[0];
+        }else if(it->subjectId == "NULL" || it->subjectId == "true" || it->subjectId == "false"){
+            fact.subjectId = it->subjectId;
         }else{
             for(int i = 0; i < action.parameter_keys.size(); i++){
                 if(action.parameter_keys[i] == it->subjectId){
@@ -380,6 +419,8 @@ supervisor_msgs::Action MsManager::addPrecsAndEffects(supervisor_msgs::Action ac
         }
         if(it->targetId == "mainAgent"){
             fact.targetId = action.actors[0];
+        }else if(it->targetId == "NULL" || it->targetId == "true" || it->targetId == "false"){
+            fact.targetId = it->targetId;
         }else{
             for(int i = 0; i < action.parameter_keys.size(); i++){
                 if(action.parameter_keys[i] == it->targetId){
@@ -396,6 +437,8 @@ supervisor_msgs::Action MsManager::addPrecsAndEffects(supervisor_msgs::Action ac
         fact.propertyType = it->propertyType;
         if(it->subjectId == "mainAgent"){
             fact.subjectId = action.actors[0];
+        }else if(it->subjectId == "NULL" || it->subjectId == "true" || it->subjectId == "false"){
+            fact.subjectId = it->subjectId;
         }else{
             for(int i = 0; i < action.parameter_keys.size(); i++){
                 if(action.parameter_keys[i] == it->subjectId){
@@ -406,6 +449,8 @@ supervisor_msgs::Action MsManager::addPrecsAndEffects(supervisor_msgs::Action ac
         }
         if(it->targetId == "mainAgent"){
             fact.targetId = action.actors[0];
+        }else if(it->targetId == "NULL" || it->targetId == "true" || it->targetId == "false"){
+            fact.targetId = it->targetId;
         }else{
             for(int i = 0; i < action.parameter_keys.size(); i++){
                 if(action.parameter_keys[i] == it->targetId){
@@ -496,6 +541,12 @@ supervisor_msgs::Action MsManager::isInList(supervisor_msgs::Action action, std:
  * @param add true if the fact needs to be add, false for removing
  * */
 void MsManager::addRmFactToAgent(toaster_msgs::Fact fact, std::string agent, bool add){
+
+    if(isInList(nonObservableFacts_, fact.property)){
+        fact.factObservability = 0.0;
+    }else{
+        fact.factObservability = 1.0;
+    }
 
     toaster_msgs::SetInfoDB srv;
     srv.request.agentId = agent;

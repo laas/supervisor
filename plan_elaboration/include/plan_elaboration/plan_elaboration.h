@@ -11,6 +11,7 @@
 #include "plan_elaboration/Domains/default_domain.h"
 #include "plan_elaboration/Domains/scan_domain.h"
 #include "plan_elaboration/Domains/blocks_domain.h"
+#include "plan_elaboration/Domains/scan_us_domain.h"
 
 #include "std_srvs/Trigger.h"
 #include "toaster_msgs/ExecuteDB.h"
@@ -33,6 +34,7 @@ public:
     bool domainInitialized_; /**< flag to say if the domain is initialized for the current goal*/
 
     std::pair<bool, supervisor_msgs::SharedPlan> findPlan();
+    std::string getLockedObject(std::string object, std::string agent);
 private:
     ros::NodeHandle* node_; /**< Node handle*/
     std::string robotName_; /**< name of the robot*/
@@ -45,6 +47,7 @@ private:
     std::map<std::string, std::vector<std::string> > highLevelRefinment_; /**< possible refinment for high level names*/
     int planId_; /**< previous given id for a new plan*/
     int nbMaxTry_; /**< nb max try to get a plan*/
+    std::vector<std::string> toIgnoreFactsForXAgent_; /**< facts to ignore when computing x agent facts*/
 
     ros::ServiceClient client_db_execute_; /**< client for the database execute service*/
     ros::ServiceClient client_db_set_; /**< client for the database set info service*/

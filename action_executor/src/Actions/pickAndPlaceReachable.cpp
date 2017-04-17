@@ -18,6 +18,7 @@ PickAndPlaceReachable::PickAndPlaceReachable(supervisor_msgs::Action action, Con
     PlaceReachable* place = new PlaceReachable(action, connector);
     placeAction_ = *place;
 
+    //we look for the action parameters
     bool foundObj = false;
     bool foundSup = false;
     for(int i=0; i<=action.parameter_keys.size();i++){
@@ -53,7 +54,7 @@ PickAndPlaceReachable::PickAndPlaceReachable(supervisor_msgs::Action action, Con
 bool PickAndPlaceReachable::preconditions(){
 
     if(!isRefined(object_)){
-        //we look for a refinment
+        //if the object is not refined, we look fo a refinement
         std::vector<toaster_msgs::Fact> conditions;
         toaster_msgs::Fact fact;
         fact.subjectId = "NULL";
@@ -70,8 +71,15 @@ bool PickAndPlaceReachable::preconditions(){
             initialObject_ = object_;
             std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), object_, newObject);
             object_ = newObject;
+        }else{
+            ROS_WARN("[action_executor] No possible refinement for object: %s", object_.c_str());
+            return false;
         }
     }
+
+    //the robot should first look at the object
+    connector_->currentAction_.headFocus = object_;
+    connector_->currentAction_.shouldKeepFocus = false;
 
     //First we check if the object is a known manipulable object
     if(!isManipulableObject(object_)){
@@ -109,6 +117,7 @@ bool PickAndPlaceReachable::preconditions(){
 bool PickAndPlaceReachable::plan(){
 
     if(pickAction_.plan()){
+        //we first plan the pick
         pickId_ = connector_->previousId_;
         if(!isRefined(support_)){
             //we postpone the support decision
@@ -132,7 +141,7 @@ bool PickAndPlaceReachable::exec(Server* action_server){
     placeId_ = connector_->previousId_;
     connector_->previousId_  = pickId_;
     if(pickAction_.exec(action_server) && pickAction_.post()){
-        //look for a support
+        //look for a support if it was not refined
         if(!isRefined(support_)){
             //we look for a refinment
             std::vector<toaster_msgs::Fact> conditions;
@@ -153,6 +162,8 @@ bool PickAndPlaceReachable::exec(Server* action_server){
                 initialSupport_ = support_;
                 std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), support_, newObject);
                 support_ = newObject;
+                //the robot should then look at the container
+                connector_->currentAction_.headFocus = support_;
                 if(placeAction_.plan()){
                     return placeAction_.exec(action_server);
                 }
@@ -160,6 +171,8 @@ bool PickAndPlaceReachable::exec(Server* action_server){
             return false;
         }
         connector_->previousId_  = placeId_;
+        //the robot should then look at the container
+        connector_->currentAction_.headFocus = support_;
         return placeAction_.exec(action_server);
     }
 

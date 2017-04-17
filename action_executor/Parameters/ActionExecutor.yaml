@@ -1,6 +1,7 @@
 ---
 action_executor:
     noExec: true
+    noPlanning: true
     restPosition:
         right: 'manipulationPoseRight'
         left: 'manipulationPoseLeft'
@@ -10,6 +11,8 @@ action_executor:
     safetyThreshold: 0.5
     toWatchThreshold: 0.5
     gripperThreshold: 0.01
+    timeScan: 2.0
+    timeWaitScan: 5.0
     planningSupport:
         TABLE_4: 'PLACEMAT_RED'
     points:
@@ -21,4 +24,6 @@ action_executor:
     humanCost: 'HERAKLES_HUMAN1'
     uniqueSupports:
         - 'PLACEMAT_RED'
+        - 'SCAN_AREA1'
+        - 'SCAN_AREA2'
 

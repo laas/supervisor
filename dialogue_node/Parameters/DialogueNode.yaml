@@ -7,16 +7,24 @@ dialogue_node:
         HERAKLES_HUMAN1: 'Greg'
         HERAKLES_HUMAN2: 'Bob'
         RED_CUBE: 'red cube'
+        RED_CUBE1: 'red cube'
         RED_CUBE2: 'red cube'
         RED_CUBE3: 'red cube'
         BLUE_CUBE: 'blue cube'
+        BLUE_CUBE1: 'blue cube'
         BLUE_CUBE2: 'blue cube'
         BLUE_CUBE3: 'blue cube'
         BLACK_CUBE: 'black cube'
         GREEN_CUBE: 'green cube'
+        GREEN_CUBE1: 'green cube'
+        GREEN_CUBE2: 'green cube'
+        GREEN_CUBE3: 'green cube'
         GREY_TAPE: 'grey tape'
         LOTR_TAPE: 'lord of the ring tape'
         WALLE_TAPE: 'walle tape'
+        RED_TAPE: 'red tape'
+        RED_TAPE1: 'red tape'
+        RED_TAPE2: 'red tape'
         TABLE_4: 'table'
         IKEA_SHELF_LIGHT: 'light shelf'
         IKEA_SHELF_DARK: 'dark shelf'
@@ -24,9 +32,17 @@ dialogue_node:
         PLACEMAT_ROBOT: 'table'
         PLACEMAT_HUMAN1: 'table'
         PLACEMAT_HUMAN2: 'table'
+        SCAN_AREA: 'scan area'
+        SCAN_AREA1: 'scan area'
+        SCAN_AREA2: 'scan area'
         PINK_TRASHBIN: 'pink box'
         BLUE_TRASHBIN: 'blue box'
         GREEN_TRASHBIN: 'green box'
+        GREEN_BOX: 'green box'
+        BLUE_BOX: 'blue box'
+        RED_BOX: 'red box'
+        RED_BOX1: 'red box'
+        RED_BOX2: 'red box'
         STICK: 'stick'
     properties:
         translationTrue:
@@ -34,19 +50,23 @@ dialogue_node:
             isIn: 'is in'
             isReachableBy: 'can reach'
             isVisibleBy: 'can see'
+            isHoldBy: 'hold'
         translationFalse:
             isOn: 'is not on'
             isIn: 'is not in'
             isReachableBy: 'can not reach'
             isVisibleBy: 'can not see'
+            isHoldBy: 'do not hold'
         translationAsk:
             isOn: 'on the'
             isIn: 'in the'
             isReachableBy: 'reachable by'
             isVisibleBy: 'visible by'
+            isHoldBy: 'hold'
         isReverse:
             isOn: false
             isIn: false
             isReachableBy: true
             isVisibleBy: true
+            isHoldBy: true
 

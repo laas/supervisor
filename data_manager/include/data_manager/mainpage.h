@@ -18,17 +18,17 @@
 *   - remove a data to a list (must be published on /data_manager/rm_data/<data_name>)
 *
 * \section Suscribed topics
-*   - topics name in param
-*   - /data_manager/add_data/<data_name>
-*   - /data_manager/rm_data/<data_name>
+*   - topics name in param (supervisor_msgs/ActionsList)
+*   - /data_manager/add_data/<data_name>: add a data to a topic (supervisor_msgs/ActionsList)
+*   - /data_manager/rm_data/<data_name>: remove a data from a topic (supervisor_msgs/ActionsList)
 *
 * \section Published topics
-*   - supervisor/actions_todo
-*   - supervisor/previous_actions
+*   - supervisor/actions_todo: list of actions todo for all agents (supervisor_msgs/ActionsList)
+*   - supervisor/previous_actions: previous actions of all agents (supervisor_msgs/ActionsList)
 *
 * \section Parameters
-*  - actions_todo_topics: topics where to read actions to do
-*  - previous_actions_topics: topics where to read previous actions
+*  - actions_todo_topics: topics where to read actions to do (list of strings)
+*  - previous_actions_topics: topics where to read previous actions (list of strings)
 *
 * \section Dependencies
 * Build dependecies:

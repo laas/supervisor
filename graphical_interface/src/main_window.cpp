@@ -9,8 +9,11 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     : QMainWindow(parent),
       actionClient_("supervisor/action_executor", true)
 {
+    //set up the windows
     ui.setupUi(this);
     setWindowTitle("PR2 supervisor");
+
+    //initialize parameters
     node_.getParam("/supervisor/robot/name", robotName_);
     node_.getParam("/supervisor/simu", simu_);
     node_.getParam("/supervisor/waitActionServer", waitActionServer_);
@@ -20,6 +23,7 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     node_.getParam("/graphical_interface/humanTab", dialogueTab_);
     node_.getParam("/graphical_interface/dialogueTab", humanTab_);
 
+    //we fill the buttons
     //we retrieve the possible agents from param of the .yaml file
     std::vector<std::string> agents;
     node_.getParam("/entities/agents", agents);
@@ -105,6 +109,7 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
         ui.Interface->setTabEnabled(4, false);
     }
 
+    //initialize clients
     client_set_db_ = node_.serviceClient<toaster_msgs::SetInfoDB>("database_manager/set_info");
     client_get_db_ = node_.serviceClient<toaster_msgs::GetInfoDB>("database_manager/get_info");
     client_execute_db_ = node_.serviceClient<toaster_msgs::ExecuteDB>("database_manager/execute");
@@ -116,7 +121,7 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     client_say_ = node_.serviceClient<supervisor_msgs::String>("dialogue_node/say");
     client_give_info_ = node_.serviceClient<supervisor_msgs::GiveInfo>("dialogue_node/give_info");
 
-
+    //initialize publishers
     boolPub_ = node_.advertise<std_msgs::Bool>("graphical_interface/boolAnswer", 1);
 
 }

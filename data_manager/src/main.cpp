@@ -17,6 +17,7 @@ std::vector<supervisor_msgs::Action> actionsTodoTopics, previousActionsTopics;
 std::vector<supervisor_msgs::Action> actionsTodoPermanent, previousActionsPermanent;
 std::vector<ros::Subscriber> todoSubs, previousSubs;
 bool previousChanged, todoChanged;
+int prevId_;
 
 /**
  * \brief Compare 2 actions
@@ -85,6 +86,7 @@ bool areActionsEqual(supervisor_msgs::Action action1, supervisor_msgs::Action ac
 void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
 
     actionsTodoTopics.insert(actionsTodoTopics.end(), msg->actions.begin(), msg->actions.end());
+    prevId_ = msg->prevId;
     if(msg->changed){
         todoChanged = true;
     }
@@ -177,6 +179,7 @@ int main (int argc, char **argv)
 
   previousChanged = false;
   todoChanged = false;
+  prevId_ = -1;
 
   //Then we create the readers
   ros::Subscriber sub;
@@ -209,6 +212,7 @@ int main (int argc, char **argv)
       actionsTodo.insert(actionsTodo.end(), actionsTodoPermanent.begin(), actionsTodoPermanent.end());
       msg_todo.actions = actionsTodo;
       msg_todo.changed = todoChanged;
+      msg_todo.prevId = prevId_;
       todo_pub.publish(msg_todo);
       supervisor_msgs::ActionsList msg_previous;
       previousActions.insert(previousActions.end(), previousActionsTopics.begin(), previousActionsTopics.end());

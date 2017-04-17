@@ -12,6 +12,7 @@ Class allowing the execution of a drop action
  * */
 Drop::Drop(supervisor_msgs::Action action, Connector* connector) : VirtualAction(connector){
 
+    //looking for the parameters of the action
     bool foundObj = false;
     bool foundCont = false;
     for(int i=0; i<=action.parameter_keys.size();i++){
@@ -47,6 +48,7 @@ Drop::Drop(supervisor_msgs::Action action, Connector* connector) : VirtualAction
  * */
 bool Drop::preconditions(){
 
+    //if the container is not refined, we look fo a refinement
     if(!isRefined(container_)){
         //we look for a refinment
         std::vector<toaster_msgs::Fact> conditions;
@@ -61,8 +63,15 @@ bool Drop::preconditions(){
             initialContainer_ = container_;
             std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), container_, newObject);
             container_ = newObject;
+        }else{
+            ROS_WARN("[action_executor] No possible refinement for container: %s", container_.c_str());
+            return false;
         }
     }
+
+    //the robot should look the container
+    connector_->currentAction_.headFocus = container_;
+    connector_->currentAction_.shouldKeepFocus = false;
 
     //First we check if the object is a known manipulable object
     if(!isManipulableObject(object_)){
@@ -73,8 +82,8 @@ bool Drop::preconditions(){
     //Then we check if the support is a known support object
     if(!isContainerObject(container_)){
        ROS_WARN("[action_executor] The container is not a known container object");
-      return false;
-    }
+       return false;
+     }
 
     //Then we check if the robot has the object in hand and if the container is reachable
     std::vector<toaster_msgs::Fact> precsTocheck;
@@ -111,6 +120,7 @@ bool Drop::plan(){
         }
     }
 
+    //We ask gtp a plan
     std::vector<gtp_ros_msgs::Role> agents;
     gtp_ros_msgs::Role role;
     role.role = "mainAgent";
@@ -156,8 +166,8 @@ bool Drop::exec(Server* action_server){
         if(execAction(gtpActionId_, subSolutions_, false, action_server)){
             return true;
         }else if(connector_->refineOrder_ ){
+            //the chosen object is already taken, we look for another refinement
             connector_->previousId_  = -1;
-            //we look for a refinment
             std::vector<toaster_msgs::Fact> conditions;
             toaster_msgs::Fact fact;
             fact.subjectId = "OBJECT";
@@ -169,6 +179,7 @@ bool Drop::exec(Server* action_server){
             if(newObject != "NULL"){
                 std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), container_, newObject);
                 container_ = newObject;
+                connector_->currentAction_.headFocus = container_;
                 if(!this->plan()){
                     return false;
                 }

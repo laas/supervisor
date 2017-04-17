@@ -12,6 +12,7 @@ Class allowing the execution of a scan action
  * */
 Scan::Scan(supervisor_msgs::Action action, Connector* connector) : VirtualAction(connector){
 
+    //we look for the action parameters
     bool found = false;
     for(int i=0; i<=action.parameter_keys.size();i++){
         if(action.parameter_keys[i] == "object"){
@@ -25,8 +26,19 @@ Scan::Scan(supervisor_msgs::Action action, Connector* connector) : VirtualAction
     }
 
     connector_->node_->getParam("/action_executor/timeScan", timeScan_);
+    connector_->node_->getParam("/action_executor/timeWaitScan", timeWaitScan_);
 
     client_light_ = connector_->node_->serviceClient<dynamic_reconfigure::Reconfigure>("/camera_synchronizer_node/set_parameters");
+    sub_head_focus_ = connector_->node_->subscribe("simple_head_manager/focus", 1, &Scan::focusCallback, this);
+}
+
+/**
+ * \brief Callback of the head focus topic
+ * @param msg topic msg
+ * */
+void Scan::focusCallback(const std_msgs::String::ConstPtr& msg){
+
+    headFocus_ = msg->data;
 }
 
 /**
@@ -38,7 +50,7 @@ Scan::Scan(supervisor_msgs::Action action, Connector* connector) : VirtualAction
 bool Scan::preconditions(){
 
     if(!isRefined(object_)){
-        //we look for a refinment
+        //if the object is not refined, we look fo a refinement
         std::vector<toaster_msgs::Fact> conditions;
         toaster_msgs::Fact fact;
         fact.subjectId = "NULL";
@@ -55,8 +67,15 @@ bool Scan::preconditions(){
             initialObject_ = object_;
             std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), object_, newObject);
             object_ = newObject;
+        }else{
+            ROS_WARN("[action_executor] No possible refinement for object: %s", object_.c_str());
+            return false;
         }
     }
+
+    //the robot should look at the object
+    connector_->currentAction_.headFocus = object_;
+    connector_->currentAction_.shouldKeepFocus = true;
 
     //We check that the object is reachable by the agent
     std::vector<toaster_msgs::Fact> precsTocheck;
@@ -122,16 +141,36 @@ bool Scan::exec(Server* action_server){
         }
     }
 
-    //TODO: add verification of head focus
+    //Verification of head focus
+    bool shouldWait = true;
+    ros::Time start_ = ros::Time::now();
+    while(shouldWait){
+        ros::Duration d = ros::Time::now() - start_;
+        double duration = d.toSec();
+        if(duration > timeWaitScan_){
+            shouldWait = false;
+        }
+        if(headFocus_ == object_){
+            shouldWait = false;
+        }
+    }
+
+    if(headFocus_ != object_){
+        ROS_WARN("Unable to get the head focus, aborting the action!");
+        return false;
+    }
 
     if(!connector_->simu_){
         //turn on the light
+        controlRobotLight(true);
     }
 
+    ROS_INFO("SCANNING");
     ros::Duration(timeScan_).sleep();
 
     if(!connector_->simu_){
         //turn off the light
+        controlRobotLight(false);
     }
 
    return true;
@@ -144,8 +183,6 @@ bool Scan::exec(Server* action_server){
  * @return true if the post-conditions are ok
  * */
 bool Scan::post(){
-
-    //Here we check/apply post conditions
 
     return true;
 }

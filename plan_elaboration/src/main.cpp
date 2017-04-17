@@ -87,7 +87,7 @@ bool endPlan(supervisor_msgs::EndPlan::Request  &req, supervisor_msgs::EndPlan::
 
     if(req.evaluate){
         //the plan needs to be evaluate
-        pe_->dom_->objectLocked_ = req.objectLocked;
+        pe_->dom_->objectLocked_ = pe_->getLockedObject(req.objectLocked, req.agentLocked);
         pe_->dom_->agentLocked_ = req.agentLocked;
     }
 
