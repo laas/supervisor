@@ -1,0 +1,5 @@
+<launch>
+    <rosparam command="load" file="$(find dialogue_node)/Parameters/DialogueNode.yaml" />
+
+    <node name="dialogue_node" pkg="dialogue_node" type="dialogue_node" output="screen" />  <!-- Launch the dialogue node -->
+</launch>

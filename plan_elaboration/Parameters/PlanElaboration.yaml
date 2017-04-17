@@ -1,0 +1,32 @@
+---
+plan_elaboration:
+    Agents: ['PR2_ROBOT', 'HERAKLES_HUMAN1']
+    nbMaxTry: 3
+    toIgnoreFactsForXAgent: ['type', 'isActivated']
+    HATP_actions:
+       Pick: 'pick'
+       Place: 'place'
+       PickAndPlace: 'pickandplace'
+       PickAndPlaceReachable: 'pickandplacereachable'
+       PickAndPlaceStick: 'pickandplaceStick'
+       PickAndDrop: 'pickanddrop'
+       Scan: 'scan'
+    domains:
+        SCAN:
+            areaScan: 'scanAreaTABLE_4'
+            facts: ['isReachableBy', 'color', 'isIn', 'hasInHand', 'isScanned', 'isInScanArea', 'canScan', 'IsInArea']
+            method: 'ScanAll'
+            params: []
+        STACK:
+            facts: ['isReachableBy', 'type', 'isOn', 'hasInHand']
+            method: 'BuildStack'
+            params: ['PLACEMAT_RED', 'RED_CUBE', 'BLACK_CUBE', 'GREEN_CUBE', 'BLUE_CUBE']
+        BLOCKS:
+            areaStack: 'stackAreaTABLE_4'
+            facts: ['isReachableBy', 'type', 'isOn', 'hasInHand', 'genericName','value', 'IsInArea']
+            method: 'Build'
+            params: []
+        SCAN_US:
+            facts: ['isReachableBy', 'color', 'type', 'isOn', 'isIn', 'isHoldBy', 'isScan', 'isActivated', 'value']
+            method: 'ScanAll'
+            params: []

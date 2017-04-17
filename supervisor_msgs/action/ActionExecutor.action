@@ -4,5 +4,11 @@ bool report
 bool shouldRetractRight
 bool shouldRetractLeft
 string state
+float64 timeTot
+float64 timeDB
+float64 timePlan
+float64 timeExec
+float64 timeGTP
+float64 timeToaster
 ---
 string state

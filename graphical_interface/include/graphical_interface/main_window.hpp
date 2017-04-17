@@ -15,46 +15,18 @@
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/client/terminal_state.h>
 
-#include <pr2motion/Arm_Right_MoveToQGoalAction.h>
-#include <pr2motion/Arm_Left_MoveToQGoalAction.h>
-#include <pr2motion/Gripper_Right_OperateAction.h>
-#include <pr2motion/Gripper_Left_OperateAction.h>
-#include <pr2motion/Torso_MoveAction.h>
-#include <pr2motion/Head_Move_TargetAction.h>
-#include <pr2motion/GetQAction.h>
-#include <pr2motion/Torso_Stop.h>
-#include <pr2motion/Gripper_Stop.h>
+#include "std_srvs/Empty.h"
+#include "std_msgs/Bool.h"
 
-#include "supervisor_msgs/Action.h"
-#include "supervisor_msgs/ActionExecutorAction.h"
-#include "supervisor_msgs/ActionExecutorActionResult.h"
-#include "supervisor_msgs/ActionExecutorActionFeedback.h"
-#include "supervisor_msgs/ChangeState.h"
-#include "supervisor_msgs/HumanActionSimu.h"
-#include "supervisor_msgs/GetInfo.h"
-#include "supervisor_msgs/NewGoal.h"
-#include "supervisor_msgs/Empty.h"
-#include "toaster_msgs/Fact.h"
-#include "toaster_msgs/RemoveFromHand.h"
 #include "toaster_msgs/SetInfoDB.h"
-#include "supervisor_msgs/ActionMS.h"
-#include "supervisor_msgs/Say.h"
-#include "supervisor_msgs/GetInfoDia.h"
-#include "supervisor_msgs/Bool.h"
 #include "toaster_msgs/GetInfoDB.h"
+#include "toaster_msgs/ExecuteDB.h"
+#include "toaster_msgs/RemoveFromHand.h"
 
-#include "head_manager/Signal.h"
-
-using namespace std;
-
-typedef actionlib::SimpleActionClient<supervisor_msgs::ActionExecutorAction> ClientSup;
-typedef actionlib::SimpleActionClient<pr2motion::Torso_MoveAction> ClientTorso;
-typedef actionlib::SimpleActionClient<pr2motion::Arm_Right_MoveToQGoalAction> ClientRightArm;
-typedef actionlib::SimpleActionClient<pr2motion::Arm_Left_MoveToQGoalAction> ClientLeftArm;
-typedef actionlib::SimpleActionClient<pr2motion::Gripper_Right_OperateAction> ClientRightGripper;
-typedef actionlib::SimpleActionClient<pr2motion::Gripper_Left_OperateAction> ClientLeftGripper;
-typedef actionlib::SimpleActionClient<pr2motion::Head_Move_TargetAction> ClientHead;
-typedef actionlib::SimpleActionClient<pr2motion::GetQAction> ClientGetQ;
+#include "supervisor_msgs/ActionExecutorAction.h"
+#include "supervisor_msgs/HumanAction.h"
+#include "supervisor_msgs/String.h"
+#include "supervisor_msgs/GiveInfo.h"
 
 class MainWindow : public QMainWindow {
 Q_OBJECT
@@ -66,92 +38,70 @@ public:
 public Q_SLOTS:
 
 private Q_SLOTS:
+
+    void on_pushButtonAddDB_clicked();
+
+    void on_pushButtonRmDB_clicked();
+
+    void on_pushButtonPrintDB_clicked();
+
+    void on_pushButtonPrintAllDB_clicked();
+
     void on_pushButtonExecuteAction_clicked();
-
-    void on_pushButtonAskAction_clicked();
-
-    void on_pushButtonSendHumanAction_clicked();
-
-    void on_pushButtonExecuteGoal_clicked();
-
-    void on_pushButtonPrintKnowledge_clicked();
-
-    void on_pushButtonSeeActions_clicked();
 
     void on_pushButtonStopAction_clicked();
 
-    bool toIgnore(string fact);
+    void on_pushButtonDetach_clicked();
 
-    void on_SpeakButton_clicked();
+    void on_pushButtonExecuteHuman_clicked();
 
+    void on_pushButtonDetachHuman_clicked();
 
-    void on_moveTorso_clicked();
+    void on_pushButtonSendGoal_clicked();
 
-    void on_stopTorso_clicked();
+    void on_pushButtonCancelGoal_clicked();
 
-    void on_openRightGripper_clicked();
+    void on_pushButtonResetDB_clicked();
 
-    void on_closeRightGripper_clicked();
+    void on_pushButtonSay_clicked();
 
-    void on_stopRightGripper_clicked();
+    void on_pushButtonHumanSay_clicked();
 
-    void on_openLeftGripper_clicked();
+    void on_pushButtonYes_clicked();
 
-    void on_closeLeftGripper_clicked();
+    void on_pushButtonNo_clicked();
 
-    void on_stopLeftGripper_clicked();
-
-    void on_moveRightArm_clicked();
-
-    void on_stopRightArm_clicked();
-
-    void on_moveLeftArm_clicked();
-
-    void on_stopLeftArm_clicked();
-
-    void on_moveHead_clicked();
-
-    void on_YesButton_clicked();
-
-    void on_NoButton_clicked();
-
-    void on_SendFactButton_clicked();
-
-    void on_pushButtonDetachFromHand_clicked();
-
-    void on_addReceiver_clicked();
-
-    void on_cleanReceiver_clicked();
-
-    void on_addEntity_clicked();
-
-    void on_cleanEntities_clicked();
-
-    void on_SendSignal_clicked();
+    void on_pushButtonPrintPlanning_clicked();
 
 public:
-    Ui::MainWindowDesign ui;
-    ros::NodeHandle node_;
-    ClientSup actionClientSup_;
-    ClientTorso actionClientTorso_;
-    ClientRightArm actionClientRightArm_;
-    ClientLeftArm actionClientLeftArm_;
-    ClientRightGripper actionClientRightGripper_;
-    ClientLeftGripper actionClientLeftGripper_;
-    ClientHead actionClientHead_;
-    ClientGetQ actionClientGetQ_;
-    string robotName_;
-    ros::Publisher boolAnswerPub_;
+    Ui::MainWindowDesign ui; /**< Main windows design*/
+    ros::NodeHandle node_; /**< Node handle*/
 
 private:
-    double waitActionServer_;
-    bool simu_;
+    double waitActionServer_; /**< time to wait for an action server*/
+    bool simu_; /**< flag to indicate simu or not*/
+    std::string robotName_; /**< name of the robot*/
 
-    vector<string> receiversSignal_;
-    vector<string> entitiesSignal_;
-    vector<double> durationsSignal_;
+    bool goalTab_; /**< flag to indicate the goals tab is activated*/
+    bool databaseTab_; /**< flag to indicate the database tab is activated*/
+    bool actionTab_; /**< flag to indicate the action tab is activated*/
+    bool humanTab_; /**< flag to indicate the human action tab is activated*/
+    bool dialogueTab_; /**< flag to indicate the human dialogue tab is activated*/
 
+    ros::ServiceClient client_set_db_; /**< client of set info db service*/
+    ros::ServiceClient client_get_db_; /**< client of get info db service*/
+    ros::ServiceClient client_execute_db_; /**< client of execute db service*/
+    ros::ServiceClient client_stop_action_; /**< client to stop an action*/
+    ros::ServiceClient client_detach_object_; /**< client to detach an object from hand*/
+    ros::ServiceClient client_human_action_; /**< client to execute human action*/
+    ros::ServiceClient client_send_goal_; /**< client to send a new goal*/
+    ros::ServiceClient client_cancel_goal_; /**< client to cancel a goal*/
+    ros::ServiceClient client_say_; /**< client to say a sentence*/
+    ros::ServiceClient client_give_info_; /**< client to give an info to the dialogue module*/
 
+    actionlib::SimpleActionClient<supervisor_msgs::ActionExecutorAction> actionClient_; /**< action executor client*/
+
+    ros::Publisher boolPub_; /**< publisher for the bool topic*/
 };
 
 

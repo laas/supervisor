@@ -1,3 +1,6 @@
-bool report
+bool success
+bool evaluate
+bool forgiveAction
+string objectLocked
+string agentLocked
 ---
-bool answer

@@ -1,0 +1,5 @@
+<launch>
+    <rosparam command="load" file="$(find data_manager)/Parameters/DataManager.yaml" />
+
+    <node name="data_manager" pkg="data_manager" type="data_manager" output="screen" />  <!-- Launch the data manager -->
+</launch>

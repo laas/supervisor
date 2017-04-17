@@ -15,6 +15,9 @@
 ** Main
 *****************************************************************************/
 
+/**
+ * \brief Main function
+ * */
 int main(int argc, char **argv) {
 
     ROS_INFO("[graphical_interface] Init graphical_interface");

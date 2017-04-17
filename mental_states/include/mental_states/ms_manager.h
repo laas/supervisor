@@ -1,77 +1,56 @@
-#ifndef MSMANAGER_H
-#define MSMANAGER_H
+#ifndef MS_MANAGER_H
+
+#define MS_MANAGER_H
 
 #include <iostream>
 #include <string>
 #include <vector>
 #include <ros/ros.h>
-#include <ros/callback_queue.h>
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/locks.hpp>
-#include <boost/thread.hpp>
+#include "boost/algorithm/string.hpp"
 
-#include <mental_states/db_interface.h>
-#include "toaster_msgs/Fact.h"
-#include "toaster_msgs/FactList.h"
-#include "supervisor_msgs/EndPlan.h"
-#include "supervisor_msgs/ChangeState.h"
-#include "supervisor_msgs/InfoGiven.h"
-#include "supervisor_msgs/GetInfo.h"
-#include "supervisor_msgs/SolveDivergentBelief.h"
-#include "supervisor_msgs/ActionMS.h"
-#include "supervisor_msgs/PlanMS.h"
-#include "supervisor_msgs/GoalMS.h"
-#include "supervisor_msgs/Link.h"
-#include "supervisor_msgs/Action.h"
-#include "supervisor_msgs/Plan.h"
-#include "supervisor_msgs/GiveInfo.h"
-#include "supervisor_msgs/Knowledge.h"
+#include "toaster_msgs/DatabaseTables.h"
+#include "toaster_msgs/SetInfoDB.h"
+
+#include "supervisor_msgs/MentalStatesList.h"
+#include "supervisor_msgs/SharedPlan.h"
+#include "supervisor_msgs/GoalsList.h"
+#include "supervisor_msgs/ActionsList.h"
+#include "supervisor_msgs/Info.h"
 
 
-using namespace std;
-
-class MSManager{
+class MsManager
+{
 public:
-	MSManager();
-	vector<supervisor_msgs::ActionMS> getActionList();
-    void update(string agent);
-	void initGoals();
-	void initHighLevelActions();
-	supervisor_msgs::GoalMS* getGoalByName(string name);
-	supervisor_msgs::ActionMS createActionFromHighLevel(supervisor_msgs::Action action);
-	int getAndIncreasePlanId();
-	void addPlanToList(supervisor_msgs::PlanMS plan);
-	pair<bool, supervisor_msgs::PlanMS> getAgentPlan(string agent);
-	void abortPlan(string agent);
-	pair<bool, supervisor_msgs::ActionMS> getActionFromAction(supervisor_msgs::Action action);
-	pair<bool, supervisor_msgs::ActionMS> getActionFromId(int id);
-	pair<bool, supervisor_msgs::PlanMS> getPlanFromId(int id);
-	supervisor_msgs::Action convertActionMStoAction(supervisor_msgs::ActionMS actionMS);
-    supervisor_msgs::Plan convertPlanMStoPlan(supervisor_msgs::PlanMS planMS);
-	vector<supervisor_msgs::ActionMS> getActionsFromIds(vector<int> ids);
-    bool isFromCurrentPlan(supervisor_msgs::ActionMS actionMS, string agent);
+    MsManager(ros::NodeHandle* node);
+    void initMentalStates();
+    bool checkEffects();
+    bool checkPrecs();
+    void checkGoals();
+    supervisor_msgs::Action addPrecsAndEffects(supervisor_msgs::Action action);
+    bool canSee(std::string agent, std::string target);
+    supervisor_msgs::Action isInList(supervisor_msgs::Action action, std::vector<supervisor_msgs::Action> actions);
+    void addEffects(supervisor_msgs::Action action, std::string agent);
+    void addRmFactToAgent(toaster_msgs::Fact fact, std::string agent, bool add);
+    bool isInList(std::vector<std::string> list, std::string element);
 
-    DBInterface db_;
-protected:
-
+    std::string robotName_; /**< name of the robot*/
+    std::string agentX_; /**< HATP name of the x agent*/
+    std::map<std::string, std::string> highLevelNames_; /**< map for higl level names objects*/
+    std::map<std::string, std::vector<std::string> > highLevelRefinment_; /**< possible refinment for high level names*/
+    std::vector<std::string> agents_; /**< the agents for who we compute mental states*/
+    std::vector<supervisor_msgs::MentalState> msList_; /**< the mental states of the agents*/
+    supervisor_msgs::Action currentRobotAction_; /**< the current robot action*/
+    supervisor_msgs::SharedPlan currentPlan_; /**< the current plan for the joint action*/
+    std::string currentRobotGoal_; /**< the current goal of the robot*/
+    std::vector<toaster_msgs::DatabaseTable> agentsTable_; /**< the knowledge of the agents from the database*/
 private:
-	vector<supervisor_msgs::ActionMS> actionList_;
-	vector<supervisor_msgs::PlanMS> planList_;
-	vector<supervisor_msgs::GoalMS> goalList_;
-	vector<supervisor_msgs::ActionMS> highLevelActions_;
-	int actionId_;
-	int planId_;
-	boost::mutex actionListMutex_;
-	boost::mutex planListMutex_;
-	boost::mutex goalListMutex_;
+    ros::NodeHandle* node_; /**< Node handle*/
+    ros::ServiceClient client_db_ ; /**< Client for the set info service of the database*/
+    std::vector<std::string> nonObservableFacts_; /**< list of non observable facts*/
 
-	void checkEffects(string agent);
-	void computePreconditions(string agent);
-	void planFeasibility(string agent);
-	void checkGoals(string agent);
-	supervisor_msgs::ActionMS getHighLevelActionByName(string name);
+    void fillHighLevelNames();
+    bool areFactsInTable(std::vector<toaster_msgs::Fact> facts, std::string agent, bool highLevel);
 
 };
 
-#endif // MSMANAGER_H
-
+#endif // MS_MANAGER_H

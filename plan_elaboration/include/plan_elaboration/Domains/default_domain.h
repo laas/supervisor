@@ -3,14 +3,13 @@
 
 #include "plan_elaboration/virtual_domain.h"
 
-using namespace std;
 
 class DefaultDomain: public VirtualDomain
 {
 public:
-    DefaultDomain();
+    DefaultDomain(ros::NodeHandle* node);
     ~DefaultDomain() {};
-    virtual vector<toaster_msgs::Fact> computeSpecificFacts(vector<toaster_msgs::Fact> facts);
+    virtual std::vector<toaster_msgs::Fact> computeSpecificFacts(std::vector<toaster_msgs::Fact> facts);
 };
 
 #endif // DEFAULT_DOMAIN_H

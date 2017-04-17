@@ -1,320 +1,509 @@
 /**
 author Sandra Devin
-
-Main class of the action executor
-
-This module allows the robot to execute high level actions.
-Available actions:
-
-In progess: pick, place (+pickandplace), drop (+pickanddrop)
-
-TODO: placereachable (+pickandplacereachable), give/grab, moveTo, goTo (+engage/disengage), scan, sweep
-
 **/
 
-#include <action_executor/action_executor.h>
+#include "action_executor/action_executor.h"
 
-ros::NodeHandle* node_;
-Connector* connector_;
-string humanSafetyJoint, robotToaster;
-double safetyThreshold;
-ros::Publisher focus_pub;
-
-ActionExecutor::ActionExecutor(string name):
-action_server_(node_, name, 
-	boost::bind(&ActionExecutor::execute,this, _1), false)
+/**
+ * \brief Construction of the class
+ * @param name name of the action server
+ * @param node pointer to the node handle
+ * */
+ActionExecutor::ActionExecutor(std::string name, ros::NodeHandle* node):
+action_server_(*node, name,
+    boost::bind(&ActionExecutor::execute,this, _1), false)
  {
- 	action_server_.start();
- 	ROS_INFO("[action_executor] Action server ready");
+    //start the action server
+    action_server_.start();
+
+    //initialize the parameters
+    connector_.node_ = node;
+    connector_.previousId_ = -1;
+    connector_.idGrasp_ = -1;
+    connector_.gripperRightOpen_ = false;
+    connector_.gripperLeftOpen_ = false;
+    connector_.rightArmMoving_ = false;
+    connector_.leftArmMoving_ = false;
+    connector_.rightGripperMoving_ = false;
+    connector_.leftGripperMoving_ = false;
+    connector_.torsoMoving_ = false;
+    connector_.stopOrder_ = false;
+    connector_.refineOrder_ = false;
+    connector_.node_->getParam("/action_executor/restPosition/right", connector_.rightArmRestPose_);
+    connector_.node_->getParam("/action_executor/restPosition/left", connector_.leftArmRestPose_);
+    connector_.node_->getParam("/supervisor/waitActionServer", connector_.waitActionServer_);
+    connector_.node_->getParam("/action_executor/shouldUseRightHand", connector_.shouldUseRightHand_);
+    connector_.node_->getParam("/supervisor/simu", connector_.simu_);
+    connector_.node_->getParam("/supervisor/robot/name", connector_.robotName_);
+    connector_.node_->getParam("/action_executor/nbPlanMaxGTP", connector_.nbPlanMax_);
+    connector_.node_->getParam("/supervisor/robot/toasterName", connector_.robotToaster_);
+    connector_.node_->getParam("/action_executor/noExec", connector_.noExec_);
+    connector_.node_->getParam("/action_executor/noPlanning", connector_.noPlanning_);
+    connector_.node_->getParam("/action_executor/humanCost", connector_.humanCost_);
+
+    //initialize high level names (from param)
+    initHighLevelNames();
+
+    //initialize the publishers
+    previous_pub_ = connector_.node_->advertise<supervisor_msgs::ActionsList>("/data_manager/add_data/previous_actions", 1);
+    current_pub_ = connector_.node_->advertise<supervisor_msgs::Action>("/action_executor/current_robot_action", 1);
+
+    //Init services
+    connector_.client_db_execute_ = connector_.node_->serviceClient<toaster_msgs::ExecuteDB>("database_manager/execute");
+    connector_.client_db_set_ = connector_.node_->serviceClient<toaster_msgs::SetInfoDB>("database_manager/set_info");
+    connector_.client_put_hand_ = connector_.node_->serviceClient<toaster_msgs::PutInHand>("pdg/put_in_hand");
+    connector_.client_remove_hand_ = connector_.node_->serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
+    connector_.client_gtp_traj_ = connector_.node_->serviceClient<gtp_ros_msgs::PublishTraj>("gtp/publishTraj");
+
+    if(connector_.simu_){
+        connector_.client_set_pose_ = connector_.node_->serviceClient<toaster_msgs::SetEntityPose>("toaster_simu/set_entity_pose");
+    }else{
+        connector_.client_set_pose_ = connector_.node_->serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
+    }
+
+
+    //Init action clients
+    ROS_INFO("[action_executor] Waiting for gtp actions server.");
+    connector_.acGTP_ = new actionlib::SimpleActionClient<gtp_ros_msgs::PlanAction>("gtp_server", true);
+    connector_.acGTP_->waitForServer();
+    ROS_INFO("[action_executor] Waiting for pr2motion actions server.");
+    connector_.PR2motion_init_ = new actionlib::SimpleActionClient<pr2motion::InitAction>("pr2motion/Init", true);
+    connector_.PR2motion_init_->waitForServer();
+    connector_.PR2motion_torso_ = new actionlib::SimpleActionClient<pr2motion::Torso_MoveAction>("pr2motion/Torso_Move", true);
+    connector_.PR2motion_torso_->waitForServer();
+    connector_.PR2motion_arm_right_ = new actionlib::SimpleActionClient<pr2motion::Arm_Right_MoveAction>("pr2motion/Arm_Right_Move",true);
+    connector_.PR2motion_arm_right_->waitForServer();
+    connector_.PR2motion_arm_left_ = new actionlib::SimpleActionClient<pr2motion::Arm_Left_MoveAction>("pr2motion/Arm_Left_Move",true);
+    connector_.PR2motion_arm_left_->waitForServer();
+    connector_.PR2motion_gripper_right_ = new actionlib::SimpleActionClient<pr2motion::Gripper_Right_OperateAction>("pr2motion/Gripper_Right_Operate",true);
+    connector_.PR2motion_gripper_right_->waitForServer();
+    connector_.PR2motion_gripper_left_ = new actionlib::SimpleActionClient<pr2motion::Gripper_Left_OperateAction>("pr2motion/Gripper_Left_Operate",true);
+    connector_.PR2motion_gripper_left_->waitForServer();
+    ROS_INFO("[action_executor] Action clients started.");
+
+    //Init PR2motion
+    ros::ServiceClient connect = connector_.node_->serviceClient<pr2motion::connect_port>("pr2motion/connect_port");
+    pr2motion::InitGoal goal_init;
+    connector_.PR2motion_init_->sendGoal(goal_init);
+
+    pr2motion::connect_port srv;
+    srv.request.local = "joint_state";
+    srv.request.remote = "joint_states";
+    if (!connect.call(srv)){
+      ROS_ERROR("[action_executor] Failed to call service pr2motion/connect_port");
+    }
+    srv.request.local = "head_controller_state";
+    srv.request.remote = "/head_traj_controller/state";
+    if (!connect.call(srv)){
+       ROS_ERROR("[action_executor] Failed to call service pr2motion/connect_port");
+    }
+    srv.request.local = "traj";
+    srv.request.remote = "gtp_trajectory";
+    if (!connect.call(srv)){
+       ROS_ERROR("[action_executor] Failed to call service pr2motion/connect_port");
+    }
+
+    if(connector_.simu_){//change torso position
+      pr2motion::Torso_MoveGoal goal;
+      goal.torso_position = 0.1;
+      connector_.torsoMoving_ = true;
+      connector_.PR2motion_torso_->sendGoal(goal);
+      ROS_INFO("[action_executor] Waiting for Torso move");
+      bool finishedBeforeTimeout = connector_.PR2motion_torso_->waitForResult(ros::Duration(connector_.waitActionServer_));
+      connector_.torsoMoving_ = false;
+      if (!finishedBeforeTimeout){
+         ROS_INFO("[action_executor] Action PR2Torso did not finish before the time out.");
+      }
+    }
+
+    ROS_INFO("[action_executor] Action server ready");
 }
 
-
+/**
+ * \brief Function to execute an action
+ * @param goal the description of the action to execute
+ * */
 void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& goal) {
-    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::ChangeState>("mental_state/change_state");
-    supervisor_msgs::ChangeState srv;
-    srv.request.type= "action";
-	srv.request.action = goal->action;
 
-	//Getting action informations
-	string name = goal->action.name;
-	int id = goal->action.id;
-	ROS_INFO("Executing action %s with id %i with parameters:", name.c_str(), id);
-	for(int i=0; i<goal->action.parameters.size();i++){
-		ROS_INFO("  %s", goal->action.parameters[i].c_str());
-	}
+    connector_.timerStart_ = ros::Time::now();
+    ros::Time now;
 
-	//Creating the action
-	VirtualAction* act = NULL;
-	act = initializeAction(goal->action);
-	if(!act){
-		ROS_WARN("Aborted");
-		result_.report = false;
+    //Checking the action parameters are valids
+    if(goal->action.parameter_keys.size() != goal->action.parameter_values.size()){
+        ROS_ERROR("[action_executor] In valid parameters: nb keys should be equal to nb values!");
+        result_.report = false;
         result_.state = "NON_VALID";
         result_.shouldRetractRight = false;
         result_.shouldRetractLeft = false;
-		action_server_.setAborted(result_);
-	   ROS_INFO("[action_executor] Action failed at creation");
-		return;
-	}
-
-	//send the fact that the action is in progress to the MS Manager
-	srv.request.state = "PROGRESS";
-	if (!client.call(srv)){
-     ROS_ERROR("[action_executor] Failed to call service mental_state/change_state");
+        now = ros::Time::now();
+        ros::Duration d = now - connector_.timerStart_;
+        result_.timeTot = d.toSec();
+        result_.timeDB = connector_.timeDB_;
+        result_.timePlan = connector_.timePlan_;
+        result_.timeExec = connector_.timeExec_;
+        result_.timeGTP = connector_.timeGTP_;
+        //we publish the action in the previous publisher
+        if(goal->action.name != "moveTo"){
+            supervisor_msgs::ActionsList msg_previous;
+            supervisor_msgs::Action actionToPublish = goal->action;
+            actionToPublish.succeed = false;
+            msg_previous.actions.push_back(actionToPublish);
+            previous_pub_.publish(msg_previous);
+            action_server_.setAborted(result_);
+        }
+        return;
     }
 
-	//Checking preconditions
-	feedback_.state = "PREC";
-	action_server_.publishFeedback(feedback_);
-	if(!act->preconditions()){
-		srv.request.state = "FAILED";
-		if (!client.call(srv)){
-         ROS_ERROR("[action_executor] Failed to call service mental_state/change_state");
-		}
+    //Getting action informations
+    std::string name = goal->action.name;
+    int id = goal->action.id;
+    ROS_INFO("Executing action %s with id %i with parameters:", name.c_str(), id);
+    for(int i=0; i<goal->action.parameter_keys.size();i++){
+        ROS_INFO("  %s: %s", goal->action.parameter_keys[i].c_str(), goal->action.parameter_values[i].c_str());
+    }
+
+    //Creating the action
+    VirtualAction* act = NULL;
+    act = initializeAction(goal->action);
+    if(!act){
+        result_.report = false;
+        result_.state = "NON_VALID";
+        result_.shouldRetractRight = false;
+        result_.shouldRetractLeft = false;
+        now = ros::Time::now();
+        ros::Duration d = now - connector_.timerStart_;
+        result_.timeTot = d.toSec();
+        result_.timeDB = connector_.timeDB_;
+        result_.timePlan = connector_.timePlan_;
+        result_.timeExec = connector_.timeExec_;
+        result_.timeGTP = connector_.timeGTP_;
+        action_server_.setAborted(result_);
+        ROS_INFO("[action_executor] Action failed at creation");
+        //we publish the action in the previous publisher
+        if(goal->action.name != "moveTo"){
+            supervisor_msgs::ActionsList msg_previous;
+            supervisor_msgs::Action actionToPublish = goal->action;
+            actionToPublish.succeed = false;
+            msg_previous.actions.push_back(actionToPublish);
+            previous_pub_.publish(msg_previous);
+        }
+        return;
+    }
+
+    connector_.currentAction_ = goal->action;
+    connector_.isActing_ = true;
+    //publishing the current action
+    if(goal->action.name != "moveTo"){
+        current_pub_.publish(connector_.currentAction_);
+    }
+
+    //Checking preconditions
+    feedback_.state = "PREC";
+    action_server_.publishFeedback(feedback_);
+    if(!act->preconditions()){
+        connector_.isActing_ = false;
         result_.report = false;
         result_.shouldRetractRight = false;
         result_.shouldRetractLeft = false;
-        connector_->weightFocus_ = 0.0;
-		if(!action_server_.isPreemptRequested()){
-			result_.state = feedback_.state;
-			action_server_.setAborted(result_);
-		}else{
-			result_.state = "PREEMPTED";
-			action_server_.setPreempted(result_);
+        now = ros::Time::now();
+        ros::Duration d = now - connector_.timerStart_;
+        result_.timeTot = d.toSec();
+        result_.timeDB = connector_.timeDB_;
+        result_.timePlan = connector_.timePlan_;
+        result_.timeExec = connector_.timeExec_;
+        result_.timeGTP = connector_.timeGTP_;
+        if(!action_server_.isPreemptRequested()){
+            result_.state = feedback_.state;
+            action_server_.setAborted(result_);
+            ROS_INFO("[action_executor] Action failed in preconditions");
+        }else{
+            result_.state = "PREEMPTED";
+            action_server_.setPreempted(result_);
+            ROS_INFO("[action_executor] Action stoped");
+        }
+        //we publish the action in the previous publisher
+        if(connector_.currentAction_.name != "moveTo"){
+            supervisor_msgs::ActionsList msg_previous;
+            connector_.currentAction_.succeed = false;
+            msg_previous.actions.push_back(connector_.currentAction_);
+            previous_pub_.publish(msg_previous);
+        }
+        return;
+    }
 
-		}
-	   ROS_INFO("[action_executor] Action failed in preconditions");
-		return;
-	}
-
-    if(action_server_.isPreemptRequested() || connector_->stopOrder_){
+    if(action_server_.isPreemptRequested() || connector_.stopOrder_){
+        connector_.isActing_ = false;
         result_.state = "PREEMPTED";
         result_.report = false;
         result_.shouldRetractRight = false;
         result_.shouldRetractLeft = false;
-        connector_->weightFocus_ = 0.0;
+        now = ros::Time::now();
+        ros::Duration d = now - connector_.timerStart_;
+        result_.timeTot = d.toSec();
+        result_.timeDB = connector_.timeDB_;
+        result_.timePlan = connector_.timePlan_;
+        result_.timeExec = connector_.timeExec_;
+        result_.timeGTP = connector_.timeGTP_;
         action_server_.setPreempted(result_);
         ROS_INFO("[action_executor] Action stoped");
+        //we publish the action in the previous publisher
+        if(connector_.currentAction_.name != "moveTo"){
+            supervisor_msgs::ActionsList msg_previous;
+            connector_.currentAction_.succeed = false;
+            msg_previous.actions.push_back(connector_.currentAction_);
+            previous_pub_.publish(msg_previous);
+        }
         return;
     }
 
-	//Plan for the action
-	feedback_.state = "PLAN";
-	action_server_.publishFeedback(feedback_);
-	if(!act->plan()){
-		srv.request.state = "FAILED";
-		if (!client.call(srv)){
-         ROS_ERROR("[action_executor] Failed to call service mental_state/change_state");
-		}
+    //Plan for the action
+    feedback_.state = "PLAN";
+    action_server_.publishFeedback(feedback_);
+    if(!act->plan()){
+        connector_.isActing_ = false;
         result_.report = false;
         result_.shouldRetractRight = false;
         result_.shouldRetractLeft = false;
-        connector_->weightFocus_ = 0.0;
-		if(!action_server_.isPreemptRequested()){
-			result_.state = feedback_.state;
-			action_server_.setAborted(result_);
-		}else{
-			result_.state = "PREEMPTED";
-			action_server_.setPreempted(result_);
-
-		}
-	   ROS_INFO("[action_executor] Action failed in planning");
-		return;
+        now = ros::Time::now();
+        ros::Duration d = now - connector_.timerStart_;
+        result_.timeTot = d.toSec();
+        result_.timeDB = connector_.timeDB_;
+        result_.timePlan = connector_.timePlan_;
+        result_.timeExec = connector_.timeExec_;
+        result_.timeGTP = connector_.timeGTP_;
+        if(!action_server_.isPreemptRequested()){
+            result_.state = feedback_.state;
+            action_server_.setAborted(result_);
+            ROS_INFO("[action_executor] Action failed in planning");
+        }else{
+            result_.state = "PREEMPTED";
+            action_server_.setPreempted(result_);
+            ROS_INFO("[action_executor] Action stoped");
+        }
+        //we publish the action in the previous publisher
+        if(connector_.currentAction_.name != "moveTo"){
+            supervisor_msgs::ActionsList msg_previous;
+            connector_.currentAction_.succeed = false;
+            msg_previous.actions.push_back(connector_.currentAction_);
+            previous_pub_.publish(msg_previous);
+        }
+        return;
     }
 
-    if(action_server_.isPreemptRequested() || connector_->stopOrder_){
+    if(action_server_.isPreemptRequested() || connector_.stopOrder_){
+        connector_.isActing_ = false;
+        now = ros::Time::now();
+        ros::Duration d = now - connector_.timerStart_;
+        result_.timeTot = d.toSec();
+        result_.timeDB = connector_.timeDB_;
+        result_.timePlan = connector_.timePlan_;
+        result_.timeExec = connector_.timeExec_;
+        result_.timeGTP = connector_.timeGTP_;
         result_.state = "PREEMPTED";
         result_.report = false;
         result_.shouldRetractRight = false;
         result_.shouldRetractLeft = false;
-        connector_->weightFocus_ = 0.0;
         action_server_.setPreempted(result_);
         ROS_INFO("[action_executor] Action stoped");
+        //we publish the action in the previous publisher
+        if(connector_.currentAction_.name != "moveTo"){
+            supervisor_msgs::ActionsList msg_previous;
+            connector_.currentAction_.succeed = false;
+            msg_previous.actions.push_back(connector_.currentAction_);
+            previous_pub_.publish(msg_previous);
+        }
         return;
     }
 
-	//Execution of the action
-	feedback_.state = "EXEC";
-	action_server_.publishFeedback(feedback_);
+    //Execution of the action
+    feedback_.state = "EXEC";
+    action_server_.publishFeedback(feedback_);
     if(!act->exec(&action_server_)){
-		srv.request.state = "FAILED";
-		if (!client.call(srv)){
-         ROS_ERROR("[action_executor] Failed to call service mental_state/change_state");
-		}
+        connector_.isActing_ = false;
         result_.report = false;
-        connector_->weightFocus_ = 0.0;
-        if(connector_->rightArmRestPose_ != connector_->rightArmPose_){
+        now = ros::Time::now();
+        ros::Duration d = now - connector_.timerStart_;
+        result_.timeTot = d.toSec();
+        result_.timeDB = connector_.timeDB_;
+        result_.timePlan = connector_.timePlan_;
+        result_.timeExec = connector_.timeExec_;
+        result_.timeGTP = connector_.timeGTP_;
+        if(connector_.rightArmRestPose_ != connector_.rightArmPose_){
             result_.shouldRetractRight = true;
         }else{
             result_.shouldRetractRight = false;
         }
-        if(connector_->leftArmRestPose_ != connector_->leftArmPose_){
+        if(connector_.leftArmRestPose_ != connector_.leftArmPose_){
             result_.shouldRetractLeft = true;
         }else{
             result_.shouldRetractLeft = false;
         }
-		if(!action_server_.isPreemptRequested()){
-			result_.state = feedback_.state;
-			action_server_.setAborted(result_);
-		}else{
-			result_.state = "PREEMPTED";
-			action_server_.setPreempted(result_);
-
-		}
-	   ROS_INFO("[action_executor] Action failed in execution");
-		return;
-	}
-
-	//Apply/Check Post-conditions
-	feedback_.state = "POST";
-	action_server_.publishFeedback(feedback_);
-	if(!act->post()){
-		srv.request.state = "FAILED";
-		if (!client.call(srv)){
-         ROS_ERROR("[action_executor] Failed to call service mental_state/change_state");
-		}
-        result_.report = false;
-        connector_->weightFocus_ = 0.0;
-        if(connector_->rightArmRestPose_ != connector_->rightArmPose_){
-            result_.shouldRetractRight = true;
+        if(!action_server_.isPreemptRequested()){
+            result_.state = feedback_.state;
+            action_server_.setAborted(result_);
+            ROS_INFO("[action_executor] Action failed in execution");
         }else{
-            result_.shouldRetractRight = false;
+            result_.state = "PREEMPTED";
+            action_server_.setPreempted(result_);
+            ROS_INFO("[action_executor] Action stoped");
         }
-        if(connector_->leftArmRestPose_ != connector_->leftArmPose_){
-            result_.shouldRetractLeft = true;
-        }else{
-            result_.shouldRetractLeft = false;
+        //we publish the action in the previous publisher
+        if(connector_.currentAction_.name != "moveTo"){
+            supervisor_msgs::ActionsList msg_previous;
+            connector_.currentAction_.succeed = false;
+            msg_previous.actions.push_back(connector_.currentAction_);
+            previous_pub_.publish(msg_previous);
         }
-		if(!action_server_.isPreemptRequested()){
-			result_.state = feedback_.state;
-			action_server_.setAborted(result_);
-		}else{
-			result_.state = "PREEMPTED";
-			action_server_.setPreempted(result_);
-
-		}
-	   ROS_INFO("[action_executor] Action failed in post conditions");
-		return;
-	}
-	
-	srv.request.state = "DONE";
-	if (!client.call(srv)){
-     ROS_ERROR("[action_executor] Failed to call service mental_state/change_state");
+        return;
     }
-    if(connector_->rightArmRestPose_ != connector_->rightArmPose_){
+
+    //Apply/Check Post-conditions
+    feedback_.state = "POST";
+    action_server_.publishFeedback(feedback_);
+    if(!act->post()){
+        connector_.isActing_ = false;
+        result_.report = false;
+        now = ros::Time::now();
+        ros::Duration d = now - connector_.timerStart_;
+        result_.timeTot = d.toSec();
+        result_.timeDB = connector_.timeDB_;
+        result_.timePlan = connector_.timePlan_;
+        result_.timeExec = connector_.timeExec_;
+        result_.timeGTP = connector_.timeGTP_;
+        if(connector_.rightArmRestPose_ != connector_.rightArmPose_){
+            result_.shouldRetractRight = true;
+        }else{
+            result_.shouldRetractRight = false;
+        }
+        if(connector_.leftArmRestPose_ != connector_.leftArmPose_){
+            result_.shouldRetractLeft = true;
+        }else{
+            result_.shouldRetractLeft = false;
+        }
+        if(!action_server_.isPreemptRequested()){
+            result_.state = feedback_.state;
+            action_server_.setAborted(result_);
+            ROS_INFO("[action_executor] Action failed in post conditions");
+        }else{
+            result_.state = "PREEMPTED";
+            action_server_.setPreempted(result_);
+            ROS_INFO("[action_executor] Action stoped");
+        }
+        //we publish the action in the previous publisher
+        if(connector_.currentAction_.name != "moveTo"){
+            supervisor_msgs::ActionsList msg_previous;
+            connector_.currentAction_.succeed = false;
+            msg_previous.actions.push_back(connector_.currentAction_);
+            previous_pub_.publish(msg_previous);
+        }
+        return;
+    }
+
+    now = ros::Time::now();
+    ros::Duration d = now - connector_.timerStart_;
+    result_.timeTot = d.toSec();
+    result_.timeDB = connector_.timeDB_;
+    result_.timePlan = connector_.timePlan_;
+    result_.timeExec = connector_.timeExec_;
+    result_.timeGTP = connector_.timeGTP_;
+    if(connector_.rightArmRestPose_ != connector_.rightArmPose_){
         result_.shouldRetractRight = true;
     }else{
         result_.shouldRetractRight = false;
     }
-    if(connector_->leftArmRestPose_ != connector_->leftArmPose_){
+    if(connector_.leftArmRestPose_ != connector_.leftArmPose_){
         result_.shouldRetractLeft = true;
     }else{
         result_.shouldRetractLeft = false;
     }
+    connector_.isActing_ = false;
     result_.report = true;
-    connector_->weightFocus_ = 0.0;
-	result_.state = "OK";
+    result_.state = "OK";
+    //we publish the action in the previous publisher
+    if(connector_.currentAction_.name != "moveTo"){
+        supervisor_msgs::ActionsList msg_previous;
+        connector_.currentAction_.succeed = true;
+        msg_previous.actions.push_back(connector_.currentAction_);
+        previous_pub_.publish(msg_previous);
+    }
     action_server_.setSucceeded(result_);
-	ROS_INFO("[action_executor] Action succeed");
+    ROS_INFO("[action_executor] Action succeed");
 }
 
 
+/**
+ * \brief Initialize a virtual action based on its name and params
+ * @param action the description of the action to initialize
+ * @return a virtual action initialized
+ * */
 VirtualAction* ActionExecutor::initializeAction(supervisor_msgs::Action action) {
-	VirtualAction* act = NULL;
+    VirtualAction* act = NULL;
 
-    connector_->stopOrder_ = false;
+    connector_.stopOrder_ = false;
 
-	if(action.name == "pick"){
-		act = new Pick(action, connector_);
-	}else if(action.name == "place"){
-        act = new Place(action, connector_);
+    if(action.name == "pick"){
+        act = new Pick(action, &connector_);
+    }else if(action.name == "place"){
+        act = new Place(action, &connector_);
     }else if(action.name == "placereachable"){
-        act = new PlaceReachable(action, connector_);
-    }else if(action.name == "pickandplace"){
-		act = new PickAndPlace(action, connector_);
-    }else if(action.name == "pickandplacereachable"){
-        act = new PickAndPlaceReachable(action, connector_);
+        act = new PlaceReachable(action, &connector_);
     }else if(action.name == "drop"){
-		act = new Drop(action, connector_);
-	}else if(action.name == "pickanddrop"){
-		act = new PickAndDrop(action, connector_);
-	}else if(action.name == "moveTo"){
-		act = new MoveTo(action, connector_);
+        act = new Drop(action, &connector_);
     }else if(action.name == "scan"){
-        act = new Scan(action, connector_);
+        act = new Scan(action, &connector_);
+    }else if(action.name == "moveTo"){
+        act = new MoveTo(action, &connector_);
+    }else if(action.name == "pickandplace"){
+        act = new PickAndPlace(action, &connector_);
+    }else if(action.name == "pickandplacereachable"){
+        act = new PickAndPlaceReachable(action, &connector_);
+    }else if(action.name == "pickanddrop"){
+        act = new PickAndDrop(action, &connector_);
     }else{
-		ROS_WARN("[action_executor] Unknown action");
-	}	
+        ROS_WARN("[action_executor] Unknown action");
+    }
 
-	return act;
+    return act;
 }
 
-/*
-Service call when a stop order arrives
-*/
-bool stopOrder(supervisor_msgs::Empty::Request  &req, supervisor_msgs::Empty::Response &res){
+/**
+ * \brief Initialize the high level name maps based on params
+ * */
+void ActionExecutor::initHighLevelNames() {
 
-   connector_->stopOrder_ = true;
-
-    return true;
-}
-
-void agentFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
-
-    vector<toaster_msgs::Fact> distanceFacts = msg->factList;
-
-    for(vector<toaster_msgs::Fact>::iterator it = distanceFacts.begin(); it != distanceFacts.end(); it++){
-        if(it->property == "Distance"){
-            if(it->subjectId == humanSafetyJoint && it->targetId == robotToaster){
-                if(it->doubleValue < safetyThreshold){
-                    connector_->stopOrder_ = true;
-                }else{
-                    connector_->stopOrder_ = false;
-                }
-            }
+    std::vector<std::string> manipulableObjects;
+    connector_.node_->getParam("/entities/objects", manipulableObjects);
+    for(std::vector<std::string>::iterator it = manipulableObjects.begin(); it != manipulableObjects.end(); it++){
+        connector_.highLevelNames_[*it] = *it;
+        std::string paramName = "/entities/highLevelName/" + *it;
+        if(connector_.node_->hasParam(paramName)){
+            connector_.node_->getParam(paramName, connector_.highLevelRefinment_[*it]);
         }
     }
-}
 
-void publishFocus(){
-    ros::Rate loop_rate(30);
-
-    while (true) {
-        supervisor_msgs::Focus msg;
-        msg.object = connector_->objectFocus_;
-        msg.weight = connector_->weightFocus_;
-        msg.stopable = connector_->stopableFocus_;
-        focus_pub.publish(msg);
-        loop_rate.sleep();
+    std::vector<std::string> supportObjects;
+    connector_.node_->getParam("/entities/supports", supportObjects);
+    for(std::vector<std::string>::iterator it = supportObjects.begin(); it != supportObjects.end(); it++){
+        connector_.highLevelNames_[*it] = *it;
+        std::string paramName = "/entities/highLevelName/" + *it;
+        if(connector_.node_->hasParam(paramName)){
+            connector_.node_->getParam(paramName, connector_.highLevelRefinment_[*it]);
+        }
     }
 
-}
+    std::vector<std::string> containerObjects;
+    connector_.node_->getParam("/entities/containers", containerObjects);
+    for(std::vector<std::string>::iterator it = containerObjects.begin(); it != containerObjects.end(); it++){
+        connector_.highLevelNames_[*it] = *it;
+        std::string paramName = "/entities/highLevelName/" + *it;
+        if(connector_.node_->hasParam(paramName)){
+            connector_.node_->getParam(paramName, connector_.highLevelRefinment_[*it]);
+        }
+    }
 
-int main (int argc, char **argv)
-{
-  ros::init(argc, argv, "action_executor");
-  ros::NodeHandle node;
-  node_ = &node;
-  node.getParam("humanSafetyJoint", humanSafetyJoint);
-  node.getParam("safetyThreshold", safetyThreshold);
-  node.getParam("robot/toasterName", robotToaster);
-   
-  Connector connector;
-  connector_ = &connector;
-
-  ROS_INFO("[action_executor] Init action_executor");
-
-  ActionExecutor executor("supervisor/action_executor");
-
-  ros::Subscriber sub = node.subscribe("agent_monitor/factList", 1000, agentFactListCallback);
-
-  ros::ServiceServer service_stop = node.advertiseService("action_executor/stop", stopOrder); //stop the execution
-
-  focus_pub = node.advertise<supervisor_msgs::Focus>("action_executor/focus", 1000);
-
-  boost::thread pubThread(publishFocus);
-
-  ros::spin();
-
-  return 0;
+    for(std::map<std::string, std::vector<std::string> >::iterator it = connector_.highLevelRefinment_.begin(); it != connector_.highLevelRefinment_.end(); it++){
+        for(std::vector<std::string>::iterator ith = it->second.begin(); ith != it->second.end(); ith++){
+            connector_.highLevelNames_[*ith] = it->first;
+        }
+    }
 }

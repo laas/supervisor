@@ -1,0 +1,5 @@
+<launch>
+    <rosparam command="load" file="$(find goal_manager)/Parameters/GoalManager.yaml" />
+
+    <node name="goal_manager" pkg="goal_manager" type="goal_manager" output="screen" />  <!-- Launch the goal manager -->
+</launch>

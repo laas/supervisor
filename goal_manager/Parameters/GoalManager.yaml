@@ -1,0 +1,35 @@
+---
+goal_manager:
+    goals:
+        names: ['STACK', 'BLOCKS', 'SCAN', 'SCAN_US']
+        STACK_actors: ['PR2_ROBOT', 'HERAKLES_HUMAN1']
+        STACK_objective: ['RED_CUBE,isOn,PLACEMAT_RED',
+                        'BLACK_CUBE,isOn,RED_CUBE',
+                        'GREEN_CUBE,isOn,BLACK_CUBE',
+                        'BLUE_CUBE,isOn,GREEN_CUBE']
+        SCAN_actors: ['PR2_ROBOT', 'HERAKLES_HUMAN1']
+        SCAN_objective: ['GREEN_CUBE,isIn,GREEN_TRASHBIN',
+                        'GREEN_CUBE2,isIn,GREEN_TRASHBIN',
+                        'GREEN_CUBE3,isIn,GREEN_TRASHBIN',
+                        'BLUE_CUBE,isIn,BLUE_TRASHBIN',
+                        'BLUE_CUBE2,isIn,BLUE_TRASHBIN',
+                        'BLUE_CUBE3,isIn,BLUE_TRASHBIN',]
+        BLOCKS_actors: ['PR2_ROBOT', 'HERAKLES_HUMAN1']
+        BLOCKS_objective: ['RED_CUBE1,isOn,PLACEMAT1',
+                           'RED_CUBE2,isOn,PLACEMAT2',
+                           'STICK,isOn,RED_CUBE1',
+                           'STICK,isOn,RED_CUBE2',
+                           'BLUE_CUBE1,isOn,STICK',
+                           'GREEN_CUBE,isOn,BLUE_CUBE1',
+                           'BLUE_CUBE2,isOn,GREEN_CUBE']
+        SCAN_US_actors: ['PR2_ROBOT', 'HERAKLES_HUMAN1']
+        SCAN_US_objective: ['GREEN_CUBE1,isIn,GREEN_TRASHBIN',
+                       'GREEN_CUBE2,isIn,GREEN_TRASHBIN',
+                       'GREEN_CUBE3,isIn,GREEN_TRASHBIN',
+                       'BLUE_CUBE1,isIn,BLUE_TRASHBIN',
+                       'BLUE_CUBE2,isIn,BLUE_TRASHBIN',
+                       'BLUE_CUBE3,isIn,BLUE_TRASHBIN',
+                       'RED_CUBE1,isIn,PINK_TRASHBIN',
+                       'RED_CUBE2,isIn,PINK_TRASHBIN',
+                       'RED_CUBE3,isIn,PINK_TRASHBIN',
+                       'RED_TAPE1,isIn,PINK_TRASHBIN',]

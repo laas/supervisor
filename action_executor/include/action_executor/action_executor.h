@@ -1,45 +1,38 @@
 #ifndef ACTIONEXECUTOR_H
 #define ACTIONEXECUTOR_H
 
-#include "supervisor_msgs/ActionExecutorAction.h"
-#include "supervisor_msgs/ChangeState.h"
-#include "supervisor_msgs/Empty.h"
-#include "supervisor_msgs/Focus.h"
-#include "action_executor/virtual_action.h"
 #include "action_executor/connector.h"
-#include "action_executor/Actions/action_pkg.h"
-#include <toaster_msgs/Fact.h>
-#include <toaster_msgs/FactList.h>
+#include "action_executor/virtual_action.h"
 
-#include <actionlib/server/simple_action_server.h>
-#include <actionlib/client/simple_action_client.h>
-#include <actionlib/client/terminal_state.h>
-
-#include <iostream>
-#include <string>
-#include <vector>
-#include <ros/ros.h>
-#include <boost/thread.hpp>
+#include "action_executor/Actions/pick.h"
+#include "action_executor/Actions/place.h"
+#include "action_executor/Actions/placeReachable.h"
+#include "action_executor/Actions/drop.h"
+#include "action_executor/Actions/scan.h"
+#include "action_executor/Actions/moveTo.h"
+#include "action_executor/Actions/pickAndPlace.h"
+#include "action_executor/Actions/pickAndPlaceReachable.h"
+#include "action_executor/Actions/pickAndDrop.h"
 
 
 typedef actionlib::SimpleActionServer<supervisor_msgs::ActionExecutorAction> Server;
-using namespace std;
 
 class ActionExecutor{
 public:
-    ActionExecutor(string name);
+    ActionExecutor(std::string name, ros::NodeHandle* node);
+    Connector connector_; /**< Connector structure which regroups usefull information*/
+    ros::Publisher previous_pub_; /**< publisher of previous actions*/
+    ros::Publisher current_pub_; /**< publisher of current actions*/
 protected:
-	ros::NodeHandle node_;
-	supervisor_msgs::ActionExecutorFeedback feedback_;
-    supervisor_msgs::ActionExecutorResult result_;
-    Server action_server_;
+    supervisor_msgs::ActionExecutorFeedback feedback_; /**< feedback of the action*/
+    supervisor_msgs::ActionExecutorResult result_; /**< result of the action*/
+    Server action_server_; /**< action server*/
 
 private:
-	void execute(const supervisor_msgs::ActionExecutorGoalConstPtr& goal);
-	VirtualAction* initializeAction(supervisor_msgs::Action action);
-
+    void execute(const supervisor_msgs::ActionExecutorGoalConstPtr& goal);
+    VirtualAction* initializeAction(supervisor_msgs::Action action);
+    void initHighLevelNames();
 
 };
 
 #endif // ACTIONEXECUTOR_H
-

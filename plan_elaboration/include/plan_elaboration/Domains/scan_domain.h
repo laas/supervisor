@@ -3,18 +3,17 @@
 
 #include "plan_elaboration/virtual_domain.h"
 
-using namespace std;
 
 class ScanDomain: public VirtualDomain
 {
 public:
-    ScanDomain();
+    ScanDomain(ros::NodeHandle* node);
     ~ScanDomain() {};
-    virtual vector<toaster_msgs::Fact> computeSpecificFacts(vector<toaster_msgs::Fact> facts);
+    virtual std::vector<toaster_msgs::Fact> computeSpecificFacts(std::vector<toaster_msgs::Fact> facts);
 
 private:
-    string areaScan_;
-    vector<toaster_msgs::Fact> computeScanArea(vector<toaster_msgs::Fact> facts);
+    std::string areaScan_; /**< Name of the area for scan*/
+    std::vector<toaster_msgs::Fact> computeScanArea(std::vector<toaster_msgs::Fact> facts);
 };
 
 #endif // SCAN_DOMAIN_H

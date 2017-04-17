@@ -1,7 +1,0 @@
-string actionName
-string agent
-string object
-string support
-string container
----
-bool answer

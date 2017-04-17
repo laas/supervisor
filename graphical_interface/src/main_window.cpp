@@ -2,676 +2,553 @@
  **/
 #include "../include/graphical_interface/main_window.hpp"
 
-vector<string> toIgnoreFacts;
-
+/**
+ * \brief Construction of the class
+ * */
 MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     : QMainWindow(parent),
-      actionClientSup_("supervisor/action_executor", true),
-      actionClientTorso_("pr2motion/Torso_Move", true),
-      actionClientRightArm_("pr2motion/Arm_Right_MoveToQGoal",true),
-      actionClientLeftArm_("pr2motion/Arm_Left_MoveToQGoal",true),
-      actionClientRightGripper_("pr2motion/Gripper_Right_Operate",true),
-      actionClientLeftGripper_("pr2motion/Gripper_Left_Operate",true),
-      actionClientHead_("pr2motion/Head_Move_Target", true),
-      actionClientGetQ_("pr2motion/GetQ", true)
+      actionClient_("supervisor/action_executor", true)
 {
+    //set up the windows
     ui.setupUi(this);
     setWindowTitle("PR2 supervisor");
-    node_.getParam("/robot/name", robotName_);
 
-    boolAnswerPub_ = node_.advertise<supervisor_msgs::Bool>("graphical_interface/boolAnswer", 1000);
+    //initialize parameters
+    node_.getParam("/supervisor/robot/name", robotName_);
+    node_.getParam("/supervisor/simu", simu_);
+    node_.getParam("/supervisor/waitActionServer", waitActionServer_);
+    node_.getParam("/graphical_interface/goalTab", goalTab_);
+    node_.getParam("/graphical_interface/databaseTab", databaseTab_);
+    node_.getParam("/graphical_interface/actionTab", actionTab_);
+    node_.getParam("/graphical_interface/humanTab", dialogueTab_);
+    node_.getParam("/graphical_interface/dialogueTab", humanTab_);
 
-    //we retrieve the possible actions from param of the .yaml file
-    vector<string> actionNames;
-    node_.getParam("/highLevelActions/names", actionNames);
-    for(vector<string>::iterator it = actionNames.begin(); it != actionNames.end(); it++){
-        ui.comboBoxActionName->addItem(it->c_str());
-        ui.comboBoxHumanActionName->addItem(it->c_str());
-    }
-
+    //we fill the buttons
     //we retrieve the possible agents from param of the .yaml file
-    vector<string> agents;
+    std::vector<std::string> agents;
     node_.getParam("/entities/agents", agents);
-    for(vector<string>::iterator it = agents.begin(); it != agents.end(); it++){
+    for(std::vector<std::string>::iterator it = agents.begin(); it != agents.end(); it++){
         if(*it != robotName_){
-            ui.comboBoxHumanAgent->addItem(it->c_str());
-            ui.comboBoxReceiverSignal->addItem(it->c_str());
+            ui.comboBoxAgentAction->addItem(it->c_str());
+            ui.comboBoxHuman->addItem(it->c_str());
+            ui.comboBoxHumanDia->addItem(it->c_str());
         }
-        ui.comboBoxAgentKnowName->addItem(it->c_str());
-        ui.comboBoxAgents->addItem(it->c_str());
-        ui.comboBoxEntityNameSignal->addItem(it->c_str());
+        ui.comboBoxAgentDB->addItem(it->c_str());
     }
-    //Add planning table in knowledge printing
-    ui.comboBoxAgentKnowName->addItem("PLANNING");
 
     //we retrieve the possible objects from param of the .yaml file
-    vector<string> objects;
+    std::vector<std::string> objects;
     node_.getParam("/entities/objects", objects);
-    for(vector<string>::iterator it = objects.begin(); it != objects.end(); it++){
-        ui.comboBoxActionObject->addItem(it->c_str());
-        ui.comboBoxActionObject2->addItem(it->c_str());
-        ui.comboBoxHumanActionObject->addItem(it->c_str());
-        ui.comboBoxEntityNameSignal->addItem(it->c_str());
+    for(std::vector<std::string>::iterator it = objects.begin(); it != objects.end(); it++){
+        ui.comboBoxObjectAction->addItem(it->c_str());
+        ui.comboBoxObjectDetachAction->addItem(it->c_str());
+        ui.comboBoxObjectHuman->addItem(it->c_str());
+        ui.comboBoxObjectDetachHuman->addItem(it->c_str());
     }
-
 
     //we retrieve the possible supports from param of the .yaml file
-    vector<string> supports;
+    std::vector<std::string> supports;
     node_.getParam("/entities/supports", supports);
-    for(vector<string>::iterator it = supports.begin(); it != supports.end(); it++){
-        ui.comboBoxActionSupport->addItem(it->c_str());
-        ui.comboBoxHumanActionSupport->addItem(it->c_str());
-        ui.comboBoxEntityNameSignal->addItem(it->c_str());
+    for(std::vector<std::string>::iterator it = supports.begin(); it != supports.end(); it++){
+        ui.comboBoxSupportAction->addItem(it->c_str());
+        ui.comboBoxSupportHuman->addItem(it->c_str());
     }
-
 
     //we retrieve the possible containers from param of the .yaml file
-    vector<string> containers;
+    std::vector<std::string> containers;
     node_.getParam("/entities/containers", containers);
-    for(vector<string>::iterator it = containers.begin(); it != containers.end(); it++){
-        ui.comboBoxActionContainer->addItem(it->c_str());
-        ui.comboBoxHumanActionContainer->addItem(it->c_str());
-        ui.comboBoxEntityNameSignal->addItem(it->c_str());
+    for(std::vector<std::string>::iterator it = containers.begin(); it != containers.end(); it++){
+        ui.comboBoxContainerAction->addItem(it->c_str());
+        ui.comboBoxContainerHuman->addItem(it->c_str());
     }
 
+    //we retrieve the possible actions from param of the .yaml file
+    std::vector<std::string> possibleActions;
+    node_.getParam("/graphical_interface/possibleActions", possibleActions);
+    for(std::vector<std::string>::iterator it = possibleActions.begin(); it != possibleActions.end(); it++){
+        ui.comboBoxNameAction->addItem(it->c_str());
+        ui.comboBoxNameActionHuman->addItem(it->c_str());
+    }
 
     //we retrieve the possible positions from param of the .yaml file
-    vector<string> positions;
-    node_.getParam("/moveToPositions/names", positions);
-    for(vector<string>::iterator it = positions.begin(); it != positions.end(); it++){
-        ui.comboBoxActionPosition->addItem(it->c_str());
+    std::vector<std::string> positions;
+    node_.getParam("/graphical_interface/moveToPositions", positions);
+    for(std::vector<std::string>::iterator it = positions.begin(); it != positions.end(); it++){
+        ui.comboBoxPositionAction->addItem(it->c_str());
     }
-
-
-    //we retrieve the possible positions from param of the .yaml file
-    vector<string> goals;
-    node_.getParam("/goals/names", goals);
-    for(vector<string>::iterator it = goals.begin(); it != goals.end(); it++){
-        ui.comboBoxGoalName->addItem(it->c_str());
-    }
-
 
     //we retrieve the possible goals from param of the .yaml file
-    node_.getParam("/toIgnorePrint", toIgnoreFacts);
-    node_.getParam("/waitActionServer", waitActionServer_);
-    node_.getParam("/simu", simu_);
+    std::vector<std::string> goals;
+    node_.getParam("/goal_manager/goals/names", goals);
+    for(std::vector<std::string>::iterator it = goals.begin(); it != goals.end(); it++){
+        ui.comboBoxGoals->addItem(it->c_str());
+    }
 
-    //configure the values for robot control
-    ui.TorsoValue->setRange(0.0, 0.3);
-    ui.TorsoValue->setSingleStep(0.1);
-    ui.Q1Right->setRange(-1.0, 1.0);
-    ui.Q1Right->setSingleStep(0.1);
-    ui.Q2Right->setRange(-1.0, 1.0);
-    ui.Q2Right->setSingleStep(0.1);
-    ui.Q3Right->setRange(-1.0, 1.0);
-    ui.Q3Right->setSingleStep(0.1);
-    ui.Q4Right->setRange(-1.0, 1.0);
-    ui.Q4Right->setSingleStep(0.1);
-    ui.Q5Right->setRange(-1.0, 1.0);
-    ui.Q5Right->setSingleStep(0.1);
-    ui.Q6Right->setRange(-1.0, 1.0);
-    ui.Q6Right->setSingleStep(0.1);
-    ui.Q7Right->setRange(-1.0, 1.0);
-    ui.Q7Right->setSingleStep(0.1);
-    ui.Q1Left->setRange(-1.0, 1.0);
-    ui.Q1Left->setSingleStep(0.1);
-    ui.Q2Left->setRange(-1.0, 1.0);
-    ui.Q2Left->setSingleStep(0.1);
-    ui.Q3Left->setRange(-1.0, 1.0);
-    ui.Q3Left->setSingleStep(0.1);
-    ui.Q4Left->setRange(-1.0, 1.0);
-    ui.Q4Left->setSingleStep(0.1);
-    ui.Q5Left->setRange(-1.0, 1.0);
-    ui.Q5Left->setSingleStep(0.1);
-    ui.Q6Left->setRange(-1.0, 1.0);
-    ui.Q6Left->setSingleStep(0.1);
-    ui.Q7Left->setRange(-1.0, 1.0);
-    ui.Q6Left->setSingleStep(0.1);
-    ui.XHead->setRange(0.0, 9.0);
-    ui.XHead->setSingleStep(0.1);
-    ui.YHead->setRange(0.0, 9.0);
-    ui.YHead->setSingleStep(0.1);
-    ui.ZHead->setRange(0.0, 2.0);
-    ui.ZHead->setSingleStep(0.1);
 
-    ui.DurationEntity->setRange(0.0, 10.0);
-    ui.DurationEntity->setSingleStep(1.0);
-    ui.ImportancySignal->setRange(0.0, 1.0);
-    ui.ImportancySignal->setSingleStep(0.1);
-    ui.UrgencySignal->setRange(0.0, 1.0);
-    ui.UrgencySignal->setSingleStep(0.1);
 
-    actionClientSup_.waitForServer();
-    actionClientTorso_.waitForServer();
-    actionClientRightArm_.waitForServer();
-    actionClientLeftArm_.waitForServer();
-    actionClientRightGripper_.waitForServer();
-    actionClientLeftGripper_.waitForServer();
-    actionClientHead_.waitForServer();
-    actionClientGetQ_.waitForServer();
+    //desactivate tabs if needed
+    if(!goalTab_){
+        ui.Interface->setTabEnabled(0, false);
+    }
 
+    if(!databaseTab_){
+        ui.Interface->setTabEnabled(1, false);
+    }
+
+    if(!actionTab_){
+        ui.Interface->setTabEnabled(2, false);
+        ROS_INFO("[graphical_interface] Waiting action client");
+        actionClient_.waitForServer();
+    }
+
+    if(!humanTab_){
+        ui.Interface->setTabEnabled(3, false);
+    }
+
+    if(!dialogueTab_){
+        ui.Interface->setTabEnabled(4, false);
+    }
+
+    //initialize clients
+    client_set_db_ = node_.serviceClient<toaster_msgs::SetInfoDB>("database_manager/set_info");
+    client_get_db_ = node_.serviceClient<toaster_msgs::GetInfoDB>("database_manager/get_info");
+    client_execute_db_ = node_.serviceClient<toaster_msgs::ExecuteDB>("database_manager/execute");
+    client_stop_action_ = node_.serviceClient<std_srvs::Empty>("action_executor/stop");
+    client_detach_object_ = node_.serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
+    client_human_action_ = node_.serviceClient<supervisor_msgs::HumanAction>("human_monitor/human_action_simu");
+    client_send_goal_ = node_.serviceClient<supervisor_msgs::String>("goal_manager/new_goal");
+    client_cancel_goal_ = node_.serviceClient<supervisor_msgs::String>("goal_manager/cancel_goal");
+    client_say_ = node_.serviceClient<supervisor_msgs::String>("dialogue_node/say");
+    client_give_info_ = node_.serviceClient<supervisor_msgs::GiveInfo>("dialogue_node/give_info");
+
+    //initialize publishers
+    boolPub_ = node_.advertise<std_msgs::Bool>("graphical_interface/boolAnswer", 1);
 
 }
 
 MainWindow::~MainWindow() {}
 
+/** ***************************************
+ * Database Tab
+ * ****************************************/
 
-/*************************************
- * Action tab
- *************************************/
+/**
+ * \brief Push button to add a fact
+ * */
+void MainWindow::on_pushButtonAddDB_clicked()
+{
+    //we get the fact content
+    std::string subject = ui.textSubject->toPlainText().toStdString();
+    if(subject == ""){
+        ROS_WARN("[graphical_interface] No subject specified: NULL instead");
+        subject = "NULL";
+    }
+    std::string target = ui.textTarget->toPlainText().toStdString();
+    if(target == ""){
+        ROS_WARN("[graphical_interface] No target specified: NULL instead");
+        target = "NULL";
+    }
+    std::string property = ui.textProperty->toPlainText().toStdString();
+    if(property == ""){
+        ROS_ERROR("[graphical_interface] No property specified: abort");
+        return;
+    }
 
-/*
-Send an action to the action executor (simple non aware execution without head control)
-*/
+    //we add it to the db
+    ROS_INFO("[graphical_interface] adding the fact: %s %s %s", subject.c_str(), property.c_str(), target.c_str());
+    std::vector<toaster_msgs::Fact> facts;
+    toaster_msgs::Fact fact;
+    fact.subjectId = subject;
+    fact.property = property;
+    fact.targetId = target;
+    facts.push_back(fact);
+    toaster_msgs::SetInfoDB srv;
+    srv.request.agentId = robotName_;
+    srv.request.facts = facts;
+    srv.request.infoType = "FACT";
+    srv.request.add = true;
+    if (!client_set_db_.call(srv)){
+        ROS_ERROR("[graphical_interface] Failed to call service database_manager/set_info");
+    }
+}
+
+/**
+ * \brief Push button to remove a fact
+ * */
+void MainWindow::on_pushButtonRmDB_clicked()
+{
+    //we get the fact content
+    std::string subject = ui.textSubject->toPlainText().toStdString();
+    if(subject == ""){
+        ROS_WARN("[graphical_interface] No subject specified: NULL instead");
+        subject = "NULL";
+    }
+    std::string target = ui.textTarget->toPlainText().toStdString();
+    if(target == ""){
+        ROS_WARN("[graphical_interface] No target specified: NULL instead");
+        target = "NULL";
+    }
+    std::string property = ui.textProperty->toPlainText().toStdString();
+    if(property == ""){
+        ROS_ERROR("[graphical_interface] No property specified: abort");
+        return;
+    }
+
+    //we add it to the db
+    ROS_INFO("[graphical_interface] removing the fact: %s %s %s", subject.c_str(), property.c_str(), target.c_str());
+    std::vector<toaster_msgs::Fact> facts;
+    toaster_msgs::Fact fact;
+    fact.subjectId = subject;
+    fact.property = property;
+    fact.targetId = target;
+    facts.push_back(fact);
+    toaster_msgs::SetInfoDB srv;
+    srv.request.agentId = robotName_;
+    srv.request.facts = facts;
+    srv.request.infoType = "FACT";
+    srv.request.add = false;
+    if (!client_set_db_.call(srv)){
+        ROS_ERROR("[graphical_interface] Failed to call service database_manager/set_info");
+    }
+}
+
+/**
+ * \brief Push button to print a fact
+ * */
+void MainWindow::on_pushButtonPrintDB_clicked()
+{
+    //create the request
+    std::string request = "SELECT * from fact_table_" + robotName_ + " where";
+    bool find = false;
+    std::string subject = ui.textSubject->toPlainText().toStdString();
+    if(subject != ""){
+        request = request + " subject_id = " + subject;
+        find = true;
+    }
+    std::string target = ui.textTarget->toPlainText().toStdString();
+    if(target != ""){
+        if(find){
+            request = request + " and";
+            find = true;
+        }
+        request = request + " target_id = " + target;
+        find = true;
+    }
+    std::string property = ui.textProperty->toPlainText().toStdString();
+    if(property != ""){
+        if(find){
+            request = request + " and";
+        }
+        request = request + " predicate = " + property;
+        find = true;
+    }
+    if(!find){
+        ROS_ERROR("[graphical_interface] You should precise at least one part of the fact");
+        return;
+    }
+
+    //we ask the corresponding facts
+    toaster_msgs::ExecuteDB srv;
+    srv.request.command = "SQL";
+    srv.request.order = request;
+    if (client_execute_db_.call(srv)){
+        //we print them
+        if(srv.response.results.size()%3 != 0){
+            ROS_ERROR("[graphical_interface] Wrong database answer: not a set of 3 to produce facts!");
+            return;
+        }
+        std::string toPrint;
+        for(int i = 0; i < srv.response.results.size(); i = i+3){
+            subject = srv.response.results[i];
+            property = srv.response.results[i+1];
+            target = srv.response.results[i+2];
+            toPrint = toPrint + subject.c_str() + " " + property.c_str() + " " + target.c_str() + "\n";
+        }
+        ui.textDB->setText(QString::fromStdString(toPrint));
+    }else{
+        ROS_ERROR("[graphical_interface] Failed to call service database_manager/execute");
+    }
+
+
+}
+
+/**
+ * \brief Push button to print all facts in an agent table
+ * */
+void MainWindow::on_pushButtonPrintAllDB_clicked()
+{
+    //we ask all facts
+    toaster_msgs::GetInfoDB srv;
+    srv.request.type = "FACT";
+    srv.request.subType = "CURRENT";
+    srv.request.agentId = ui.comboBoxAgentDB->currentText().toStdString();
+    if (client_get_db_.call(srv)){
+        std::string toPrint;
+        for(std::vector<toaster_msgs::Fact>::iterator it = srv.response.resFactList.factList.begin(); it != srv.response.resFactList.factList.end(); it++){
+            toPrint = toPrint + it->subjectId.c_str() + " " + it->property.c_str() + " " + it->targetId.c_str() + "\n";
+        }
+        ui.textDB->setText(QString::fromStdString(toPrint));
+    }else{
+        ROS_ERROR("[graphical_interface] Failed to call service database_manager/get_info");
+    }
+
+}
+
+
+
+/**
+ * \brief Push button to print all facts in the planning table
+ * */
+void MainWindow::on_pushButtonPrintPlanning_clicked()
+{
+    //we ask all facts
+    toaster_msgs::GetInfoDB srv;
+    srv.request.type = "FACT";
+    srv.request.subType = "PLANNING";
+    if (client_get_db_.call(srv)){
+        std::string toPrint;
+        for(std::vector<toaster_msgs::Fact>::iterator it = srv.response.resFactList.factList.begin(); it != srv.response.resFactList.factList.end(); it++){
+            toPrint = toPrint + it->subjectId.c_str() + " " + it->property.c_str() + " " + it->targetId.c_str() + "\n";
+        }
+        ui.textDB->setText(QString::fromStdString(toPrint));
+    }else{
+        ROS_ERROR("[graphical_interface] Failed to call service database_manager/get_info");
+    }
+
+}
+
+/**
+ * \brief Push button to reset the database
+ * */
+void MainWindow::on_pushButtonResetDB_clicked()
+{
+    toaster_msgs::ExecuteDB srv;
+    srv.request.command = "EMPTY";
+    srv.request.type = "ALL";
+    if (!client_execute_db_.call(srv)){
+        ROS_ERROR("[graphical_interface] Failed to call service database_manager/execute");
+    }
+
+}
+
+
+/** ***************************************
+ * Action Tab
+ * ****************************************/
+
+/**
+ * \brief Push button to execute an action
+ * */
 void MainWindow::on_pushButtonExecuteAction_clicked()
 {
-    //Getting parameters
-    string actionName = ui.comboBoxActionName->currentText().toStdString();
-    string actionObject = ui.comboBoxActionObject->currentText().toStdString();
-    string actionSupport = ui.comboBoxActionSupport->currentText().toStdString();
-    string actionContainer = ui.comboBoxActionContainer->currentText().toStdString();
-    string position = ui.comboBoxActionPosition->currentText().toStdString();
+    //we get all the parameters and construct the action
+    supervisor_msgs::Action action;
+    action.actors.push_back(robotName_);
+    action.name = ui.comboBoxNameAction->currentText().toStdString();
+    action.parameter_keys.push_back("object");
+    action.parameter_values.push_back(ui.comboBoxObjectAction->currentText().toStdString());
+    action.parameter_keys.push_back("support");
+    action.parameter_values.push_back(ui.comboBoxSupportAction->currentText().toStdString());
+    action.parameter_keys.push_back("container");
+    action.parameter_values.push_back(ui.comboBoxContainerAction->currentText().toStdString());
+    action.parameter_keys.push_back("targetAgent");
+    action.parameter_values.push_back(ui.comboBoxAgentAction->currentText().toStdString());
+    action.parameter_keys.push_back("confName");
+    action.parameter_values.push_back(ui.comboBoxPositionAction->currentText().toStdString());
 
-    //creating the action with the good parameters coming from higl level actions
+    //we send it to the action executor
     supervisor_msgs::ActionExecutorGoal goal;
-    goal.action.name = actionName;
-    goal.action.id = -1;
-    goal.action.actors.push_back(robotName_);
-    string paramTopic = "highLevelActions/";
-    paramTopic = paramTopic + actionName + "_param";
-    vector<string> params;
-    node_.getParam(paramTopic, params);
-    for(vector<string>::iterator it = params.begin(); it != params.end(); it++){
-        if(*it == "mainObject"){
-             goal.action.parameters.push_back(actionObject);
-        }else if(*it == "supportObject"){
-            goal.action.parameters.push_back(actionSupport);
-       }else if(*it == "containerObject"){
-            goal.action.parameters.push_back(actionContainer);
-       }else if(*it == "position"){
-            goal.action.parameters.push_back(position);
-       }
-    }
+    goal.action = action;
+    actionClient_.sendGoal(goal);
 
-    //Sending the actions
-    actionClientSup_.sendGoal(goal);
+
 }
 
-/*
-Ask an action: send the action to the mental state manager (complete execution)
-*/
-void MainWindow::on_pushButtonAskAction_clicked()
-{
-    //Getting parameters
-    string actionName = ui.comboBoxActionName->currentText().toStdString();
-    string actionObject = ui.comboBoxActionObject->currentText().toStdString();
-    string actionSupport = ui.comboBoxActionSupport->currentText().toStdString();
-    string actionContainer = ui.comboBoxActionContainer->currentText().toStdString();
-    string position = ui.comboBoxActionPosition->currentText().toStdString();
-
-    //creating the action
-    ros::ServiceClient action_state = node_.serviceClient<supervisor_msgs::ChangeState>("mental_state/change_state");
-    supervisor_msgs::ChangeState srv_astate;
-    srv_astate.request.type = "action";
-    srv_astate.request.action.name = actionName;
-    srv_astate.request.action.id = -1;
-    srv_astate.request.action.actors.push_back(robotName_);
-    string paramTopic = "highLevelActions/";
-    paramTopic = paramTopic + actionName + "_param";
-    vector<string> params;
-    node_.getParam(paramTopic, params);
-    for(vector<string>::iterator it = params.begin(); it != params.end(); it++){
-        if(*it == "mainObject"){
-             srv_astate.request.action.parameters.push_back(actionObject);
-        }else if(*it == "supportObject"){
-            srv_astate.request.action.parameters.push_back(actionSupport);
-       }else if(*it == "containerObject"){
-            srv_astate.request.action.parameters.push_back(actionContainer);
-       }else if(*it == "position"){
-            srv_astate.request.action.parameters.push_back(position);
-       }
-    }
-
-    srv_astate.request.state = "ASKED";
-
-    //Sending the action
-    if (!action_state.call(srv_astate)) {
-       ROS_ERROR("Failed to call service mental_state/change_state");
-       return;
-    }
-}
-
-/*
-Stop the action execution
-*/
+/**
+ * \brief Push button to stop an action
+ * */
 void MainWindow::on_pushButtonStopAction_clicked()
 {
-    ros::ServiceClient stop = node_.serviceClient<supervisor_msgs::Empty>("action_executor/stop");
-    supervisor_msgs::Empty srv;
-    if (!stop.call(srv)) {
-       ROS_ERROR("Failed to call service action_executor/stop");
-       return;
+
+    std_srvs::Empty srv;
+    if (!client_stop_action_.call(srv)){
+        ROS_ERROR("[graphical_interface] Failed to call service action_executor/stop");
     }
 }
 
-/*
-Detach an object fro the hand of the agent
-*/
-void MainWindow::on_pushButtonDetachFromHand_clicked()
+/**
+ * \brief Push button to detach an object from the robot hand
+ * */
+void MainWindow::on_pushButtonDetach_clicked()
 {
-    string object = ui.comboBoxActionObject2->currentText().toStdString();
-    string agent = ui.comboBoxAgents->currentText().toStdString();
 
-    //detach in toaster
-    ros::ServiceClient client = node_.serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
     toaster_msgs::RemoveFromHand srv;
-    srv.request.objectId = object;
-    if (!client.call(srv)) {
-       ROS_ERROR("Failed to call service pdg/remove_from_hand");
-       return;
+    srv.request.objectId = ui.comboBoxObjectDetachAction->currentText().toStdString();
+    if (!client_detach_object_.call(srv)){
+        ROS_ERROR("[graphical_interface] Failed to call service pdg/remove_from_hand");
     }
 
-    //remove fact in database
+}
+
+/** ***************************************
+ * Human action Tab
+ * ****************************************/
+
+/**
+ * \brief Push button to execute a human action
+ * */
+void MainWindow::on_pushButtonExecuteHuman_clicked()
+{
+
+    //we get all the parameters and construct the action
+    supervisor_msgs::Action action;
+    action.actors.push_back(ui.comboBoxHuman->currentText().toStdString());
+    action.name = ui.comboBoxNameActionHuman->currentText().toStdString();
+    action.parameter_keys.push_back("object");
+    action.parameter_values.push_back(ui.comboBoxObjectHuman->currentText().toStdString());
+    action.parameter_keys.push_back("support");
+    action.parameter_values.push_back(ui.comboBoxSupportHuman->currentText().toStdString());
+    action.parameter_keys.push_back("container");
+    action.parameter_values.push_back(ui.comboBoxContainerHuman->currentText().toStdString());
+
+    if(action.name == "placeStick" || action.name == "pickandplaceStick"){
+        action.parameter_keys.push_back("support1");
+        action.parameter_values.push_back("RED_CUBE1");
+        action.parameter_keys.push_back("support2");
+        action.parameter_values.push_back("RED_CUBE2");
+    }
+
+    //we send it to the action executor
+    supervisor_msgs::HumanAction srv;
+    srv.request.agent = ui.comboBoxHuman->currentText().toStdString();
+    srv.request.action = action;
+    if (!client_human_action_.call(srv)){
+        ROS_ERROR("[graphical_interface] Failed to call service human_monitor/human_action_simu");
+    }
+
+}
+
+/**
+ * \brief Push button to detach an object from a human hand
+ * */
+void MainWindow::on_pushButtonDetachHuman_clicked()
+{
+
+    toaster_msgs::RemoveFromHand srv;
+    srv.request.objectId = ui.comboBoxObjectDetachHuman->currentText().toStdString();
+    if (!client_detach_object_.call(srv)){
+        ROS_ERROR("[graphical_interface] Failed to call service pdg/remove_from_hand");
+    }
+
+}
+
+/** ***************************************
+ * Goal Tab
+ * ****************************************/
+
+/**
+ * \brief Push button to send a new goal
+ * */
+void MainWindow::on_pushButtonSendGoal_clicked(){
+
+    //we goal the corresponding service
+    supervisor_msgs::String srv;
+    srv.request.data = ui.comboBoxGoals->currentText().toStdString();
+    if (!client_send_goal_.call(srv)){
+        ROS_ERROR("[graphical_interface] Failed to call service goal_manager/new_goal");
+    }
+}
+
+/**
+ * \brief Push button to cancel a goal
+ * */
+void MainWindow::on_pushButtonCancelGoal_clicked()
+{
+    //we goal the corresponding service
+    supervisor_msgs::String srv;
+    srv.request.data = ui.comboBoxGoals->currentText().toStdString();
+    if (!client_cancel_goal_.call(srv)){
+        ROS_ERROR("[graphical_interface] Failed to call service goal_manager/cancel_goal");
+    }
+}
+
+/** ***************************************
+ * Dialogue Tab
+ * ****************************************/
+
+/**
+ * \brief Push button to say a sentence
+ * */
+void MainWindow::on_pushButtonSay_clicked()
+{
+
+    //we get the sentence
+    std::string sentence = ui.textDia->toPlainText().toStdString();
+
+    //we send it to the dialogue module
+    supervisor_msgs::String srv;
+    srv.request.data = sentence;
+    if (!client_say_.call(srv)){
+        ROS_ERROR("[graphical_interface] Failed to call service dialogue_node/say");
+    }
+}
+
+/**
+ * \brief Push button to give a fact to the robot (simulated dialogue)
+ * */
+void MainWindow::on_pushButtonHumanSay_clicked()
+{
+    //we get the fact content
+    std::string subject = ui.textSubjectDia->toPlainText().toStdString();
+    if(subject == ""){
+        ROS_WARN("[graphical_interface] No subject specified: NULL instead");
+        subject = "NULL";
+    }
+    std::string target = ui.textTargetDia->toPlainText().toStdString();
+    if(target == ""){
+        ROS_WARN("[graphical_interface] No target specified: NULL instead");
+        target = "NULL";
+    }
+    std::string property = ui.textPropertyDia->toPlainText().toStdString();
+    if(property == ""){
+        ROS_ERROR("[graphical_interface] No property specified: abort");
+        return;
+    }
     toaster_msgs::Fact fact;
-    fact.subjectId = object;
-    fact.property = "isHoldBy";
-    fact.targetId = agent;
-    fact.propertyType = "state";
+    fact.subjectId = subject;
+    fact.property = property;
+    fact.targetId = target;
 
-    ros::ServiceClient clientDB = node_.serviceClient<toaster_msgs::SetInfoDB>("database_manager/set_info");
-    toaster_msgs::SetInfoDB srvDB;
-    srvDB.request.add = false;
-    srvDB.request.infoType = "FACT";
-    srvDB.request.agentId = robotName_;
-    srvDB.request.facts.push_back(fact);
-    if (!clientDB.call(srvDB)) {
-       ROS_ERROR("Failed to call service database_manager/set_info");
-       return;
-    }
-
-
-}
-
-
-
-/*************************************
- * Human Simu tab
- *************************************/
-
-
-
-void MainWindow::on_pushButtonSendHumanAction_clicked()
-{
-    //Getting parameters
-    string agent = ui.comboBoxHumanAgent->currentText().toStdString();
-    string actionName = ui.comboBoxHumanActionName->currentText().toStdString();
-    string actionObject = ui.comboBoxHumanActionObject->currentText().toStdString();
-    string actionSupport = ui.comboBoxHumanActionSupport->currentText().toStdString();
-    string actionContainer = ui.comboBoxHumanActionContainer->currentText().toStdString();
-
-    //creating the action
-    ros::ServiceClient human_action = node_.serviceClient<supervisor_msgs::HumanActionSimu>("human_monitor/human_action_simu");
-    supervisor_msgs::HumanActionSimu srv_haction;
-    srv_haction.request.actionName = actionName;
-    srv_haction.request.agent = agent;
-    srv_haction.request.object = actionObject;
-    srv_haction.request.support = actionSupport;
-    srv_haction.request.container = actionContainer;
-
-    //Sending the action
-    if (!human_action.call(srv_haction)) {
-       ROS_ERROR("Failed to call service human_monitor/human_action_simu");
-       return;
-    }
-}
-
-
-/*************************************
- * Goal tab
- *************************************/
-
-
-void MainWindow::on_pushButtonExecuteGoal_clicked()
-{
-    //Getting parameters
-    string goal = ui.comboBoxGoalName->currentText().toStdString();
-
-    //sending the goal to the goal manager
-    ros::ServiceClient new_goal = node_.serviceClient<supervisor_msgs::NewGoal>("goal_manager/new_goal");
-    supervisor_msgs::NewGoal srv;
-    srv.request.goal = goal;
-    if (!new_goal.call(srv)) {
-       ROS_ERROR("Failed to call service goal_manager/new_goal");
-       return;
-    }
-
-}
-
-
-
-/*************************************
- * Knowledge tab
- *************************************/
-
-bool MainWindow::toIgnore(string fact){
-    for(vector<string>::iterator it = toIgnoreFacts.begin(); it != toIgnoreFacts.end(); it++){
-        if(fact == *it){
-            return true;
-        }
-    }
-    return false;
-}
-
-
-void MainWindow::on_pushButtonPrintKnowledge_clicked()
-{
-    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
-    ros::ServiceClient client_DB = node_.serviceClient<toaster_msgs::GetInfoDB>("database_manager/get_info");
-
-    //get the agent name
-    string agent = ui.comboBoxAgentKnowName->currentText().toStdString();
-
-    //get all the facts for the agent
-    vector<toaster_msgs::Fact> facts;
-    if(agent == "PLANNING"){
-        toaster_msgs::GetInfoDB srv_DB;
-        srv_DB.request.type = "FACT";
-        srv_DB.request.subType = "PLANNING";
-        if (client_DB.call(srv_DB)) {
-            facts = srv_DB.response.resFactList.factList;
-        }else{
-            ROS_ERROR("Failed to call service database_manager/get_info");
-            return;
-         }
-    }else{
-        supervisor_msgs::GetInfo srv;
-        srv.request.info = "ALL_FACTS";
-        srv.request.agent = agent;
-        if (client.call(srv)) {
-            facts = srv.response.facts;
-        }else{
-            ROS_ERROR("Failed to call service mental_state/get_info");
-            return;
-         }
-    }
-
-    //We sort the facts by type
-    vector<toaster_msgs::Fact> envFacts, actionFacts, planFacts, goalFacts;
-    for(vector<toaster_msgs::Fact>::iterator it = facts.begin(); it != facts.end(); it++){
-        if(it->property == "actionState"){
-             actionFacts.push_back(*it);
-        }else if(it->property == "planState"){
-            planFacts.push_back(*it);
-       }else if(it->property == "goalState"){
-            goalFacts.push_back(*it);
-       }else if(!toIgnore(it->property) || agent == "PLANNING"){
-            envFacts.push_back(*it);
-       }
-    }
-    //and we print all the facts
-    string toPrint = "---Environment---\n";
-    for(vector<toaster_msgs::Fact>::iterator it = envFacts.begin(); it != envFacts.end(); it++){
-        toPrint = toPrint + it->subjectId + " " + it->property + " " + it->targetId + "\n";
-    }
-    toPrint = toPrint + "---Goals---\n";
-    for(vector<toaster_msgs::Fact>::iterator it = goalFacts.begin(); it != goalFacts.end(); it++){
-        toPrint = toPrint + it->subjectId + " " + it->property + " " + it->targetId + "\n";
-    }
-    toPrint = toPrint + "---Plans---\n";
-    for(vector<toaster_msgs::Fact>::iterator it = planFacts.begin(); it != planFacts.end(); it++){
-        toPrint = toPrint + it->subjectId + " " + it->property + " " + it->targetId + "\n";
-    }
-    toPrint = toPrint + "---Actions---\n";
-    for(vector<toaster_msgs::Fact>::iterator it = actionFacts.begin(); it != actionFacts.end(); it++){
-        toPrint = toPrint + it->subjectId + " " + it->property + " " + it->targetId + "\n";
-    }
-    ui.textBrowserKnowledge->setText(QString::fromStdString(toPrint));
-
-
-}
-void MainWindow::on_pushButtonSeeActions_clicked()
-{
-    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetInfo>("mental_state/get_info");
-    supervisor_msgs::GetInfo srv;
-    srv.request.info = "ACTIONS";
-    ui.textBrowserActions->setText("");
-    if (client.call(srv)) {
-        string toPrint;
-        for(vector<supervisor_msgs::ActionMS>::iterator it = srv.response.actions.begin(); it != srv.response.actions.end(); it++){
-            toPrint = toPrint + boost::lexical_cast<string>(it->id) + "\n" + it->name + "\n" + "Actors: ";
-            for(vector<string>::iterator itt = it->actors.begin(); itt != it->actors.end(); itt++){
-                toPrint = toPrint + *itt + " ";
-            }
-            toPrint = toPrint + "\n" + "Parameters: ";
-            for(vector<string>::iterator itt = it->parameters.begin(); itt != it->parameters.end(); itt++){
-                toPrint = toPrint + *itt + " ";
-            }
-            toPrint = toPrint + "\n" + "-----------------\n";
-        }
-        ui.textBrowserActions->setText(QString::fromStdString(toPrint));
-    }else{
-        ROS_ERROR("Failed to call service mental_state/get_info");
-   }
-}
-
-
-/*************************************
- * Dialogue tab
- *************************************/
-
-void MainWindow::on_SpeakButton_clicked()
-{
-    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::Say>("dialogue_node/say");
-    supervisor_msgs::Say srv;
-    string sentence = ui.SpeakSentence->text().toStdString();
-    srv.request.sentence = sentence;
-    if (!client.call(srv)) {
-        ROS_ERROR("Failed to call service dialogue_node/say");
-    }
-}
-
-
-void MainWindow::on_YesButton_clicked()
-{
-    supervisor_msgs::Bool msg;
-    msg.boolAnswer = true;
-    boolAnswerPub_.publish(msg);
-}
-
-void MainWindow::on_NoButton_clicked()
-{
-    supervisor_msgs::Bool msg;
-    msg.boolAnswer = false;
-    boolAnswerPub_.publish(msg);
-}
-
-void MainWindow::on_SendFactButton_clicked()
-{
-    ros::ServiceClient client = node_.serviceClient<supervisor_msgs::GetInfoDia>("dialogue_node/get_info");
-    supervisor_msgs::GetInfoDia srv;
+    //we send it to the dialogue module
+    supervisor_msgs::GiveInfo srv;
+    srv.request.toRobot = true;
     srv.request.type = "FACT";
-    toaster_msgs::Fact fact;
-    fact.subjectId = ui.SubjectFact->text().toStdString();
-    fact.property = ui.PropertyFact->text().toStdString();
-    fact.targetId = ui.TargetFact->text().toStdString();
+    srv.request.partner = ui.comboBoxHumanDia->currentText().toStdString();
     srv.request.fact = fact;
-    if (!client.call(srv)) {
-        ROS_ERROR("Failed to call service dialogue_node/get_info");
+    if (!client_give_info_.call(srv)){
+        ROS_ERROR("[graphical_interface] Failed to call service dialogue_node/say");
     }
 }
 
-/*************************************
- * Robot control tab
- *************************************/
-
-void MainWindow::on_moveTorso_clicked()
+/**
+ * \brief Push button to say yes
+ * */
+void MainWindow::on_pushButtonYes_clicked()
 {
-    pr2motion::Torso_MoveGoal goal;
-    goal.torso_position = ui.TorsoValue->value();
-    actionClientTorso_.sendGoal(goal);
+
+    std_msgs::Bool msg;
+    msg.data = true;
+    boolPub_.publish(msg);
 }
 
-void MainWindow::on_stopTorso_clicked()
+/**
+ * \brief Push button to say no
+ * */
+void MainWindow::on_pushButtonNo_clicked()
 {
-    ros::ServiceClient client = node_.serviceClient<pr2motion::Torso_Stop>("pr2motion/Torso_Stop");
-    pr2motion::Torso_Stop srv;
-    if (!client.call(srv)) {
-        ROS_ERROR("Failed to call service pr2motion/Torso_Stop");
-    }
-}
 
-void MainWindow::on_openRightGripper_clicked()
-{
-    if(!simu_){
-        pr2motion::Gripper_Right_OperateGoal goal;
-        goal.goal_mode.value=pr2motion::pr2motion_GRIPPER_MODE::pr2motion_GRIPPER_OPEN;
-        actionClientRightGripper_.sendGoal(goal);
-    }
-}
+    std_msgs::Bool msg;
+    msg.data = false;
+    boolPub_.publish(msg);
 
-void MainWindow::on_closeRightGripper_clicked()
-{
-    if(!simu_){
-        pr2motion::Gripper_Right_OperateGoal goal;
-        goal.goal_mode.value=pr2motion::pr2motion_GRIPPER_MODE::pr2motion_GRIPPER_CLOSE;
-        actionClientRightGripper_.sendGoal(goal);
-    }
-}
-
-void MainWindow::on_stopRightGripper_clicked()
-{
-    if(!simu_){
-        ros::ServiceClient client = node_.serviceClient<pr2motion::Gripper_Stop>("pr2motion/Gripper_Stop");
-        pr2motion::Gripper_Stop srv;
-        if (!client.call(srv)) {
-            ROS_ERROR("Failed to call service pr2motion/Gripper_Stop");
-        }
-    }
-}
-
-void MainWindow::on_openLeftGripper_clicked()
-{
-    if(!simu_){
-        pr2motion::Gripper_Left_OperateGoal goal;
-        goal.goal_mode.value=pr2motion::pr2motion_GRIPPER_MODE::pr2motion_GRIPPER_OPEN;
-        actionClientLeftGripper_.sendGoal(goal);
-    }
-}
-
-void MainWindow::on_closeLeftGripper_clicked()
-{
-    if(!simu_){
-        pr2motion::Gripper_Left_OperateGoal goal;
-        goal.goal_mode.value=pr2motion::pr2motion_GRIPPER_MODE::pr2motion_GRIPPER_CLOSE;
-        actionClientLeftGripper_.sendGoal(goal);
-    }
-}
-
-void MainWindow::on_stopLeftGripper_clicked()
-{
-    if(!simu_){
-        ros::ServiceClient client = node_.serviceClient<pr2motion::Gripper_Stop>("pr2motion/Gripper_Stop");
-        pr2motion::Gripper_Stop srv;
-        if (!client.call(srv)) {
-            ROS_ERROR("Failed to call service pr2motion/Gripper_Stop");
-        }
-    }
-}
-
-void MainWindow::on_moveRightArm_clicked()
-{
-    pr2motion::Arm_Right_MoveToQGoalGoal goal;
-    goal.traj_mode.value = pr2motion::pr2motion_TRAJ_MODE::pr2motion_TRAJ_PATH;
-    goal.shoulder_pan_joint = ui.Q1Right->value();
-    goal.shoulder_lift_joint = ui.Q2Right->value();
-    goal.upper_arm_roll_joint = ui.Q3Right->value();
-    goal.elbow_flex_joint = ui.Q4Right->value();
-    goal.forearm_roll_joint = ui.Q5Right->value();
-    goal.wrist_flex_joint = ui.Q6Right->value();
-    goal.wrist_roll_joint = ui.Q7Right->value();
-    actionClientRightArm_.sendGoal(goal);
-}
-
-void MainWindow::on_stopRightArm_clicked()
-{
-    actionClientRightArm_.cancelGoal();
-}
-
-void MainWindow::on_moveLeftArm_clicked()
-{
-    pr2motion::Arm_Left_MoveToQGoalGoal goal;
-    goal.traj_mode.value = pr2motion::pr2motion_TRAJ_MODE::pr2motion_TRAJ_PATH;
-    goal.shoulder_pan_joint = ui.Q1Left->value();
-    goal.shoulder_lift_joint = ui.Q2Left->value();
-    goal.upper_arm_roll_joint = ui.Q3Left->value();
-    goal.elbow_flex_joint = ui.Q4Left->value();
-    goal.forearm_roll_joint = ui.Q5Left->value();
-    goal.wrist_flex_joint = ui.Q6Left->value();
-    goal.wrist_roll_joint = ui.Q7Left->value();
-    actionClientLeftArm_.sendGoal(goal);
-}
-
-void MainWindow::on_stopLeftArm_clicked()
-{
-    actionClientLeftArm_.cancelGoal();
-}
-
-void MainWindow::on_moveHead_clicked()
-{
-    pr2motion::Head_Move_TargetGoal goal;
-    goal.head_mode.value = pr2motion::pr2motion_HEAD_MODE::pr2motion_HEAD_LOOKAT;
-    goal.head_target_frame = "base_link";
-    goal.head_target_x = ui.XHead->value();
-    goal.head_target_y = ui.YHead->value();
-    goal.head_target_z = ui.ZHead->value();
-    actionClientHead_.sendGoal(goal);
-}
-
-
-/*************************************
- * Signal tab
- *************************************/
-
-void MainWindow::on_addReceiver_clicked()
-{
-    string receiver = ui.comboBoxReceiverSignal->currentText().toStdString();
-    receiversSignal_.push_back(receiver);
-}
-
-void MainWindow::on_cleanReceiver_clicked()
-{
-    receiversSignal_.clear();
-}
-
-void MainWindow::on_addEntity_clicked()
-{
-    string entity = ui.comboBoxEntityNameSignal->currentText().toStdString();
-    entitiesSignal_.push_back(entity);
-    double duration = ui.DurationEntity->value();
-    durationsSignal_.push_back(duration);
-}
-
-void MainWindow::on_cleanEntities_clicked()
-{
-    entitiesSignal_.clear();
-    durationsSignal_.clear();
-}
-
-void MainWindow::on_SendSignal_clicked()
-{
-    ros::Publisher signal_pub = node_.advertise<head_manager::Signal>("head_manager/signal", 1000);
-    head_manager::Signal msg;
-
-    msg.receivers = receiversSignal_;
-    receiversSignal_.clear();
-    msg.entities = entitiesSignal_;
-    entitiesSignal_.clear();
-    msg.durations = durationsSignal_;
-    durationsSignal_.clear();
-    double urgency = ui.ImportancySignal->value();
-    msg.urgency = urgency;
-    double importancy = ui.UrgencySignal->value();
-    msg.importancy = importancy;
-    msg.weight = importancy;
-    signal_pub.publish(msg);
 }

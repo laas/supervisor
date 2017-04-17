@@ -1,0 +1,9 @@
+<launch>
+    <rosparam command="load" file="$(find launchs)/Parameters/General.yaml" />
+    <rosparam command="load" file="$(find launchs)/Parameters/Entities.yaml" />
+    <rosparam command="load" file="$(find launchs)/Parameters/HighLevelActions.yaml" />
+    <rosparam command="load" file="$(find goal_manager)/Parameters/GoalManager.yaml" />
+    <rosparam command="load" file="$(find mental_states)/Parameters/MentalStates.yaml" />
+
+    <node name="mental_states" pkg="mental_states" type="mental_states" output="screen" />  <!-- Launch the mental_states manager -->
+</launch>

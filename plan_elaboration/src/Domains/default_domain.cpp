@@ -1,13 +1,19 @@
 #include "plan_elaboration/Domains/default_domain.h"
 
-DefaultDomain::DefaultDomain() : VirtualDomain()
+/**
+ * \brief Constructor of the class
+ * */
+DefaultDomain::DefaultDomain(ros::NodeHandle* node) : VirtualDomain(node)
 {
+    isHighLevelDomain_ = false;
 }
 
-/*
-Default function to update the planning world state: do noting
-*/
-vector<toaster_msgs::Fact> DefaultDomain::computeSpecificFacts(vector<toaster_msgs::Fact> facts){
+/**
+ * \brief Default function to update the planning world state: do noting
+ * @param facts the initial set of facts
+ * @return the facts used for planning
+ * */
+std::vector<toaster_msgs::Fact> DefaultDomain::computeSpecificFacts(std::vector<toaster_msgs::Fact> facts){
 
     return facts;
 }

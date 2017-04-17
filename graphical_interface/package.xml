@@ -7,7 +7,7 @@
      graphical_interface
 
   </description>
-  <maintainer email="sandra.devin88@gmail.com">Sandra Devin</maintainer>
+  <maintainer email="sdevin@laas.fr">Sandra Devin</maintainer>
   <author>Sandra Devin</author>
   <license>BSD</license>
   <!-- <url type="bugtracker">https://github.com/stonier/qt_ros/issues</url> -->

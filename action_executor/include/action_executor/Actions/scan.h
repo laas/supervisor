@@ -1,48 +1,34 @@
 #ifndef SCAN_H
 #define SCAN_H
 
-#include "supervisor_msgs/Action.h"
 #include "action_executor/virtual_action.h"
-#include <toaster_msgs/FactList.h>
+#include "action_executor/Actions/moveTo.h"
 
-#include <actionlib/server/simple_action_server.h>
+#include "std_msgs/String.h"
 
 #include <dynamic_reconfigure/DoubleParameter.h>
 #include <dynamic_reconfigure/Reconfigure.h>
 #include <dynamic_reconfigure/Config.h>
 
-#include <iostream>
-#include <string>
-#include <vector>
-#include <ros/ros.h>
-
-
-using namespace std;
-
 class Scan: public VirtualAction{
 public:
     Scan(supervisor_msgs::Action action, Connector* connector);
-	virtual bool preconditions();
-	virtual bool plan();
+    virtual bool preconditions();
+    virtual bool plan();
     virtual bool exec(Server* action_server);
-	virtual bool post();
+    virtual bool post();
 protected:
 
 private:
-    double timeScan_;
-    clock_t start_;
-    double timeWait_;
-    clock_t wait_;
-    bool isLookingObject_;
-    string robotToaster_;
-    
-    ros::Subscriber subLook_;
+    double timeScan_; /**< time to scan an object*/
+    double timeWaitScan_; /**< time to wait for the head focus on the object*/
+    ros::ServiceClient client_light_; /**< service client to control the robot light*/
+    ros::Subscriber sub_head_focus_; /**< subscriber to the head focus*/
+    std::string headFocus_; /**< focus of the robot head*/
 
     void controlRobotLight(bool on);
-    void isLookingCallback(const toaster_msgs::FactList::ConstPtr& msg);
-
+    void focusCallback(const std_msgs::String::ConstPtr& msg);
 
 };
 
 #endif // SCAN_H
-

@@ -1,33 +1,25 @@
 #ifndef PLACE_H
 #define PLACE_H
 
-#include "supervisor_msgs/Action.h"
 #include "action_executor/virtual_action.h"
-
-#include <actionlib/server/simple_action_server.h>
-
-#include <iostream>
-#include <string>
-#include <vector>
-#include <ros/ros.h>
-
-
-using namespace std;
 
 class Place: public VirtualAction{
 public:
-	Place(supervisor_msgs::Action action, Connector* connector);
-	virtual bool preconditions();
-	virtual bool plan();
+    Place(supervisor_msgs::Action action, Connector* connector);
+    Place() {}
+    virtual bool preconditions();
+    virtual bool plan();
     virtual bool exec(Server* action_server);
-	virtual bool post();
+    virtual bool post();
+
+    std::string support_; /**< support where to place the object*/
+    std::string initialSupport_; /**< given high level support when there is one*/
+    std::string replacementSupport_; /**< replacement support to use for planning*/
 protected:
 
 private:
-	string support_;
 
 
 };
 
 #endif // PLACE_H
-

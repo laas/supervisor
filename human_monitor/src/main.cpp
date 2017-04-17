@@ -1,114 +1,169 @@
 /**
-author Sandra Devin
+ *\author Sandra Devin (sdevin@laas.fr)
+ *
+ * @todo add inference of actions based on effects of known needed actions
+ *
+ * **********/
 
-Main class of the human_monitor.
-
-The human monitor allows to monitor humans actions by looking into facts from toaster
-
-**/
 
 #include <human_monitor/human_monitor.h>
 
-HumanMonitor* hm = new HumanMonitor();
-string humanHand;
+ros::NodeHandle* node_;
+HumanMonitor* hm_;
+std::string humanHand;
 double pickThreshold, placeThreshold, dropThreshold, disengageThreshold;
-pair<string, string> lastEngagment;
-bool humanEngaged, humanPicked;
-string objectPicked;
+std::map<std::string, std::string> humanEngaged;
+bool shouldDetect;
 
-/*
-Service call from simulation to tell that a human picked an object
-*/
-bool humaActionSimu(supervisor_msgs::HumanActionSimu::Request  &req, supervisor_msgs::HumanActionSimu::Response &res){
-	
-	if(req.actionName == "pick"){
-	   hm->humanPick(req.agent, req.object);
-	}else if(req.actionName == "place"){
-	   hm->humanPlace(req.agent, req.object, req.support);
-	}else if(req.actionName == "drop"){
-	   hm->humanDrop(req.agent, req.object, req.container);
-	}else{
-	   ROS_ERROR("[human_monitor] Unknown action name");
-	}
+/**
+* \brief Service call from simulation to tell that a human does an action
+* @param req service request
+* @param res service result
+* @return true
+* */
+bool humaActionSimu(supervisor_msgs::HumanAction::Request  &req, supervisor_msgs::HumanAction::Response &res){
 
-	return true;
+    //we look for actions parameters
+    if(req.action.parameter_keys.size() != req.action.parameter_values.size()){
+         ROS_ERROR("[human_monitor] Invalid action parameters: nb keys should be equal to nb values!");
+         return true;
+    }
+    std::map<std::string, std::string> params;
+    for(int i = 0; i < req.action.parameter_keys.size(); i++){
+         if(req.action.parameter_keys[i] == "object"){
+             params["object"] = req.action.parameter_values[i];
+         }
+         if(req.action.parameter_keys[i] == "support"){
+             params["support"] = req.action.parameter_values[i];
+         }
+         if(req.action.parameter_keys[i] == "container"){
+             params["container"] = req.action.parameter_values[i];
+         }
+         if(req.action.parameter_keys[i] == "support1"){
+             params["support1"] = req.action.parameter_values[i];
+         }
+         if(req.action.parameter_keys[i] == "support2"){
+             params["support2"] = req.action.parameter_values[i];
+         }
+    }
+
+    //we send the action
+    if(req.action.name == "pick"){
+        if(params.find("object") == params.end()){
+            ROS_ERROR("[human_monitor] No object to pick!");
+            return true;
+        }
+       hm_->humanPick(req.agent, params["object"]);
+    }else if(req.action.name == "place"){
+        if(params.find("object") == params.end()){
+            ROS_ERROR("[human_monitor] No object to place!");
+            return true;
+        }
+        if(params.find("support") == params.end()){
+            ROS_ERROR("[human_monitor] No support to place!");
+            return true;
+        }
+       hm_->humanPlace(req.agent, params["object"], params["support"]);
+    }else if(req.action.name == "drop"){
+        if(params.find("object") == params.end()){
+            ROS_ERROR("[human_monitor] No object to drop!");
+            return true;
+        }
+        if(params.find("container") == params.end()){
+            ROS_ERROR("[human_monitor] No container to drop!");
+            return true;
+        }
+       hm_->humanDrop(req.agent, params["object"], params["container"]);
+    }else if(req.action.name == "placeStick"){
+        if(params.find("object") == params.end()){
+            ROS_ERROR("[human_monitor] No object to place!");
+            return true;
+        }
+        if(params.find("support1") == params.end() || params.find("support2") == params.end()){
+            ROS_ERROR("[human_monitor] No support to place!");
+            return true;
+        }
+       hm_->humanPlaceStick(req.agent, params["object"], params["support1"], params["support2"]);
+    }else{
+       ROS_ERROR("[human_monitor] Unknown action name");
+    }
+
+    return true;
 }
 
-
+/**
+* \brief Call back for the topic agent_monitor/fact_list
+* @param msg agent monitor fact list
+* */
 /*
-Call back for the topic agent_monitor/fact_list
 */
 void agentFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
-	
-    vector<toaster_msgs::Fact> facts = msg->factList;
 
-    for(vector<toaster_msgs::Fact>::iterator it = facts.begin(); it != facts.end(); it++){
-        if(it->property == "Distance" && it->subjectId == humanHand){
-            if(humanEngaged){
-                if(it->subjectOwnerId == lastEngagment.first && it->targetId == lastEngagment.second){
-                    if(it->doubleValue > disengageThreshold){
-                        humanEngaged = false;
-                    }
-                }
-            }else if(humanPicked){//if the human picked an object, if we are close to another object we ignore it just after the pick
-                if(it->doubleValue < disengageThreshold && it->targetId != objectPicked){
-                    lastEngagment.first = it->subjectOwnerId;
-                    lastEngagment.second = it->targetId;
-                    humanEngaged = true;
-                    humanPicked = false;
-                }
-            }else{
-                pair<bool, string> ownerAttachment = hm->hasInHand(it->subjectOwnerId);
-                if(ownerAttachment.first){
-                    if(it->targetId != ownerAttachment.second){
-                      if(it->doubleValue < placeThreshold && hm->isSupportObject(it->targetId)){
-                        hm->humanPlace(it->subjectOwnerId, ownerAttachment.second, it->targetId);
-                        lastEngagment.first = it->subjectOwnerId;
-                        lastEngagment.second = it->targetId;
-                        humanEngaged = true;
-                      }else if(it->doubleValue < dropThreshold && hm->isContainerObject(it->targetId)){
-                            hm->humanDrop(it->subjectOwnerId, ownerAttachment.second, it->targetId);
-                            lastEngagment.first = it->subjectOwnerId;
-                            lastEngagment.second = it->targetId;
-                            humanEngaged = true;
-                      }
+    if(shouldDetect){
+        std::vector<toaster_msgs::Fact> facts = msg->factList;
+
+        for(std::vector<toaster_msgs::Fact>::iterator it = facts.begin(); it != facts.end(); it++){
+            if(it->property == "Distance" && it->subjectId == humanHand){
+                if(humanEngaged.find(it->subjectOwnerId) != humanEngaged.end()){
+                    //the human just performed an action, we wait he disengages
+                    if(it->targetId == humanEngaged[it->subjectOwnerId] && it->doubleValue > disengageThreshold){
+                            humanEngaged.erase(it->subjectOwnerId);
                     }
                 }else{
-                    if(it->doubleValue < pickThreshold && hm->isManipulableObject(it->targetId)){
-                        hm->humanPick(it->subjectOwnerId, it->targetId);
-                        humanPicked = true;
-                        objectPicked = it->targetId;
+                    std::pair<bool, std::string> ownerAttachment = hm_->hasInHand(it->subjectOwnerId);
+                    if(ownerAttachment.first){
+                        //the human has an object in hand, we look for place or drop
+                        if(it->targetId != ownerAttachment.second){
+                          if(it->doubleValue < placeThreshold && hm_->isSupportObject(it->targetId)){
+                            hm_->humanPlace(it->subjectOwnerId, ownerAttachment.second, it->targetId);
+                            humanEngaged[it->subjectOwnerId] = it->targetId;
+                          }else if(it->doubleValue < dropThreshold && hm_->isContainerObject(it->targetId)){
+                                hm_->humanDrop(it->subjectOwnerId, ownerAttachment.second, it->targetId);
+                                humanEngaged[it->subjectOwnerId] = it->targetId;
+                          }
+                        }
+                    }else{
+                        //the human has no object in hand, we look for a pick
+                        if(it->doubleValue < pickThreshold && hm_->isManipulableObject(it->targetId)){
+                            hm_->humanPick(it->subjectOwnerId, it->targetId);
+                            humanEngaged[it->subjectOwnerId] = it->targetId;
+                        }
                     }
                 }
             }
         }
     }
-	
-}
 
+}
+/**
+ * \brief Main function
+ * */
 int main (int argc, char **argv)
 {
   ros::init(argc, argv, "human_monitor");
   ros::NodeHandle node;
-  node.getParam("/humanRightHand", humanHand);
-  node.getParam("/threshold/pick", pickThreshold);
-  node.getParam("/threshold/place", placeThreshold);
-  node.getParam("/threshold/drop", dropThreshold);
-  node.getParam("/threshold/disengage", disengageThreshold);
+  node_ = &node;
 
-  humanEngaged = false;
-  humanPicked = false;
 
-  ROS_INFO("[human_monitor] Init human_monitor");
+  ROS_INFO("[human_monitor] Init");
 
-  //Services declarations
+  node.getParam("/human_monitor/rightHand", humanHand);
+  node.getParam("/human_monitor/threshold/pick", pickThreshold);
+  node.getParam("/human_monitor/threshold/place", placeThreshold);
+  node.getParam("/human_monitor/threshold/drop", dropThreshold);
+  node.getParam("/human_monitor/threshold/disengage", disengageThreshold);
+  node.getParam("/human_monitor/shouldDetect", shouldDetect);
+
+  HumanMonitor hm(node_);
+  hm_ = &hm;
+
+
   ros::ServiceServer service_action = node.advertiseService("human_monitor/human_action_simu", humaActionSimu); //allows the simulation to tell that a human has done an action
-  
+
   ros::Subscriber sub = node.subscribe("agent_monitor/factList", 1, agentFactListCallback);
 
-  ROS_INFO("[human_monitor] human_monitor ready");
+  ROS_INFO("[human_monitor] Ready");
 
   ros::spin();
 
-  return 0;
 }

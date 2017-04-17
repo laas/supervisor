@@ -1,653 +1,308 @@
 /**
 author Sandra Devin
 
-Main class of the mental_state manager.
-
-The mental state manager estimates and maintains the mental states of each agent concerning goals, plans and actions.
-
-TODO: - notion of agent present to give info (interaction Area?)
-      - do not send to times the same info to give (variable waiting info to give)
-      - add IN PROGRESS when an agent can see the actor in the middle of the execution
+Main class of the mental_states manager
 
 **/
 
-#include <mental_states/ms_manager.h>
+#include "mental_states/ms_manager.h"
 
-MSManager* ms = new MSManager();
-string robotName;
-vector<string> allAgents;
-bool simu;
-bool isGivingInfo;
-ros::NodeHandle* node;
+ros::NodeHandle* node_;
+MsManager* ms_;
+bool needCheckEffect_, needCheckPrec_, needCheckGoal_;
+std::vector<supervisor_msgs::Action> oldMsgPrevious_;
+int prevId_;
 
+/**
+ * \brief Callback of the database tables
+ * @param msg topic msg
+ * */
+void dbCallback(const toaster_msgs::DatabaseTables::ConstPtr& msg){
 
-/*
-Function call when we ask the robot to execute a new goal
-*/
-bool newGoal(string goal){
-	
-    supervisor_msgs::GoalMS* goalMS = NULL;
-	//Get the goal by its name
-    goalMS = ms->getGoalByName(goal);
-    if(!goalMS){
-		ROS_ERROR("[mental_state] Unknown goal");
-		return false;
-	}
-
-	//add the goal state to PENDING into the knowledge of each of its actor
-    vector<string> actors = goalMS->actors;
-	for(vector<string>::iterator it = actors.begin(); it != actors.end(); it++){
-        ms->db_.addGoalState(*goalMS, *it, "PENDING");
-	}
-	return true;
-	
-}
-
-
-/*
-Function call when we the robot starts to execute a goal
-*/
-bool startGoal(string goal){
-
-    supervisor_msgs::GoalMS* goalMS = NULL;
-    //Get the goal by its name
-    goalMS = ms->getGoalByName(goal);
-    if(!goalMS){
-        ROS_ERROR("[mental_state] Unknown goal");
-        return false;
-    }
-
-    //add the goal state to PROGRESS into the knowledge of each of its actor
-    vector<string> actors = goalMS->actors;
-    for(vector<string>::iterator it = actors.begin(); it != actors.end(); it++){
-        ms->db_.addGoalState(*goalMS, *it, "PROGRESS");
-    }
-    return true;
-}
-
-/*
-Function call to abort a goal for an agent
-*/
-bool abortGoal(string goal, string agent){
-    supervisor_msgs::GoalMS* goalMS = NULL;
-    //Get the goal by its name
-    goalMS = ms->getGoalByName(goal);
-    if(!goalMS){
-        ROS_ERROR("[mental_state] Unknown goal");
-        return true;
-    }
-
-    ms->db_.addGoalState(*goalMS, agent, "ABORTED");
-
-
-    return true;
-}
-
-/*
-Function call when a plan is computed by the robot
-*/
-bool newPlan(supervisor_msgs::Plan plan, bool shared){
-
-    //Transform the plan into a PlanMS
-    supervisor_msgs::PlanMS planMS;
-    planMS.goal = *(ms->getGoalByName(plan.goal));
-    planMS.id = ms->getAndIncreasePlanId();
-    map<int, int> lmap;
-    for(vector<supervisor_msgs::Action>::iterator it = plan.actions.begin(); it != plan.actions.end(); it++){
-        supervisor_msgs::ActionMS action = ms->createActionFromHighLevel(*it);
-        planMS.actions.push_back(action);
-        lmap[it->id] = action.id;
-    }
-    for(vector<supervisor_msgs::Link>::iterator it = plan.links.begin(); it != plan.links.end(); it++){
-        supervisor_msgs::Link newLink;
-        newLink.origin = lmap[it->origin];
-        newLink.following = lmap[it->following];
-        planMS.links.push_back(newLink);
-    }
-
-    //Add the plan to the list of plans
-    ms->addPlanToList(planMS);
-
-    //add the plan state to PROGRESS and the action to PLANNED into the robot knowledge and both to UNKNOWN into the other agent knowledge
-    for(vector<string>::iterator it = allAgents.begin(); it != allAgents.end(); it++){
-        if(*it == robotName){
-            ms->db_.addActionsState(planMS.actions, *it, "PLANNED");
-            ms->db_.addPlanState(planMS, *it, "PROGRESS");
-        }else if(!shared){
-            ms->db_.addActionsState(planMS.actions, *it, "UNKNOWN");
-            ms->db_.addPlanState(planMS, *it, "UNKNOWN");
+    std::vector<toaster_msgs::DatabaseTable> tables = msg->tables;
+    for(std::vector<toaster_msgs::DatabaseTable>::iterator it = tables.begin(); it != tables.end(); it++){
+        if(it->changed && it->agentName != ms_->robotName_){
+            needCheckEffect_ = true;
         }
     }
-
-    if(shared){
-        //we get all the agents which can see the robot
-        vector<string> presentAgents = ms->db_.getAgentsWhoSee(robotName);
-
-        //For all these agents, the plan is now in PROGRESS and its actions PLANNED
-        for(vector<string>::iterator it = presentAgents.begin(); it != presentAgents.end(); it++){
-            ms->db_.addActionsState(planMS.actions, *it, "PLANNED");
-            ms->db_.addPlanState(planMS, *it, "PROGRESS");
-        }
-    }
-
-    return true;
+    ms_->agentsTable_ = tables;
 }
 
-/*
-Function call to abort the robot shares the current plan
-*/
-bool sharePlan(){
+/**
+ * \brief Callback of the goal list
+ * @param msg topic msg
+ * */
+void goalCallback(const supervisor_msgs::GoalsList::ConstPtr& msg){
 
-    //we get all the agents which can see the robot
-    vector<string> presentAgents = ms->db_.getAgentsWhoSee(robotName);
-    //We get the current plan
-    pair<bool, supervisor_msgs::PlanMS> robotPlan = ms->getAgentPlan(robotName);
-    if(!robotPlan.first){
-        return true;
+    if(ms_->currentRobotGoal_ != msg->currentGoal){
+        needCheckGoal_ = true;
+        ms_->currentRobotGoal_ = msg->currentGoal;
     }
-
-    //For all these agents, the plan is now in PROGRESS and its actions PLANNED
-    for(vector<string>::iterator it = presentAgents.begin(); it != presentAgents.end(); it++){
-        ms->db_.addActionsState(robotPlan.second.actions, *it, "PLANNED");
-        ms->db_.addPlanState(robotPlan.second, *it, "PROGRESS");
-    }
-
-    return true;
 }
 
-/*
-Function call to abort the current plan for an agent
-*/
-bool abortPlan(string agent){
+/**
+ * \brief Callback of the previous actions list
+ * @param msg topic msg
+ * */
+void prevCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
 
-    ms->abortPlan(agent);
-
-
-    return true;
-}
-
-/*
-Function call when the robot detects the change of state of an action (either action in PROGRESS, DONE or ABORTED)
-*/
-bool actionState(supervisor_msgs::Action action, string state){
-
-    //first we get the corresponding action
-    pair<bool, supervisor_msgs::ActionMS> actionFind = ms->getActionFromAction(action);
-    supervisor_msgs::ActionMS actionMS;
-    if(actionFind.first){
-        actionMS = actionFind.second;
-        //if this action is already consider DONE or FAILED, so it is another new action
-        //if the action has no state, it is an old plan action, we ignore it
-        string actionState = ms->db_.getActionState(robotName, actionMS);
-        if(actionState == "DONE" || actionState == "FAILED" || actionState == "UNKNOWN"){
-            actionMS = ms->createActionFromHighLevel(action);
-        }
-    }else {
-        actionMS = ms->createActionFromHighLevel(action);
-    }
-
-    //then we get all the agent which can see the actors of the action
-    vector<string> canSeeAgents = allAgents;
-    for(vector<string>::iterator it = actionMS.actors.begin(); it != actionMS.actors.end(); it++){
-        vector<string> tempAgents = ms->db_.getAgentsWhoSee(*it);
-        vector<string> temp(100);
-        sort(tempAgents.begin(), tempAgents.end());
-        sort(canSeeAgents.begin(), canSeeAgents.end());
-        vector<string>::iterator i = set_intersection(tempAgents.begin(), tempAgents.end(), canSeeAgents.begin(), canSeeAgents.end(), temp.begin());
-        temp.resize(i-temp.begin());
-        canSeeAgents = temp;
-    }
-    canSeeAgents.insert(canSeeAgents.end(), actionMS.actors.begin(), actionMS.actors.end());
-    canSeeAgents.push_back(robotName);
-
-    //for all these agent and for the actors we change the state of the action
-    for(vector<string>::iterator it = canSeeAgents.begin(); it != canSeeAgents.end(); it++){
-        if(state == "DONE"){//if the state is done, we also add the effects of the action in the agent knowledge
-            ms->db_.addEffects(actionMS.effects, *it);
-        }
-        vector<supervisor_msgs::ActionMS> actions;
-        actions.push_back(actionMS);
-        ms->db_.addActionsState(actions, *it, state);
-        //if it is a failed action (from the plan), we abort the plan for all agent who can see
-        if(state == "FAILED"){
-            if(ms->isFromCurrentPlan(actionMS, *it)){
-                abortPlan(*it);
+    //look for the new action added to the previous list and check if the agents are aware of the action
+    std::vector<supervisor_msgs::Action> currentActions = msg->actions;
+    if(currentActions.size() > oldMsgPrevious_.size()){
+        //the action(s) performed are at the end of the list
+        for(int i = oldMsgPrevious_.size(); i < currentActions.size(); i++){
+            prevId_ = currentActions[i].id;
+            supervisor_msgs::Action action = ms_->addPrecsAndEffects(currentActions[i]);
+            if(action.succeed){
+                ms_->addEffects(action, ms_->robotName_);
             }
-
-        }
-    }
-
-    return true;
-
-}
-
-
-/*
-Service call when we change the state of a goal/plan/action
-*/
-bool changeState(supervisor_msgs::ChangeState::Request  &req, supervisor_msgs::ChangeState::Response &res){
-
-    if(req.type == "action"){
-        return actionState(req.action, req.state);
-    }else if(req.type == "plan"){
-        if(req.state == "PROGRESS"){
-            return newPlan(req.plan, false);
-        }else if(req.state == "SHARE"){
-            return sharePlan();
-        }else if(req.state == "PROGRESS_SHARE"){
-            return newPlan(req.plan, true);
-        }else if(req.state == "ABORT"){
-            return abortPlan(req.agent);
-        }
-
-    }else if(req.type == "goal"){
-        if(req.state == "NEW"){
-            return newGoal(req.goal);
-        }else if(req.state == "PROGRESS"){
-            return startGoal(req.goal);
-        }else if(req.state == "ABORT"){
-            return abortGoal(req.goal, req.agent);
-        }
-
-    }
-
-}
-
-/*
-Function call to get the action an agent thinks an actor has to do
-*/
-pair<supervisor_msgs::Action, string> getActionTodo(string agent, string actor){
-
-    bool actionFind = false;
-    pair<supervisor_msgs::Action, string> answer;
-
-    //First we look for the action ASKED to the actor in the knowledge of the agent
-    vector<int> askedIds = ms->db_.getActionsIdFromState(agent, "ASKED");
-    vector<supervisor_msgs::ActionMS> askedActions = ms->getActionsFromIds(askedIds);
-    for(vector<supervisor_msgs::ActionMS>::iterator it = askedActions.begin(); it != askedActions.end(); it++){
-        bool isActor = false;
-        for(vector<string>::iterator ita = it->actors.begin(); ita != it->actors.end(); ita++){
-            if(*ita == actor){
-                isActor = true;
-                break;
-            }
-        }
-        if(isActor){//if we find an action ASKED to the actor, we look if the agent think the action is possible (preconditions)
-            if(ms->db_.factsAreIn(agent, it->prec)){
-                //if the action is possible we return this action
-                answer.second = "READY"; //we return READY in order to inform that the action is possible
-                answer.first = ms->convertActionMStoAction(*it);
-                return answer;
-            }else if(!actionFind){
-                //else we remember this action in case there is no other possible action
-                actionFind = true;
-                answer.second = "NEEDED"; //we return NEEDED in order to inform that the action is not possible
-                answer.first = ms->convertActionMStoAction(*it);
-            }
-        }
-    }
-
-    //Then we look for READY action
-    vector<int> readyIds = ms->db_.getActionsIdFromState(agent, "READY");
-    vector<supervisor_msgs::ActionMS> readyActions = ms->getActionsFromIds(readyIds);
-    for(vector<supervisor_msgs::ActionMS>::iterator it = readyActions.begin(); it != readyActions.end(); it++){
-        bool isActor = false;
-        for(vector<string>::iterator ita = it->actors.begin(); ita != it->actors.end(); ita++){
-            if(*ita == actor){
-                isActor = true;
-                break;
-            }
-        }
-        if(isActor){//if we find an action READY to the actor, we return the action
-            answer.second = "READY";
-            answer.first = ms->convertActionMStoAction(*it);
-            return answer;
-        }
-    }
-
-    //If we didn't find yet an action ASKED but not possible we look for NEEDED action
-    if(!actionFind){
-        vector<int> neededIds = ms->db_.getActionsIdFromState(agent, "NEEDED");
-        vector<supervisor_msgs::ActionMS> neededActions = ms->getActionsFromIds(neededIds);
-        for(vector<supervisor_msgs::ActionMS>::iterator it = neededActions.begin(); it != neededActions.end(); it++){
-            bool isActor = false;
-            for(vector<string>::iterator ita = it->actors.begin(); ita != it->actors.end(); ita++){
-                if(*ita == actor){
-                    isActor = true;
-                    break;
+            for(std::vector<supervisor_msgs::MentalState>::iterator itms = ms_->msList_.begin(); itms != ms_->msList_.end(); itms++){
+                //check if the agents sees the action
+                bool canSee = ms_->canSee(itms->agentName, action.actors[0]);
+                supervisor_msgs::Action newAction;
+                if(ms_->currentRobotAction_.id == action.id){
+                    //it was the robot current action
+                    newAction = action;
+                    ms_->currentRobotAction_.id = -1;
+                    if(canSee){
+                        itms->currentRobotAction.id = -1;
+                        itms->previousActions.push_back(newAction);
+                        if(newAction.succeed){
+                            ms_->addEffects(newAction, itms->agentName);
+                        }
+                    }
+                }else if(canSee){
+                    if(ms_->currentPlan_.id != -1){
+                        //check if the action is from the plan
+                        supervisor_msgs::Action inPlanAction = ms_->isInList(action, itms->todoActions);
+                        if(inPlanAction.id != -1){
+                            if(inPlanAction.actors[0] == ms_->agentX_){
+                                inPlanAction.actors[0] = action.actors[0];
+                            }
+                            newAction = inPlanAction;
+                            newAction.succeed = action.succeed;
+                        }else{
+                            newAction = action;
+                        }
+                    }else{
+                        newAction = action;
+                    }
+                    if(newAction.succeed){
+                        if(action.name == "pick" && newAction.name != "pick"){
+                            //take pick effects
+                            newAction.name = "pick";
+                            newAction.effects.clear();
+                            newAction.precs.clear();
+                            newAction = ms_->addPrecsAndEffects(newAction);
+                        }
+                        itms->previousActions.push_back(newAction);
+                        ms_->addEffects(newAction, itms->agentName);
+                    }
                 }
             }
-            if(isActor){//if we find an action READY to the actor, we return the action
-                answer.second = "NEEDED";
-                answer.first = ms->convertActionMStoAction(*it);
-                return answer;
+        }
+        oldMsgPrevious_ = currentActions;
+        needCheckPrec_ = true;
+    }
+}
+
+/**
+ * \brief Callback of the shared plan
+ * @param msg topic msg
+ * */
+void planCallback(const supervisor_msgs::SharedPlan::ConstPtr& msg){
+
+    if(msg->id != ms_->currentPlan_.id){
+        if(msg->id != -1){
+            //end current plan for all agents
+            std::vector<supervisor_msgs::Action> planActions = msg->actions;
+            for(std::vector<supervisor_msgs::MentalState>::iterator itms = ms_->msList_.begin(); itms != ms_->msList_.end(); itms++){
+                itms->plannedActions.clear();
+                itms->todoActions.clear();
+                //replace by the new plans
+                for(std::vector<supervisor_msgs::Action>::iterator it = planActions.begin(); it != planActions.end(); it++){
+                    itms->plannedActions.push_back(ms_->addPrecsAndEffects(*it));
+                }
+            }
+            //we check the current robot action if any
+            if(ms_->currentRobotAction_.id != -1){
+                supervisor_msgs::Action inPlanAction = ms_->isInList(ms_->currentRobotAction_, planActions);
+                if(inPlanAction.id != -1){
+                    ms_->currentRobotAction_.id = inPlanAction.id;
+                    for(std::vector<supervisor_msgs::MentalState>::iterator itms = ms_->msList_.begin(); itms != ms_->msList_.end(); itms++){
+                        if(itms->currentRobotAction.id != -1){
+                            itms->currentRobotAction.id = inPlanAction.id;
+                        }
+                    }
+                }
+            }
+        }else{
+            //end current plan for all agents
+            for(std::vector<supervisor_msgs::MentalState>::iterator itms = ms_->msList_.begin(); itms != ms_->msList_.end(); itms++){
+                itms->plannedActions.clear();
+                itms->todoActions.clear();
+            }
+        }
+        needCheckPrec_ = true;
+        ms_->currentPlan_ = *msg;
+    }
+}
+
+/**
+ * \brief Callback of the current robot action
+ * @param msg topic msg
+ * */
+void robotActionCallback(const supervisor_msgs::Action::ConstPtr& msg){
+
+    //it is a new action
+    if(ms_->currentRobotAction_.id != msg->id){
+        supervisor_msgs::Action newAction = ms_->addPrecsAndEffects(*msg);
+         ms_->currentRobotAction_ = newAction;
+    }
+    //we check for each agent if he is aware of the action
+    for(std::vector<supervisor_msgs::MentalState>::iterator itms = ms_->msList_.begin(); itms != ms_->msList_.end(); itms++){
+        if(itms->currentRobotAction.id != msg->id){
+            if(ms_->canSee(itms->agentName, ms_->robotName_)){
+                itms->currentRobotAction = ms_->currentRobotAction_;
             }
         }
     }
-
-    //if we find nothing we return the state NONE
-    answer.second = "NONE";
-    return answer;
 }
 
 
-/*
-Function call to get the state of an action
-*/
-string getActionState(string agent, supervisor_msgs::Action action){
+/**
+ * \brief Callback of the info given from dialogue node
+ * @param msg topic msg
+ * */
+void infoCallback(const supervisor_msgs::Info::ConstPtr& msg){
 
-    pair<bool, supervisor_msgs::ActionMS> actionFind = ms->getActionFromAction(action);
-    if(actionFind.first){
-        return ms->db_.getActionState(agent, actionFind.second);
-    }
-
-    return "UNKNOWN";
-}
-
-/*
-Service call when we want information
-*/
-bool getInfo(supervisor_msgs::GetInfo::Request  &req, supervisor_msgs::GetInfo::Response &res){
-
-    if(req.info == "ALL_FACTS"){
-        res.facts = ms->db_.getFactsAgent(req.agent);
-    }else if(req.info == "FACTS_IN"){
-        res.answer = ms->db_.factsAreIn(req.agent, req.facts);
-    }else if(req.info == "AGENTS"){
-        res.agents =  ms->db_.getAgents();
-    }else if(req.info == "ACTIONS_TODO"){
-        pair<supervisor_msgs::Action, string> answer = getActionTodo(req.agent, req.actor);
-        res.action = answer.first;
-        res.state = answer.second;
-    }else if(req.info == "ACTION_STATE"){
-        res.state = getActionState(req.agent, req.action);
-    }else if(req.info == "ACTIONS"){
-        res.actions = ms->getActionList();
-    }
-
-    return true; 
-
-}
-
-/*
-Service when an agent informs an other agent about something, it can be:
-	- the state of a goal, @infoType = goalState
-	- the state of a plan, @infoType = planState
-	- the state of a action, @infoType = actionState
-	- a fact, @infoType = fact
-*/
-bool infoGiven(supervisor_msgs::InfoGiven::Request  &req, supervisor_msgs::InfoGiven::Response &res){
-
-    isGivingInfo = false;
-	
-	if(req.infoType == "goalState"){//we put the state of the goal into the receiver and sender knowledge
-		supervisor_msgs::GoalMS* goal = NULL;
-		goal = ms->getGoalByName(req.goal);
-		if(!goal){
-			ROS_ERROR("[mental_state] Unknown goal");
-			return false;
-		}
-        ms->db_.addGoalState(*goal, req.receiver, req.state);
-        ms->db_.addGoalState(*goal, req.sender, req.state);
-	}else if(req.infoType == "planState"){//we put the state of the plan into the receiver and sender knowledge
-		pair<bool, supervisor_msgs::PlanMS> plan = ms->getPlanFromId(req.planId);
-		if(plan.first){
-            ms->db_.addPlanState(plan.second, req.receiver, req.state);
-            ms->db_.addPlanState(plan.second, req.sender, req.state);
-		}
-	}else if(req.infoType == "actionState"){//we put the state of the action into the receiver and sender knowledge
-		pair<bool, supervisor_msgs::ActionMS> action = ms->getActionFromId(req.actionId);
-		if(action.first){
-			vector<supervisor_msgs::ActionMS> actions;
-			actions.push_back(action.second);
-            ms->db_.addActionsState(actions, req.receiver, req.state);
-            ms->db_.addActionsState(actions, req.sender, req.state);
-		}
-
-	}else if(req.infoType == "fact"){//we put the fact into the receiver and sender knowledge
-		vector<toaster_msgs::Fact> facts;
-        req.fact.propertyType == "dialogue";
-		facts.push_back(req.fact);
-        ms->db_.addFacts(facts, req.receiver);
-        ms->db_.addFacts(facts, req.sender);
-	}else {
-		ROS_ERROR("[mental_state] Unknown infoType");
-		return false;
-	}
-
-
-	return true;
-}
-
-
-
-/*
-Service call to get the state of an action
-*/
-bool solveDivergentBelief(supervisor_msgs::SolveDivergentBelief::Request  &req, supervisor_msgs::SolveDivergentBelief::Response &res){
-
-    //if we already ask to the dialogue node to give an information, we wait its return beofre giving another
-    //TODO: find a better way to do it
-    if(isGivingInfo){
-        return true;
-    }
-
-    ros::ServiceClient client = node->serviceClient<supervisor_msgs::GiveInfo>("dialogue_node/give_info");
-    supervisor_msgs::GiveInfo srv;
-	
-	pair<bool, supervisor_msgs::ActionMS> actionFind = ms->getActionFromAction(req.action);
-	if(actionFind.first){
-        string humanState = ms->db_.getActionState(req.agent, actionFind.second);
-        string robotState = ms->db_.getActionState(robotName, actionFind.second);
-		if(robotState == "READY" && humanState != "READY"){
-			//we first look if the agent has the same plan as the robot
-			pair<bool, supervisor_msgs::PlanMS> robotPlan = ms->getAgentPlan(robotName);
-			if(robotPlan.first){
-				pair<bool, supervisor_msgs::PlanMS> humanPlan = ms->getAgentPlan(req.agent);
-				if(!humanPlan.first){
-                    isGivingInfo = true;
-                    srv.request.receiver = req.agent;
-                    srv.request.type = "PLAN";
-                    srv.request.planState = "SHARE";
-                    srv.request.plan = ms->convertPlanMStoPlan(robotPlan.second);
-                    if (!client.call(srv)){
-                       ROS_ERROR("[mental_state] Failed to call service dialogue_node/give_info");
-                    }
-					return true;
-				}else{
-					if(robotPlan.second.id != humanPlan.second.id){
-                        isGivingInfo = true;
-                        srv.request.receiver = req.agent;
-                        srv.request.type = "PLAN";
-                        srv.request.planState = "SHARE";
-                        srv.request.plan = ms->convertPlanMStoPlan(robotPlan.second);
-                        if (!client.call(srv)){
-                           ROS_ERROR("[mental_state] Failed to call service dialogue_node/give_info");
+    if(msg->type == "FACT"){
+        if(msg->toRobot){
+            ms_->addRmFactToAgent(msg->fact, ms_->robotName_, msg->isTrue);
+        }
+        ms_->addRmFactToAgent(msg->fact, msg->agent, msg->isTrue);
+        needCheckEffect_ = true;
+        needCheckPrec_ = true;
+    }else if(msg->type == "ACTION"){
+        for(std::vector<supervisor_msgs::MentalState>::iterator itms = ms_->msList_.begin(); itms != ms_->msList_.end(); itms++){
+            if(itms->agentName == msg->agent){
+                supervisor_msgs::Action newAction;
+                if(ms_->currentRobotAction_.id == msg->action.id){
+                    //it was the robot current action
+                    newAction = ms_->currentRobotAction_;
+                    newAction.succeed = msg->action.succeed;
+                    ms_->currentRobotAction_.id = -1;
+                    itms->currentRobotAction.id = -1;
+                }else if(ms_->currentPlan_.id != -1){
+                    //check if the action is from the plan
+                    supervisor_msgs::Action inPlanAction = ms_->isInList(msg->action, itms->todoActions);
+                    if(inPlanAction.id != -1){
+                        if(inPlanAction.actors[0] == ms_->agentX_){
+                            inPlanAction.actors[0] = msg->action.actors[0];
                         }
-						return true;
-					}
-					//If the agent thinks the action is NEEDED, the problem comes from the preconditions
-					if(humanState == "NEEDED"){
-						for(vector<toaster_msgs::Fact>::iterator it = actionFind.second.prec.begin(); it != actionFind.second.prec.end(); it++){
-							vector<toaster_msgs::Fact> toTest;
-							toTest.push_back(*it);
-                            if(!ms->db_.factsAreIn(req.agent, toTest)){
-                                isGivingInfo = true;
-                                srv.request.receiver = req.agent;
-                                srv.request.type = "FACT";
-                                srv.request.isTrue = true;
-                                srv.request.fact = *it;
-                                if (!client.call(srv)){
-                                   ROS_ERROR("[mental_state] Failed to call service dialogue_node/give_info");
-                                }
-                                return true;
-							}	
-						}
-					}else if(humanState == "PLANNED"){//If the agent thinks the action is PLANNED, the problem comes from the previous actions
-						//we get all actions id with a link to the action
-						for(vector<supervisor_msgs::Link>::iterator itl = robotPlan.second.links.begin(); itl != robotPlan.second.links.end(); itl++){
-							if(itl->following == actionFind.second.id){
-								toaster_msgs::Fact fact;
-								vector<toaster_msgs::Fact> toCheck;
-								ostringstream toString;
-								toString << itl->origin;
-								fact.subjectId = toString.str();
-								fact.property = "actionState";
-								fact.targetId = "DONE";
-								toCheck.push_back(fact);
-                                if(!ms->db_.factsAreIn(req.agent, toCheck)){
-                                    isGivingInfo = true;
-                                    srv.request.receiver = req.agent;
-                                    srv.request.type = "ACTION";
-                                    srv.request.actionState = "DONE";
-                                    pair<bool, supervisor_msgs::ActionMS> actionToVerbalize = ms->getActionFromId(itl->origin);
-                                    srv.request.action = ms->convertActionMStoAction(actionToVerbalize.second);
-                                    if (!client.call(srv)){
-                                       ROS_ERROR("[mental_state] Failed to call service dialogue_node/give_info");
-                                    }
-                                    return true;
-                                }
-							}
-						}
-					}
-				}
-			}
-		}else if(humanState == "READY" && robotState != "READY"){
-            //we first look if the agent has the same plan as the robot
-            pair<bool, supervisor_msgs::PlanMS> robotPlan = ms->getAgentPlan(robotName);
-            if(robotPlan.first){
-                pair<bool, supervisor_msgs::PlanMS> humanPlan = ms->getAgentPlan(req.agent);
-                if(!humanPlan.first){
-                    isGivingInfo = true;
-                    srv.request.receiver = req.agent;
-                    srv.request.type = "PLAN";
-                    srv.request.planState = "SHARE";
-                    srv.request.plan = ms->convertPlanMStoPlan(robotPlan.second);
-                    if (!client.call(srv)){
-                       ROS_ERROR("[mental_state] Failed to call service dialogue_node/give_info");
+                        newAction = inPlanAction;
+                        newAction.succeed = msg->action.succeed;
                     }
-                    return true;
                 }else{
-                    if(robotPlan.second.id != humanPlan.second.id){
-                        isGivingInfo = true;
-                        srv.request.receiver = req.agent;
-                        srv.request.type = "PLAN";
-                        srv.request.planState = "SHARE";
-                        srv.request.plan = ms->convertPlanMStoPlan(robotPlan.second);
-                        if (!client.call(srv)){
-                           ROS_ERROR("[mental_state] Failed to call service dialogue_node/give_info");
-                        }
-                        return true;
-                    }
-                    //If the robot thinks the action is NEEDED, the problem comes from the preconditions
-                    if(robotState == "NEEDED"){
-                        for(vector<toaster_msgs::Fact>::iterator it = actionFind.second.prec.begin(); it != actionFind.second.prec.end(); it++){
-                            vector<toaster_msgs::Fact> toTest;
-                            toTest.push_back(*it);
-                            if(!ms->db_.factsAreIn(robotName, toTest)){
-                                if(ms->db_.factsAreIn(req.agent, toTest)){
-                                    isGivingInfo = true;
-                                    srv.request.receiver = req.agent;
-                                    srv.request.type = "FACT";
-                                    srv.request.isTrue = false;
-                                    srv.request.fact = *it;
-                                    if (!client.call(srv)){
-                                       ROS_ERROR("[mental_state] Failed to call service dialogue_node/give_info");
-                                    }
-                                    return true;
-                                }
-                            }
-                        }
-                    }else if(robotState == "PLANNED"){//If the agent thinks the action is PLANNED, the problem comes from the previous actions
-                        //we get all actions id with a link to the action
-                        for(vector<supervisor_msgs::Link>::iterator itl = robotPlan.second.links.begin(); itl != robotPlan.second.links.end(); itl++){
-                            if(itl->following == actionFind.second.id){
-                                toaster_msgs::Fact fact;
-                                vector<toaster_msgs::Fact> toCheck;
-                                ostringstream toString;
-                                toString << itl->origin;
-                                fact.subjectId = toString.str();
-                                fact.property = "actionState";
-                                pair<bool, supervisor_msgs::ActionMS> actionLink = ms->getActionFromId(itl->origin);
-                                string actionState = ms->db_.getActionState(req.agent, actionLink.second);
-                                fact.targetId = actionState;
-                                toCheck.push_back(fact);
-                                if(!ms->db_.factsAreIn(req.agent, toCheck)){
-                                    isGivingInfo = true;
-                                    srv.request.receiver = req.agent;
-                                    srv.request.type = "ACTION";
-                                    srv.request.actionState = actionState;
-                                    pair<bool, supervisor_msgs::ActionMS> actionToVerbalize = ms->getActionFromId(itl->origin);
-                                    srv.request.action = ms->convertActionMStoAction(actionToVerbalize.second);
-                                    if (!client.call(srv)){
-                                       ROS_ERROR("[mental_state] Failed to call service dialogue_node/give_info");
-                                    }
-                                    return true;
-                                }
+                    newAction = ms_->addPrecsAndEffects(msg->action);
+                    newAction.succeed = msg->action.succeed;
+                }
+                itms->previousActions.push_back(newAction);
+                ms_->addEffects(newAction, itms->agentName);
+                break;
+            }
+        }
+        needCheckPrec_ = true;
+    }else if(msg->type == "ASK_ACTION"){
+        for(std::vector<supervisor_msgs::MentalState>::iterator itms = ms_->msList_.begin(); itms != ms_->msList_.end(); itms++){
+            if(itms->agentName == msg->agent){
+                supervisor_msgs::Action inTodoAction = ms_->isInList(msg->action, itms->todoActions);
+                if(inTodoAction.id == -1){
+                    supervisor_msgs::Action toAdd = msg->action;
+                    //if needed we remove if from planned actions
+                    supervisor_msgs::Action inPlannedAction = ms_->isInList(msg->action, itms->plannedActions);
+                    if(inPlannedAction.id != -1){
+                        toAdd.id = inPlannedAction.id;
+                        for(std::vector<supervisor_msgs::Action>::iterator it = itms->plannedActions.begin(); it != itms->plannedActions.end(); it++){
+                            if(it->id == toAdd.id){
+                                itms->plannedActions.erase(it);
+                                break;
                             }
                         }
                     }
+                    //we add it in the todo actions
+                    itms->todoActions.push_back(toAdd);
+                }
+                break;
+            }
+        }
+    }else if(msg->type == "GOAL"){
+        for(std::vector<supervisor_msgs::MentalState>::iterator itms = ms_->msList_.begin(); itms != ms_->msList_.end(); itms++){
+            if(itms->agentName == msg->agent){
+                itms->robotGoal == msg->goal;
+                std::string actorsParam = "goal_manager/goals/" + msg->goal + "_actors";
+                std::vector<std::string> actors;
+                node_->getParam(actorsParam, actors);
+                if(ms_->isInList(actors, itms->agentName)){
+                    itms->agentGoal == msg->goal;
                 }
             }
-		}
-	}else {
-		ROS_ERROR("[mental_states] No such action");
-	}
-
-
-	return true;
-}
-
-
-
-/*
-Service which return all actions
-*/
-void update(MSManager* ms, string agent){
-
-     ms->update(agent);
+        }
+    }
 }
 
 int main (int argc, char **argv)
 {
-  ros::init(argc, argv, "mental_state");
-  ros::NodeHandle _node;
-  node = &_node;
-    ros::Rate loop_rate(30);
+  ros::init(argc, argv, "mental_states");
+  ros::NodeHandle node;
+  node_ = &node;
+  ros::Rate loop_rate(30);
 
-  ROS_INFO("[mental_state] Init mental_state");
+  MsManager ms(node_);
+  ms_ = &ms;
+  needCheckEffect_ = false;
+  needCheckGoal_ = false;
+  needCheckPrec_ = false;
+  prevId_ =-1;
 
-  //Services declarations
-  ros::ServiceServer service_change_state = _node.advertiseService("mental_state/change_state", changeState); //change the state of a goal/plan/action
-  ros::ServiceServer service_get_info = _node.advertiseService("mental_state/get_info", getInfo); //get diverse information
-  ros::ServiceServer service_info_given = _node.advertiseService("mental_state/info_given", infoGiven); //when an agent informs an other agent about something
-  ros::ServiceServer service_solve_divergent_belief = _node.advertiseService("mental_state/solve_divergent_belief", solveDivergentBelief); //solve a divergent belief concerning an action
+  ros::Subscriber sub_db = node_->subscribe("database_manager/tables", 1, dbCallback);
+  ros::Subscriber sub_goal = node_->subscribe("goal_manager/goalsList", 1, goalCallback);
+  ros::Subscriber sub_prev = node_->subscribe("supervisor/previous_actions", 1, prevCallback);
+  ros::Subscriber sub_plan = node_->subscribe("plan_elaboration/plan", 1, planCallback);
+  ros::Subscriber robot_action = node_->subscribe("/action_executor/current_robot_action", 1, robotActionCallback);
+  ros::Subscriber sub_info = node_->subscribe("/dialogue_node/infoGiven", 1, infoCallback);
 
-  ros::Publisher knowledge_pub = node->advertise<supervisor_msgs::Knowledge>("/mental_states/agents_knowledge", 1000);
+  ros::Publisher ms_pub = node_->advertise<supervisor_msgs::MentalStatesList>("/mental_states/mental_states", 1);
 
-  _node.getParam("/simu", simu);
-  _node.getParam("/robot/name", robotName);
-  allAgents = ms->db_.getAgents();
-  ms->db_.cleanDB();
-  ms->db_.initKnowledge(allAgents);
-  ms->initGoals();
-  ms->initHighLevelActions();
-  isGivingInfo = false;
+  ROS_INFO("[mental_states] mental_states ready");
 
-  ROS_INFO("[mental_state] mental_state ready");
-  
-  boost::thread_group g;
-  while(_node.ok()){
-    ms->db_.updateKnowledge(); //we get new state from the database
-    for(vector<string>::iterator it = allAgents.begin(); it != allAgents.end(); it++){
-          g.create_thread(boost::bind(update, ms, *it));
-    }
-    g.join_all();
-    supervisor_msgs::Knowledge msg;
-    msg.agentsKnowledge = ms->db_.knowledge_;
-    knowledge_pub.publish(msg);
-    ros::spinOnce();
-    loop_rate.sleep();
+  while (node.ok()) {
+      ros::spinOnce();
+
+      bool changed  = false;
+      while(needCheckEffect_ || needCheckGoal_ || needCheckPrec_){
+        if(needCheckEffect_){
+            needCheckPrec_ = needCheckPrec_ || ms_->checkEffects();
+            needCheckEffect_ = false;
+        }
+        if(needCheckPrec_){
+            needCheckEffect_ = needCheckEffect_ || ms_->checkPrecs();
+            needCheckPrec_ = false;
+        }
+        if(needCheckGoal_){
+            ms_->checkGoals();
+            needCheckGoal_ = false;
+        }
+        changed = true;
+      }
+
+      supervisor_msgs::MentalStatesList toPublish;
+      toPublish.mentalStates = ms_->msList_;
+      toPublish.changed = changed;
+      toPublish.prevId = prevId_;
+      ms_pub.publish(toPublish);
+
+      loop_rate.sleep();
   }
 
   return 0;

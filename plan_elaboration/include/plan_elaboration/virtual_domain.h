@@ -8,14 +8,25 @@
 
 #include "toaster_msgs/Fact.h"
 
-using namespace std;
-
 class VirtualDomain
 {
 public:
-    VirtualDomain() {};
+    VirtualDomain(ros::NodeHandle* node);
     ~VirtualDomain() {};
-    virtual vector<toaster_msgs::Fact> computeSpecificFacts(vector<toaster_msgs::Fact> facts) = 0;
+    virtual std::vector<toaster_msgs::Fact> computeSpecificFacts(std::vector<toaster_msgs::Fact> facts) = 0;
+    std::string goal_; /**< current goal corresponding to the domain*/
+    std::string agentLocked_; /**< agent locked for evaluation*/
+    std::string objectLocked_; /**< object locked for evaluation*/
+    std::string agentForgive_; /**< agent locked for forgiven actions*/
+    std::string objectForgive_; /**< object locked for forgiven actions*/
+    bool isHighLevelDomain_;  /**< Indicate if the domain is build with hugh level concepts*/
+
+protected:
+    ros::NodeHandle* node_; /**< Node handle*/
+    std::string robotName_; /**< name of the robot */
+
+    std::vector<toaster_msgs::Fact> computeLockedFacts(std::vector<toaster_msgs::Fact> facts);
+    std::vector<toaster_msgs::Fact> computeForgiveFacts(std::vector<toaster_msgs::Fact> facts);
 };
 
 #endif // VIRTUAL_DOMAIN_H

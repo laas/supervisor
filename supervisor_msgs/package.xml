@@ -27,9 +27,9 @@
   <run_depend>std_msgs</run_depend>
   <run_depend>geometry_msgs</run_depend>
   <run_depend>message_generation</run_depend>
-    <run_depend>message_runtime</run_depend>
-    <run_depend>actionlib</run_depend>
-    <run_depend>actionlib_msgs</run_depend>
-    <run_depend>toaster_msgs</run_depend>
+  <run_depend>message_runtime</run_depend>
+  <run_depend>actionlib</run_depend>
+  <run_depend>actionlib_msgs</run_depend>
+  <run_depend>toaster_msgs</run_depend>
 
 </package>

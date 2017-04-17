@@ -1,31 +1,44 @@
 #include "plan_elaboration/Domains/scan_domain.h"
 
-ScanDomain::ScanDomain() : VirtualDomain()
+/**
+ * \brief Constructor of the class
+ * */
+ScanDomain::ScanDomain(ros::NodeHandle* node) : VirtualDomain(node)
 {
-    areaScan_ = "scanAreaTABLE_4"; //TODO: to put in param
+    node_->getParam("/plan_elaboration/domains/SCAN/areaScan", areaScan_);
+    isHighLevelDomain_ = true;
 }
 
-/*
-Update the planning world state with blocks domain specific facts:
-    - isInScanArea
 
-*/
-vector<toaster_msgs::Fact> ScanDomain::computeSpecificFacts(vector<toaster_msgs::Fact> facts){
+/**
+ * \brief Update the planning world state with scan domain specific facts:
+    - isInScanArea
+ * @param facts the initial set of facts
+ * @return the facts used for planning
+ * */
+std::vector<toaster_msgs::Fact> ScanDomain::computeSpecificFacts(std::vector<toaster_msgs::Fact> facts){
 
     facts = computeScanArea(facts);
+
+    facts = computeForgiveFacts(facts);
+
+    facts = computeLockedFacts(facts);
 
     return facts;
 }
 
-/*
-Compute isInScanArea facts
-*/
-vector<toaster_msgs::Fact> ScanDomain::computeScanArea(vector<toaster_msgs::Fact> facts){
+
+/**
+ * \brief Compute isInScanArea facts
+ * @param facts the initial set of facts
+ * @return the initial set of facts + isInScanArea facts
+ * */
+std::vector<toaster_msgs::Fact> ScanDomain::computeScanArea(std::vector<toaster_msgs::Fact> facts){
 
 
-    vector<toaster_msgs::Fact> toReturn;
+    std::vector<toaster_msgs::Fact> toReturn;
 
-    for(vector<toaster_msgs::Fact>::iterator it = facts.begin(); it != facts.end(); it++){
+    for(std::vector<toaster_msgs::Fact>::iterator it = facts.begin(); it != facts.end(); it++){
         if(it->property == "IsInArea" && it->targetId == areaScan_){
             //we add the fact into the planning knowledge
             toaster_msgs::Fact toAdd;
