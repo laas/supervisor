@@ -21,6 +21,8 @@ public:
     std::string object_; /**< object of the action*/
     std::string initialObject_; /**< given high level object when there is one*/
     int gtpActionId_; /**< id of the gtp task*/
+    std::string actionName_;
+    std::string support_;
 protected:
    Connector* connector_; /**< connector structure pointer*/
 
@@ -38,13 +40,14 @@ protected:
    void PutInContainer(std::string object, std::string container);
    std::pair<int, std::vector<gtp_ros_msgs::SubSolution> >  planGTP(std::string actionName, std::vector<gtp_ros_msgs::Role> agents, std::vector<gtp_ros_msgs::Role> objects, std::vector<gtp_ros_msgs::MiscData> datas, std::vector<gtp_ros_msgs::Point> points, std::vector<gtp_ros_msgs::ActionId> attachments);
    bool execAction(int actionId, std::vector<gtp_ros_msgs::SubSolution> subSolutions, bool shouldOpen, Server* action_server);
-   bool executeTrajectory(int actionId, int actionSubId, int armId, Server* action_server);
+   bool executeTrajectory(int actionId, int actionSubId, int armId, Server* action_server, std::string name);
    bool openGripper(int armId, Server* action_server);
    bool closeGripper(int armId, Server* action_server);
    bool isGripperEmpty(std::string arm);
    bool isRefined(std::string object);
    std::string findRefinment(std::string object, std::vector<toaster_msgs::Fact> conditions, std::string forbiddenObject);
    std::vector<std::string> AreFactsInDB(std::vector<toaster_msgs::Fact> facts);
+   void saveTraj(gtp_ros_msg::GTPTraj traj, std::string trajName);
 private:
 };
 

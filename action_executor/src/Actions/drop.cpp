@@ -35,6 +35,8 @@ Drop::Drop(supervisor_msgs::Action action, Connector* connector) : VirtualAction
         ROS_WARN("[action_executor] Missing parameter: container where to drop");
     }
 
+    actionName_ = "drop";
+
 }
 
 /**
@@ -109,49 +111,73 @@ bool Drop::preconditions(){
  * */
 bool Drop::plan(){
 
-    std::vector<gtp_ros_msgs::ActionId> attachments;
-    //If there is no previous task we look for a previous grasp
-    if(connector_->previousId_ == -1){
-        if(connector_->idGrasp_ == -1){
-            ROS_WARN("[action_executor] No previous Id nore previous grasp id");
-           return false;
-        }else{
-            //TODO: add attachment in GTP
+
+    if(connector_->saveMode_ == "load"){
+        gtpActionId_ = 101;
+        gtp_ros_msgs::SubSolution subSol;
+        subSol.agent = "PR2_ROBOT";
+        subSol.armId = 1;
+        subSol.id = 0;
+        subSol.name = "approach";
+        subSol.type = "move";
+        subSolutions_.push_back(subSol);
+        subSol.id = 1;
+        subSol.name = "engage";
+        subSol.type = "move";
+        subSolutions_.push_back(subSol);
+        subSol.id = 2;
+        subSol.name = "release";
+        subSol.type = "release";
+        subSolutions_.push_back(subSol);
+        subSol.id = 3;
+        subSol.name = "disengage";
+        subSol.type = "move";
+        subSolutions_.push_back(subSol);
+    }else{
+        std::vector<gtp_ros_msgs::ActionId> attachments;
+        //If there is no previous task we look for a previous grasp
+        if(connector_->previousId_ == -1){
+            if(connector_->idGrasp_ == -1){
+                ROS_WARN("[action_executor] No previous Id nore previous grasp id");
+               return false;
+            }else{
+                //TODO: add attachment in GTP
+            }
         }
+
+        //We ask gtp a plan
+        std::vector<gtp_ros_msgs::Role> agents;
+        gtp_ros_msgs::Role role;
+        role.role = "mainAgent";
+        role.name = connector_->robotName_;
+        agents.push_back(role);
+        std::vector<gtp_ros_msgs::Role> objects;
+        role.role = "mainObject";
+        role.name = object_;
+        objects.push_back(role);
+        role.role = "supportObject";
+        role.name = container_;
+        objects.push_back(role);
+        std::vector<gtp_ros_msgs::Point> points;
+        std::vector<gtp_ros_msgs::MiscData> datas;
+
+        //if(connector_->shouldUseRightHand_){
+            gtp_ros_msgs::MiscData data;
+            data.key = "hand";
+            data.value = "left";
+            datas.push_back(data);
+        //}
+
+
+        std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > answer = planGTP("drop", agents, objects, datas, points, attachments);
+        gtpActionId_ = answer.first;
+
+        if(gtpActionId_ == -1){
+            return false;
+         }
+
+        subSolutions_ = answer.second;
     }
-
-    //We ask gtp a plan
-    std::vector<gtp_ros_msgs::Role> agents;
-    gtp_ros_msgs::Role role;
-    role.role = "mainAgent";
-    role.name = connector_->robotName_;
-    agents.push_back(role);
-    std::vector<gtp_ros_msgs::Role> objects;
-    role.role = "mainObject";
-    role.name = object_;
-    objects.push_back(role);
-    role.role = "supportObject";
-    role.name = container_;
-    objects.push_back(role);
-    std::vector<gtp_ros_msgs::Point> points;
-    std::vector<gtp_ros_msgs::MiscData> datas;
-
-    if(connector_->shouldUseRightHand_){
-        gtp_ros_msgs::MiscData data;
-        data.key = "hand";
-        data.value = "right";
-        datas.push_back(data);
-    }
-
-
-    std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > answer = planGTP("drop", agents, objects, datas, points, attachments);
-    gtpActionId_ = answer.first;
-
-    if(gtpActionId_ == -1){
-        return false;
-     }
-
-    subSolutions_ = answer.second;
     return true;
 }
 

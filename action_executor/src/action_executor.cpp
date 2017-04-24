@@ -40,6 +40,8 @@ action_server_(*node, name,
     connector_.node_->getParam("/action_executor/noExec", connector_.noExec_);
     connector_.node_->getParam("/action_executor/noPlanning", connector_.noPlanning_);
     connector_.node_->getParam("/action_executor/humanCost", connector_.humanCost_);
+    connector_.node_->getParam("/action_executor/saveMode", connector_.saveMode_);
+    connector_.node_->getParam("/action_executor/saveFilePath", connector_.saveFilePath_);
 
     //initialize high level names (from param)
     initHighLevelNames();
@@ -47,6 +49,7 @@ action_server_(*node, name,
     //initialize the publishers
     previous_pub_ = connector_.node_->advertise<supervisor_msgs::ActionsList>("/data_manager/add_data/previous_actions", 1);
     current_pub_ = connector_.node_->advertise<supervisor_msgs::Action>("/action_executor/current_robot_action", 1);
+    connector_.gtp_pub_ = connector_.node_->advertise<gtp_ros_msg::GTPTraj>("/gtp/trajectory", 1);
 
     //Init services
     connector_.client_db_execute_ = connector_.node_->serviceClient<toaster_msgs::ExecuteDB>("database_manager/execute");
@@ -59,6 +62,10 @@ action_server_(*node, name,
         connector_.client_set_pose_ = connector_.node_->serviceClient<toaster_msgs::SetEntityPose>("toaster_simu/set_entity_pose");
     }else{
         connector_.client_set_pose_ = connector_.node_->serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
+    }
+
+    if(connector_.saveMode_ == "save"){
+        connector_.fileSave_.open(connector_.saveFilePath_.c_str(), std::ios::out|std::ios::trunc);
     }
 
 

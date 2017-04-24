@@ -5,7 +5,12 @@
  * */
 ScanUsDomain::ScanUsDomain(ros::NodeHandle* node) : VirtualDomain(node)
 {
-    isHighLevelDomain_ = true;
+    node_->getParam("/supervisor/systemMode", systemMode_);
+    if(systemMode_ == "new"){
+        isHighLevelDomain_ = true;
+    }else{
+        isHighLevelDomain_ = false;
+    }
 }
 
 
@@ -25,6 +30,8 @@ std::vector<toaster_msgs::Fact> ScanUsDomain::computeSpecificFacts(std::vector<t
     facts = computeForgiveFacts(facts);
 
     facts = computeLockedFacts(facts);
+
+    facts = computeIsActivated(facts);
 
     return facts;
 }
@@ -109,4 +116,33 @@ void ScanUsDomain::computeScanned(std::vector<toaster_msgs::Fact> facts){
             }
         }
     }
+}
+
+/**
+ * \brief compute is activated facst
+ * @param facts the initial set of facts
+ * @retuen the initial set of facts + is Activated facts
+ * */
+std::vector<toaster_msgs::Fact> ScanUsDomain::computeIsActivated(std::vector<toaster_msgs::Fact> facts){
+
+    std::vector<toaster_msgs::Fact> toReturn = facts;
+
+    toaster_msgs::Fact toAdd;
+    toAdd.subjectId = robotName_;
+    toAdd.property = "isActivated";
+    toAdd.propertyType = "state";
+    toAdd.targetId = "true";
+    toReturn.push_back(toAdd);
+    toAdd.subjectId = "HERAKLES_HUMAN1";
+    toReturn.push_back(toAdd);
+
+    if(systemMode_ == "hold"){
+        toAdd.targetId = "false";
+    }
+    toAdd.subjectId = "AGENTX";
+    toReturn.push_back(toAdd);
+    toAdd.subjectId = "AGENTX2";
+    toReturn.push_back(toAdd);
+
+    return toReturn;
 }

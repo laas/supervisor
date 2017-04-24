@@ -2,10 +2,11 @@
 plan_elaboration:
     Agents: ['PR2_ROBOT', 'HERAKLES_HUMAN1']
     nbMaxTry: 3
-    toIgnoreFactsForXAgent: ['type', 'isActivated']
+    toIgnoreFactsForXAgent: ['type', 'isActivated', 'hasInRightHand', 'hasInLeftHand']
     HATP_actions:
        Pick: 'pick'
        Place: 'place'
+       Drop: 'drop'
        PickAndPlace: 'pickandplace'
        PickAndPlaceReachable: 'pickandplacereachable'
        PickAndPlaceStick: 'pickandplaceStick'

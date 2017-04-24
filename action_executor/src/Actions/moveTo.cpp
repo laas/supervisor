@@ -112,7 +112,7 @@ bool MoveTo::exec(Server* action_server){
     }
 
     //for moveTo, the solution is only one trajectory
-    return executeTrajectory(gtpActionId_, 0, armId, action_server);
+    return executeTrajectory(gtpActionId_, 0, armId, action_server, "move");
 
 }
 

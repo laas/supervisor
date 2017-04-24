@@ -13,7 +13,9 @@ public:
 
 private:
     std::map<std::string, bool> objectsScanned_;
+    std::string systemMode_;
     void computeScanned(std::vector<toaster_msgs::Fact> facts);
+    std::vector<toaster_msgs::Fact> computeIsActivated(std::vector<toaster_msgs::Fact> facts);
     std::vector<toaster_msgs::Fact> computeHasInHand(std::vector<toaster_msgs::Fact> facts);
     std::vector<toaster_msgs::Fact> computeHasOn(std::vector<toaster_msgs::Fact> facts);
 };

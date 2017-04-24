@@ -11,7 +11,10 @@ ros::NodeHandle* node_;
 MsManager* ms_;
 bool needCheckEffect_, needCheckPrec_, needCheckGoal_;
 std::vector<supervisor_msgs::Action> oldMsgPrevious_;
-int prevId_;
+int prevIdRobot_, prevIdHuman_;
+bool infoGiven_;
+std::string systemMode_, mainPartner_;
+std::vector<supervisor_msgs::Action> toTell_;
 
 /**
  * \brief Callback of the database tables
@@ -40,6 +43,34 @@ void goalCallback(const supervisor_msgs::GoalsList::ConstPtr& msg){
     }
 }
 
+
+/**
+ * \brief Callback of the previous actions list (hold system)
+ * @param msg topic msg
+ * */
+void prevHoldCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
+
+    //look for the new action added to the previous list and check if the agents are aware of the action
+    std::vector<supervisor_msgs::Action> currentActions = msg->actions;
+    if(currentActions.size() > oldMsgPrevious_.size()){
+        //the action(s) performed are at the end of the list
+        for(int i = oldMsgPrevious_.size(); i < currentActions.size(); i++){
+            if(currentActions[i].actors[0] == ms_->robotName_){
+                prevIdRobot_ = currentActions[i].id;
+                if(!ms_->isVisibleBy(ms_->robotName_, mainPartner_)){
+                    toTell_.push_back(currentActions[i]);
+                }
+            }else{
+                prevIdHuman_ = currentActions[i].id;
+            }
+            if(currentActions[i].succeed){
+                ms_->addEffects(currentActions[i], ms_->robotName_);
+            }
+        }
+        oldMsgPrevious_ = currentActions;
+    }
+}
+
 /**
  * \brief Callback of the previous actions list
  * @param msg topic msg
@@ -51,7 +82,11 @@ void prevCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
     if(currentActions.size() > oldMsgPrevious_.size()){
         //the action(s) performed are at the end of the list
         for(int i = oldMsgPrevious_.size(); i < currentActions.size(); i++){
-            prevId_ = currentActions[i].id;
+            if(currentActions[i].actors[0] == ms_->robotName_){
+                prevIdRobot_ = currentActions[i].id;
+            }else{
+                prevIdHuman_ = currentActions[i].id;
+            }
             supervisor_msgs::Action action = ms_->addPrecsAndEffects(currentActions[i]);
             if(action.succeed){
                 ms_->addEffects(action, ms_->robotName_);
@@ -176,6 +211,8 @@ void robotActionCallback(const supervisor_msgs::Action::ConstPtr& msg){
  * */
 void infoCallback(const supervisor_msgs::Info::ConstPtr& msg){
 
+    infoGiven_ = true;
+
     if(msg->type == "FACT"){
         if(msg->toRobot){
             ms_->addRmFactToAgent(msg->fact, ms_->robotName_, msg->isTrue);
@@ -196,11 +233,17 @@ void infoCallback(const supervisor_msgs::Info::ConstPtr& msg){
                 }else if(ms_->currentPlan_.id != -1){
                     //check if the action is from the plan
                     supervisor_msgs::Action inPlanAction = ms_->isInList(msg->action, itms->todoActions);
+                    if(inPlanAction.id == -1){
+                        inPlanAction = ms_->isInList(msg->action, itms->plannedActions);
+                    }
                     if(inPlanAction.id != -1){
                         if(inPlanAction.actors[0] == ms_->agentX_){
                             inPlanAction.actors[0] = msg->action.actors[0];
                         }
                         newAction = inPlanAction;
+                        newAction.succeed = msg->action.succeed;
+                    }else{
+                        newAction = ms_->addPrecsAndEffects(msg->action);
                         newAction.succeed = msg->action.succeed;
                     }
                 }else{
@@ -239,12 +282,12 @@ void infoCallback(const supervisor_msgs::Info::ConstPtr& msg){
     }else if(msg->type == "GOAL"){
         for(std::vector<supervisor_msgs::MentalState>::iterator itms = ms_->msList_.begin(); itms != ms_->msList_.end(); itms++){
             if(itms->agentName == msg->agent){
-                itms->robotGoal == msg->goal;
+                itms->robotGoal = msg->goal;
                 std::string actorsParam = "goal_manager/goals/" + msg->goal + "_actors";
                 std::vector<std::string> actors;
                 node_->getParam(actorsParam, actors);
                 if(ms_->isInList(actors, itms->agentName)){
-                    itms->agentGoal == msg->goal;
+                    itms->agentGoal = msg->goal;
                 }
             }
         }
@@ -263,14 +306,29 @@ int main (int argc, char **argv)
   needCheckEffect_ = false;
   needCheckGoal_ = false;
   needCheckPrec_ = false;
-  prevId_ =-1;
+  infoGiven_ = false;
+  prevIdRobot_ =-1;
+  prevIdHuman_ =-1;
 
-  ros::Subscriber sub_db = node_->subscribe("database_manager/tables", 1, dbCallback);
-  ros::Subscriber sub_goal = node_->subscribe("goal_manager/goalsList", 1, goalCallback);
-  ros::Subscriber sub_prev = node_->subscribe("supervisor/previous_actions", 1, prevCallback);
-  ros::Subscriber sub_plan = node_->subscribe("plan_elaboration/plan", 1, planCallback);
-  ros::Subscriber robot_action = node_->subscribe("/action_executor/current_robot_action", 1, robotActionCallback);
-  ros::Subscriber sub_info = node_->subscribe("/dialogue_node/infoGiven", 1, infoCallback);
+  node_->getParam("/supervisor/systemMode", systemMode_);
+  node_->getParam("/supervisor/mainPartner", mainPartner_);
+
+  ros::Subscriber sub_db;
+  ros::Subscriber sub_goal;
+  ros::Subscriber sub_plan;
+  ros::Subscriber robot_action;
+  ros::Subscriber sub_info;
+  ros::Subscriber sub_prev;
+  if(systemMode_ == "new"){
+      sub_db = node_->subscribe("database_manager/tables", 1, dbCallback);
+      sub_goal = node_->subscribe("goal_manager/goalsList", 1, goalCallback);
+      sub_plan = node_->subscribe("plan_elaboration/plan", 1, planCallback);
+      robot_action = node_->subscribe("/action_executor/current_robot_action", 1, robotActionCallback);
+      sub_info = node_->subscribe("/dialogue_node/infoGiven", 1, infoCallback);
+      sub_prev = node_->subscribe("supervisor/previous_actions", 1, prevCallback);
+  }else{
+      sub_prev = node_->subscribe("supervisor/previous_actions", 1, prevHoldCallback);
+  }
 
   ros::Publisher ms_pub = node_->advertise<supervisor_msgs::MentalStatesList>("/mental_states/mental_states", 1);
 
@@ -299,7 +357,12 @@ int main (int argc, char **argv)
       supervisor_msgs::MentalStatesList toPublish;
       toPublish.mentalStates = ms_->msList_;
       toPublish.changed = changed;
-      toPublish.prevId = prevId_;
+      toPublish.prevIdRobot = prevIdRobot_;
+      toPublish.prevIdHuman = prevIdHuman_;
+      toPublish.infoGiven = infoGiven_;
+      toPublish.toTell = toTell_;
+      toTell_.clear();
+      infoGiven_ = false;
       ms_pub.publish(toPublish);
 
       loop_rate.sleep();

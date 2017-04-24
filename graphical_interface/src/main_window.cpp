@@ -84,6 +84,12 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
         ui.comboBoxGoals->addItem(it->c_str());
     }
 
+    //we retrieve the possible positions from param of the .yaml file
+    std::vector<std::string> positionsGoTo;
+    node_.getParam("/graphical_interface/goToPositions", positionsGoTo);
+    for(std::vector<std::string>::iterator it = positionsGoTo.begin(); it != positionsGoTo.end(); it++){
+        ui.comboBoxPositionHuman->addItem(it->c_str());
+    }
 
 
     //desactivate tabs if needed
@@ -410,6 +416,8 @@ void MainWindow::on_pushButtonExecuteHuman_clicked()
     action.parameter_values.push_back(ui.comboBoxSupportHuman->currentText().toStdString());
     action.parameter_keys.push_back("container");
     action.parameter_values.push_back(ui.comboBoxContainerHuman->currentText().toStdString());
+    action.parameter_keys.push_back("position");
+    action.parameter_values.push_back(ui.comboBoxPositionHuman->currentText().toStdString());
 
     if(action.name == "placeStick" || action.name == "pickandplaceStick"){
         action.parameter_keys.push_back("support1");

@@ -35,7 +35,7 @@ highLevelActions:
         drop_effects: ['object, isIn, container', 'NULL, isHoldBy, mainAgent']
         pickanddrop_param: ['object', 'container']
         pickanddrop_actors: ['mainAgent']
-        pickanddrop_prec: ['object, isReachableBy, mainAgent', 'container, isReachableBy, mainAgent']
+        pickanddrop_prec: ['object, isReachableBy, mainAgent', 'container, isReachableBy, mainAgent', 'object, isScan, true']
         pickanddrop_effects: ['object, isOn, NULL', 'object, isIn, container']
         moveTo_param: ['confName']
         moveTo_actors: ['mainAgent']

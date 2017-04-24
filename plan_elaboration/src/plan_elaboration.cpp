@@ -15,6 +15,7 @@ PlanElaboration::PlanElaboration(ros::NodeHandle* node)
     node_->getParam("/plan_elaboration/Agents", agentList_);
     node_->getParam("/plan_elaboration/nbMaxTry", nbMaxTry_);
     node_->getParam("/plan_elaboration/toIgnoreFactsForXAgent", toIgnoreFactsForXAgent_);
+    node_->getParam("/supervisor/systemMode", systemMode_);
 
     planId_ = 0;
 
@@ -229,7 +230,12 @@ void PlanElaboration::setPlanningTable(std::string agent){
         //we add specific domains fact in the world state
         std::vector<toaster_msgs::Fact> updatedFacts = dom_->computeSpecificFacts(agentFacts);
         //we get the final list of facts containing agentX capabilities
-        std::vector<toaster_msgs::Fact> finalFacts = computeAgentXFacts(updatedFacts);
+        std::vector<toaster_msgs::Fact> finalFacts;
+        if(systemMode_ == "new"){
+            finalFacts = computeAgentXFacts(updatedFacts);
+        }else{
+            finalFacts  = updatedFacts;
+        }
         //we update the planning table with these facts
         srv_set.request.infoType = "RESET_PLANNING";
         srv_set.request.facts = finalFacts;
@@ -473,16 +479,16 @@ supervisor_msgs::SharedPlan PlanElaboration::convertPlan(hatp_msgs::Plan plan){
           action.id = it->id;
           action.actors = it->agents;
           //we replace objects name by higher level name when needed
-          if(dom_->isHighLevelDomain_){
+          //if(dom_->isHighLevelDomain_){
             action.parameter_values = convertParam(it->parameters);
-          }else{
-            action.parameter_values = it->parameters;
-          }
+          //}else{
+          //  action.parameter_values = it->parameters;
+          //}
           //get the parameters keys from param
           std::string paramTopic = "highLevelActions/" + action.name + "_param";
           node_->getParam(paramTopic, action.parameter_keys );
           if(action.parameter_values.size() != action.parameter_keys.size()){
-              ROS_ERROR("[plan_elaboration] Incorrect action parameters for action: %s", action.name.c_str());
+              ROS_ERROR("[plan_elaboration] Incorrect action parameters for action: %s, with init name %s", action.name.c_str(), it->name.c_str());
               ROS_ERROR("[plan_elaboration] parameters are:");
               for(std::vector<std::string>::iterator itp = action.parameter_values.end(); itp != action.parameter_values.end(); itp++){
                   ROS_ERROR("                %s", itp->c_str());
@@ -522,7 +528,7 @@ std::vector<std::string> PlanElaboration::convertParam(std::vector<std::string> 
             tmpParam = *it;
             flag = true;
         }else{//the parameter is a flag, change the object in memory accordingly
-            if(*it == "FTRUE"){
+            if(*it == "FTRUE" && systemMode_ == "new"){
                 result.push_back(highLevelNames_[tmpParam]);
             }else{
                 result.push_back(tmpParam);
@@ -675,6 +681,7 @@ std::string PlanElaboration::getLockedObject(std::string object, std::string age
 
     //create vector of isReachable facts for each possible refinement
     std::vector<std::string> possibleObjects = highLevelRefinment_[object];
+    ROS_WARN("creating vector");
     std::vector<toaster_msgs::Fact> toTest;
     for(std::vector<std::string>::iterator it = possibleObjects.begin(); it != possibleObjects.end(); it++){
         toaster_msgs::Fact fact;

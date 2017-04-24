@@ -186,6 +186,10 @@ void giveInfoAction(supervisor_msgs::Action action, std::string actionState, std
             sentence = actorName + " can not pick the " + objectName;
         }else if(actionState == "NOT_PERFORMED"){
             sentence = actorName + " did not pick the " + objectName;
+        }else if(actionState == "WILL"){
+            sentence = actorName + " will pick the " + objectName;
+        }else if(actionState == "SHOULD"){
+            sentence = actorName + " should pick the " + objectName;
         }else{
             ROS_ERROR("[dialogue_node] Action state not supported");
             return;
@@ -236,6 +240,10 @@ void giveInfoAction(supervisor_msgs::Action action, std::string actionState, std
             sentence = actorName + " can not place the " + objectName + " on the " + supportName;
         }else if(actionState == "NOT_PERFORMED"){
             sentence = actorName + " did not place the " + objectName + " on the " + supportName;
+        }else if(actionState == "WILL"){
+            sentence = actorName + " will place the " + objectName + " on the " + supportName;
+        }else if(actionState == "SHOULD"){
+            sentence = actorName + " should place the " + objectName + " on the " + supportName;
         }else{
             ROS_ERROR("[dialogue_node] Action state not supported");
             return;
@@ -286,6 +294,10 @@ void giveInfoAction(supervisor_msgs::Action action, std::string actionState, std
             sentence = actorName + " can not put the " + objectName + " in the " + containerName;
         }else if(actionState == "NOT_PERFORMED"){
             sentence = actorName + " did not put the " + objectName + " in the " + containerName;
+        }else if(actionState == "WILL"){
+            sentence = actorName + " will put the " + objectName + " in the " + containerName;
+        }else if(actionState == "SHOULD"){
+            sentence = actorName + " will put the " + objectName + " in the " + containerName;
         }else{
             ROS_ERROR("[dialogue_node] Action state not supported");
             return;
@@ -323,7 +335,11 @@ void giveInfoAction(supervisor_msgs::Action action, std::string actionState, std
         }else if(actionState == "FAILED"){
             sentence = actorName + " failed to scan the " + objectName;
         }else if(actionState == "NOT_PERFORMED"){
-            sentence = actorName + " did non scan " + objectName;
+            sentence = actorName + " did not scan " + objectName;
+        }else if(actionState == "WILL"){
+            sentence = actorName + " will scan " + objectName;
+        }else if(actionState == "SHOULD"){
+            sentence = actorName + " will scan " + objectName;
         }else{
             ROS_ERROR("[dialogue_node] Action state not supported");
             return;

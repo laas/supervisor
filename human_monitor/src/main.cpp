@@ -45,6 +45,9 @@ bool humaActionSimu(supervisor_msgs::HumanAction::Request  &req, supervisor_msgs
          if(req.action.parameter_keys[i] == "support2"){
              params["support2"] = req.action.parameter_values[i];
          }
+         if(req.action.parameter_keys[i] == "position"){
+             params["position"] = req.action.parameter_values[i];
+         }
     }
 
     //we send the action
@@ -84,6 +87,12 @@ bool humaActionSimu(supervisor_msgs::HumanAction::Request  &req, supervisor_msgs
             return true;
         }
        hm_->humanPlaceStick(req.agent, params["object"], params["support1"], params["support2"]);
+    }else if(req.action.name == "goTo"){
+        if(params.find("position") == params.end()){
+            ROS_ERROR("[human_monitor] No position where to go!");
+            return true;
+        }
+       hm_->humanGoTo(req.agent, params["position"]);
     }else{
        ROS_ERROR("[human_monitor] Unknown action name");
     }

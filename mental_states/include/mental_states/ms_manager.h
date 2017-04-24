@@ -10,6 +10,7 @@
 
 #include "toaster_msgs/DatabaseTables.h"
 #include "toaster_msgs/SetInfoDB.h"
+#include "toaster_msgs/ExecuteDB.h"
 
 #include "supervisor_msgs/MentalStatesList.h"
 #include "supervisor_msgs/SharedPlan.h"
@@ -32,6 +33,7 @@ public:
     void addEffects(supervisor_msgs::Action action, std::string agent);
     void addRmFactToAgent(toaster_msgs::Fact fact, std::string agent, bool add);
     bool isInList(std::vector<std::string> list, std::string element);
+    bool isVisibleBy(std::string target, std::string agent);
 
     std::string robotName_; /**< name of the robot*/
     std::string agentX_; /**< HATP name of the x agent*/
@@ -46,6 +48,7 @@ public:
 private:
     ros::NodeHandle* node_; /**< Node handle*/
     ros::ServiceClient client_db_ ; /**< Client for the set info service of the database*/
+    ros::ServiceClient client_execute_db_ ; /**< Client for the set info service of the database*/
     std::vector<std::string> nonObservableFacts_; /**< list of non observable facts*/
 
     void fillHighLevelNames();

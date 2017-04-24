@@ -44,15 +44,21 @@ std::string mode_;
 bool timerStarted_;
 ros::Time start_;
 double timeAdaptation_, timeWaitHuman_;
-int previousManagedAction_;
+int previousManagedAction_, previousManagedHumanAction_;
 std::string currentGoal_;
 std::vector<toaster_msgs::Fact> areaFacts_;
-std::string areaInform_;
+std::string areaInform_, areaIdle_;
 std::vector<supervisor_msgs::Action> actionsTodo_, previousActions_;
 supervisor_msgs::SharedPlan currentPlan_;
 bool shouldRetractRight_, shouldRetractLeft_;
 std::string rightRestPosition_, leftRestPosition_;
-int planPrevId_, msPrevId_;
+int planPrevIdRobot_, msPrevIdRobot_, planPrevIdHuman_, msPrevIdHuman_;
+bool isGivingInfo_;
+bool hasActed_;
+int prevRobotId_;
+std::vector<supervisor_msgs::Action> toTell_;
+std::string systemMode_;
+bool speakingMode_;
 
 /**
  * \brief Fill the highLevelNames map from param
@@ -188,15 +194,206 @@ void actionDone(const actionlib::SimpleClientGoalState& state, const supervisor_
 
 
 /**
+ * \brief Says if an agent is in an area
+ * @param agent the tested agent
+ * @param area the tested area
+ * @return true if the agent is in the area
+ * */
+bool isInArea(std::string agent, std::string area){
+
+    for(std::vector<toaster_msgs::Fact>::iterator it = areaFacts_.begin(); it != areaFacts_.end(); it++){
+        if(it->property == "IsInArea" && it->subjectId == agent && it->targetId == area){
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+
+/**
+ * \brief Callback for todo actions (hold system)
+ * @param msg topic msg
+ * */
+void todoHoldCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
+
+    planPrevIdRobot_ = msg->prevIdRobot;
+    planPrevIdHuman_ = msg->prevIdHuman;
+    actionsTodo_ = msg->actions;
+
+    if(planPrevIdRobot_ == prevRobotId_ && prevRobotId_ != -1){
+        hasActed_ = true;
+        prevRobotId_ = -1;
+    }
+
+
+    supervisor_msgs::Action humanAction;
+    bool hasHumanAction = false;
+    for(std::vector<supervisor_msgs::Action>::iterator it = actionsTodo_.begin(); it != actionsTodo_.end(); it++){
+        if(it->actors[0] == mainPartner_){
+            //we remember the action to inform the human
+            hasHumanAction = true;
+            humanAction = *it;
+            break;
+        }
+    }
+    if(humanAction.id == previousManagedHumanAction_){
+        //we already informed about this action
+        hasHumanAction = false;
+    }
+
+    if(robotState_ == "IDLE" && actionsTodo_.size() > 0 && planPrevIdRobot_ == msPrevIdRobot_ && msPrevIdHuman_ == planPrevIdHuman_){
+        bool isWaiting = false;
+
+        supervisor_msgs::Action action;
+        bool hasRobotAction = false;
+        //we look for actions with the robot has actor
+        for(std::vector<supervisor_msgs::Action>::iterator it = actionsTodo_.begin(); it != actionsTodo_.end(); it++){
+            if(it->actors[0] == robotName_){
+                hasRobotAction = true;
+                action = *it;
+                break;
+            }
+        }
+        if(action.id == previousManagedAction_ && !timerStarted_){
+            //we wait for the todo list update
+            hasRobotAction = false;
+        }
+        previousManagedAction_ = action.id;
+
+        if(hasRobotAction){
+            //if the human is here and we are in speaking mode, we inform him
+            if(speakingMode_ && isInArea(mainPartner_, areaInform_)){
+                supervisor_msgs::GiveInfo srv;
+                srv.request.type = "ACTION";
+                srv.request.action = action;
+                srv.request.actionState = "WILL";
+                srv.request.partner = mainPartner_;
+                if (!client_inform_->call(srv)){
+                   ROS_ERROR("[robot_decision] Failed to call service dialogue_node/give_info");
+                }
+            }
+            //we execute the action
+            supervisor_msgs::ActionExecutorGoal goal;
+            action.actors[0] = robotName_;
+            goal.action = action;
+            actionClient_->sendGoal(goal,  &actionDone, Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
+            robotState_ = "ACTING";
+            currentAction_ = action;
+            hasActed_ = false;
+            prevRobotId_ = action.id;
+        }else{
+            //there is only actions to do for the human
+            //we first try another plan
+            if(hasActed_ == true){
+                supervisor_msgs::EndPlan srv;
+                srv.request.success = false;
+                srv.request.evaluate = false;
+                srv.request.forgiveAction = true;
+                srv.request.objectLocked = getLockedObject(actionsTodo_[0]);
+                srv.request.agentLocked = mainPartner_;
+                if (!client_end_plan_->call(srv)){
+                   ROS_ERROR("[robot_decision] Failed to call service plan_elaboration/end_plan");
+                }
+                hasActed_ = false;
+                hasHumanAction = false;
+            }else{//else we wait
+                isWaiting = true;
+                if(!timerStarted_){
+                    start_ = ros::Time::now();
+                    timerStarted_ = true;
+                }else{
+                    ros::Duration d = ros::Time::now() - start_;
+                    double duration = d.toSec();
+                    if(duration >= timeWaitHuman_){
+                        //the partner does not perform its action, we look for another plan
+                        timerStarted_ = false;
+                        supervisor_msgs::EndPlan srv;
+                        srv.request.success = false;
+                        srv.request.evaluate = false;
+                        srv.request.forgiveAction = true;
+                        srv.request.objectLocked = getLockedObject(actionsTodo_[0]);
+                        srv.request.agentLocked = mainPartner_;
+                        if (!client_end_plan_->call(srv)){
+                           ROS_ERROR("[robot_decision] Failed to call service plan_elaboration/end_plan");
+                        }
+                    }
+                }
+            }
+        }
+
+        if(!isWaiting){
+            timerStarted_ = false;
+        }
+    }
+
+    if(hasHumanAction && speakingMode_ && isInArea(mainPartner_, areaInform_)){
+        supervisor_msgs::GiveInfo srv;
+        srv.request.type = "ACTION";
+        srv.request.action = humanAction;
+        srv.request.actionState = "SHOULD";
+        srv.request.partner = mainPartner_;
+        if (!client_inform_->call(srv)){
+           ROS_ERROR("[robot_decision] Failed to call service dialogue_node/give_info");
+        }
+        previousManagedHumanAction_ = humanAction.id;
+    }
+
+    if(robotState_ == "IDLE" && (actionsTodo_.size() == 0 || timerStarted_)){
+        //we retract the arms if needed
+        if(shouldRetractRight_){
+            supervisor_msgs::Action retractAction;
+            supervisor_msgs::ActionExecutorGoal goal;
+            retractAction.actors.push_back(robotName_);
+            retractAction.name = "moveTo";
+            retractAction.id = -1;
+            retractAction.parameter_keys.push_back("arm");
+            retractAction.parameter_values.push_back("right");
+            retractAction.parameter_keys.push_back("position");
+            retractAction.parameter_values.push_back(rightRestPosition_);
+            goal.action = retractAction;
+            actionClient_->sendGoal(goal,  &actionDone, Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
+            robotState_ = "RETRACTING";
+        }else if(shouldRetractLeft_){
+            supervisor_msgs::Action retractAction;
+            supervisor_msgs::ActionExecutorGoal goal;
+            retractAction.actors.push_back(robotName_);
+            retractAction.name = "moveTo";
+            retractAction.id = -1;
+            retractAction.parameter_keys.push_back("arm");
+            retractAction.parameter_values.push_back("left");
+            retractAction.parameter_keys.push_back("position");
+            retractAction.parameter_values.push_back(leftRestPosition_);
+            goal.action = retractAction;
+            actionClient_->sendGoal(goal,  &actionDone, Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
+            robotState_ = "RETRACTING";
+        }
+    }
+
+
+
+}
+
+
+
+
+/**
  * \brief Callback for todo actions
  * @param msg topic msg
  * */
 void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
 
-    planPrevId_ = msg->prevId;
+    planPrevIdRobot_ = msg->prevIdRobot;
+    planPrevIdHuman_ = msg->prevIdHuman;
     actionsTodo_ = msg->actions;
 
-    if(robotState_ == "IDLE" && actionsTodo_.size() > 0 && planPrevId_ == msPrevId_){
+    if(planPrevIdRobot_ == prevRobotId_ && prevRobotId_ != -1){
+        hasActed_ = true;
+        prevRobotId_ = -1;
+    }
+
+    if(robotState_ == "IDLE" && actionsTodo_.size() > 0 && planPrevIdRobot_ == msPrevIdRobot_ && msPrevIdHuman_ == planPrevIdHuman_){
         bool isWaiting = false;
 
         supervisor_msgs::Action action;
@@ -227,6 +424,8 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
             actionClient_->sendGoal(goal,  &actionDone, Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
             robotState_ = "ACTING";
             currentAction_ = action;
+            hasActed_ = false;
+            prevRobotId_ = action.id;
         }else if(hasXAction){
             //we try to attribute the action
             /** @todo implement priority for identical actions*/
@@ -238,6 +437,8 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                 actionClient_->sendGoal(goal,  &actionDone, Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
                 robotState_ = "ACTING";
                 currentAction_ = action;
+                hasActed_ = false;
+                prevRobotId_ = action.id;
 
                 supervisor_msgs::EndPlan srv;
                 srv.request.success = false;
@@ -249,8 +450,11 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                 }
             }else{
                 //we try to attribute the action
-                /** @todo check the possible actors*/
                 std::vector<std::string> possibleActors;
+                if(timerStarted_ || isInArea(mainPartner_, areaIdle_)){
+                    possibleActors.push_back(mainPartner_);
+                }
+                possibleActors.push_back(robotName_);
                 if(possibleActors.size() == 1){
                     supervisor_msgs::EndPlan srv;
                     srv.request.success = false;
@@ -268,6 +472,8 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                         actionClient_->sendGoal(goal,  &actionDone, Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
                         robotState_ = "ACTING";
                         currentAction_ = action;
+                        hasActed_ = false;
+                        prevRobotId_ = action.id;
 
                         supervisor_msgs::EndPlan srv;
                         srv.request.success = false;
@@ -278,8 +484,8 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                            ROS_ERROR("[robot_decision] Failed to call service plan_elaboration/end_plan");
                         }
                     }
-                //}else if(possibleActors.size() > 1){
-                }else{
+                }else if(possibleActors.size() > 1){
+                //}else{
                     if(mode_ == "negotiation"){
                         supervisor_msgs::Ask srv_ask;
                         srv_ask.request.type = "ACTION";
@@ -307,8 +513,9 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                               actionClient_->sendGoal(goal,  &actionDone, Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
                               robotState_ = "ACTING";
                               currentAction_ = action;
+                              hasActed_ = false;
+                              prevRobotId_ = action.id;
 
-                              ROS_ERROR("end plan from neg no!");
                               supervisor_msgs::EndPlan srv;
                               srv.request.success = false;
                               srv.request.evaluate = true;
@@ -330,7 +537,29 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                         }else{
                             ros::Duration d = ros::Time::now() - start_;
                             double duration = d.toSec();
-                            if(duration >= timeAdaptation_){
+                            if(action.name == "pickandplace" && !isInArea(mainPartner_, areaIdle_)){
+                                //the human left the area to execute the action
+                                supervisor_msgs::EndPlan srv;
+                                srv.request.success = false;
+                                srv.request.evaluate = true;
+                                srv.request.objectLocked = getLockedObject(action);
+                                srv.request.agentLocked = mainPartner_;
+                                if (!client_end_plan_->call(srv)){
+                                   ROS_ERROR("[robot_decision] Failed to call service plan_elaboration/end_plan");
+                                }
+                                timerStarted_ = false;
+                            }else if(action.name == "pickanddrop" && !isInArea(mainPartner_, areaIdle_)){
+                                //the human left the area to execute another action
+                                supervisor_msgs::EndPlan srv;
+                                srv.request.success = false;
+                                srv.request.evaluate = true;
+                                srv.request.objectLocked = getLockedObject(action);
+                                srv.request.agentLocked = robotName_;
+                                if (!client_end_plan_->call(srv)){
+                                   ROS_ERROR("[robot_decision] Failed to call service plan_elaboration/end_plan");
+                                }
+                                timerStarted_ = false;
+                            }else if(duration >= timeAdaptation_){
                                 //the partner does not perform it, the robot does it
                                 supervisor_msgs::ActionExecutorGoal goal;
                                 action.actors[0] = robotName_;
@@ -338,8 +567,9 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                                 actionClient_->sendGoal(goal,  &actionDone, Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
                                 robotState_ = "ACTING";
                                 currentAction_ = action;
+                                hasActed_ = false;
+                                prevRobotId_ = action.id;
 
-                                ROS_ERROR("end plan from adaptation!");
                                 supervisor_msgs::EndPlan srv;
                                 srv.request.success = false;
                                 srv.request.evaluate = true;
@@ -358,25 +588,38 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
             }
         }else{
             //there is only actions to do for the human
-            isWaiting = true;
-            if(!timerStarted_){
-                start_ = ros::Time::now();
-                timerStarted_ = true;
-            }else{
-                ros::Duration d = ros::Time::now() - start_;
-                double duration = d.toSec();
-                if(duration >= timeWaitHuman_){
-                    //the partner does not perform its action, we look for another plan
-                    ROS_ERROR("end plan from human!");
-                    timerStarted_ = false;
-                    supervisor_msgs::EndPlan srv;
-                    srv.request.success = false;
-                    srv.request.evaluate = false;
-                    srv.request.forgiveAction = true;
-                    srv.request.objectLocked = getLockedObject(actionsTodo_[0]);
-                    srv.request.agentLocked = mainPartner_;
-                    if (!client_end_plan_->call(srv)){
-                       ROS_ERROR("[robot_decision] Failed to call service plan_elaboration/end_plan");
+            //we first try another plan
+            if(hasActed_ == true){
+                supervisor_msgs::EndPlan srv;
+                srv.request.success = false;
+                srv.request.evaluate = false;
+                srv.request.forgiveAction = true;
+                srv.request.objectLocked = getLockedObject(actionsTodo_[0]);
+                srv.request.agentLocked = mainPartner_;
+                if (!client_end_plan_->call(srv)){
+                   ROS_ERROR("[robot_decision] Failed to call service plan_elaboration/end_plan");
+                }
+                hasActed_ = false;
+            }else{//else we wait
+                isWaiting = true;
+                if(!timerStarted_){
+                    start_ = ros::Time::now();
+                    timerStarted_ = true;
+                }else{
+                    ros::Duration d = ros::Time::now() - start_;
+                    double duration = d.toSec();
+                    if(duration >= timeWaitHuman_){
+                        //the partner does not perform its action, we look for another plan
+                        timerStarted_ = false;
+                        supervisor_msgs::EndPlan srv;
+                        srv.request.success = false;
+                        srv.request.evaluate = false;
+                        srv.request.forgiveAction = true;
+                        srv.request.objectLocked = getLockedObject(actionsTodo_[0]);
+                        srv.request.agentLocked = mainPartner_;
+                        if (!client_end_plan_->call(srv)){
+                           ROS_ERROR("[robot_decision] Failed to call service plan_elaboration/end_plan");
+                        }
                     }
                 }
             }
@@ -442,23 +685,6 @@ bool stopSrv(std_srvs::Trigger ::Request  &req, std_srvs::Trigger ::Response &re
     }
 
     return true;
-}
-
-/**
- * \brief Says if an agent is in an area
- * @param agent the tested agent
- * @param area the tested area
- * @return true if the agent is in the area
- * */
-bool isInArea(std::string agent, std::string area){
-
-    for(std::vector<toaster_msgs::Fact>::iterator it = areaFacts_.begin(); it != areaFacts_.end(); it++){
-        if(it->property == "IsInArea" && it->subjectId == agent && it->targetId == area){
-            return true;
-        }
-    }
-
-    return false;
 }
 
 /**
@@ -664,8 +890,6 @@ void solveDB(std::string agent, supervisor_msgs::MentalState ms, supervisor_msgs
                 }
                 if(!find){
                     //we find the missing info
-                    ROS_WARN("DB to solve, action name: %s, object: %s", action.name.c_str(), action.parameter_values[0].c_str());
-                    ROS_WARN("missing action: %s", originAction.name.c_str());
                     supervisor_msgs::GiveInfo srv;
                     srv.request.type = "ACTION";
                     srv.request.action = originAction;
@@ -674,6 +898,7 @@ void solveDB(std::string agent, supervisor_msgs::MentalState ms, supervisor_msgs
                     if (!client_inform_->call(srv)){
                        ROS_ERROR("[robot_decision] Failed to call service dialogue_node/give_info");
                     }
+                    isGivingInfo_ = true;
                     return;
                 }
             }
@@ -689,11 +914,10 @@ void solveDB(std::string agent, supervisor_msgs::MentalState ms, supervisor_msgs
                 srv.request.fact = actionWithPrec.precs[i];
                 srv.request.isTrue = true;
                 srv.request.partner = agent;
-                ROS_WARN("DB to solve, action name: %s, object: %s", action.name.c_str(), action.parameter_values[0].c_str());
-                ROS_WARN("missing prec: %s", actionWithPrec.precs[i].property.c_str());
                 if (!client_inform_->call(srv)){
                    ROS_ERROR("[robot_decision] Failed to call service dialogue_node/give_info");
                 }
+                isGivingInfo_ = true;
                 return;
             }
         }
@@ -711,11 +935,10 @@ void solveDB(std::string agent, supervisor_msgs::MentalState ms, supervisor_msgs
                     srv.request.actionState = "FAILED";
                 }
                 srv.request.partner = agent;
-                ROS_WARN("DB to solve, action name: %s, object: %s", action.name.c_str(), action.parameter_values[0].c_str());
-                ROS_WARN("done action: %s", action.name.c_str());
                 if (!client_inform_->call(srv)){
                    ROS_ERROR("[robot_decision] Failed to call service dialogue_node/give_info");
                 }
+                isGivingInfo_ = true;
                 return;
             }
         }
@@ -761,11 +984,10 @@ void solveDB(std::string agent, supervisor_msgs::MentalState ms, supervisor_msgs
                     srv.request.type = "ACTION";
                     srv.request.action = toInformAction;
                     srv.request.partner = agent;
-                    ROS_WARN("DB to solve, action name: %s, object: %s", action.name.c_str(), action.parameter_values[0].c_str());
-                    ROS_WARN("wrong action, name: %s, object: %s", toInformAction.name.c_str(), toInformAction.parameter_values[0].c_str());
                     if (!client_inform_->call(srv)){
                        ROS_ERROR("[robot_decision] Failed to call service dialogue_node/give_info");
                     }
+                    isGivingInfo_ = true;
                     return;
                 }
             }
@@ -782,11 +1004,10 @@ void solveDB(std::string agent, supervisor_msgs::MentalState ms, supervisor_msgs
                 srv.request.fact = actionWithPrec.precs[i];
                 srv.request.isTrue = false;
                 srv.request.partner = agent;
-                ROS_WARN("DB to solve, action name: %s, object: %s", action.name.c_str(), action.parameter_values[0].c_str());
-                ROS_WARN("missing prec: %s", actionWithPrec.precs[i].property.c_str());
                 if (!client_inform_->call(srv)){
                    ROS_ERROR("[robot_decision] Failed to call service dialogue_node/give_info");
                 }
+                isGivingInfo_ = true;
                 return;
             }
         }
@@ -831,13 +1052,32 @@ void planCallback(const supervisor_msgs::SharedPlan::ConstPtr& msg){
 }
 
 /**
+ * \brief Callback for the mental states (hold system)
+ * @param msg topic msg
+ * */
+void msHoldCallback(const supervisor_msgs::MentalStatesList::ConstPtr& msg){
+
+    msPrevIdRobot_ = msg->prevIdRobot;
+    msPrevIdHuman_ = msg->prevIdHuman;
+
+    toTell_.insert(toTell_.end(),msg->toTell.begin(),msg->toTell.end());
+
+}
+
+/**
  * \brief Callback for the mental states
  * @param msg topic msg
  * */
 void msCallback(const supervisor_msgs::MentalStatesList::ConstPtr& msg){
 
-    msPrevId_ = msg->prevId;
-    if(msg->changed && actionsTodo_.size() > 0 && msPrevId_ == planPrevId_){
+    msPrevIdRobot_ = msg->prevIdRobot;
+    msPrevIdHuman_ = msg->prevIdHuman;
+
+    if(msg->infoGiven){
+        isGivingInfo_ = false;
+    }
+
+    if(isGivingInfo_ == false && msg->changed && actionsTodo_.size() > 0 && msPrevIdRobot_ == planPrevIdRobot_ && msPrevIdHuman_ == planPrevIdHuman_){
         std::vector<supervisor_msgs::MentalState> ms = msg->mentalStates;
         for(std::vector<supervisor_msgs::MentalState>::iterator itms = ms.begin(); itms != ms.end(); itms++){
             //we inform only if the human is here
@@ -951,16 +1191,24 @@ int main (int argc, char **argv)
   node_->getParam("/robot_decision/timeAdaptation", timeAdaptation_);
   node_->getParam("/robot_decision/timeWaitHuman", timeWaitHuman_);
   node_->getParam("/robot_decision/areaInform", areaInform_);
+  node_->getParam("/robot_decision/areaIdle", areaIdle_);
   node_->getParam("/action_executor/restPosition/right", rightRestPosition_);
   node_->getParam("/action_executor/restPosition/left", leftRestPosition_);
+  node_->getParam("/supervisor/systemMode", systemMode_);
+  node_->getParam("/supervisor/speakingMode", speakingMode_);
 
   robotState_ = "IDLE";
   timerStarted_ = false;
   shouldRetractRight_ = true;
   shouldRetractLeft_ = true;
+  isGivingInfo_ = false;
+  hasActed_ = false;
   previousManagedAction_ = -1;
-  planPrevId_ = -1;
-  msPrevId_ = -1;
+  planPrevIdRobot_ = -1;
+  msPrevIdRobot_ = -1;
+  planPrevIdHuman_ = -1;
+  msPrevIdHuman_ = -1;
+  prevRobotId_ = -1;
 
   fillHighLevelNames();
 
@@ -981,12 +1229,19 @@ int main (int argc, char **argv)
   actionClient.waitForServer();
   actionClient_ = &actionClient;
 
-  ros::Subscriber sub_todo = node.subscribe("supervisor/actions_todo", 1,todoCallback);
-  ros::Subscriber sub_ms = node.subscribe("mental_states/mental_states", 1, msCallback);
+  ros::Subscriber sub_todo;
+  ros::Subscriber sub_ms;
   ros::Subscriber sub_goal = node.subscribe("goal_manager/goalsList", 1, goalCallback);
   ros::Subscriber sub_area = node.subscribe("area_manager/factList", 1, areaFactListCallback);
   ros::Subscriber sub_plan = node.subscribe("plan_elaboration/plan", 1, planCallback);
   ros::Subscriber sub_prev = node.subscribe("supervisor/previous_actions", 1, previousCallback);
+  if(systemMode_ == "new"){
+      sub_ms = node.subscribe("mental_states/mental_states", 1, msCallback);
+      sub_todo = node.subscribe("supervisor/actions_todo", 1,todoCallback);
+  }else{
+      sub_ms = node.subscribe("mental_states/mental_states", 1, msHoldCallback);
+      sub_todo = node.subscribe("supervisor/actions_todo", 1,todoHoldCallback);
+  }
 
 
   ros::ServiceServer service_stop = node.advertiseService("robot_decision/stop", stopSrv); //when an action needs to be stopped
@@ -996,6 +1251,23 @@ int main (int argc, char **argv)
   while(node.ok()){
       //activate the readers
       ros::spinOnce();
+
+      if(systemMode_ == "hold" && speakingMode_){
+          if(toTell_.size() > 0 && isInArea(mainPartner_, areaInform_)){
+              for(std::vector<supervisor_msgs::Action>::iterator it = toTell_.begin(); it != toTell_.end(); it++){
+                  supervisor_msgs::GiveInfo srv;
+                  srv.request.type = "ACTION";
+                  srv.request.action = *it;
+                  srv.request.actionState = "DONE";
+                  srv.request.partner = mainPartner_;
+                  if (!client_inform_->call(srv)){
+                     ROS_ERROR("[robot_decision] Failed to call service dialogue_node/give_info");
+                  }
+              }
+              toTell_.clear();
+          }
+      }
+
       loop_rate.sleep();
   }
 }

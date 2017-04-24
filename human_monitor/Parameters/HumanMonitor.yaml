@@ -10,3 +10,16 @@ human_monitor:
     replacementSupport:
         PLACEMAT_1: 'TABLE_4'
         PLACEMAT_2: 'TABLE_4'
+    position:
+        stackPos:
+            x: 8.0
+            y: 11.0
+            theta: 0
+        tapePos:
+            x: 5.0
+            y: 11.0
+            theta: 0
+        scanPos:
+            x: 6.0
+            y: 6.1
+            theta: 180

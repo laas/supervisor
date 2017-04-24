@@ -1,7 +1,9 @@
 ---
 action_executor:
-    noExec: true
-    noPlanning: true
+    noExec: false
+    noPlanning: false
+    saveMode: 'save' #save, none or load
+    saveFilePath: '/home/sdevin/catkin_ws/src/supervisor/action_executor/trajs/SaveTraj.yaml'
     restPosition:
         right: 'manipulationPoseRight'
         left: 'manipulationPoseLeft'

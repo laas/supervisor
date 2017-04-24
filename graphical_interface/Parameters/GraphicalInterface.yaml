@@ -16,7 +16,12 @@ graphical_interface:
         - 'pickandplaceReachable'
         - 'pickanddrop'
         - 'moveTo'
+        - 'goTo'
     moveToPositions:
         - 'manipulationPoseRight'
         - 'manipulationPoseLeft'
+    goToPositions:
+        - 'stackPos'
+        - 'tapePos'
+        - 'scanPos'
 

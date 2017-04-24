@@ -15,6 +15,7 @@ PickAndDrop::PickAndDrop(supervisor_msgs::Action action, Connector* connector) :
     //we construct the pick action, then the drop action
     Pick* pick = new Pick(action, connector);
     pickAction_ = *pick;
+    pickAction_.support_ = "drop";
     Drop* drop = new Drop(action, connector);
     dropAction_ = *drop;
 

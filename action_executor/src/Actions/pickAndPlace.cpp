@@ -15,6 +15,7 @@ PickAndPlace::PickAndPlace(supervisor_msgs::Action action, Connector* connector)
     //we construct the pick action, then the place action
     Pick* pick = new Pick(action, connector);
     pickAction_ = *pick;
+    pickAction_.support_ = "place";
     Place* place = new Place(action, connector);
     placeAction_ = *place;
 

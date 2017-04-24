@@ -48,6 +48,7 @@ private:
     int planId_; /**< previous given id for a new plan*/
     int nbMaxTry_; /**< nb max try to get a plan*/
     std::vector<std::string> toIgnoreFactsForXAgent_; /**< facts to ignore when computing x agent facts*/
+    std::string systemMode_;
 
     ros::ServiceClient client_db_execute_; /**< client for the database execute service*/
     ros::ServiceClient client_db_set_; /**< client for the database set info service*/

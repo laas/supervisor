@@ -26,6 +26,7 @@ public:
     void humanPlace(std::string agent, std::string object, std::string support);
     void humanDrop(std::string agent, std::string object, std::string container);
     void humanPlaceStick(std::string agent, std::string object, std::string support1, std::string support2);
+    void humanGoTo(std::string agent, std::string position);
     std::pair<bool, std::string> hasInHand(std::string agent);
     bool isManipulableObject(std::string object);
     bool isSupportObject(std::string support);

@@ -33,7 +33,7 @@ ros::ServiceClient* client_stop_action_;
 ros::ServiceClient* client_end_plan_;
 int lastPlanId_;
 bool changed_;
-int prevId_;
+int prevIdRobot_, prevIdHuman_;
 
 
 /**
@@ -334,8 +334,6 @@ void checkAction(supervisor_msgs::Action action, std::string actor){
                     ROS_ERROR("[plan_elaboration] Failed to call service robot_decision/stop");
                 }
             }
-        }else{
-            endCurrentPlan();
         }
     }
 }
@@ -403,6 +401,7 @@ void robotActionCallback(const supervisor_msgs::Action::ConstPtr& msg){
             previousActions_.push_back(plannedRobotAction_);
             updatePlan();
         }
+        robotActing_ = false;
     }
 
     if(!robotActing_ && msg->name != "" && msg->id != robotProgressAction_.id){
@@ -426,36 +425,44 @@ void previousActionCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
 
     //we look if there was a change in the action performed (nothing is suppose to disappear from this list)
     std::vector<supervisor_msgs::Action> currentActions = msg->actions;
-    if(currentPlan_ != -1 && currentActions.size() > oldMsgPrevious_.size()){
+    if(currentActions.size() > oldMsgPrevious_.size()){
         //the action(s) performed are at the end of the list
         for(int i = oldMsgPrevious_.size(); i < currentActions.size(); i++){
-            prevId_ = currentActions[i].id;
-            if(robotActing_ && robotProgressAction_.id == currentActions[i].id){
-                //it was the robot current action
-                robotActing_ = false;
-                if(!currentActions[i].succeed){
-                    //the action failed, a new plan is needed
-                    supervisor_msgs::EndPlan srv;
-                    srv.request.success = false;
-                    srv.request.evaluate = false;
-                    if (!client_end_plan_->call(srv)){
-                       ROS_ERROR("[plan_maintainer] Failed to call service plan_elaboration/end_plan");
-                    }
-                    endCurrentPlan();
-                }else{
-                    //the action succeed, we update the plan
-                    previousActions_.push_back(plannedRobotAction_);
-                    updatePlan();
-                }
-            }else if(!robotActing_ && currentActions[i].actors[0] == robotName_){
-                toTreatRobotResult_ = currentActions[i];
+            if(currentActions[i].actors[0] == robotName_){
+                prevIdRobot_ = currentActions[i].id;
             }else{
-                //it is not the robot action
-                checkAction(currentActions[i], currentActions[i].actors[0]);
-                if(currentPlan_ != -1){
-                    //the plan was not broked by this action
-                    updatePlan();
+                prevIdHuman_ = currentActions[i].id;
+            }
+            if(currentPlan_ != -1 ){
+                if(robotActing_ && robotProgressAction_.id == currentActions[i].id){
+                    //it was the robot current action
+                    robotActing_ = false;
+                    if(!currentActions[i].succeed){
+                        //the action failed, a new plan is needed
+                        supervisor_msgs::EndPlan srv;
+                        srv.request.success = false;
+                        srv.request.evaluate = false;
+                        if (!client_end_plan_->call(srv)){
+                           ROS_ERROR("[plan_maintainer] Failed to call service plan_elaboration/end_plan");
+                        }
+                        endCurrentPlan();
+                    }else{
+                        //the action succeed, we update the plan
+                        previousActions_.push_back(plannedRobotAction_);
+                        updatePlan();
+                    }
+                }else if(!robotActing_ && currentActions[i].actors[0] == robotName_){
+                    toTreatRobotResult_ = currentActions[i];
+                }else{
+                    //it is not the robot action
+                    checkAction(currentActions[i], currentActions[i].actors[0]);
+                    if(currentPlan_ != -1){
+                        //the plan was not broked by this action
+                        updatePlan();
+                    }
                 }
+            }else if(robotActing_ && robotProgressAction_.id == currentActions[i].id){
+                robotActing_ = false;
             }
         }
     }
@@ -498,7 +505,8 @@ int main (int argc, char **argv)
   fillHighLevelNames();
   currentPlan_ = -1;
   lastPlanId_ = -1;
-  prevId_ = -1;
+  prevIdRobot_ = -1;
+  prevIdHuman_ = -1;
 
   robotActing_ = false;
   changed_ = false;
@@ -522,7 +530,8 @@ int main (int argc, char **argv)
   while (node.ok()) {
       ros::spinOnce();
       supervisor_msgs::ActionsList msg;
-      msg.prevId = prevId_;
+      msg.prevIdRobot = prevIdRobot_;
+      msg.prevIdHuman = prevIdHuman_;
       msg.changed = changed_;
       msg.actions = todoActions_;
       todo_actions.publish(msg);

@@ -394,6 +394,66 @@ void HumanMonitor::humanPlaceStick(std::string agent, std::string object, std::s
 }
 
 /**
+ * \brief Function to call to move a human in simulation
+ * @param agent the human to move
+ * @param position the place to go
+ * */
+void HumanMonitor::humanGoTo(std::string agent, std::string position){
+
+   //we get the exact position
+   std::string initialTopic = "human_monitor/position/" + position;
+   std::string xTopic = initialTopic + "/x";
+   std::string yTopic = initialTopic + "/y";
+   std::string thetaTopic = initialTopic + "/theta";
+   double x, y;
+   int theta;
+   node_->getParam(xTopic, x);
+   node_->getParam(yTopic, y);
+   node_->getParam(thetaTopic, theta);
+
+   //we move the agent and his joints
+   toaster_msgs::SetEntityPose srv_setPose;
+   srv_setPose.request.id = agent;
+   srv_setPose.request.type = "human";
+   srv_setPose.request.pose.position.x = x;
+   srv_setPose.request.pose.position.y = y;
+   srv_setPose.request.pose.position.z = 0.0;
+   srv_setPose.request.pose.orientation.x = 0.0;
+   srv_setPose.request.pose.orientation.y = 0.0;
+   if(theta == 0){
+       srv_setPose.request.pose.orientation.z = 0.0;
+       srv_setPose.request.pose.orientation.w = 1.0;
+   }else if(theta == 180){
+       srv_setPose.request.pose.orientation.z = 1.0;
+       srv_setPose.request.pose.orientation.w = 0.0;
+   }
+   if (!client_set_pose_.call(srv_setPose)){
+    ROS_ERROR("[human_monitor] Failed to call service pdg/set_entity_pose");
+   }
+
+   srv_setPose.request.type = "joint";
+   srv_setPose.request.id = "base";
+   srv_setPose.request.ownerId = agent;
+   srv_setPose.request.pose.position.z = 0.0;
+   if (!client_set_pose_.call(srv_setPose)){
+    ROS_ERROR("[human_monitor] Failed to call service pdg/set_entity_pose");
+   }
+
+   srv_setPose.request.id = "head";
+   srv_setPose.request.pose.position.z = 1.5;
+   if (!client_set_pose_.call(srv_setPose)){
+    ROS_ERROR("[human_monitor] Failed to call service pdg/set_entity_pose");
+   }
+
+   srv_setPose.request.id = "rightHand";
+   srv_setPose.request.pose.position.z = 1.0;
+   if (!client_set_pose_.call(srv_setPose)){
+    ROS_ERROR("[human_monitor] Failed to call service pdg/set_entity_pose");
+   }
+
+}
+
+/**
  * \brief Function which tells if an agent has already an object in hand
  * @param agent the agent tested
  * @return true if the agent has an object in hand, else false
