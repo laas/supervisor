@@ -22,6 +22,7 @@ Simple dialogue node
 #include "toaster_msgs/HumanListStamped.h"
 
 #include "supervisor_msgs/ActionsList.h"
+#include "supervisor_msgs/String.h"
 
 ros::NodeHandle* node_;
 std::string robotName_;
@@ -34,6 +35,7 @@ int robotActionId_;
 bool shouldMove_;
 std::vector<supervisor_msgs::Action> previousActions_;
 bool isSpeaking_;
+int oldRobotIdAction_;
 
 /**
  * \brief Init head management of pr2motion
@@ -159,7 +161,7 @@ geometry_msgs::Point getTarget(){
  * */
 void robotActionCallback(const supervisor_msgs::Action::ConstPtr& msg){
 
-    if(msg->headFocus.size() > 0){
+    if(msg->headFocus.size() > 0 && oldRobotIdAction_ != msg->id){
         robotActing_ = true;
         robotActionId_ = msg->id;
         robotFocus_ = msg->shouldKeepFocus;
@@ -190,6 +192,7 @@ void previousActionCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
     if(newPrev.size() > previousActions_.size()){
         for(int i = previousActions_.size(); i < newPrev.size(); i++){
             if(newPrev[i].id == robotActionId_){
+                oldRobotIdAction_ = robotActionId_;
                 robotActionId_ = -1;
                 robotActing_ = false;
                 break;
@@ -210,6 +213,23 @@ void speakingCallback(const std_msgs::Bool::ConstPtr& msg){
     }
 }
 
+/**
+ * \brief Service to look at an object/agent
+ * @param req name of the object
+ * @param res empty result
+ * @return true
+ * */
+bool lookAt(supervisor_msgs::String::Request  &req, supervisor_msgs::String::Response &res){
+
+    geometry_msgs::Point point;
+    if(req.data == "HERAKLES_HUMAN1"){
+        point = getPoseAgent(req.data);
+    }else{
+        point = getPoseObject(req.data);
+    }
+    lookAtPoint(point);
+}
+
 int main (int argc, char **argv)
 {
   ros::init(argc, argv, "simple_head_manager");
@@ -225,6 +245,7 @@ int main (int argc, char **argv)
 
   robotActionId_ = -1;
   isSpeaking_ = false;
+  oldRobotIdAction_ = -1;
 
   ros::Subscriber sub_robot_action = node_->subscribe("/action_executor/current_robot_action", 1, robotActionCallback);
   ros::Subscriber sub_humans_action = node_->subscribe("/human_monitor/current_humans_action", 1, humansActionCallback);
@@ -232,6 +253,8 @@ int main (int argc, char **argv)
   ros::Subscriber sub_dialogue = node_->subscribe("/dialogue_node/isSpeaking", 1, speakingCallback);
 
   ros::Publisher focus_pub = node_->advertise<std_msgs::String>("/simple_head_manager/focus", 1);
+
+  ros::ServiceServer service_look_at = node_->advertiseService("/simple_head_manager/look_at", lookAt);
 
   ROS_INFO("[simple_head_manager] simple_head_manager ready");
 

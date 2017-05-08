@@ -29,6 +29,10 @@
 #include <pr2motion/InitAction.h>
 #include <pr2motion/connect_port.h>
 #include <pr2motion/Torso_MoveAction.h>
+#include <pr2motion/Arm_Right_MoveToQGoalAction.h>
+#include <pr2motion/Arm_Left_MoveToQGoalAction.h>
+
+#include <pr2_controllers_msgs/Pr2GripperCommandAction.h>
 
 #include <iostream>
 #include <string>
@@ -74,6 +78,8 @@ struct Connector{
     std::ofstream fileSave_;
 
     ros::Publisher gtp_pub_; /**< publisher of gtp traj*/
+    trajectory_msgs::JointTrajectory curTraj_;
+    bool needTraj_;
 
     int previousId_;/**< previous gtp id*/
     int idGrasp_;/**< gtp id of the previous grasp*/
@@ -84,6 +90,12 @@ struct Connector{
     actionlib::SimpleActionClient<pr2motion::Arm_Left_MoveAction>* PR2motion_arm_left_;/**< pr2motion left arm action server*/
     actionlib::SimpleActionClient<pr2motion::Gripper_Right_OperateAction>* PR2motion_gripper_right_;/**< pr2motion right gripper action server*/
     actionlib::SimpleActionClient<pr2motion::Gripper_Left_OperateAction>* PR2motion_gripper_left_;/**< pr2motion left gripper action server*/
+    actionlib::SimpleActionClient<pr2motion::Arm_Right_MoveToQGoalAction>* PR2motion_arm_right_Q_;/**< pr2motion right arm action server for move to Q*/
+    actionlib::SimpleActionClient<pr2motion::Arm_Left_MoveToQGoalAction>* PR2motion_arm_left_Q_;/**< pr2motion left arm action server for move to Q*/
+    actionlib::SimpleActionClient<pr2_controllers_msgs::Pr2GripperCommandAction>* gripper_right;
+    actionlib::SimpleActionClient<pr2_controllers_msgs::Pr2GripperCommandAction>* gripper_left;
+
+
 
     ros::ServiceClient client_db_execute_; /**< toaster client for database execute commands*/
     ros::ServiceClient client_put_hand_; /**< toaster client to put objects in hand*/

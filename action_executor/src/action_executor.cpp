@@ -58,14 +58,15 @@ action_server_(*node, name,
     connector_.client_remove_hand_ = connector_.node_->serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
     connector_.client_gtp_traj_ = connector_.node_->serviceClient<gtp_ros_msgs::PublishTraj>("gtp/publishTraj");
 
-    if(connector_.simu_){
+    //if(connector_.simu_){
         connector_.client_set_pose_ = connector_.node_->serviceClient<toaster_msgs::SetEntityPose>("toaster_simu/set_entity_pose");
-    }else{
-        connector_.client_set_pose_ = connector_.node_->serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
-    }
+    //}else{
+    //    connector_.client_set_pose_ = connector_.node_->serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
+    //}
 
     if(connector_.saveMode_ == "save"){
         connector_.fileSave_.open(connector_.saveFilePath_.c_str(), std::ios::out|std::ios::trunc);
+        connector_.fileSave_ << "trajs:" << std::endl;
     }
 
 
@@ -86,6 +87,15 @@ action_server_(*node, name,
     connector_.PR2motion_gripper_right_->waitForServer();
     connector_.PR2motion_gripper_left_ = new actionlib::SimpleActionClient<pr2motion::Gripper_Left_OperateAction>("pr2motion/Gripper_Left_Operate",true);
     connector_.PR2motion_gripper_left_->waitForServer();
+    connector_.PR2motion_arm_right_Q_ = new actionlib::SimpleActionClient<pr2motion::Arm_Right_MoveToQGoalAction>("pr2motion/Arm_Right_MoveToQGoal",true);
+    connector_.PR2motion_arm_right_Q_->waitForServer();
+    connector_.PR2motion_arm_left_Q_ = new actionlib::SimpleActionClient<pr2motion::Arm_Left_MoveToQGoalAction>("pr2motion/Arm_Left_MoveToQGoal",true);
+    connector_.PR2motion_arm_left_Q_->waitForServer();
+    ROS_INFO("Waiting for grippers actions server.");
+    connector_.gripper_right = new actionlib::SimpleActionClient<pr2_controllers_msgs::Pr2GripperCommandAction>("r_gripper_sensor_controller/gripper_action", true);
+    connector_.gripper_right->waitForServer();
+    connector_.gripper_left = new actionlib::SimpleActionClient<pr2_controllers_msgs::Pr2GripperCommandAction>("l_gripper_sensor_controller/gripper_action", true);
+    connector_.gripper_left->waitForServer();
     ROS_INFO("[action_executor] Action clients started.");
 
     //Init PR2motion
@@ -105,7 +115,7 @@ action_server_(*node, name,
        ROS_ERROR("[action_executor] Failed to call service pr2motion/connect_port");
     }
     srv.request.local = "traj";
-    srv.request.remote = "gtp_trajectory";
+    srv.request.remote = "/gtp/trajectory";
     if (!connect.call(srv)){
        ROS_ERROR("[action_executor] Failed to call service pr2motion/connect_port");
     }

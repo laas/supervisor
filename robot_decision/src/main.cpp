@@ -186,9 +186,13 @@ bool isIdendicalAction(supervisor_msgs::Action action, std::vector<supervisor_ms
  * */
 void actionDone(const actionlib::SimpleClientGoalState& state, const supervisor_msgs::ActionExecutorResultConstPtr& result){
 
+    ROS_WARN("END OF ROBOT ACTION");
     robotState_ = "IDLE";
     shouldRetractRight_ = result->shouldRetractRight;
     shouldRetractLeft_ = result->shouldRetractLeft;
+    if(shouldRetractRight_){
+        ROS_WARN("SHOULD RETRACT RIGHT ARM");
+    }
 }
 
 

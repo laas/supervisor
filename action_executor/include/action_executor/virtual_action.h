@@ -22,7 +22,8 @@ public:
     std::string initialObject_; /**< given high level object when there is one*/
     int gtpActionId_; /**< id of the gtp task*/
     std::string actionName_;
-    std::string support_;
+    std::string param1_;
+    std::string param2_;
 protected:
    Connector* connector_; /**< connector structure pointer*/
 
@@ -47,7 +48,7 @@ protected:
    bool isRefined(std::string object);
    std::string findRefinment(std::string object, std::vector<toaster_msgs::Fact> conditions, std::string forbiddenObject);
    std::vector<std::string> AreFactsInDB(std::vector<toaster_msgs::Fact> facts);
-   void saveTraj(gtp_ros_msg::GTPTraj traj, std::string trajName);
+   void saveTraj(trajectory_msgs::JointTrajectory traj, std::string trajName);
 private:
 };
 

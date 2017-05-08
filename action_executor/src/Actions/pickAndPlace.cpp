@@ -15,14 +15,13 @@ PickAndPlace::PickAndPlace(supervisor_msgs::Action action, Connector* connector)
     //we construct the pick action, then the place action
     Pick* pick = new Pick(action, connector);
     pickAction_ = *pick;
-    pickAction_.support_ = "place";
     Place* place = new Place(action, connector);
     placeAction_ = *place;
 
     //we look for the action parameters
     bool foundObj = false;
     bool foundSup = false;
-    for(int i=0; i<=action.parameter_keys.size();i++){
+    for(int i=0; i<action.parameter_keys.size();i++){
         if(action.parameter_keys[i] == "object"){
             object_ = action.parameter_values[i];
             foundObj = true;
@@ -41,6 +40,12 @@ PickAndPlace::PickAndPlace(supervisor_msgs::Action action, Connector* connector)
     if(!foundSup){
         ROS_WARN("[action_executor] Missing parameter: support where to place");
     }
+
+    //fill param for save/load traj
+    pickAction_.param1_ = object_;
+    pickAction_.param2_ = "place";
+    placeAction_.param1_ = object_;
+    placeAction_.param2_ = support_;
 }
 
 /**

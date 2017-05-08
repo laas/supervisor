@@ -1,5 +1,6 @@
 <launch>
     <rosparam command="load" file="$(find action_executor)/Parameters/ActionExecutor.yaml" />
+    <rosparam command="load" file="$(find action_executor)/Parameters/SaveTraj.yaml" />
     <rosparam command="load" file="$(find launchs)/Parameters/General.yaml" />
     <rosparam command="load" file="$(find launchs)/Parameters/Entities.yaml" />
 

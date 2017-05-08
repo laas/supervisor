@@ -15,7 +15,7 @@ MoveTo::MoveTo(supervisor_msgs::Action action, Connector* connector) : VirtualAc
     //looking for the parameters of the action
     bool foundArm = false;
     bool foundPos = false;
-    for(int i=0; i<=action.parameter_keys.size();i++){
+    for(int i=0; i<action.parameter_keys.size();i++){
         if(action.parameter_keys[i] == "arm"){
             arm_ = action.parameter_values[i];
             foundArm = true;
@@ -29,7 +29,8 @@ MoveTo::MoveTo(supervisor_msgs::Action action, Connector* connector) : VirtualAc
         }
     }
     if(!foundArm){
-        ROS_WARN("[action_executor] Missing parameter: arm to move");
+        ROS_WARN("[action_executor] Missing parameter: arm to move, right by default");
+        arm_ = "right";
     }
     if(!foundPos){
         ROS_WARN("[action_executor] Missing parameter: position to reach");
@@ -62,7 +63,7 @@ bool MoveTo::plan(){
     }
 
    //ask gtp a plan
-   std::vector<gtp_ros_msgs::ActionId> attachments;
+   /*std::vector<gtp_ros_msgs::ActionId> attachments;
    std::vector<gtp_ros_msgs::Role> agents;
    gtp_ros_msgs::Role role;
    role.role = "mainAgent";
@@ -84,7 +85,7 @@ bool MoveTo::plan(){
     }else{
        subSolutions_ = answer.second;
        return true;
-    }
+    }*/
 
     return true;
 }
@@ -103,7 +104,49 @@ bool MoveTo::exec(Server* action_server){
          return true;
     }
 
-    //convert the armId in pr2motion format
+    if(arm_ == "right"){
+        pr2motion::Arm_Right_MoveToQGoalGoal goalQ;
+       goalQ.traj_mode.value=pr2motion::pr2motion_TRAJ_MODE::pr2motion_TRAJ_GATECH;
+       goalQ.shoulder_pan_joint = -1.952888;
+       goalQ.shoulder_lift_joint = -0.095935;
+       goalQ.upper_arm_roll_joint = -0.601572;
+       goalQ.elbow_flex_joint = -1.600124;
+       goalQ.forearm_roll_joint = 0.018247;
+       goalQ.wrist_flex_joint = -0.432897;
+       goalQ.wrist_roll_joint = -1.730082;\
+       connector_->PR2motion_arm_right_Q_->sendGoal(goalQ);
+       connector_->rightArmMoving_ = true;
+       ROS_INFO("[action_manager] Waiting for arms move");
+       bool finishedBeforeTimeout = connector_->PR2motion_arm_right_Q_->waitForResult(ros::Duration(connector_->waitActionServer_));
+       connector_->rightArmMoving_ = false;
+       if (!finishedBeforeTimeout){
+          ROS_INFO("Action PR2 go to Q did not finish before the time out.");
+       }
+    }
+   else if(arm_ == "left"){
+        pr2motion::Arm_Left_MoveToQGoalGoal goalQL;
+        goalQL.traj_mode.value=pr2motion::pr2motion_TRAJ_MODE::pr2motion_TRAJ_GATECH;
+        goalQL.shoulder_pan_joint = 1.91155;
+        goalQL.shoulder_lift_joint = -0.0984492;
+        goalQL.upper_arm_roll_joint = 0.6;
+        goalQL.elbow_flex_joint = -1.6534;
+        goalQL.forearm_roll_joint = -0.02173;
+        goalQL.wrist_flex_joint = -0.473717;
+        goalQL.wrist_roll_joint = -1.76561;\
+        connector_->PR2motion_arm_left_Q_->sendGoal(goalQL);
+        connector_->leftArmMoving_ = true;
+        ROS_INFO("[action_manager] Waiting for arms move");
+        bool finishedBeforeTimeout = connector_->PR2motion_arm_left_Q_->waitForResult(ros::Duration(connector_->waitActionServer_));
+        connector_->leftArmMoving_ = false;
+        if (!finishedBeforeTimeout){
+          ROS_INFO("Action PR2 go to Q did not finish before the time out.");
+        }
+   }
+
+       return true;
+
+
+   /* //convert the armId in pr2motion format
     int armId;
     if(arm_ == "right"){
         armId = 0;
@@ -112,7 +155,7 @@ bool MoveTo::exec(Server* action_server){
     }
 
     //for moveTo, the solution is only one trajectory
-    return executeTrajectory(gtpActionId_, 0, armId, action_server, "move");
+    return executeTrajectory(gtpActionId_, 0, armId, action_server, "move");*/
 
 }
 

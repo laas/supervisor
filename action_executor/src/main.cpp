@@ -70,6 +70,16 @@ void humanActionCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
 }
 
 /**
+ * \brief Callback of human actions
+ * @param msg the human action executed
+ * */
+void gtpTrajCallback(const trajectory_msgs::JointTrajectory::ConstPtr& msg){
+
+    executor_->connector_.needTraj_ = false;
+    executor_->connector_.curTraj_ = *msg;
+}
+
+/**
  * \brief Main function
  * */
 int main (int argc, char **argv)
@@ -90,6 +100,7 @@ int main (int argc, char **argv)
 
   ros::Subscriber sub = node.subscribe("agent_monitor/factList", 1, agentFactListCallback);
   ros::Subscriber sub_human_action = node.subscribe("human_monitor/current_humans_action", 1, humanActionCallback);
+  ros::Subscriber sub_gtp_traj = node.subscribe("/gtp/ros_trajectory", 1, gtpTrajCallback);
 
   ros::ServiceServer service_stop = node.advertiseService("action_executor/stop", stopOrder); //stop the execution
 

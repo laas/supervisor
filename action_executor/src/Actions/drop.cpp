@@ -15,7 +15,7 @@ Drop::Drop(supervisor_msgs::Action action, Connector* connector) : VirtualAction
     //looking for the parameters of the action
     bool foundObj = false;
     bool foundCont = false;
-    for(int i=0; i<=action.parameter_keys.size();i++){
+    for(int i=0; i<action.parameter_keys.size();i++){
         if(action.parameter_keys[i] == "object"){
             object_ = action.parameter_values[i];
             foundObj = true;
@@ -36,6 +36,8 @@ Drop::Drop(supervisor_msgs::Action action, Connector* connector) : VirtualAction
     }
 
     actionName_ = "drop";
+    param1_ = "SCAN_AREA2";
+    param2_ = container_;
 
 }
 
@@ -122,16 +124,8 @@ bool Drop::plan(){
         subSol.type = "move";
         subSolutions_.push_back(subSol);
         subSol.id = 1;
-        subSol.name = "engage";
-        subSol.type = "move";
-        subSolutions_.push_back(subSol);
-        subSol.id = 2;
         subSol.name = "release";
         subSol.type = "release";
-        subSolutions_.push_back(subSol);
-        subSol.id = 3;
-        subSol.name = "disengage";
-        subSol.type = "move";
         subSolutions_.push_back(subSol);
     }else{
         std::vector<gtp_ros_msgs::ActionId> attachments;

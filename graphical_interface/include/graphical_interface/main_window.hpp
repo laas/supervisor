@@ -73,6 +73,22 @@ private Q_SLOTS:
 
     void on_pushButtonPrintPlanning_clicked();
 
+    void on_pushButtonPickStack_clicked();
+
+    void on_pushButtonPickTape_clicked();
+
+    void on_pushButtonPickArea1_clicked();
+
+    void on_pushButtonPickArea2_clicked();
+
+    void on_pushButtonPlaceArea1_clicked();
+
+    void on_pushButtonPlaceArea2_clicked();
+
+    void on_pushButtonDropGreen_clicked();
+
+    void on_pushButtonDropRed_clicked();
+
 public:
     Ui::MainWindowDesign ui; /**< Main windows design*/
     ros::NodeHandle node_; /**< Node handle*/
@@ -81,6 +97,7 @@ private:
     double waitActionServer_; /**< time to wait for an action server*/
     bool simu_; /**< flag to indicate simu or not*/
     std::string robotName_; /**< name of the robot*/
+    int idAction_;
 
     bool goalTab_; /**< flag to indicate the goals tab is activated*/
     bool databaseTab_; /**< flag to indicate the database tab is activated*/

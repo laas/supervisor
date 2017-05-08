@@ -3,4 +3,4 @@ simple_head_manager:
     defaultTarget: 'HERAKLES_HUMAN1'
     speakingTarget: 'HERAKLES_HUMAN1'
     headJoint: 'head'
-    shouldMove: false
+    shouldMove: true

@@ -15,14 +15,15 @@ PickAndDrop::PickAndDrop(supervisor_msgs::Action action, Connector* connector) :
     //we construct the pick action, then the drop action
     Pick* pick = new Pick(action, connector);
     pickAction_ = *pick;
-    pickAction_.support_ = "drop";
+
+
     Drop* drop = new Drop(action, connector);
     dropAction_ = *drop;
 
     //we look for the action parameters
     bool foundObj = false;
     bool foundCont = false;
-    for(int i=0; i<=action.parameter_keys.size();i++){
+    for(int i=0; i<action.parameter_keys.size();i++){
         if(action.parameter_keys[i] == "object"){
             object_ = action.parameter_values[i];
             foundObj = true;
@@ -41,6 +42,28 @@ PickAndDrop::PickAndDrop(supervisor_msgs::Action action, Connector* connector) :
     if(!foundCont){
         ROS_WARN("[action_executor] Missing parameter: container where to drop");
     }
+
+    //fill param for save/load traj
+    pickAction_.param1_ = "drop";
+    //find the support where the object is before pick
+    std::vector<toaster_msgs::Fact> facts;
+    toaster_msgs::Fact fact;
+    fact.subjectId = object_;
+    fact.property = "isOn";
+    fact.targetId = "SCAN_AREA1";
+    facts.push_back(fact);
+    fact.targetId = "SCAN_AREA2";
+    facts.push_back(fact);
+    std::vector<std::string> res = AreFactsInDB(facts);
+    if(res[0] == "true"){
+        pickAction_.param2_ = "SCAN_AREA1";
+        dropAction_.param1_ = "SCAN_AREA1";
+    }else if(res[1] == "true"){
+        pickAction_.param2_ = "SCAN_AREA2";
+        dropAction_.param1_ = "SCAN_AREA2";
+    }
+    dropAction_.param2_ = container_;
+
 }
 
 /**

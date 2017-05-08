@@ -34,11 +34,11 @@ HumanMonitor::HumanMonitor(ros::NodeHandle* node){
     client_set_info_ = node_->serviceClient<toaster_msgs::SetInfoDB>("database_manager/set_info");
 
     //if we are in simulation, the objects position are manager by toaster_simu, else by pdg
-    if(simu_){
+    //if(simu_){
         client_set_pose_ = node_->serviceClient<toaster_msgs::SetEntityPose>("toaster_simu/set_entity_pose");
-    }else{
-        client_set_pose_ = node_->serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
-    }
+    //}else{
+    //    client_set_pose_ = node_->serviceClient<toaster_msgs::SetEntityPose>("pdg/set_entity_pose");
+    //}
 
 }
 

@@ -1,7 +1,7 @@
 ---
 supervisor:
     waitActionServer: 30.0
-    simu: true
+    simu: false
     robot:
         name: 'PR2_ROBOT'
         toasterName: 'pr2'
@@ -14,5 +14,5 @@ supervisor:
     AgentX:  'AGENTX'
     Omni: 'OMNI'
     mainPartner: 'HERAKLES_HUMAN1'
-    systemMode: 'hold' #new or hold
+    systemMode: 'new' #new or hold
     speakingMode: true

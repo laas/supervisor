@@ -419,6 +419,10 @@ bool VirtualAction::execAction(int actionId, std::vector<gtp_ros_msgs::SubSoluti
         return true;
     }
 
+    if(connector_->saveMode_ == "save"){
+        connector_->fileSave_ <<"  "  << actionName_ << "_" << param1_ << "_" << param2_ << ":" << std::endl;
+    }
+
     //the robot should have the gripper open to execute the trajectory
     if(shouldOpen && ((subSolutions[0].armId== 0 && !connector_->gripperRightOpen_) || (subSolutions[0].armId== 1 && !connector_->gripperLeftOpen_))){
         openGripper(subSolutions[0].armId, action_server);
@@ -469,30 +473,45 @@ bool VirtualAction::executeTrajectory(int actionId, int actionSubId, int armId, 
        return true;
    }
 
-   if(connector_->saveMode_ == "load"){
+   if(connector_->saveMode_ == "load" && actionName_ != "moveTo"){
         //we get the traj from param
        gtp_ros_msg::GTPTraj traj;
        traj.name = name;
-       std::string baseTopic = "trajs/" + actionName_ + "/" + object_ + "_" + support_ + "/" + name + "/";
+       std::string baseTopic = "trajs/" + actionName_ + "_" + param1_ + "_" + param2_ + "/" + name + "/";
        std::vector<std::string> joint_names;
        std::string jointNamesTopic = baseTopic + "joint_names";
+       if(!connector_->node_->hasParam(jointNamesTopic)){
+           ROS_WARN("Traj not found in param: %s", baseTopic.c_str());
+           return false;
+       }
        connector_->node_->getParam(jointNamesTopic, joint_names);
+       std::string nbPointsTopic = baseTopic + "nbPoints";
+       int nbPoints;
+       connector_->node_->getParam(nbPointsTopic, nbPoints);
        for(std::vector<std::string>::iterator it = joint_names.begin(); it != joint_names.end(); it++){
            traj.traj.joint_names.push_back(*it);
+       }
+       for(int i = 0; i < nbPoints; i++){
            trajectory_msgs::JointTrajectoryPoint point;
-           std::string positionTopic = baseTopic + *it + "/positions";
+           std::stringstream ss;
+           ss << i;
+           std::string strI = ss.str();
+           std::string positionTopic = baseTopic + "point_" + strI + "/positions";
            connector_->node_->getParam(positionTopic, point.positions);
-           std::string velocitiesTopic = baseTopic + *it + "/velocities";
+           std::string velocitiesTopic = baseTopic + "point_" + strI + "/velocities";
            connector_->node_->getParam(velocitiesTopic, point.velocities);
-           std::string accelTopic = baseTopic + *it + "/accelerations";
+           std::string accelTopic = baseTopic + "point_" + strI + "/accelerations";
            connector_->node_->getParam(accelTopic, point.accelerations);
-           std::string effortTopic = baseTopic + *it + "/effort";
+           std::string effortTopic = baseTopic + "point_" + strI + "/effort";
            connector_->node_->getParam(effortTopic, point.effort);
            traj.traj.points.push_back(point);
        }
        //we publish it in the corresponding topic
        connector_->gtp_pub_.publish(traj);
    }else{
+       if(connector_->saveMode_ == "save" && actionName_ != "moveTo"){
+           connector_->needTraj_ = true;
+       }
        gtp_ros_msgs::PublishTraj srv;
        srv.request.actionId.taskId = actionId;
        srv.request.actionId.alternativeId = 0;
@@ -510,12 +529,20 @@ bool VirtualAction::executeTrajectory(int actionId, int actionSubId, int armId, 
 
    //if needed, save the traj
    if(connector_->saveMode_ == "save"){
-       gtp_ros_msg::GTPTraj traj = *(ros::topic::waitForMessage<gtp_ros_msg::GTPTraj>("/gtp/trajectory",ros::Duration(1)));
-       saveTraj(traj, name);
+       ROS_INFO("Waiting for gtp traj to save");
+       while(connector_->needTraj_){
+
+       }
+       ROS_INFO("Gtp traj received");
+       saveTraj(connector_->curTraj_, name);
    }
    if(armId == 0){//right arm
       pr2motion::Arm_Right_MoveGoal arm_goal_right;
-      arm_goal_right.traj_mode.value=pr2motion::pr2motion_TRAJ_MODE::pr2motion_TRAJ_GATECH;
+      if(name == "engage" || name == "escape"){
+          arm_goal_right.traj_mode.value=pr2motion::pr2motion_TRAJ_MODE::pr2motion_TRAJ_GATECH;
+      }else{
+          arm_goal_right.traj_mode.value=pr2motion::pr2motion_TRAJ_MODE::pr2motion_TRAJ_GATECH;
+      }
       arm_goal_right.path_mode.value=pr2motion::pr2motion_PATH_MODE::pr2motion_PATH_PORT;
       connector_->rightArmMoving_ = true;
       ros::Time start = ros::Time::now();
@@ -534,7 +561,11 @@ bool VirtualAction::executeTrajectory(int actionId, int actionSubId, int armId, 
       connector_->rightArmPose_ = "unknown";
    }else{
       pr2motion::Arm_Left_MoveGoal arm_goal_left;
-      arm_goal_left.traj_mode.value=pr2motion::pr2motion_TRAJ_MODE::pr2motion_TRAJ_GATECH;
+      if(name == "engage" || name == "escape"){
+          arm_goal_left.traj_mode.value=pr2motion::pr2motion_TRAJ_MODE::pr2motion_TRAJ_GATECH;
+      }else{
+          arm_goal_left.traj_mode.value=pr2motion::pr2motion_TRAJ_MODE::pr2motion_TRAJ_GATECH;
+      }
       arm_goal_left.path_mode.value=pr2motion::pr2motion_PATH_MODE::pr2motion_PATH_PORT;
       connector_->leftArmMoving_ = true;
       ros::Time start = ros::Time::now();
@@ -546,6 +577,9 @@ bool VirtualAction::executeTrajectory(int actionId, int actionSubId, int armId, 
               connector_->PR2motion_arm_left_->cancelGoal();
               return false;
           }
+      }
+      if(name == "engage" || name == "escape"){
+          //ros::Duration(1.0).sleep();
       }
       ros::Time end = ros::Time::now();
       ros::Duration d = end - start;
@@ -573,7 +607,7 @@ bool VirtualAction::closeGripper(int armId, Server* action_server){
         return true;
     }
 
-    bool finishedBeforeTimeout;
+    /*bool finishedBeforeTimeout;
     if(armId == 0){//right arm
        pr2motion::Gripper_Right_OperateGoal gripper_goal;
        gripper_goal.goal_mode.value=pr2motion::pr2motion_GRIPPER_MODE::pr2motion_GRIPPER_CLOSE;
@@ -613,7 +647,31 @@ bool VirtualAction::closeGripper(int armId, Server* action_server){
     }
 
 
-   return true;
+   return true;*/
+
+    bool finishedBeforeTimeout;
+     pr2_controllers_msgs::Pr2GripperCommandGoal open_cmd;
+     open_cmd.command.position = 0.0;
+     open_cmd.command.max_effort = -1.0;
+     if(armId == 0){//right arm
+          connector_->rightGripperMoving_ = true;
+         connector_->gripper_right->sendGoal(open_cmd);
+         finishedBeforeTimeout = connector_->gripper_right->waitForResult(ros::Duration(connector_->waitActionServer_));
+          connector_->gripperRightOpen_= false;
+           connector_->rightGripperMoving_ = false;
+      }else{
+          connector_->leftGripperMoving_ = true;
+     connector_->gripper_left->sendGoal(open_cmd);
+         finishedBeforeTimeout = connector_->gripper_left->waitForResult(ros::Duration(connector_->waitActionServer_));
+          connector_->leftGripperMoving_ = false;
+          connector_->gripperLeftOpen_= false;
+      }
+      if(!finishedBeforeTimeout){
+        ROS_INFO("[action_executor] gripper Action did not finish before the time out.");
+          return false;
+      }
+
+      return true;
 
 }
 
@@ -631,7 +689,7 @@ bool VirtualAction::openGripper(int armId, Server* action_server){
         return true;
     }
 
-    bool finishedBeforeTimeout;
+    /*bool finishedBeforeTimeout;
     if(armId == 0){//right arm
        pr2motion::Gripper_Right_OperateGoal gripper_goal;
        gripper_goal.goal_mode.value=pr2motion::pr2motion_GRIPPER_MODE::pr2motion_GRIPPER_OPEN;
@@ -666,7 +724,32 @@ bool VirtualAction::openGripper(int armId, Server* action_server){
        connector_->gripperLeftOpen_= true;
     }
 
-   return true;
+   return true;*/
+
+
+   bool finishedBeforeTimeout;
+         pr2_controllers_msgs::Pr2GripperCommandGoal open_cmd;
+     open_cmd.command.position = 0.08;
+     open_cmd.command.max_effort = -1.0;
+     if(armId == 0){//right arm
+      connector_->rightGripperMoving_ = true;
+         connector_->gripper_right->sendGoal(open_cmd);
+         finishedBeforeTimeout = connector_->gripper_right->waitForResult(ros::Duration(connector_->waitActionServer_));
+          connector_->gripperRightOpen_= true;
+           connector_->rightGripperMoving_ = false;
+      }else{
+      connector_->leftGripperMoving_ = true;
+     connector_->gripper_left->sendGoal(open_cmd);
+         finishedBeforeTimeout = connector_->gripper_left->waitForResult(ros::Duration(connector_->waitActionServer_));
+      connector_->leftGripperMoving_ = false;
+      connector_->gripperLeftOpen_= true;
+      }
+      if(!finishedBeforeTimeout){
+        ROS_INFO("[action_executor] gripper Action did not finish before the time out.");
+          return false;
+      }
+
+      return true;
 
 }
 
@@ -807,65 +890,61 @@ std::vector<std::string> VirtualAction::AreFactsInDB(std::vector<toaster_msgs::F
  * \brief Function which save in a file a gtp traj
  * @param traj the traj to save
  * */
-void VirtualAction::saveTraj(gtp_ros_msg::GTPTraj traj, std::string trajName){
+void VirtualAction::saveTraj(trajectory_msgs::JointTrajectory traj, std::string trajName){
 
-    connector_->fileSave_ << "trajs:" << std::endl;
-    connector_->fileSave_ <<"\t"  << actionName_ << ":" << std::endl;
-    connector_->fileSave_ <<"\t"  <<"\t" << object_ << "_" << support_ << ":" << std::endl;
-    connector_->fileSave_ <<"\t"  <<"\t" <<"\t" << trajName << ":" << std::endl;
-    if(traj.traj.joint_names.size() != traj.traj.points.size()){
-        ROS_WARN("Impossible to save the traj, joint_names size not equal to points size!");
-        return;
-    }
-    connector_->fileSave_ <<"\t"  <<"\t" <<"\t" <<"\t" << " joint_names: [";
+    connector_->fileSave_ <<"      " << trajName << ":" << std::endl;
+
+    connector_->fileSave_ <<"       " << " joint_names: [";
     bool first = true;
-    for(int i = 0; i < traj.traj.joint_names.size(); i++){
+    for(int i = 0; i < traj.joint_names.size(); i++){
         if(!first){
-            connector_->fileSave_ <<", '";
+            connector_->fileSave_ <<", ";
         }
-        connector_->fileSave_ <<"'" << traj.traj.joint_names[i] << "'";
+        connector_->fileSave_ <<"'" << traj.joint_names[i] << "'";
         first = false;
     }
     connector_->fileSave_ <<"]" << std::endl;
-    for(int i = 0; i < traj.traj.joint_names.size(); i++){
-        connector_->fileSave_ <<"\t"  <<"\t" <<"\t" <<"\t" << traj.traj.joint_names[i] << ":" << std::endl;
-        connector_->fileSave_ <<"\t"  <<"\t" <<"\t" <<"\t" <<"\t"  << " positions: [";
+
+    connector_->fileSave_ <<"       " << " nbPoints: " << traj.points.size() << std::endl;
+    for(int i = 0; i < traj.points.size(); i++){
+        connector_->fileSave_ <<"        " << "point_" << i << ":" << std::endl;
+        connector_->fileSave_ <<"          "  << " positions: [";
         first = true;
-        for(int j = 0; j < traj.traj.points[i].positions.size(); j++){
+        for(int j = 0; j < traj.points[i].positions.size(); j++){
             if(!first){
-                connector_->fileSave_ <<", '";
+                connector_->fileSave_ <<", ";
             }
-            connector_->fileSave_  << traj.traj.points[i].positions[j];
+            connector_->fileSave_  << traj.points[i].positions[j];
             first = false;
         }
         connector_->fileSave_ <<"]" << std::endl;
-        connector_->fileSave_ <<"\t"  <<"\t" <<"\t" <<"\t" <<"\t"  << " velocities: [";
+        connector_->fileSave_ <<"          "  << " velocities: [";
         first = true;
-        for(int j = 0; j < traj.traj.points[i].velocities.size(); j++){
+        for(int j = 0; j < traj.points[i].velocities.size(); j++){
             if(!first){
-                connector_->fileSave_ <<", '";
+                connector_->fileSave_ <<", ";
             }
-            connector_->fileSave_ << traj.traj.points[i].velocities[j];
+            connector_->fileSave_ << traj.points[i].velocities[j];
             first = false;
         }
         connector_->fileSave_ <<"]" << std::endl;
-        connector_->fileSave_  <<"\t" <<"\t" <<"\t" <<"\t" <<"\t"  << " accelerations: [";
+        connector_->fileSave_  <<"          "  << " accelerations: [";
         first = true;
-        for(int j = 0; j < traj.traj.points[i].accelerations.size(); j++){
+        for(int j = 0; j < traj.points[i].accelerations.size(); j++){
             if(!first){
-                connector_->fileSave_ <<", '";
+                connector_->fileSave_ <<", ";
             }
-            connector_->fileSave_ << traj.traj.points[i].accelerations[j];
+            connector_->fileSave_ << traj.points[i].accelerations[j];
             first = false;
         }
         connector_->fileSave_ <<"]" << std::endl;
-        connector_->fileSave_ <<"\t"  <<"\t" <<"\t" <<"\t" <<"\t"  << " effort: [";
+        connector_->fileSave_ <<"          "  << " effort: [";
         first = true;
-        for(int j = 0; j < traj.traj.points[i].effort.size(); j++){
+        for(int j = 0; j < traj.points[i].effort.size(); j++){
             if(!first){
-                connector_->fileSave_ <<", '";
+                connector_->fileSave_ <<", ";
             }
-            connector_->fileSave_  << traj.traj.points[i].effort[j];
+            connector_->fileSave_  << traj.points[i].effort[j];
             first = false;
         }
         connector_->fileSave_ <<"]" << std::endl;

@@ -14,7 +14,7 @@ Pick::Pick(supervisor_msgs::Action action, Connector* connector) : VirtualAction
 
     //looking for the parameters of the action
     bool found = false;
-    for(int i=0; i<=action.parameter_keys.size();i++){
+    for(int i=0; i<action.parameter_keys.size();i++){
         if(action.parameter_keys[i] == "object"){
             object_ = action.parameter_values[i];
             found = true;
@@ -103,9 +103,9 @@ bool Pick::plan(){
         gtpActionId_ = 100;
         gtp_ros_msgs::SubSolution subSol;
         subSol.agent = "PR2_ROBOT";
-        if(support_ == "place"){
+        if(param2_ == "place"){
             subSol.armId = 0;
-        }else if(support_ == "drop"){
+        }else{
             subSol.armId = 1;
         }
         subSol.id = 0;
@@ -121,7 +121,7 @@ bool Pick::plan(){
         subSol.type = "grasp";
         subSolutions_.push_back(subSol);
         subSol.id = 3;
-        subSol.name = "disengage";
+        subSol.name = "escape";
         subSol.type = "move";
         subSolutions_.push_back(subSol);
     }else{
@@ -139,12 +139,23 @@ bool Pick::plan(){
         std::vector<gtp_ros_msgs::Point> points;
         std::vector<gtp_ros_msgs::MiscData> datas;
 
-        if(connector_->shouldUseRightHand_){
+        if(param2_ == "place"){
+            gtp_ros_msgs::MiscData data;
+            data.key = "hand";
+            data.value = "right";
+            datas.push_back(data);
+        }else{
+            gtp_ros_msgs::MiscData data;
+            data.key = "hand";
+            data.value = "left";
+            datas.push_back(data);
+        }
+        /*if(connector_->shouldUseRightHand_){
         gtp_ros_msgs::MiscData data;
         data.key = "hand";
         data.value = "right";
         datas.push_back(data);
-        }
+        }*/
 
         std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > answer = planGTP("pick", agents, objects, datas, points, attachments);
         gtpActionId_ = answer.first;

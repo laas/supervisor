@@ -10,6 +10,7 @@ human_monitor:
     replacementSupport:
         PLACEMAT_1: 'TABLE_4'
         PLACEMAT_2: 'TABLE_4'
+    humanStack: ['GREEN_CUBE1', 'BLUE_CUBE2', 'RED_CUBE1', 'GREEN_CUBE3', 'RED_CUBE3']
     position:
         stackPos:
             x: 8.0

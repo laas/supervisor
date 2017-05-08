@@ -15,7 +15,7 @@ Place::Place(supervisor_msgs::Action action, Connector* connector) : VirtualActi
     //we look for the action parameters
     bool foundObj = false;
     bool foundSup = false;
-    for(int i=0; i<=action.parameter_keys.size();i++){
+    for(int i=0; i<action.parameter_keys.size();i++){
         if(action.parameter_keys[i] == "object"){
             object_ = action.parameter_values[i];
             foundObj = true;
@@ -38,6 +38,8 @@ Place::Place(supervisor_msgs::Action action, Connector* connector) : VirtualActi
     replacementSupport_ = "NONE";
 
     actionName_ = "place";
+    param1_ = object_;
+    param2_ = support_;
 }
 
 /**
@@ -138,7 +140,7 @@ bool Place::plan(){
         subSol.type = "release";
         subSolutions_.push_back(subSol);
         subSol.id = 3;
-        subSol.name = "disengage";
+        subSol.name = "escape";
         subSol.type = "move";
         subSolutions_.push_back(subSol);
     }else{

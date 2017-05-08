@@ -31,6 +31,7 @@ public:
     bool isManipulableObject(std::string object);
     bool isSupportObject(std::string support);
     bool isContainerObject(std::string container);
+
 protected:
 
 private:
