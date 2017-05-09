@@ -20,6 +20,7 @@ Simple dialogue node
 #include <pr2motion/Head_Move_TargetAction.h>
 #include "toaster_msgs/ObjectListStamped.h"
 #include "toaster_msgs/HumanListStamped.h"
+#include "toaster_msgs/FactList.h"
 
 #include "supervisor_msgs/ActionsList.h"
 #include "supervisor_msgs/String.h"
@@ -27,7 +28,7 @@ Simple dialogue node
 ros::NodeHandle* node_;
 std::string robotName_;
 actionlib::SimpleActionClient<pr2motion::Head_Move_TargetAction>* head_action_client_;
-std::string defaultTarget_, speakingTarget_, headJoint_;
+std::string defaultTarget_, speakingTarget_, headJoint_, handJoint_;
 std::string robotTarget_, currentTarget_;
 std::vector<std::string> humanTargets_;
 bool robotActing_, robotFocus_;
@@ -36,6 +37,14 @@ bool shouldMove_;
 std::vector<supervisor_msgs::Action> previousActions_;
 bool isSpeaking_;
 int oldRobotIdAction_;
+bool lookMoving_, lookInArea_, lookAnticipation_, lookAction_, lookActionAtEnd_;
+double distAnticipation_;
+bool isMoving_, isInArea_;
+std::string objectNear_;
+double minXArea_, maxXArea_, minYArea_, maxYArea_;
+bool shouldSignal_, needSignal_, signalGiven_;
+std::string objectSignal_;
+bool inAction_;
 
 /**
  * \brief Init head management of pr2motion
@@ -107,13 +116,15 @@ geometry_msgs::Point getPoseObject(std::string object){
  * @param agent the agent we want the position
  * @return a point corresponding to the agent position
  * */
-geometry_msgs::Point getPoseAgent(std::string agent){
+geometry_msgs::Point getPoseAgent(std::string joint){
+
+    std::string agent = defaultTarget_;
 
     toaster_msgs::HumanListStamped humanList  = *(ros::topic::waitForMessage<toaster_msgs::HumanListStamped>("pdg/humanList",ros::Duration(1)));
     for(std::vector<toaster_msgs::Human>::iterator it = humanList.humanList.begin(); it != humanList.humanList.end(); it++){
       if(it->meAgent.meEntity.id == agent){
          for(std::vector<toaster_msgs::Joint>::iterator itj = it->meAgent.skeletonJoint.begin(); itj != it->meAgent.skeletonJoint.end(); itj++){
-             if(itj->meEntity.id == headJoint_){
+             if(itj->meEntity.id == joint){
                 return itj->meEntity.pose.position;
              }
          }
@@ -127,31 +138,67 @@ geometry_msgs::Point getPoseAgent(std::string agent){
     return point;
 }
 
+std::string getHumanTarget(){
+
+    if(isMoving_ && lookMoving_){
+        return handJoint_;
+    }else if(isInArea_ && lookInArea_){
+        return handJoint_;
+    }
+
+    return headJoint_;
+}
+
 /**
  * \brief Get the point to look
  * @return a point to look at
  * */
 geometry_msgs::Point getTarget(){
 
+    if(robotActing_ && !inAction_){
+        inAction_ = true;
+        signalGiven_ = false;
+    }else if(!robotActing_ && inAction_){
+        inAction_ = false;
+        if(shouldSignal_ && !signalGiven_){
+            needSignal_ = true;
+        }
+    }
+
     if(isSpeaking_ && !robotFocus_){
         currentTarget_ = speakingTarget_;
         return getPoseAgent(currentTarget_);
-    }else if(humanTargets_.size() > 0 && !robotFocus_){
+    }else if(humanTargets_.size() > 0 && !robotFocus_ && lookAction_){
         currentTarget_ = humanTargets_[0];
         humanTargets_.erase(humanTargets_.begin());
         return getPoseObject(currentTarget_);
     }else if(robotActing_){
-        currentTarget_ = robotTarget_;
+        if(robotTarget_ == defaultTarget_){
+            currentTarget_ = robotTarget_;
+            return getPoseAgent(currentTarget_);
+        }else if(robotTarget_ == "SIGNAL"){
+            needSignal_ = true;
+            return getPoseObject(currentTarget_);
+        }else{
+            currentTarget_ = robotTarget_;
+            return getPoseObject(currentTarget_);
+        }
+    }else if(lookActionAtEnd_ && humanTargets_.size() > 0){
+        currentTarget_ = humanTargets_[0];
+        humanTargets_.erase(humanTargets_.begin());
+        return getPoseObject(currentTarget_);
+    }else if(lookAnticipation_ && objectNear_ != "NULL"){
+        currentTarget_  = objectNear_;
         return getPoseObject(currentTarget_);
     }else{
-        currentTarget_ = defaultTarget_;
+        currentTarget_ = getHumanTarget();
         return getPoseAgent(currentTarget_);
     }
 
     robotActing_ = false;
     isSpeaking_ = false;
 
-    return getPoseAgent(currentTarget_);
+    return getPoseAgent(defaultTarget_);
 }
 
 
@@ -213,6 +260,57 @@ void speakingCallback(const std_msgs::Bool::ConstPtr& msg){
     }
 }
 
+
+/**
+ * \brief Callback for agent monitor facts
+ * @param msg the list of facts
+ * */
+void agentFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
+
+    objectNear_ = "NULL";
+    isMoving_ = false;
+    std::vector<toaster_msgs::Fact> agentFacts = msg->factList;
+    for(std::vector<toaster_msgs::Fact>::iterator it = agentFacts.begin(); it != agentFacts.end(); it++){
+        if(it->property == "Distance"){
+            if(it->subjectId == handJoint_ && it->subjectOwnerId == defaultTarget_){
+                if(it->doubleValue < distAnticipation_){
+                    objectNear_ = it->targetId;
+                }
+            }
+        }else if(it->property == "IsMoving"){
+            if(it->subjectId == handJoint_ && it->subjectOwnerId == defaultTarget_){
+                if(it->stringValue == "true"){
+                    isMoving_ = true;
+                }
+            }
+        }
+    }
+}
+/**
+ * \brief Callback for agent monitor facts
+ * @param msg the list of facts
+ * */
+void humanListCallback(const toaster_msgs::HumanListStamped::ConstPtr& msg){
+
+    isInArea_ = false;
+
+    std::vector<toaster_msgs::Human> humanList  = msg->humanList;
+    for(std::vector<toaster_msgs::Human>::iterator it = humanList.begin(); it != humanList.end(); it++){
+      if(it->meAgent.meEntity.id == defaultTarget_){
+         for(std::vector<toaster_msgs::Joint>::iterator itj = it->meAgent.skeletonJoint.begin(); itj != it->meAgent.skeletonJoint.end(); itj++){
+             if(itj->meEntity.id == handJoint_){
+                if(itj->meEntity.pose.position.x > minXArea_ && itj->meEntity.pose.position.x < maxXArea_
+                        && itj->meEntity.pose.position.y > minYArea_ && itj->meEntity.pose.position.y > maxYArea_){
+                    isInArea_ = true;
+                }
+                break;
+             }
+         }
+         break;
+      }
+    }
+}
+
 /**
  * \brief Service to look at an object/agent
  * @param req name of the object
@@ -230,6 +328,18 @@ bool lookAt(supervisor_msgs::String::Request  &req, supervisor_msgs::String::Res
     lookAtPoint(point);
 }
 
+void signal(){
+
+    geometry_msgs::Point point;
+    point = getPoseAgent(defaultTarget_);
+    lookAtPoint(point);
+    point = getPoseObject(objectSignal_);
+    lookAtPoint(point);
+    point = getPoseAgent(defaultTarget_);
+    lookAtPoint(point);
+    signalGiven_ = true;
+}
+
 int main (int argc, char **argv)
 {
   ros::init(argc, argv, "simple_head_manager");
@@ -238,7 +348,22 @@ int main (int argc, char **argv)
   node_->getParam("/robot/name", robotName_);
   node_->getParam("/simple_head_manager/defaultTarget", defaultTarget_);
   node_->getParam("/simple_head_manager/headJoint", headJoint_);
+  node_->getParam("/simple_head_manager/handJoint", handJoint_);
   node_->getParam("/simple_head_manager/shouldMove", shouldMove_);
+  node_->getParam("/simple_head_manager/lookMoving", lookMoving_);
+  node_->getParam("/simple_head_manager/lookInArea", lookInArea_);
+  node_->getParam("/simple_head_manager/lookAnticipation", lookAnticipation_);
+  node_->getParam("/simple_head_manager/lookAction", lookAction_);
+  node_->getParam("/simple_head_manager/lookActionAtEnd", lookActionAtEnd_);
+  node_->getParam("/simple_head_manager/distAnticipation", distAnticipation_);
+  node_->getParam("/simple_head_manager/minXArea", minXArea_);
+  node_->getParam("/simple_head_manager/maxXArea", maxXArea_);
+  node_->getParam("/simple_head_manager/minYArea", minYArea_);
+  node_->getParam("/simple_head_manager/maxYArea", maxYArea_);
+  node_->getParam("/simple_head_manager/shouldSignal", shouldSignal_);
+  node_->getParam("/simple_head_manager/objectSignal", objectSignal_);
+
+
   ros::Rate loop_rate(30);
 
   initPR2motion();
@@ -246,11 +371,15 @@ int main (int argc, char **argv)
   robotActionId_ = -1;
   isSpeaking_ = false;
   oldRobotIdAction_ = -1;
+  signalGiven_ = false;
+  inAction_ = false;
 
   ros::Subscriber sub_robot_action = node_->subscribe("/action_executor/current_robot_action", 1, robotActionCallback);
   ros::Subscriber sub_humans_action = node_->subscribe("/human_monitor/current_humans_action", 1, humansActionCallback);
   ros::Subscriber sub_prev_action = node_->subscribe("/supervisor/previous_actions", 1, previousActionCallback);
   ros::Subscriber sub_dialogue = node_->subscribe("/dialogue_node/isSpeaking", 1, speakingCallback);
+  ros::Subscriber sub_agent = node_->subscribe("/agent_monitor/factList", 1, agentFactListCallback);
+  ros::Subscriber sub_human = node_->subscribe("/pdg/humanList", 1, humanListCallback);
 
   ros::Publisher focus_pub = node_->advertise<std_msgs::String>("/simple_head_manager/focus", 1);
 
@@ -262,7 +391,11 @@ int main (int argc, char **argv)
       ros::spinOnce();
 
       geometry_msgs::Point point = getTarget();
-      lookAtPoint(point);
+      if(needSignal_ && !signalGiven_){
+          signal();
+      }else{
+        lookAtPoint(point);
+      }
       std_msgs::String msg;
       msg.data = currentTarget_;
       focus_pub.publish(msg);

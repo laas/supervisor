@@ -24,6 +24,7 @@ public:
     std::string actionName_;
     std::string param1_;
     std::string param2_;
+    std::string nextHeadHocus_;
 protected:
    Connector* connector_; /**< connector structure pointer*/
 

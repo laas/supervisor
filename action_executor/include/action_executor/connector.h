@@ -80,6 +80,8 @@ struct Connector{
     ros::Publisher gtp_pub_; /**< publisher of gtp traj*/
     trajectory_msgs::JointTrajectory curTraj_;
     bool needTraj_;
+    bool anticipation_;
+    std::string objectStop_;
 
     int previousId_;/**< previous gtp id*/
     int idGrasp_;/**< gtp id of the previous grasp*/

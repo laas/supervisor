@@ -3,4 +3,17 @@ simple_head_manager:
     defaultTarget: 'HERAKLES_HUMAN1'
     speakingTarget: 'HERAKLES_HUMAN1'
     headJoint: 'head'
+    handJoint: 'rightHand'
     shouldMove: true
+    lookMoving: false
+    lookInArea: false
+    lookAnticipation: false
+    lookAction: false
+    lookActionAtEnd: false
+    distAnticipation: 0.5
+    minXArea: 6.0
+    maxXArea: 6.5
+    minYArea: 6.0
+    maxYArea: 6.5
+    shouldSignal: false
+    objectSignal: 'RED_CUBE1'

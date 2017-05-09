@@ -46,6 +46,9 @@ PickAndPlace::PickAndPlace(supervisor_msgs::Action action, Connector* connector)
     pickAction_.param2_ = "place";
     placeAction_.param1_ = object_;
     placeAction_.param2_ = support_;
+
+    pickAction_.nextHeadHocus_ = support_;
+    connector_->node_->getParam("/action_executor/nextObject", placeAction_.nextHeadHocus_);
 }
 
 /**

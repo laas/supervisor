@@ -448,6 +448,9 @@ bool VirtualAction::execAction(int actionId, std::vector<gtp_ros_msgs::SubSoluti
             openGripper(it->armId, action_server);
             RemoveFromHand(object_);
         }else{//this is a trajectory
+            if(it->name == "escape" && connector_->anticipation_){
+                connector_->currentAction_.headFocus = nextHeadHocus_;
+            }
             executeTrajectory(actionId, it->id, it->armId, action_server, it->name);
         }
      }

@@ -28,4 +28,7 @@ action_executor:
         - 'PLACEMAT_RED'
         - 'SCAN_AREA1'
         - 'SCAN_AREA2'
+    anticipation: false
+    nextObject: 'RED_CUBE1'
+    objectStop: 'RED_CUBE1'
 

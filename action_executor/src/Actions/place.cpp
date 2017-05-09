@@ -128,7 +128,11 @@ bool Place::plan(){
         subSol.agent = "PR2_ROBOT";
         subSol.armId = 0;
         subSol.id = 0;
-        subSol.name = "approach";
+        if(connector_->stopOrder_){
+            subSol.name = "approach_stop";
+        }else{
+            subSol.name = "approach";
+        }
         subSol.type = "move";
         subSolutions_.push_back(subSol);
         subSol.id = 1;
@@ -290,6 +294,14 @@ bool Place::exec(Server* action_server){
                 ROS_WARN("[action_executor] No possible refinement for support: %s", support_.c_str());
                 return false;
             }
+        }else if(connector_->stopOrder_){
+                connector_->currentAction_.headFocus = connector_->objectStop_;
+                if(!this->plan()){
+                    return false;
+                }
+                connector_->stopOrder_ = false;
+                ros::Duration(0.1).sleep();
+                connector_->currentAction_.headFocus = support_;
         }else{
             connector_->previousId_  = -1;
             return false;

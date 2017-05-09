@@ -42,6 +42,8 @@ action_server_(*node, name,
     connector_.node_->getParam("/action_executor/humanCost", connector_.humanCost_);
     connector_.node_->getParam("/action_executor/saveMode", connector_.saveMode_);
     connector_.node_->getParam("/action_executor/saveFilePath", connector_.saveFilePath_);
+    connector_.node_->getParam("/action_executor/anticipation", connector_.anticipation_);
+    connector_.node_->getParam("/action_executor/objectStop", connector_.objectStop_);
 
     //initialize high level names (from param)
     initHighLevelNames();
