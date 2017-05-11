@@ -59,6 +59,7 @@ int prevRobotId_;
 std::vector<supervisor_msgs::Action> toTell_;
 std::string systemMode_;
 bool speakingMode_;
+ros::Publisher rm_pub;
 
 /**
  * \brief Fill the highLevelNames map from param
@@ -430,6 +431,9 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
             currentAction_ = action;
             hasActed_ = false;
             prevRobotId_ = action.id;
+            supervisor_msgs::ActionsList msg;
+            msg.actions.push_back(action);
+            rm_pub.publish(msg);
         }else if(hasXAction){
             //we try to attribute the action
             /** @todo implement priority for identical actions*/
@@ -1246,6 +1250,9 @@ int main (int argc, char **argv)
       sub_ms = node.subscribe("mental_states/mental_states", 1, msHoldCallback);
       sub_todo = node.subscribe("supervisor/actions_todo", 1,todoHoldCallback);
   }
+
+
+  rm_pub = node.advertise<supervisor_msgs::ActionsList>("/data_manager/rm_data/actions_todo", 1);
 
 
   ros::ServiceServer service_stop = node.advertiseService("robot_decision/stop", stopSrv); //when an action needs to be stopped
