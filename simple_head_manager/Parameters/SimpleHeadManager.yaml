@@ -6,14 +6,14 @@ simple_head_manager:
     handJoint: 'rightHand'
     shouldMove: true
     lookMoving: false
-    lookInArea: false
-    lookAnticipation: false
+    lookInArea: true
+    lookAnticipation: true
     lookAction: false
     lookActionAtEnd: false
     distAnticipation: 0.5
-    minXArea: 6.0
-    maxXArea: 6.5
-    minYArea: 6.0
-    maxYArea: 6.5
+    minXArea: 3.5
+    maxXArea: 4.1
+    minYArea: 6.4
+    maxYArea: 7.7
     shouldSignal: false
     objectSignal: 'RED_CUBE1'

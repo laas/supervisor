@@ -18,6 +18,7 @@ Simple dialogue node
 
 #include <pr2motion/connect_port.h>
 #include <pr2motion/Head_Move_TargetAction.h>
+#include <pr2motion/Z_Head_SetMinDuration.h>
 #include "toaster_msgs/ObjectListStamped.h"
 #include "toaster_msgs/HumanListStamped.h"
 #include "toaster_msgs/FactList.h"
@@ -45,6 +46,10 @@ double minXArea_, maxXArea_, minYArea_, maxYArea_;
 bool shouldSignal_, needSignal_, signalGiven_;
 std::string objectSignal_;
 bool inAction_;
+int nbNotMoving_ = 0;
+int nbMaxNotMoving_ = 15;
+int nbNear_ = 0;
+int nbMaxNear_ = 5;
 
 /**
  * \brief Init head management of pr2motion
@@ -63,6 +68,11 @@ void initPR2motion(){
     if (!connect_port_srv.call(srv)){
       ROS_ERROR("[simple_head_manager] Failed to call service pr2motion/connect_port");
     }
+
+    pr2motion::Z_Head_SetMinDuration srv_MinDuration;
+    srv_MinDuration.request.head_min_duration=0.5;
+    if(!ros::service::call("/pr2motion/Z_Head_SetMinDuration",srv_MinDuration))
+        ROS_ERROR("[robot_observer] Failed to call service /pr2motion/Z_Head_SetMinDuration");
 }
 
 /**
@@ -140,9 +150,9 @@ geometry_msgs::Point getPoseAgent(std::string joint){
 
 std::string getHumanTarget(){
 
-    if(isMoving_ && lookMoving_){
+    if((isMoving_ && lookMoving_) && (!lookInArea_ || isInArea_)){
         return handJoint_;
-    }else if(isInArea_ && lookInArea_){
+    }else if((isInArea_ && lookInArea_) && (isMoving_ || !lookMoving_)){
         return handJoint_;
     }
 
@@ -267,24 +277,52 @@ void speakingCallback(const std_msgs::Bool::ConstPtr& msg){
  * */
 void agentFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
 
-    objectNear_ = "NULL";
-    isMoving_ = false;
+    std::string object = "NULL";
+    bool movingFact = false;
     std::vector<toaster_msgs::Fact> agentFacts = msg->factList;
     for(std::vector<toaster_msgs::Fact>::iterator it = agentFacts.begin(); it != agentFacts.end(); it++){
         if(it->property == "Distance"){
-            if(it->subjectId == handJoint_ && it->subjectOwnerId == defaultTarget_){
+            if(it->subjectId == handJoint_ && it->subjectOwnerId == defaultTarget_ && it->targetId == "SCAN_AREA1" && it->targetId != "GREEN_CUBE1"){
                 if(it->doubleValue < distAnticipation_){
-                    objectNear_ = it->targetId;
+                    object = it->targetId;
                 }
             }
         }else if(it->property == "IsMoving"){
             if(it->subjectId == handJoint_ && it->subjectOwnerId == defaultTarget_){
                 if(it->stringValue == "true"){
-                    isMoving_ = true;
+                    movingFact = true;
                 }
             }
         }
     }
+
+    if(!movingFact && isMoving_){
+	if(nbNotMoving_ < nbMaxNotMoving_){
+		nbNotMoving_++;
+	}else{
+             isMoving_ = false;
+	}
+    }else if(movingFact && !isMoving_){
+	ROS_WARN("isMoving");
+	isMoving_ = true;
+	nbNotMoving_ = 0;
+    }else if(movingFact){
+	 nbNotMoving_ = 0;
+    }
+
+    if(object == "NULL" && objectNear_ != "NULL"){
+        if(nbNear_ < nbMaxNear_){
+                nbNear_++;
+        }else{
+             objectNear_ = "NULL";
+        }
+    }else if(object != "NULL" && objectNear_ == "NULL"){
+        objectNear_ = object;
+        nbNotMoving_ = 0;
+    }else if(object != "NULL"){
+         nbNotMoving_ = 0;
+    }
+    
 }
 /**
  * \brief Callback for agent monitor facts
@@ -300,8 +338,10 @@ void humanListCallback(const toaster_msgs::HumanListStamped::ConstPtr& msg){
          for(std::vector<toaster_msgs::Joint>::iterator itj = it->meAgent.skeletonJoint.begin(); itj != it->meAgent.skeletonJoint.end(); itj++){
              if(itj->meEntity.id == handJoint_){
                 if(itj->meEntity.pose.position.x > minXArea_ && itj->meEntity.pose.position.x < maxXArea_
-                        && itj->meEntity.pose.position.y > minYArea_ && itj->meEntity.pose.position.y > maxYArea_){
+                        && itj->meEntity.pose.position.y > minYArea_ && itj->meEntity.pose.position.y < maxYArea_){
                     isInArea_ = true;
+		    ROS_WARN("in area");
+		    ROS_WARN("hand pose: %f %f, min: %f %f, max: %f %f", itj->meEntity.pose.position.x, itj->meEntity.pose.position.y, minXArea_, minYArea_, maxXArea_, maxYArea_);
                 }
                 break;
              }
