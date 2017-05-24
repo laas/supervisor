@@ -17,7 +17,6 @@ PickAndPlace::PickAndPlace(supervisor_msgs::Action action, Connector* connector)
     pickAction_ = *pick;
     Place* place = new Place(action, connector);
     placeAction_ = *place;
-
     //we look for the action parameters
     bool foundObj = false;
     bool foundSup = false;
@@ -45,7 +44,9 @@ PickAndPlace::PickAndPlace(supervisor_msgs::Action action, Connector* connector)
     pickAction_.param1_ = object_;
     pickAction_.param2_ = "place";
     placeAction_.param1_ = object_;
-    placeAction_.param2_ = support_;
+    placeAction_.param2_ = support_; 
+
+    connector_->objectToWatch_ = support_;
 }
 
 /**
@@ -176,8 +177,10 @@ bool PickAndPlace::exec(Server* action_server){
             //we update the current action
             if(newObject != "NULL"){
                 initialSupport_ = support_;
+		ROS_WARN("Chosen support %s", newObject.c_str());
                 std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), support_, newObject);
                 support_ = newObject;
+                connector_->objectToWatch_ = support_;
                 placeAction_.support_ = support_;
                 placeAction_.initialSupport_ = initialSupport_;
                 //the robot should then look at the container

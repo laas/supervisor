@@ -686,7 +686,7 @@ std::string PlanElaboration::getLockedObject(std::string object, std::string age
     for(std::vector<std::string>::iterator it = possibleObjects.begin(); it != possibleObjects.end(); it++){
         toaster_msgs::Fact fact;
         fact.subjectId = *it;
-        fact.property = "isReachebleBy";
+        fact.property = "isReachableBy";
         fact.targetId = agent;
         toTest.push_back(fact);
     }

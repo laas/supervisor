@@ -1,8 +1,10 @@
 ---
 dialogue_node:
     shouldSpeak: true
-    acapelaVoice: 'tracy'
+    acapelaVoice: 'Will'
+    acapelaVoiceFrench: 'Bruno'
     timeWaitAnswer: 300.0
+    french: true
     entitiesTranslation:
         HERAKLES_HUMAN1: 'Greg'
         HERAKLES_HUMAN2: 'Bob'
@@ -33,8 +35,8 @@ dialogue_node:
         PLACEMAT_HUMAN1: 'table'
         PLACEMAT_HUMAN2: 'table'
         SCAN_AREA: 'scan area'
-        SCAN_AREA1: 'scan area'
-        SCAN_AREA2: 'scan area'
+        SCAN_AREA1: 'scan area one'
+        SCAN_AREA2: 'scan area two'
         PINK_TRASHBIN: 'pink box'
         BLUE_TRASHBIN: 'blue box'
         GREEN_TRASHBIN: 'green box'
@@ -44,6 +46,47 @@ dialogue_node:
         RED_BOX1: 'red box'
         RED_BOX2: 'red box'
         STICK: 'stick'
+    entitiesTranslationFrench:
+        HERAKLES_HUMAN1: 'Greg'
+        HERAKLES_HUMAN2: 'Bob'
+        RED_CUBE: 'cube rouge'
+        RED_CUBE1: 'cube rouge'
+        RED_CUBE2: 'cube rouge'
+        RED_CUBE3: 'cube rouge'
+        BLUE_CUBE: 'cube bleu'
+        BLUE_CUBE1: 'cube bleu'
+        BLUE_CUBE2: 'cube bleu'
+        BLUE_CUBE3: 'cube bleu'
+        BLACK_CUBE: 'cube noir'
+        GREEN_CUBE: 'cube vert'
+        GREEN_CUBE1: 'cube vert'
+        GREEN_CUBE2: 'cube vert'
+        GREEN_CUBE3: 'cube vert'
+        GREY_TAPE: 'cassette grise'
+        LOTR_TAPE: 'cassette seigneur des anneaux'
+        WALLE_TAPE: 'cassette walle'
+        RED_TAPE: 'cassette rouge'
+        RED_TAPE1: 'cassette rouge'
+        RED_TAPE2: 'cassette rouge'
+        TABLE_4: 'table'
+        IKEA_SHELF_LIGHT: 'meuble clair'
+        IKEA_SHELF_DARK: 'meuble foncé'
+        PLACEMAT_RED: 'placement'
+        PLACEMAT_ROBOT: 'table'
+        PLACEMAT_HUMAN1: 'table'
+        PLACEMAT_HUMAN2: 'table'
+        SCAN_AREA: 'zone'
+        SCAN_AREA1: 'zone de scan une'
+        SCAN_AREA2: 'zone de scan deux'
+        PINK_TRASHBIN: 'boite rose'
+        BLUE_TRASHBIN: 'boite bleue'
+        GREEN_TRASHBIN: 'boite verte'
+        GREEN_BOX: 'boite verte'
+        BLUE_BOX: 'boite bleue'
+        RED_BOX: 'boite rouge'
+        RED_BOX1: 'boite rouge'
+        RED_BOX2: 'boite rouge'
+        STICK: 'baton'
     properties:
         translationTrue:
             isOn: 'is on'
@@ -51,18 +94,36 @@ dialogue_node:
             isReachableBy: 'can reach'
             isVisibleBy: 'can see'
             isHoldBy: 'hold'
+        translationTrueFrench:
+            isOn: 'est sur'
+            isIn: 'est dans'
+            isReachableBy: 'peut atteindre'
+            isVisibleBy: 'peut voire'
+            isHoldBy: 'tient'
         translationFalse:
             isOn: 'is not on'
             isIn: 'is not in'
             isReachableBy: 'can not reach'
             isVisibleBy: 'can not see'
             isHoldBy: 'do not hold'
+        translationFalseFrench:
+            isOn: 'nest pas sure'
+            isIn: 'nest pas dans'
+            isReachableBy: 'ne peut pas atteindre'
+            isVisibleBy: 'ne peut pas voire'
+            isHoldBy: 'ne tient pas'
         translationAsk:
             isOn: 'on the'
             isIn: 'in the'
             isReachableBy: 'reachable by'
             isVisibleBy: 'visible by'
             isHoldBy: 'hold'
+        translationAskFrench:
+            isOn: 'sur le'
+            isIn: 'dans le'
+            isReachableBy: 'accessible de'
+            isVisibleBy: 'visible de'
+            isHoldBy: 'tenu par'
         isReverse:
             isOn: false
             isIn: false

@@ -11,8 +11,6 @@ Class allowing the execution of a pick action
  * @param connector pointer to the connector structure
  * */
 Pick::Pick(supervisor_msgs::Action action, Connector* connector) : VirtualAction(connector){
-
-    //looking for the parameters of the action
     bool found = false;
     for(int i=0; i<action.parameter_keys.size();i++){
         if(action.parameter_keys[i] == "object"){
@@ -24,7 +22,6 @@ Pick::Pick(supervisor_msgs::Action action, Connector* connector) : VirtualAction
     if(!found){
         ROS_WARN("[action_executor] Missing parameter: object to pick");
     }
-
     actionName_ = "pick";
 }
 
@@ -179,10 +176,13 @@ bool Pick::plan(){
  * */
 bool Pick::exec(Server* action_server){
 
+   ros::Duration(5.0).sleep();
+
    while(true){
        if(execAction(gtpActionId_, subSolutions_, true, action_server)){
            return true;
        }else if(connector_->refineOrder_ ){
+	   connector_->refineOrder_  = false;
            connector_->previousId_  = -1;
            //the chosen object is already taken, we look for another refinement
            std::vector<toaster_msgs::Fact> conditions;

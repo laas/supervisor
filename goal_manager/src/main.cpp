@@ -193,16 +193,17 @@ bool endGoal(supervisor_msgs::String::Request  &req, supervisor_msgs::String::Re
         return true;
 
     }
+    
 
     //Check if the goal is the current goal
-    if(currentGoal_ != req.data){
+/*    if(currentGoal_ != req.data){
         ROS_WARN("[goal_manager] %s is not the current goal!", req.data.c_str());;
         res.success = false;
         return true;
-    }
+    }*/
 
     //Look for the goal objective
-    std::vector<toaster_msgs::Fact> obj;
+    /*std::vector<toaster_msgs::Fact> obj;
     for(std::vector<supervisor_msgs::Goal>::iterator it = possibleGoals_.begin(); it != possibleGoals_.end(); it++){
         if(it->name == currentGoal_){
             obj = it->objective;
@@ -220,6 +221,12 @@ bool endGoal(supervisor_msgs::String::Request  &req, supervisor_msgs::String::Re
         isIn =  srv.response.boolAnswer;
     }else{
        ROS_ERROR("[goal_manager] Failed to call service database_manager/execute");
+    }*/
+
+    bool isIn = false;
+    std::string status;
+    if(req.data == "OK"){
+	isIn = true;
     }
 
     //Publish the result

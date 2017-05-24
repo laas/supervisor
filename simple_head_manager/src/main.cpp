@@ -210,6 +210,8 @@ void speakingCallback(const std_msgs::Bool::ConstPtr& msg){
 
     if(msg->data){
         isSpeaking_ = true;
+    }else{
+	isSpeaking_ = false;
     }
 }
 
@@ -239,6 +241,7 @@ int main (int argc, char **argv)
   node_->getParam("/simple_head_manager/defaultTarget", defaultTarget_);
   node_->getParam("/simple_head_manager/headJoint", headJoint_);
   node_->getParam("/simple_head_manager/shouldMove", shouldMove_);
+  node_->getParam("/simple_head_manager/speakingTarget", speakingTarget_);
   ros::Rate loop_rate(30);
 
   initPR2motion();

@@ -57,14 +57,15 @@ void prevHoldCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
         for(int i = oldMsgPrevious_.size(); i < currentActions.size(); i++){
             if(currentActions[i].actors[0] == ms_->robotName_){
                 prevIdRobot_ = currentActions[i].id;
-                if(!ms_->isVisibleBy(ms_->robotName_, mainPartner_)){
+                if(!ms_->isVisibleBy(ms_->robotName_, mainPartner_) && currentActions[i].succeed){
+                    ROS_WARN("add to tell");
                     toTell_.push_back(currentActions[i]);
                 }
             }else{
                 prevIdHuman_ = currentActions[i].id;
             }
             if(currentActions[i].succeed){
-                ms_->addEffects(currentActions[i], ms_->robotName_);
+                ms_->addEffects(ms_->addPrecsAndEffects(currentActions[i]), ms_->robotName_);
             }
         }
         oldMsgPrevious_ = currentActions;
@@ -353,6 +354,10 @@ int main (int argc, char **argv)
         }
         changed = true;
       }
+      
+      if(toTell_.size()>0){
+	ROS_WARN("to tell published");
+      }
 
       supervisor_msgs::MentalStatesList toPublish;
       toPublish.mentalStates = ms_->msList_;
@@ -361,10 +366,12 @@ int main (int argc, char **argv)
       toPublish.prevIdHuman = prevIdHuman_;
       toPublish.infoGiven = infoGiven_;
       toPublish.toTell = toTell_;
-      toTell_.clear();
       infoGiven_ = false;
       ms_pub.publish(toPublish);
-
+      if(toTell_.size()>0){
+        ROS_WARN("to publish size: %d", toPublish.toTell.size());
+      }
+      toTell_.clear();
       loop_rate.sleep();
   }
 

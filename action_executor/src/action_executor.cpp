@@ -245,6 +245,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
             msg_previous.actions.push_back(connector_.currentAction_);
             previous_pub_.publish(msg_previous);
         }
+        connector_.objectToWatch_ = "NULL";
         return;
     }
 
@@ -270,6 +271,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
             msg_previous.actions.push_back(connector_.currentAction_);
             previous_pub_.publish(msg_previous);
         }
+        connector_.objectToWatch_ = "NULL";
         return;
     }
 
@@ -304,6 +306,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
             msg_previous.actions.push_back(connector_.currentAction_);
             previous_pub_.publish(msg_previous);
         }
+	connector_.objectToWatch_ = "NULL";
         return;
     }
 
@@ -329,6 +332,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
             msg_previous.actions.push_back(connector_.currentAction_);
             previous_pub_.publish(msg_previous);
         }
+	connector_.objectToWatch_ = "NULL";
         return;
     }
 
@@ -371,6 +375,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
             msg_previous.actions.push_back(connector_.currentAction_);
             previous_pub_.publish(msg_previous);
         }
+	connector_.objectToWatch_ = "NULL";
         return;
     }
 
@@ -413,6 +418,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
             msg_previous.actions.push_back(connector_.currentAction_);
             previous_pub_.publish(msg_previous);
         }
+	connector_.objectToWatch_ = "NULL";
         return;
     }
 
@@ -445,6 +451,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
     }
     action_server_.setSucceeded(result_);
     ROS_INFO("[action_executor] Action succeed");
+    connector_.objectToWatch_ = "NULL";
 }
 
 

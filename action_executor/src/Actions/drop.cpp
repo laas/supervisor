@@ -130,14 +130,14 @@ bool Drop::plan(){
     }else{
         std::vector<gtp_ros_msgs::ActionId> attachments;
         //If there is no previous task we look for a previous grasp
-        if(connector_->previousId_ == -1){
+        /*if(connector_->previousId_ == -1){
             if(connector_->idGrasp_ == -1){
                 ROS_WARN("[action_executor] No previous Id nore previous grasp id");
                return false;
             }else{
                 //TODO: add attachment in GTP
             }
-        }
+        }*/
 
         //We ask gtp a plan
         std::vector<gtp_ros_msgs::Role> agents;

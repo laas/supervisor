@@ -45,13 +45,13 @@ void agentFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
                         }else{
                             executor_->connector_.stopOrder_ = false;
                         }
-                    }else if(it->targetId == executor_->connector_.objectToWatch_){
+                    /*}else if(it->targetId == executor_->connector_.objectToWatch_){
                         //check if the robot should change its object refinement
                         if(it->doubleValue < toWatchThreshold_){
                             executor_->connector_.refineOrder_ = true;
                         }else{
                             executor_->connector_.refineOrder_ = false;
-                        }
+                        }*/
                     }
                 }
             }
@@ -67,6 +67,19 @@ void humanActionCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
 
     //when an action is executed by a human, we reset the gtp previous id
     executor_->connector_.previousId_ = -1;
+    supervisor_msgs::Action humanAction = msg->actions[0];
+   ROS_WARN("object to watch: %s", executor_->connector_.objectToWatch_.c_str());
+    if(humanAction.name == "place"){
+	for(int i = 0; i < humanAction.parameter_keys.size(); i++){
+		if(humanAction.parameter_keys[i] == "support"){
+			if(humanAction.parameter_values[i] == executor_->connector_.objectToWatch_){
+				executor_->connector_.refineOrder_ = true;
+				ROS_WARN("refine order");
+			}
+			break;
+		}
+	}
+    }
 }
 
 /**
@@ -75,8 +88,8 @@ void humanActionCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
  * */
 void gtpTrajCallback(const trajectory_msgs::JointTrajectory::ConstPtr& msg){
 
-    executor_->connector_.needTraj_ = false;
     executor_->connector_.curTraj_ = *msg;
+    executor_->connector_.needTraj_ = false;
 }
 
 /**
@@ -99,7 +112,7 @@ int main (int argc, char **argv)
   executor_ = &executor;
 
   ros::Subscriber sub = node.subscribe("agent_monitor/factList", 1, agentFactListCallback);
-  ros::Subscriber sub_human_action = node.subscribe("human_monitor/current_humans_action", 1, humanActionCallback);
+  ros::Subscriber sub_human_action = node.subscribe("human_monitor/current_humans_action", 100, humanActionCallback);
   ros::Subscriber sub_gtp_traj = node.subscribe("/gtp/ros_trajectory", 1, gtpTrajCallback);
 
   ros::ServiceServer service_stop = node.advertiseService("action_executor/stop", stopOrder); //stop the execution

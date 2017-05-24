@@ -146,7 +146,7 @@ bool Place::plan(){
     }else{
         std::vector<gtp_ros_msgs::ActionId> attachments;
         //If there is no previous task we look for a previous grasp
-        if(connector_->previousId_ == -1){
+        /*if(connector_->previousId_ == -1){
             if(connector_->idGrasp_ == -1){
                 ROS_WARN("[action_executor] No previous Id nore previous grasp id");
                return false;
@@ -156,7 +156,7 @@ bool Place::plan(){
                 attach.alternativeId = 0;
                 attachments.push_back(attach);
             }
-        }
+        }*/
 
         //ask gtp a plan
         std::vector<gtp_ros_msgs::Role> agents;
@@ -179,8 +179,9 @@ bool Place::plan(){
         //}
 
         std::string actionName;
-        if(isManipulableObject(support_)){
-            role.role = "supportObject";
+        //if(isManipulableObject(support_)){
+        if(true){ 
+	   role.role = "supportObject";
             role.name = support_;
             objects.push_back(role);
             //if the support is also a manipulable object, this is a stack action
@@ -263,6 +264,7 @@ bool Place::exec(Server* action_server){
         if(execAction(gtpActionId_, subSolutions_, false, action_server)){
             return true;
         }else if(connector_->refineOrder_ ){
+            connector_->refineOrder_  = false;
             connector_->previousId_  = -1;
             //the chosen object is already taken, we look for another refinement
             std::vector<toaster_msgs::Fact> conditions;
@@ -282,13 +284,14 @@ bool Place::exec(Server* action_server){
             if(newObject != "NULL"){
                 std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), support_, newObject);
                 support_ = newObject;
+                connector_->objectToWatch_ = support_;
                 connector_->currentAction_.headFocus = support_;
                 if(!this->plan()){
                     return false;
                 }
             }else{
                 ROS_WARN("[action_executor] No possible refinement for support: %s", support_.c_str());
-                return false;
+		return false;
             }
         }else{
             connector_->previousId_  = -1;

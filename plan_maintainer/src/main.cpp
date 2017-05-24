@@ -79,6 +79,20 @@ void fillHighLevelNames(){
 }
 
 /**
+ * \brief Clear all data about the current plan
+ * */
+void endCurrentPlan(){
+
+    currentPlan_ = -1;
+    changed_ = true;
+    previousActions_.clear();
+    todoActions_.clear();
+    plannedActions_.clear();
+}
+
+
+
+/**
  * \brief Update the current plan
  * */
 void updatePlan(){
@@ -132,8 +146,16 @@ void updatePlan(){
     todoActions_ = newTodo;
 
     /** @todo check if the todo actions are still feasible*/
-    /** @todo check if no more todo/in progress actions in the plan*/
-
+   if(plannedActions_.size() == 0 && todoActions_.size() == 0 && !robotActing_){
+	//end of the plan
+	supervisor_msgs::EndPlan srv;
+        srv.request.success = true;
+        srv.request.evaluate = false;
+        if (!client_end_plan_->call(srv)){
+           ROS_ERROR("[plan_maintainer] Failed to call service plan_elaboration/end_plan");
+        }
+        endCurrentPlan();
+   }
 }
 
 
@@ -202,18 +224,6 @@ supervisor_msgs::Action isInList(supervisor_msgs::Action action, std::vector<sup
     }
 
     return toReturn;
-}
-
-/**
- * \brief Clear all data about the current plan
- * */
-void endCurrentPlan(){
-
-    currentPlan_ = -1;
-    changed_ = true;
-    previousActions_.clear();
-    todoActions_.clear();
-    plannedActions_.clear();
 }
 
 
@@ -320,6 +330,7 @@ void checkAction(supervisor_msgs::Action action, std::string actor){
             }
         }else if(actor != robotName_){
             //it is a unexpected action, a new plan is needed
+	    ros::Duration(0.1).sleep();
             supervisor_msgs::EndPlan srv;
             srv.request.success = false;
             srv.request.evaluate = false;

@@ -137,7 +137,10 @@ std::vector<toaster_msgs::Fact> ScanUsDomain::computeIsActivated(std::vector<toa
     toReturn.push_back(toAdd);
 
     if(systemMode_ == "hold"){
+	ROS_WARN("hold system");
         toAdd.targetId = "false";
+    }else{
+	ROS_WARN("system mode: %s", systemMode_.c_str());
     }
     toAdd.subjectId = "AGENTX";
     toReturn.push_back(toAdd);

@@ -87,6 +87,7 @@ bool endPlan(supervisor_msgs::EndPlan::Request  &req, supervisor_msgs::EndPlan::
 
     if(req.evaluate){
         //the plan needs to be evaluate
+        ROS_WARN("new plan with %s locked for %s", req.objectLocked.c_str(), req.agentLocked.c_str());
         pe_->dom_->objectLocked_ = pe_->getLockedObject(req.objectLocked, req.agentLocked);
         pe_->dom_->agentLocked_ = req.agentLocked;
     }
@@ -114,6 +115,7 @@ int main (int argc, char **argv)
 
   PlanElaboration pe(node_);
   pe_ = &pe;
+
 
   hasPlan_ = false;
   needPlan_ = false;

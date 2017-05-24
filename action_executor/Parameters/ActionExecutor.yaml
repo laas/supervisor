@@ -1,7 +1,7 @@
 ---
 action_executor:
-    noExec: false
-    noPlanning: false
+    noExec: true
+    noPlanning: true
     saveMode: 'save' #save, none or load
     saveFilePath: '/home/sdevin/catkin_ws/src/supervisor/action_executor/trajs/SaveTraj.yaml'
     restPosition:
@@ -28,4 +28,4 @@ action_executor:
         - 'PLACEMAT_RED'
         - 'SCAN_AREA1'
         - 'SCAN_AREA2'
-
+        - 'SCAN_AREA'

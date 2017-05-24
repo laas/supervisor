@@ -15,12 +15,12 @@ VirtualAction::VirtualAction(Connector* connector){
    connector_ = connector;
    gripperEmpty_ = false;
 
-   connector_->timePlan_ = 0.0;
+  /* connector_->timePlan_ = 0.0;
    connector_->timeGTP_ = 0.0;
    connector_->timeExec_ = 0.0;
    connector_->timeDB_ = 0.0;
    connector_->timeToaster_ = 0.0;
-
+*/
    initialObject_ = "NULL";
 }
 
@@ -159,6 +159,19 @@ void VirtualAction::PutInHand(std::string object, std::string hand, int gtpId){
     if(!connector_->client_db_set_.call(srv_fact)){
         ROS_ERROR("[action_executor] Failed to call service database_manager/set_info");
     }
+
+    std::vector<toaster_msgs::Fact> toRm;
+    fact.property = "isOn";
+    fact.targetId = "NULL";
+    toRm.push_back(fact);
+
+    srv_fact.request.agentId = connector_->robotName_;
+    srv_fact.request.facts = toRm;
+    srv_fact.request.add = false;
+    if(!connector_->client_db_set_.call(srv_fact)){
+        ROS_ERROR("[action_executor] Failed to call service database_manager/set_info");
+    }
+
 
     //put the object in the hand of the robot
     std::string robotHand;
@@ -817,7 +830,7 @@ bool VirtualAction::isRefined(std::string object){
 std::string VirtualAction::findRefinment(std::string object, std::vector<toaster_msgs::Fact> conditions, std::string forbiddenObject){
 
     std::string res = "NULL";
-    double bestCost = 0.0;
+    double bestCost = -1.0;
     //we look for all possible refinment for the object
     std::vector<toaster_msgs::Fact> toCheck;
     for(std::vector<std::string>::iterator it = connector_->highLevelRefinment_[object].begin(); it != connector_->highLevelRefinment_[object].end(); it++){
