@@ -179,7 +179,7 @@ void writeLogs(){
 
     std::ofstream fileSaveTime, fileSaveMistakes;
     //we save the execution time
-    std::string fileNameTime = "/home/sdevin/catkin_ws/supervisor/logs/Time.txt";
+    std::string fileNameTime = "/home/sdevin/catkin_ws/src/supervisor/logs/Time.txt";
     fileSaveTime.open(fileNameTime.c_str(), std::ios::out|std::ios::ate);
     ros::Time now = ros::Time::now();
     ros::Duration duration = now - start_;
@@ -191,7 +191,7 @@ void writeLogs(){
 
 
     //we save the number of mistakes
-    std::string fileNameMistakes = "/home/sdevin/catkin_ws/supervisor/logs/Mistakes.txt";
+    std::string fileNameMistakes = "/home/sdevin/catkin_ws/src/supervisor/logs/Mistakes.txt";
     fileSaveMistakes.open(fileNameMistakes.c_str(), std::ios::out|std::ios::ate);
     int nbMistakes = 0;
 

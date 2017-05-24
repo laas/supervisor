@@ -76,7 +76,7 @@ void goalsListCallback(const supervisor_msgs::GoalsList::ConstPtr& msg){
             //we log results
             std::ofstream fileSave;
             //we save the execution time
-            std::string fileName = "/home/sdevin/catkin_ws/supervisor/logs/Verb.txt";
+            std::string fileName = "/home/sdevin/catkin_ws/src/supervisor/logs/Verb.txt";
             fileSave.open(fileName.c_str(), std::ios::out|std::ios::ate);
             std::ostringstream strs;
             strs << nbReplaning_;
