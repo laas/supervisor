@@ -18,6 +18,11 @@ ros::ServiceClient* client_goal_;
 ros::ServiceClient* client_stop_plan_;
 bool needPlan_;
 
+std::string nbParticipant_;
+std::string condition_;
+int nbReplaning_ = 0;
+bool started = false;
+
 /**
  * \brief Callback of the goal list
  * @param msg topic msg
@@ -63,6 +68,22 @@ void goalsListCallback(const supervisor_msgs::GoalsList::ConstPtr& msg){
             }
             pe_->currentGoal_ = "NONE";
         }
+        if(msg->currentGoal == "SCAN_US" && !started){
+            started = true;
+        }
+        if(msg->currentGoal == "NONE" && started){
+            started = false;
+            //we log results
+            std::ofstream fileSave;
+            //we save the execution time
+            std::string fileName = "/home/sdevin/catkin_ws/supervisor/logs/Verb.txt";
+            fileSave.open(fileName.c_str(), std::ios::out|std::ios::ate);
+            std::ostringstream strs;
+            strs << nbReplaning_;
+            std::string nbReplan = strs.str();
+            fileSave << "Participant " << nbParticipant_.c_str() << "\t Condition " << condition_.c_str() << "\t " << nbReplan.c_str() << std::endl;
+
+        }
     }
 }
 
@@ -100,6 +121,7 @@ bool endPlan(supervisor_msgs::EndPlan::Request  &req, supervisor_msgs::EndPlan::
 
     //we look for a new plan
     needPlan_ = true;
+    nbReplaning_++;
 
     return true;
 }
@@ -116,6 +138,27 @@ int main (int argc, char **argv)
   PlanElaboration pe(node_);
   pe_ = &pe;
 
+  node_->getParam("/supervisor/nbParticipant", nbParticipant_);
+
+  std::string systemMode;
+  node_->getParam("/supervisor/systemMode", systemMode);
+  if(systemMode == "new"){
+      std::string speakMode;
+      node_->getParam("/robot_decision/mode", speakMode);
+      if(speakMode == "negotiation"){
+        condition_ = "Negotiation";
+      }else{
+        condition_ = "Adaptation";
+      }
+  }else{
+      bool speakMode;
+      node_->getParam("/supervisor/speakingMode", speakMode);
+      if(speakMode){
+        condition_ = "RS-all";
+      }else{
+        condition_ = "RS-none";
+      }
+  }
 
   hasPlan_ = false;
   needPlan_ = false;

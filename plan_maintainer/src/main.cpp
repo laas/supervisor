@@ -11,12 +11,14 @@ Main class of the plan maintainer
 #include <map>
 #include <ros/ros.h>
 #include "boost/algorithm/string.hpp"
+#include <fstream>
 
 #include "std_srvs/Trigger.h"
 
 #include "supervisor_msgs/SharedPlan.h"
 #include "supervisor_msgs/ActionsList.h"
 #include "supervisor_msgs/EndPlan.h"
+#include "supervisor_msgs/GoalsList.h"
 
 
 
@@ -35,6 +37,11 @@ int lastPlanId_;
 bool changed_;
 int prevIdRobot_, prevIdHuman_;
 
+std::string nbParticipant_;
+std::string condition_;
+int nbActionRobot_ = 0;
+int nbActionHuman_ = 0;
+bool started = false;
 
 /**
  * \brief Fill the highLevelNames map from param
@@ -441,8 +448,10 @@ void previousActionCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
         for(int i = oldMsgPrevious_.size(); i < currentActions.size(); i++){
             if(currentActions[i].actors[0] == robotName_){
                 prevIdRobot_ = currentActions[i].id;
+                nbActionRobot_++;
             }else{
                 prevIdHuman_ = currentActions[i].id;
+                nbActionHuman_++;
             }
             if(currentPlan_ != -1 ){
                 if(robotActing_ && robotProgressAction_.id == currentActions[i].id){
@@ -505,6 +514,35 @@ bool stopSrv(std_srvs::Trigger ::Request  &req, std_srvs::Trigger ::Response &re
     return true;
 }
 
+/**
+ * \brief Callback of the goal list
+ * @param msg topic msg
+ * */
+void goalsListCallback(const supervisor_msgs::GoalsList::ConstPtr& msg){
+
+    if(msg->changed){
+        if(msg->currentGoal == "SCAN_US" && !started){
+            started = true;
+        }
+        if(msg->currentGoal == "NONE" && started){
+            started = false;
+            //we log results
+            std::ofstream fileSave;
+            //we save the execution time
+            std::string fileName = "/home/sdevin/catkin_ws/supervisor/logs/Verb.txt";
+            fileSave.open(fileName.c_str(), std::ios::out|std::ios::ate);
+            std::ostringstream strs;
+            strs << nbActionHuman_;
+            std::string nbActH = strs.str();
+            std::ostringstream strs2;
+            strs2 << nbActionRobot_;
+            std::string nbActR = strs2.str();
+            fileSave << "Participant " << nbParticipant_.c_str() << "\t Condition " << condition_.c_str() << "\t " << nbActR.c_str() << "\t" << nbActH.c_str() << std::endl;
+
+        }
+    }
+}
+
 int main (int argc, char **argv)
 {
   ros::init(argc, argv, "plan_maintainer");
@@ -513,6 +551,28 @@ int main (int argc, char **argv)
   ros::Rate loop_rate(30);
   node_->getParam("supervisor/robot/name", robotName_);
   node_->getParam("/supervisor/AgentX", xAgent_);
+  node_->getParam("/supervisor/nbParticipant", nbParticipant_);
+
+  std::string systemMode;
+  node_->getParam("/supervisor/systemMode", systemMode);
+  if(systemMode == "new"){
+      std::string speakMode;
+      node_->getParam("/robot_decision/mode", speakMode);
+      if(speakMode == "negotiation"){
+        condition_ = "Negotiation";
+      }else{
+        condition_ = "Adaptation";
+      }
+  }else{
+      bool speakMode;
+      node_->getParam("/supervisor/speakingMode", speakMode);
+      if(speakMode){
+        condition_ = "RS-all";
+      }else{
+        condition_ = "RS-none";
+      }
+  }
+
   fillHighLevelNames();
   currentPlan_ = -1;
   lastPlanId_ = -1;
@@ -522,6 +582,8 @@ int main (int argc, char **argv)
   robotActing_ = false;
   changed_ = false;
 
+
+  ros::Subscriber sub_goal = node.subscribe("/goal_manager/goalsList", 1, goalsListCallback);
   ros::Subscriber sub_plan = node_->subscribe("plan_elaboration/plan", 1, planCallback);
   ros::Subscriber sub_robot_action = node_->subscribe("/action_executor/current_robot_action", 1, robotActionCallback);
   ros::Subscriber sub_humans_action = node_->subscribe("supervisor/previous_actions", 1, previousActionCallback);

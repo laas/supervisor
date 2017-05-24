@@ -300,7 +300,7 @@ int main (int argc, char **argv)
   ros::init(argc, argv, "mental_states");
   ros::NodeHandle node;
   node_ = &node;
-  ros::Rate loop_rate(30);
+  ros::Rate loop_rate(5);
 
   MsManager ms(node_);
   ms_ = &ms;

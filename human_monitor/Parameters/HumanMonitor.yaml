@@ -3,9 +3,9 @@ human_monitor:
     shouldDetect: false
     rightHand: 'rightHand'
     threshold:
-        pick: 0.20
+        pick: 0.5
         place: 0.30
-        drop: 0.40
+        drop: 0.5
         disengage: 0.50
     replacementSupport:
         PLACEMAT_1: 'TABLE_4'

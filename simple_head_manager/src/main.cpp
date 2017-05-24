@@ -178,7 +178,9 @@ void humansActionCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
 
     std::vector<supervisor_msgs::Action> actions = msg->actions;
     for(std::vector<supervisor_msgs::Action>::iterator it = actions.begin(); it != actions.end(); it++){
-        humanTargets_.push_back(it->headFocus);
+        if(it->headFocus != "NONE"){
+            humanTargets_.push_back(it->headFocus);
+        }
     }
 }
 

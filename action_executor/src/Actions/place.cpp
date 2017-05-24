@@ -266,6 +266,7 @@ bool Place::exec(Server* action_server){
         }else if(connector_->refineOrder_ ){
             connector_->refineOrder_  = false;
             connector_->previousId_  = -1;
+            inRefinement_ = true;
             //the chosen object is already taken, we look for another refinement
             std::vector<toaster_msgs::Fact> conditions;
             toaster_msgs::Fact fact;

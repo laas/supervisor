@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <ros/ros.h>
+#include <fstream>
 
 #include "plan_elaboration/virtual_domain.h"
 #include "plan_elaboration/Domains/default_domain.h"

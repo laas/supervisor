@@ -16,3 +16,4 @@ supervisor:
     mainPartner: 'HERAKLES_HUMAN1'
     systemMode: 'new' #new or hold
     speakingMode: true
+    nbParticipant: '999'

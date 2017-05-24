@@ -63,7 +63,11 @@ void HumanMonitor::humanPick(std::string agent, std::string object){
     action.parameter_keys.push_back("object");
     action.parameter_values.push_back(object);
     action.actors.push_back(agent);
-    action.headFocus = object;
+    if(shouldLook_){
+        action.headFocus = object;
+    }else{
+        action.headFocus = "NONE";
+    }
     action.id = currentId_;
     currentId_--; //we use negative id to distinguish from robot actions
 
@@ -124,7 +128,11 @@ void HumanMonitor::humanPlace(std::string agent, std::string object, std::string
     action.parameter_keys.push_back("support");
     action.parameter_values.push_back(support);
     action.actors.push_back(agent);
-    action.headFocus = support;
+    if(shouldLook_){
+        action.headFocus = support;
+    }else{
+        action.headFocus = "NONE";
+    }
     action.id = currentId_;
     currentId_--; //we use negative id to distinguish from robot actions
 
@@ -233,7 +241,11 @@ void HumanMonitor::humanDrop(std::string agent, std::string object, std::string 
     action.parameter_keys.push_back("container");
     action.parameter_values.push_back(container);
     action.actors.push_back(agent);
-    action.headFocus = container;
+    if(shouldLook_){
+        action.headFocus = container;
+    }else{
+        action.headFocus = "NONE";
+    }
     action.id = currentId_;
     currentId_--; //we use negative id to distinguish from robot actions
 
@@ -324,7 +336,11 @@ void HumanMonitor::humanPlaceStick(std::string agent, std::string object, std::s
     action.parameter_keys.push_back("support2");
     action.parameter_values.push_back(support2);
     action.actors.push_back(agent);
-    action.headFocus = support1;
+    if(shouldLook_){
+        action.headFocus = support1;
+    }else{
+        action.headFocus = "NONE";
+    }
     action.id = currentId_;
     currentId_--; //we use negative id to distinguish from robot actions
 

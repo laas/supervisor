@@ -881,6 +881,7 @@ void solveDB(std::string agent, supervisor_msgs::MentalState ms, supervisor_msgs
 
     if(todo){
         //we first check the causal links
+        /*
         for(std::vector<supervisor_msgs::Link>::iterator it = currentPlan_.links.begin(); it != currentPlan_.links.end(); it++){
             if(it->following == action.id){
                 bool find = false;
@@ -912,7 +913,7 @@ void solveDB(std::string agent, supervisor_msgs::MentalState ms, supervisor_msgs
                     return;
                 }
             }
-        }
+        }*/
         //then we check the preconditions
         supervisor_msgs::Action actionWithPrec = addPrecs(action);
         std::vector<bool> inTable = areFactsInTable(actionWithPrec.precs, agent);

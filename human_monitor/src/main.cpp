@@ -26,8 +26,8 @@ std::map<std::string, std::string> colors_;
 * */
 void humanPickStack(std::string agent){
 
+    hm_->shouldLook_ = false;
     hm_->humanPick(agent, topStack_);
-    humanEngaged[agent] = topStack_;
     if(humanStack_.size() > 0){
         topStack_ = humanStack_.front();
         humanStack_.erase(humanStack_.begin());
@@ -42,8 +42,8 @@ void humanPickStack(std::string agent){
 * */
 void humanPickTape(std::string agent){
 
+    hm_->shouldLook_ = false;
     hm_->humanPick(agent, humanTape_);
-    humanEngaged[agent] = humanTape_;
     humanTape_ = "NULL";
 }
 
@@ -54,8 +54,9 @@ void humanPickTape(std::string agent){
 * */
 void humanPickArea1(std::string agent){
 
+    hm_->shouldLook_ = true;
     hm_->humanPick(agent, onScan1_);
-    humanEngaged[agent] = onScan1_;
+    humanEngaged[agent] = "SCAN_AREA1";
     onScan1_ = "NULL";
 }
 
@@ -65,8 +66,9 @@ void humanPickArea1(std::string agent){
 * */
 void humanPickArea2(std::string agent){
 
+    hm_->shouldLook_ = true;
     hm_->humanPick(agent, onScan2_);
-    humanEngaged[agent] = onScan2_;
+    humanEngaged[agent] = "SCAN_AREA2";
     onScan2_ = "NULL";
 }
 
@@ -77,6 +79,7 @@ void humanPickArea2(std::string agent){
 * */
 void humanPlaceArea1(std::string agent, std::string object){
 
+    hm_->shouldLook_ = true;
     onScan1_ = object;
     hm_->humanPlace(agent, object, "SCAN_AREA1");
     humanEngaged[agent] = "SCAN_AREA1";
@@ -89,6 +92,7 @@ void humanPlaceArea1(std::string agent, std::string object){
 * */
 void humanPlaceArea2(std::string agent, std::string object){
 
+    hm_->shouldLook_ = true;
     onScan2_ = object;
     hm_->humanPlace(agent, object, "SCAN_AREA2");
     humanEngaged[agent] = "SCAN_AREA2";
@@ -101,6 +105,7 @@ void humanPlaceArea2(std::string agent, std::string object){
 * */
 void humanDropGreen(std::string agent, std::string object){
 
+    hm_->shouldLook_ = false;
     hm_->humanDrop(agent, object, "GREEN_BOX");
     humanEngaged[agent] = "GREEN_BOX";
 }
@@ -111,6 +116,7 @@ void humanDropGreen(std::string agent, std::string object){
 * */
 void humanDropRed(std::string agent, std::string object){
 
+    hm_->shouldLook_ = false;
     hm_->humanDrop(agent, object, "RED_BOX2");
     humanEngaged[agent] = "RED_BOX2";
 }

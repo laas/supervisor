@@ -13,6 +13,7 @@ Simple dialogue node
 #include <actionlib/server/simple_action_server.h>
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/client/terminal_state.h>
+#include <fstream>
 
 #include "std_msgs/Bool.h"
 
@@ -21,6 +22,7 @@ Simple dialogue node
 #include "supervisor_msgs/SharedPlan.h"
 #include "supervisor_msgs/String.h"
 #include "supervisor_msgs/Info.h"
+#include "supervisor_msgs/GoalsList.h"
 
 
 #ifdef ACAPELA
@@ -41,6 +43,12 @@ std::vector<std::pair<std::string, supervisor_msgs::SharedPlan> > toSharePlans;
 
 ros::Publisher info_pub_;
 ros::Publisher speaking_pub_;
+
+std::string nbParticipant_;
+std::string condition_;
+int nbQuestion_ = 0;
+int nbInfo_ = 0;
+bool started = false;
 
 #ifdef ACAPELA
 double waitActionServer;
@@ -88,6 +96,8 @@ void saySentence(std::string sentence, std::string receiver){
  * */
 void giveInfoFact(toaster_msgs::Fact fact, bool isTrue, std::string receiver){
 
+    nbInfo_++;
+
     //We transform the fact into a sentence
     std::string sentence;
     std::string isReverseTopic, subjectTopic, targetTopic, propertyTopic;
@@ -114,13 +124,13 @@ void giveInfoFact(toaster_msgs::Fact fact, bool isTrue, std::string receiver){
             if(!french_){
                 subjectName = "You";
             }else{
-                subjectName = "Tu";
+                subjectName = "Vous";
             }
         }else{
             if(!french_){
                 subjectName = "you";
             }else{
-                subjectName = "toi";
+                subjectName = "votre";
             }
         }
     }else{
@@ -150,13 +160,13 @@ void giveInfoFact(toaster_msgs::Fact fact, bool isTrue, std::string receiver){
             if(!french_){
                 targetName = "You";
             }else{
-                targetName = "Tu";
+                targetName = "Vous";
             }
         }else{
             if(!french_){
                 targetName = "you";
             }else{
-                targetName = "toi";
+                targetName = "votre";
             }
         }
     }else{
@@ -185,13 +195,13 @@ void giveInfoFact(toaster_msgs::Fact fact, bool isTrue, std::string receiver){
         if(!french_){
             sentence = targetName + " " + propertyName + " the " + subjectName;
         }else{
-            sentence = targetName + " " + propertyName + " le " + subjectName;
+            sentence = targetName + " " + propertyName + " " + subjectName;
         }
     }else{
         if(!french_){
             sentence = "The " + subjectName + " " + propertyName + " the " + targetName;
         }else{
-            sentence = "Le " + subjectName + " " + propertyName + " le " + targetName;
+            sentence = subjectName + " " + propertyName + " " + targetName;
         }
     }
 
@@ -215,6 +225,9 @@ void giveInfoFact(toaster_msgs::Fact fact, bool isTrue, std::string receiver){
  * */
 void giveInfoAction(supervisor_msgs::Action action, std::string actionState, std::string receiver){
 
+
+    nbInfo_++;
+
     /** @todo: find a better way to do this */
     std::string sentence;
     if(action.name == "pick"){
@@ -231,7 +244,7 @@ void giveInfoAction(supervisor_msgs::Action action, std::string actionState, std
                 if(!french_){
                     actorName = "you";
                 }else{
-                    actorName = "Tu";
+                    actorName = "Vous";
                 }
             }else{
                 if(!french_){
@@ -248,12 +261,26 @@ void giveInfoAction(supervisor_msgs::Action action, std::string actionState, std
         bool objectFound = false;
         for(int i = 0; i < action.parameter_keys.size(); i++){
             if(action.parameter_keys[i] == "object"){
-                if(!french_){
+                /*if(!french_){
                     objectTopic = "dialogue_node/entitiesTranslation/" + action.parameter_values[i];
                 }else{
                     objectTopic = "dialogue_node/entitiesTranslationFrench/" + action.parameter_values[i];
                 }
-                node_->getParam(objectTopic, objectName);
+                node_->getParam(objectTopic, objectName);*/
+                if(action.parameter_values[i] == "RED_TAPE1" || action.parameter_values[i] == "RED_TAPE2"){
+                    if(!french_){
+                        objectTopic = "dialogue_node/entitiesTranslation/" + action.parameter_values[i];
+                    }else{
+                        objectTopic = "dialogue_node/entitiesTranslationFrench/" + action.parameter_values[i];
+                    }
+                    node_->getParam(objectTopic, objectName);
+                }else{
+                    if(!french_){
+                        objectName = "next cube";
+                    }else{
+                        objectTopic = "le prochain cube";
+                    }
+                }
                 objectFound = true;
             }
         }
@@ -268,23 +295,23 @@ void giveInfoAction(supervisor_msgs::Action action, std::string actionState, std
                 if(action.actors[0] == robotName_){
                     sentence = "J'ai pris le " + objectName;
                 }else{
-                    sentence = "Tu as pris le " + objectName;
+                    sentence = "Vous avez pris " + objectName;
                 }
             }
         }else if(actionState == "FAILED"){
             if(!french_){
                 sentence = actorName + " can not pick the " + objectName;
             }else{
-                sentence = actorName + " ne peux pas prendre le " + objectName;
+                sentence = actorName + " ne peux pas prendre " + objectName;
             }
         }else if(actionState == "NOT_PERFORMED"){
             if(!french_){
                 sentence = actorName + " did not pick the " + objectName;
             }else{
                 if(action.actors[0] == robotName_){
-                    sentence = "Je n'ai pas pris le " + objectName;
+                    sentence = "Je n'ai pas pris " + objectName;
                 }else{
-                    sentence = "Tu n'as pas pris le " + objectName;
+                    sentence = "Vous n'avez pas pris " + objectName;
                 }
             }
         }else if(actionState == "WILL"){
@@ -292,16 +319,16 @@ void giveInfoAction(supervisor_msgs::Action action, std::string actionState, std
                 sentence = actorName + " will pick the " + objectName;
             }else{
                 if(action.actors[0] == robotName_){
-                    sentence = "Je vais prendre le " + objectName;
+                    sentence = "Je vez prendre " + objectName;
                 }else{
-                    sentence = "Tu vas prendre le " + objectName;
+                    sentence = "Vous allez prendre " + objectName;
                 }
             }
         }else if(actionState == "SHOULD"){
             if(!french_){
                 sentence = actorName + " should pick the " + objectName;
             }else{
-                sentence = actorName + " devrais prendre le " + objectName;
+                sentence = actorName + " devriez prendre " + objectName;
             }
         }else{
             ROS_ERROR("[dialogue_node] Action state not supported");
@@ -338,12 +365,26 @@ void giveInfoAction(supervisor_msgs::Action action, std::string actionState, std
         bool objectFound = false;
         for(int i = 0; i < action.parameter_keys.size(); i++){
             if(action.parameter_keys[i] == "object"){
-                if(!french_){
+                /*if(!french_){
                     objectTopic = "dialogue_node/entitiesTranslation/" + action.parameter_values[i];
                 }else{
                     objectTopic = "dialogue_node/entitiesTranslationFrench/" + action.parameter_values[i];
                 }
-                node_->getParam(objectTopic, objectName);
+                node_->getParam(objectTopic, objectName);*/
+                if(action.parameter_values[i] == "RED_TAPE1" || action.parameter_values[i] == "RED_TAPE2"){
+                    if(!french_){
+                        objectTopic = "dialogue_node/entitiesTranslation/" + action.parameter_values[i];
+                    }else{
+                        objectTopic = "dialogue_node/entitiesTranslationFrench/" + action.parameter_values[i];
+                    }
+                    node_->getParam(objectTopic, objectName);
+                }else{
+                    if(!french_){
+                        objectName = "next cube";
+                    }else{
+                        objectTopic = "le prochain cube";
+                    }
+                }
                 objectFound = true;
             }
         }
@@ -374,23 +415,23 @@ void giveInfoAction(supervisor_msgs::Action action, std::string actionState, std
                 if(action.actors[0] == robotName_){
                     sentence = "J'ai posé le " + objectName + " sur le " + supportName;
                 }else{
-                    sentence = "Tu as posé le " + objectName + " sur le " + supportName;
+                    sentence = "Vous avez posé " + objectName + " sur " + supportName;
                 }
             }
         }else if(actionState == "FAILED"){
             if(!french_){
                 sentence = actorName + " can not place the " + objectName + " on the " + supportName;
             }else{
-                sentence = actorName + " ne peux pas poser le " + objectName + " sur le " + supportName;
+                sentence = actorName + " ne peux pas poser " + objectName + " sur " + supportName;
             }
         }else if(actionState == "NOT_PERFORMED"){
             if(!french_){
                 sentence = actorName + " did not place the " + objectName + " on the " + supportName;
             }else{
                 if(action.actors[0] == robotName_){
-                    sentence = "Je n'ai pas posé le " + objectName + " sur le " + supportName;
+                    sentence = "Je n'ai pas posé " + objectName + " sur " + supportName;
                 }else{
-                    sentence = "Tu n'as pas posé le " + objectName + " sur le " + supportName;
+                    sentence = "Vous n'avez pas posé " + objectName + " sur " + supportName;
                 }
             }
         }else if(actionState == "WILL"){
@@ -398,16 +439,16 @@ void giveInfoAction(supervisor_msgs::Action action, std::string actionState, std
                 sentence = actorName + " will place the " + objectName + " on the " + supportName;
             }else{
                 if(action.actors[0] == robotName_){
-                    sentence = "Je vais poser le " + objectName + " sur le " + supportName;
+                    sentence = "Je vez poser " + objectName + " sur " + supportName;
                 }else{
-                    sentence = "Tu vas poser le " + objectName + " sur le " + supportName;
+                    sentence = "Vous allez poser " + objectName + " sur " + supportName;
                 }
             }
         }else if(actionState == "SHOULD"){
             if(!french_){
                 sentence = actorName + " should place the " + objectName + " on the " + supportName;
             }else{
-                sentence = actorName + " devrais poser le " + objectName + " sur le " + supportName;
+                sentence = actorName + " devriez poser " + objectName + " sur " + supportName;
             }
         }else{
             ROS_ERROR("[dialogue_node] Action state not supported");
@@ -427,7 +468,7 @@ void giveInfoAction(supervisor_msgs::Action action, std::string actionState, std
                 if(!french_){
                     actorName = "you";
                 }else{
-                    actorName = "Tu";
+                    actorName = "Vous";
                 }
             }else{
                 if(!french_){
@@ -475,45 +516,45 @@ void giveInfoAction(supervisor_msgs::Action action, std::string actionState, std
         }
         if(actionState == "DONE"){
             if(!french_){
-                sentence = actorName + " put the " + objectName + " in the " + containerName;
+                sentence = actorName + " put the " + objectName;
             }else{
                 if(action.actors[0] == robotName_){
-                    sentence = "J'ai rangé le " + objectName + " dans le " + containerName;
+                    sentence = "J'ai rangé " + objectName;
                 }else{
-                    sentence = "Tu as rangé le " + objectName + " dans le " + containerName;
+                    sentence = "Vous avez rangé " + objectName;
                 }
             }
         }else if(actionState == "FAILED"){
             if(!french_){
-                sentence = actorName + " can not put the " + objectName + " in the " + containerName;
+                sentence = actorName + " can not put the " + objectName;
             }else{
-                sentence = actorName + " ne peux pas ranger le " + objectName + " dans le " + containerName;
+                sentence = actorName + " ne peux pas ranger " + objectName;
             }
         }else if(actionState == "NOT_PERFORMED"){
             if(!french_){
-                sentence = actorName + " did not put the " + objectName + " in the " + containerName;
+                sentence = actorName + " did not put the " + objectName ;
             }else{
                 if(action.actors[0] == robotName_){
-                    sentence = "Je n'ai pas rangé le " + objectName + " dans le " + containerName;
+                    sentence = "Je n'ai pas rangé le " + objectName;
                 }else{
-                    sentence = "Tu n'as pas rangé le " + objectName + " dans le " + containerName;
+                    sentence = "Vous n'avez pas rangé " + objectName;
                 }
             }
         }else if(actionState == "WILL"){
             if(!french_){
-                sentence = actorName + " will put the " + objectName + " in the " + containerName;
+                sentence = actorName + " will put the " + objectName;
             }else{
                 if(action.actors[0] == robotName_){
-                    sentence = "Je vais ranger le " + objectName + " dans le " + containerName;
+                    sentence = "Je vez ranger " + objectName;
                 }else{
-                    sentence = "Tu vas ranger le " + objectName + " dans le " + containerName;
+                    sentence = "Vous allez ranger " + objectName;
                 }
             }
         }else if(actionState == "SHOULD"){
             if(!french_){
-                sentence = actorName + " will put the " + objectName + " in the " + containerName;
+                sentence = actorName + " will put the " + objectName;
             }else{
-                sentence = actorName + " devrais ranger le " + objectName + " dans le " + containerName;
+                sentence = actorName + " devriez ranger " + objectName;
             }
         }else{
             ROS_ERROR("[dialogue_node] Action state not supported");
@@ -533,7 +574,7 @@ void giveInfoAction(supervisor_msgs::Action action, std::string actionState, std
                 if(!french_){
                     actorName = "you";
                 }else{
-                    actorName = "Tu";
+                    actorName = "Vous";
                 }
             }else{
                 if(!french_){
@@ -568,25 +609,25 @@ void giveInfoAction(supervisor_msgs::Action action, std::string actionState, std
                 sentence = actorName + " scanned the " + objectName;
             }else{
                 if(action.actors[0] == robotName_){
-                    sentence = "J'ai scanné le " + objectName;
+                    sentence = "J'ai scanné " + objectName;
                 }else{
-                    sentence = "Tu as scanné le " + objectName;
+                    sentence = "Vous avez scanné " + objectName;
                 }
             }
         }else if(actionState == "FAILED"){
             if(!french_){
                 sentence = actorName + " failed to scan the " + objectName;
             }else{
-                sentence = actorName + " ne peux pas scanner le " + objectName;
+                sentence = actorName + " ne peux pas scanner " + objectName;
             }
         }else if(actionState == "NOT_PERFORMED"){
             if(!french_){
                 sentence = actorName + " did not scan " + objectName;
             }else{
                 if(action.actors[0] == robotName_){
-                    sentence = "Je n'ai pas scanné le " + objectName;
+                    sentence = "Je n'ai pas scanné " + objectName;
                 }else{
-                    sentence = "Tu n'as pas scanné le " + objectName;
+                    sentence = "Vous n'avez pas scanné " + objectName;
                 }
             }
         }else if(actionState == "WILL"){
@@ -594,16 +635,16 @@ void giveInfoAction(supervisor_msgs::Action action, std::string actionState, std
                 sentence = actorName + " will scan " + objectName;
             }else{
                 if(action.actors[0] == robotName_){
-                    sentence = "Je vais scanner le " + objectName;
+                    sentence = "Je vez scanner " + objectName;
                 }else{
-                    sentence = "Tu vas scanner le " + objectName;
+                    sentence = "Vous allez scanner " + objectName;
                 }
             }
         }else if(actionState == "SHOULD"){
             if(!french_){
                 sentence = actorName + " will scan " + objectName;
             }else{
-                sentence = actorName + " devrais scanner le " + objectName;
+                sentence = actorName + " devriez scanner " + objectName;
             }
         }else{
             ROS_ERROR("[dialogue_node] Action state not supported");
@@ -711,6 +752,8 @@ void sharePlan(supervisor_msgs::SharedPlan plan, std::string receiver){
  * */
 void askCanAction(supervisor_msgs::Action action, std::string receiver){
 
+    nbQuestion_++;
+
     /** @todo: find a better way to do this */
 
     std::string sentence;
@@ -719,12 +762,26 @@ void askCanAction(supervisor_msgs::Action action, std::string receiver){
         bool objectFound = false;
         for(int i = 0; i < action.parameter_keys.size(); i++){
             if(action.parameter_keys[i] == "object"){
-                if(!french_){
+                /*if(!french_){
                     objectTopic = "dialogue_node/entitiesTranslation/" + action.parameter_values[i];
                 }else{
                     objectTopic = "dialogue_node/entitiesTranslationFrench/" + action.parameter_values[i];
                 }
-                node_->getParam(objectTopic, objectName);
+                node_->getParam(objectTopic, objectName);*/
+                if(action.parameter_values[i] == "RED_TAPE1" || action.parameter_values[i] == "RED_TAPE2"){
+                    if(!french_){
+                        objectTopic = "dialogue_node/entitiesTranslation/" + action.parameter_values[i];
+                    }else{
+                        objectTopic = "dialogue_node/entitiesTranslationFrench/" + action.parameter_values[i];
+                    }
+                    node_->getParam(objectTopic, objectName);
+                }else{
+                    if(!french_){
+                        objectName = "next cube";
+                    }else{
+                        objectTopic = "le prochain cube";
+                    }
+                }
                 objectFound = true;
             }
         }
@@ -735,19 +792,33 @@ void askCanAction(supervisor_msgs::Action action, std::string receiver){
         if(!french_){
             sentence = "Can you pick the " + objectName +  " please?";
         }else{
-            sentence = "Peut tu prendre le " + objectName +  " s'il te plait?";
+            sentence = "Pouvez vous prendre " + objectName +  " s'il vous plait?";
         }
     }else if(action.name == "place" || action.name == "pickandplace"){
         std::string objectTopic, supportTopic, objectName, supportName;
         bool objectFound = false;
         for(int i = 0; i < action.parameter_keys.size(); i++){
             if(action.parameter_keys[i] == "object"){
-                if(!french_){
+                /*if(!french_){
                     objectTopic = "dialogue_node/entitiesTranslation/" + action.parameter_values[i];
                 }else{
                     objectTopic = "dialogue_node/entitiesTranslationFrench/" + action.parameter_values[i];
                 }
-                node_->getParam(objectTopic, objectName);
+                node_->getParam(objectTopic, objectName);*/
+                if(action.parameter_values[i] == "RED_TAPE1" || action.parameter_values[i] == "RED_TAPE2"){
+                    if(!french_){
+                        objectTopic = "dialogue_node/entitiesTranslation/" + action.parameter_values[i];
+                    }else{
+                        objectTopic = "dialogue_node/entitiesTranslationFrench/" + action.parameter_values[i];
+                    }
+                    node_->getParam(objectTopic, objectName);
+                }else{
+                    if(!french_){
+                        objectName = "next cube";
+                    }else{
+                        objectTopic = "le prochain cube";
+                    }
+                }
                 objectFound = true;
             }
         }
@@ -774,7 +845,7 @@ void askCanAction(supervisor_msgs::Action action, std::string receiver){
         if(!french_){
             sentence = "Can you place the " + objectName + " on the " + supportName + " please?";
         }else{
-            sentence = "Peut tu placer le " + objectName + " sur le " + supportName + " s'il te plait?";
+            sentence = "Pouvez vous placer " + objectName + " sur " + supportName + " s'il vous plait?";
         }
     }else if(action.name == "drop" || action.name == "pickanddrop"){
         std::string objectTopic, containerTopic, objectName, containerName;
@@ -811,9 +882,9 @@ void askCanAction(supervisor_msgs::Action action, std::string receiver){
             return;
         }
         if(!french_){
-            sentence = "Can you put the " + objectName + " in the " + containerName + " please?";
+            sentence = "Can you put the " + objectName + " please?";
         }else{
-            sentence = "Peut tu ranger le " + objectName + " dans le " + containerName + " s'il te plait?";
+            sentence = "Pouvez vous ranger " + objectName + " s'il vous plait?";
         }
     }else if(action.name == "scan"){
         std::string objectTopic, objectName;
@@ -836,7 +907,7 @@ void askCanAction(supervisor_msgs::Action action, std::string receiver){
         if(!french_){
             sentence = "Can you scan the " + objectName + " please?";
         }else{
-            sentence = "Peut tu scanner le " + objectName +  " s'il te plait?";
+            sentence = "Pouvez vous scanner " + objectName +  " s'il vous plait?";
         }
     }
 
@@ -851,6 +922,8 @@ void askCanAction(supervisor_msgs::Action action, std::string receiver){
  * @param receiver the person to talk to (not used for now)
  * */
 void askWantAction(supervisor_msgs::Action action, std::string receiver){
+
+    nbQuestion_++;
 
     /** @todo find a better way to do this */
     std::string sentence;
@@ -875,7 +948,7 @@ void askWantAction(supervisor_msgs::Action action, std::string receiver){
         if(!french_){
             sentence = "Do you want to pick the " + objectName +  "?";
         }else{
-            sentence = "Veut tu prendre le " + objectName +  "?";
+            sentence = "Voulez vous prendre " + objectName +  "?";
         }
     }else if(action.name == "place" || action.name == "pickandplace"){
         std::string objectTopic, supportTopic, objectName, supportName;
@@ -914,7 +987,7 @@ void askWantAction(supervisor_msgs::Action action, std::string receiver){
         if(!french_){
             sentence = "Do you want to place the " + objectName + " on the " + supportName + "?";
         }else{
-            sentence = "Veut tu poser le " + objectName + " sur le " + supportName + "?";
+            sentence = "Voulez vous poser " + objectName + " sur " + supportName + "?";
         }
     }else if(action.name == "drop" || action.name == "pickanddrop"){
         std::string objectTopic, containerTopic, objectName, containerName;
@@ -951,9 +1024,9 @@ void askWantAction(supervisor_msgs::Action action, std::string receiver){
             return;
         }
         if(!french_){
-            sentence = "Do you want to put the " + objectName + " in the " + containerName + "?";
+            sentence = "Do you want to put the " + objectName + "?";
         }else{
-            sentence = "Veut tu ranger le " + objectName + " dans le " + containerName + "?";
+            sentence = "Voulez vous ranger " + objectName + "?";
         }
     }else if(action.name == "scan"){
         std::string objectTopic, objectName;
@@ -976,7 +1049,7 @@ void askWantAction(supervisor_msgs::Action action, std::string receiver){
         if(!french_){
             sentence = "Do you want to scan the " + objectName + "?";
         }else{
-            sentence = "Veut tu scanner le " + objectName +  "?";
+            sentence = "Voulez vous scanner " + objectName +  "?";
         }
     }
 
@@ -1006,7 +1079,7 @@ void askFact(toaster_msgs::Fact fact, std::string receiver){
         if(!french_){
             subjectName = "you";
         }else{
-            subjectName = "Tu";
+            subjectName = "Vous";
         }
     }else{
         if(!french_){
@@ -1026,7 +1099,7 @@ void askFact(toaster_msgs::Fact fact, std::string receiver){
         if(!french_){
             targetName = "you";
         }else{
-            subjectName = "toi";
+            subjectName = "vous";
         }
     }else{
         if(!french_){
@@ -1041,7 +1114,7 @@ void askFact(toaster_msgs::Fact fact, std::string receiver){
     if(!french_){
         sentence = "Is the " + subjectName + " " + propertyName + " " + targetName + "?";
     }else{
-        sentence = "Est ce que le " + subjectName + " " + propertyName + " " + targetName + "?";
+        sentence = "Est ce que " + subjectName + " " + propertyName + " " + targetName + "?";
     }
 
     //We verbalize the sentence
@@ -1198,6 +1271,35 @@ void initAcapela(){
 }
 #endif //ACAPELA
 
+/**
+ * \brief Callback of the goal list
+ * @param msg topic msg
+ * */
+void goalsListCallback(const supervisor_msgs::GoalsList::ConstPtr& msg){
+
+    if(msg->changed){
+        if(msg->currentGoal == "SCAN_US" && !started){
+            started = true;
+        }
+        if(msg->currentGoal == "NONE" && started){
+            started = false;
+            //we log results
+            std::ofstream fileSave;
+            //we save the execution time
+            std::string fileName = "/home/sdevin/catkin_ws/supervisor/logs/Verb.txt";
+            fileSave.open(fileName.c_str(), std::ios::out|std::ios::ate);
+            std::ostringstream strs;
+            strs << nbQuestion_;
+            std::string nbQ = strs.str();
+            std::ostringstream strs2;
+            strs2 << nbInfo_;
+            std::string nbInfo = strs2.str();
+            fileSave << "Participant " << nbParticipant_.c_str() << "\t Condition " << condition_.c_str() << "\t " << nbInfo.c_str() << "\t" << nbQ.c_str() << std::endl;
+
+        }
+    }
+}
+
 int main (int argc, char **argv)
 {
   ros::init(argc, argv, "dialogue_node");
@@ -1208,6 +1310,29 @@ int main (int argc, char **argv)
   node_->getParam("supervisor/robot/name", robotName_);
   node_->getParam("dialogue_node/timeWaitAnswer", timeToWait_);
   node_->getParam("dialogue_node/french", french_);
+  node_->getParam("/supervisor/nbParticipant", nbParticipant_);
+
+  std::string systemMode;
+  node_->getParam("/supervisor/systemMode", systemMode);
+  if(systemMode == "new"){
+      std::string speakMode;
+      node_->getParam("/robot_decision/mode", speakMode);
+      if(speakMode == "negotiation"){
+        condition_ = "Negotiation";
+      }else{
+        condition_ = "Adaptation";
+      }
+  }else{
+      bool speakMode;
+      node_->getParam("/supervisor/speakingMode", speakMode);
+      if(speakMode){
+        condition_ = "RS-all";
+      }else{
+        condition_ = "RS-none";
+      }
+  }
+
+  ros::Subscriber sub_goal = node.subscribe("/goal_manager/goalsList", 1, goalsListCallback);
 
   //Services declarations
   ros::ServiceServer service_say = node_->advertiseService("dialogue_node/say", say); //say a sentence

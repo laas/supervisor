@@ -441,7 +441,13 @@ bool VirtualAction::execAction(int actionId, std::vector<gtp_ros_msgs::SubSoluti
         openGripper(subSolutions[0].armId, action_server);
     }
 
+    bool firstTraj = true;
     for(std::vector<gtp_ros_msgs::SubSolution>::iterator it = subSolutions.begin(); it != subSolutions.end(); it++){
+     if(firstTraj && inRefinement_){
+         firstTraj = false;
+         continue;
+     }
+     firstTraj = false;
      if(action_server->isPreemptRequested() || connector_->stopOrder_ || connector_->refineOrder_){
         return false;
      }

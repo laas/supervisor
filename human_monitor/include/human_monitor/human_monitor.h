@@ -32,6 +32,8 @@ public:
     bool isSupportObject(std::string support);
     bool isContainerObject(std::string container);
 
+    bool shouldLook_;
+
 protected:
 
 private:
