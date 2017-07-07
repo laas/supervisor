@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>494</width>
-    <height>562</height>
+    <width>568</width>
+    <height>625</height>
    </rect>
   </property>
   <property name="mouseTracking">
@@ -30,10 +30,10 @@
    <widget class="QTabWidget" name="Interface">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>491</width>
-      <height>581</height>
+      <x>10</x>
+      <y>-10</y>
+      <width>561</width>
+      <height>641</height>
      </rect>
     </property>
     <property name="currentIndex">
@@ -875,6 +875,214 @@
       </property>
       <property name="text">
        <string>RED</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonYesUS">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>540</y>
+        <width>97</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Yes</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonNoUS">
+      <property name="geometry">
+       <rect>
+        <x>270</x>
+        <y>540</y>
+        <width>97</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>No</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonStartGoalUS">
+      <property name="geometry">
+       <rect>
+        <x>420</x>
+        <y>60</y>
+        <width>97</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Ask</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonPlaceFamFR">
+      <property name="geometry">
+       <rect>
+        <x>430</x>
+        <y>290</y>
+        <width>97</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Place cube FR</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonSayFamFR">
+      <property name="geometry">
+       <rect>
+        <x>430</x>
+        <y>480</y>
+        <width>97</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Say Fam FR</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonScanGreenFam">
+      <property name="geometry">
+       <rect>
+        <x>430</x>
+        <y>350</y>
+        <width>97</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Scan GREEN</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_19">
+      <property name="geometry">
+       <rect>
+        <x>420</x>
+        <y>120</y>
+        <width>101</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>FAM HUMAN</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonScanBlueFam">
+      <property name="geometry">
+       <rect>
+        <x>430</x>
+        <y>390</y>
+        <width>97</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Scan BLUE</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonDropFam">
+      <property name="geometry">
+       <rect>
+        <x>430</x>
+        <y>430</y>
+        <width>97</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Drop Cube</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonPlaceSCAN1">
+      <property name="geometry">
+       <rect>
+        <x>430</x>
+        <y>170</y>
+        <width>101</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Place SCAN1</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonPlaceSCAN2">
+      <property name="geometry">
+       <rect>
+        <x>430</x>
+        <y>210</y>
+        <width>101</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Place SCAN2</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_20">
+      <property name="geometry">
+       <rect>
+        <x>420</x>
+        <y>270</y>
+        <width>101</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>FAM ROBOT</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonSayFamEN">
+      <property name="geometry">
+       <rect>
+        <x>430</x>
+        <y>520</y>
+        <width>97</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Say Fam EN</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonPickFam">
+      <property name="geometry">
+       <rect>
+        <x>430</x>
+        <y>140</y>
+        <width>97</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Pick</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonPlaceFamEN">
+      <property name="geometry">
+       <rect>
+        <x>430</x>
+        <y>320</y>
+        <width>97</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Place cube EN</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonStartSecour">
+      <property name="geometry">
+       <rect>
+        <x>420</x>
+        <y>90</y>
+        <width>97</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Start</string>
       </property>
      </widget>
     </widget>

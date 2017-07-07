@@ -680,3 +680,258 @@ void MainWindow::on_pushButtonDropRed_clicked()
         ROS_ERROR("[graphical_interface] Failed to call service human_monitor/human_action_simu");
     }
 }
+
+void MainWindow::on_pushButtonYesUS_clicked()
+{
+
+    std_msgs::Bool msg;
+    msg.data = true;
+    boolPub_.publish(msg);
+}
+
+void MainWindow::on_pushButtonNoUS_clicked()
+{
+    std_msgs::Bool msg;
+    msg.data = false;
+    boolPub_.publish(msg);
+}
+
+void MainWindow::on_pushButtonStartGoalUS_clicked()
+{
+    //we get the sentence
+    std::string sentence = "Est ce que vous voulez commencez?";
+
+    //we send it to the dialogue module
+    supervisor_msgs::String srv;
+    srv.request.data = sentence;
+    if (!client_say_.call(srv)){
+        ROS_ERROR("[graphical_interface] Failed to call service dialogue_node/say");
+    }
+}
+void MainWindow::on_pushButtonPickFam_clicked()
+{
+    //we construct the action
+    supervisor_msgs::Action action;
+    action.actors.push_back("HERAKLES_HUMAN1");
+    action.name = "pick";
+    action.parameter_keys.push_back("object");
+    action.parameter_values.push_back("BLUE_CUBE1");
+
+    //we send it to the action executor
+    supervisor_msgs::HumanAction srv;
+    srv.request.agent = ui.comboBoxHuman->currentText().toStdString();
+    srv.request.action = action;
+    if (!client_human_action_.call(srv)){
+        ROS_ERROR("[graphical_interface] Failed to call service human_monitor/human_action_simu");
+    }
+
+
+}
+
+void MainWindow::on_pushButtonPlaceSCAN1_clicked()
+{
+    //we construct the action
+    supervisor_msgs::Action action;
+    action.actors.push_back("HERAKLES_HUMAN1");
+    action.name = "place";
+    action.parameter_keys.push_back("object");
+    action.parameter_values.push_back("BLUE_CUBE1");
+    action.parameter_keys.push_back("support");
+    action.parameter_values.push_back("SCAN_AREA1");
+
+    //we send it to the action executor
+    supervisor_msgs::HumanAction srv;
+    srv.request.agent = ui.comboBoxHuman->currentText().toStdString();
+    srv.request.action = action;
+    if (!client_human_action_.call(srv)){
+        ROS_ERROR("[graphical_interface] Failed to call service human_monitor/human_action_simu");
+    }
+
+
+}
+
+
+void MainWindow::on_pushButtonPlaceSCAN2_clicked()
+{
+    //we construct the action
+    supervisor_msgs::Action action;
+    action.actors.push_back("HERAKLES_HUMAN1");
+    action.name = "place";
+    action.parameter_keys.push_back("object");
+    action.parameter_values.push_back("BLUE_CUBE1");
+    action.parameter_keys.push_back("support");
+    action.parameter_values.push_back("SCAN_AREA2");
+
+    //we send it to the action executor
+    supervisor_msgs::HumanAction srv;
+    srv.request.agent = ui.comboBoxHuman->currentText().toStdString();
+    srv.request.action = action;
+    if (!client_human_action_.call(srv)){
+        ROS_ERROR("[graphical_interface] Failed to call service human_monitor/human_action_simu");
+    }
+}
+
+void MainWindow::on_pushButtonPlaceFamFR_clicked()
+{
+
+    //we get the sentence
+    std::string sentence = "Commençons";
+
+    //we send it to the dialogue module
+    supervisor_msgs::String srv;
+    srv.request.data = sentence;
+    if (!client_say_.call(srv)){
+        ROS_ERROR("[graphical_interface] Failed to call service dialogue_node/say");
+    }
+
+    //we construct the action
+    supervisor_msgs::Action action;
+    action.id = idAction_;
+    idAction_++;
+    action.actors.push_back(robotName_);
+    action.name = "pickandplace";
+    action.parameter_keys.push_back("object");
+    action.parameter_values.push_back("BLACK_CUBE");
+    action.parameter_keys.push_back("support");
+    action.parameter_values.push_back("SCAN_AREA");
+
+    //we send it to the action executor
+    supervisor_msgs::ActionExecutorGoal goal;
+    goal.action = action;
+    actionClient_.sendGoal(goal);
+
+}
+
+void MainWindow::on_pushButtonPlaceFamEN_clicked()
+{
+
+    //we get the sentence
+    std::string sentence = "Let's start!";
+
+    //we send it to the dialogue module
+    supervisor_msgs::String srv;
+    srv.request.data = sentence;
+    if (!client_say_.call(srv)){
+        ROS_ERROR("[graphical_interface] Failed to call service dialogue_node/say");
+    }
+
+    //we construct the action
+    supervisor_msgs::Action action;
+    action.id = idAction_;
+    idAction_++;
+    action.actors.push_back(robotName_);
+    action.name = "pickandplace";
+    action.parameter_keys.push_back("object");
+    action.parameter_values.push_back("BLACK_CUBE");
+    action.parameter_keys.push_back("support");
+    action.parameter_values.push_back("SCAN_AREA");
+
+    //we send it to the action executor
+    supervisor_msgs::ActionExecutorGoal goal;
+    goal.action = action;
+    actionClient_.sendGoal(goal);
+
+}
+
+
+
+void MainWindow::on_pushButtonScanGreenFam_clicked()
+{
+    //we construct the action
+    supervisor_msgs::Action action;
+    action.id = idAction_;
+    idAction_++;
+    action.actors.push_back(robotName_);
+    action.name = "scan";
+    action.parameter_keys.push_back("object");
+    action.parameter_values.push_back("BLACK_CUBE");
+
+    //we send it to the action executor
+    supervisor_msgs::ActionExecutorGoal goal;
+    goal.action = action;
+    actionClient_.sendGoal(goal);
+}
+
+void MainWindow::on_pushButtonScanBlueFam_clicked()
+{
+    //we construct the action
+    supervisor_msgs::Action action;
+    action.id = idAction_;
+    idAction_++;
+    action.actors.push_back(robotName_);
+    action.name = "scan";
+    action.parameter_keys.push_back("object");
+    action.parameter_values.push_back("BLUE_CUBE1");
+
+    //we send it to the action executor
+    supervisor_msgs::ActionExecutorGoal goal;
+    goal.action = action;
+    actionClient_.sendGoal(goal);
+}
+
+void MainWindow::on_pushButtonDropFam_clicked()
+{
+
+    //we construct the action
+    supervisor_msgs::Action action;
+    action.id = idAction_;
+    idAction_++;
+    action.actors.push_back(robotName_);
+    action.name = "pickanddrop";
+    action.parameter_keys.push_back("object");
+    action.parameter_values.push_back("BLUE_CUBE1");
+    action.parameter_keys.push_back("container");
+    action.parameter_values.push_back("BLUE_BOX");
+
+    //we send it to the action executor
+    supervisor_msgs::ActionExecutorGoal goal;
+    goal.action = action;
+    actionClient_.sendGoal(goal);
+
+}
+
+void MainWindow::on_pushButtonSayFamFR_clicked()
+{
+    //we get the sentence
+    std::string sentence = "Bravo";
+
+    //we send it to the dialogue module
+    supervisor_msgs::String srv;
+    srv.request.data = sentence;
+    if (!client_say_.call(srv)){
+        ROS_ERROR("[graphical_interface] Failed to call service dialogue_node/say");
+    }
+}
+
+void MainWindow::on_pushButtonSayFamEN_clicked()
+{
+    //we get the sentence
+    std::string sentence = "Do you want to start the main task?";
+
+    //we send it to the dialogue module
+    supervisor_msgs::String srv;
+    srv.request.data = sentence;
+    if (!client_say_.call(srv)){
+        ROS_ERROR("[graphical_interface] Failed to call service dialogue_node/say");
+    }
+}
+
+void MainWindow::on_pushButtonStartSecour_clicked()
+{
+    //we get the sentence
+    std::string sentence = "Commençons";
+
+    //we send it to the dialogue module
+    supervisor_msgs::String srv_say;
+    srv_say.request.data = sentence;
+    if (!client_say_.call(srv_say)){
+        ROS_ERROR("[graphical_interface] Failed to call service dialogue_node/say");
+    }
+
+    //we goal the corresponding service
+    supervisor_msgs::String srv;
+    srv.request.data = "SCAN_US";
+    if (!client_send_goal_.call(srv)){
+        ROS_ERROR("[graphical_interface] Failed to call service goal_manager/new_goal");
+    }
+}

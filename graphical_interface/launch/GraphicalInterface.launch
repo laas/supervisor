@@ -1,6 +1,5 @@
 <launch>
     <rosparam command="load" file="$(find graphical_interface)/Parameters/GraphicalInterface.yaml" />
-    <rosparam command="load" file="$(find launchs)/Parameters/General.yaml" />
     <rosparam command="load" file="$(find launchs)/Parameters/Entities.yaml" />
 
     <node name="graphical_interface" pkg="graphical_interface" type="graphical_interface" output="screen" />  <!-- Launch the graphical interface -->

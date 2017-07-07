@@ -89,6 +89,34 @@ private Q_SLOTS:
 
     void on_pushButtonDropRed_clicked();
 
+    void on_pushButtonYesUS_clicked();
+
+    void on_pushButtonNoUS_clicked();
+
+    void on_pushButtonStartGoalUS_clicked();
+
+    void on_pushButtonPlaceFamFR_clicked();
+
+    void on_pushButtonPlaceFamEN_clicked();
+
+    void on_pushButtonPlaceSCAN1_clicked();
+
+    void on_pushButtonPickFam_clicked();
+
+    void on_pushButtonPlaceSCAN2_clicked();
+
+    void on_pushButtonScanGreenFam_clicked();
+
+    void on_pushButtonScanBlueFam_clicked();
+
+    void on_pushButtonDropFam_clicked();
+
+    void on_pushButtonSayFamFR_clicked();
+
+    void on_pushButtonSayFamEN_clicked();
+
+    void on_pushButtonStartSecour_clicked();
+
 public:
     Ui::MainWindowDesign ui; /**< Main windows design*/
     ros::NodeHandle node_; /**< Node handle*/
