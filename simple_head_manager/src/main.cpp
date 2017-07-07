@@ -18,6 +18,7 @@ Simple dialogue node
 
 #include <pr2motion/connect_port.h>
 #include <pr2motion/Head_Move_TargetAction.h>
+#include <pr2motion/Z_Head_SetMinDuration.h>
 #include "toaster_msgs/ObjectListStamped.h"
 #include "toaster_msgs/HumanListStamped.h"
 
@@ -54,6 +55,11 @@ void initPR2motion(){
     if (!connect_port_srv.call(srv)){
       ROS_ERROR("[simple_head_manager] Failed to call service pr2motion/connect_port");
     }
+
+    pr2motion::Z_Head_SetMinDuration srv_MinDuration;
+    srv_MinDuration.request.head_min_duration=0.5;
+    if(!ros::service::call("/pr2motion/Z_Head_SetMinDuration",srv_MinDuration))
+        ROS_ERROR("[robot_observer] Failed to call service /pr2motion/Z_Head_SetMinDuration");
 }
 
 /**
@@ -75,7 +81,7 @@ void lookAtPoint(geometry_msgs::Point point){
 
     head_action_client_->sendGoal(goal);
 
-    bool finishedBeforeTimeout = head_action_client_->waitForResult(ros::Duration(300.0));
+    bool finishedBeforeTimeout = head_action_client_->waitForResult(ros::Duration(3.0));
 
     if (!finishedBeforeTimeout)
       ROS_INFO("[simple_head_manager] Action did not finish before the time out.");
@@ -121,9 +127,9 @@ geometry_msgs::Point getPoseAgent(std::string agent){
     }
 
     geometry_msgs::Point point;
-    point.x = 0.0;
-    point.y = 0.0;
-    point.z = 0.0;
+    point.x = 4.0;
+    point.y = 7.0;
+    point.z = 1.6;
     return point;
 }
 

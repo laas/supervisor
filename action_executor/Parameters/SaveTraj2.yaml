@@ -1,0 +1,1877 @@
+trajs:
+  pick_GREEN_CUBE1_place:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -1.95237, -0.0958905, -0.602092, -1.60012, 0.018012, -0.433225, -1.72981, 0, 0, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -1.24555, -0.27882, -1.66535, -1.72184, -1.30707, -1.43927, 0.44555, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -1.24555, -0.27882, -1.66535, -1.72184, -1.30707, -1.43927, 0.44555, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -1.24677, -0.0721897, -1.58665, -1.73819, -1.50223, -1.54319, 0.489906, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -1.24677, -0.0721897, -1.58665, -1.73819, -1.50223, -1.54319, 0.489906, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -1.24514, -0.256026, -1.66461, -1.72598, -1.33032, -1.44176, 0.453138, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  place_GREEN_CUBE1_SCAN_AREA1:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -1.24514, -0.256026, -1.66461, -1.72598, -1.33032, -1.44176, 0.453138, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.472823, 0.0581666, -1.63338, -1.73112, -1.6383, -1.51841, 1.26189, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.472823, 0.0581666, -1.63338, -1.73112, -1.6383, -1.51841, 1.26189, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.33152, -0.152907, -2.23882, -1.69181, -1.4715, -0.894228, 1.27218, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.33152, -0.152907, -2.23882, -1.69181, -1.4715, -0.894228, 1.27218, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.426033, -0.0719185, -1.95066, -1.71532, -1.55154, -1.18496, 1.2717, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  place_GREEN_CUBE1_SCAN_AREA2:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -1.24514, -0.256026, -1.66461, -1.72598, -1.33032, -1.44176, 0.453138, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.171782, 0.231331, -1.71402, -1.51895, -1.79705, -1.4196, -0.189751, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.171782, 0.231331, -1.71402, -1.51895, -1.79705, -1.4196, -0.189751, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  pick_BLUE_CUBE1_place:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -1.93247, -0.0955521, -0.619571, -1.60172, -0.00281298, -0.442971, -1.68995, 0, 0, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -1.23304, -0.212279, -1.76521, -1.74251, -1.39, -1.34686, -1.10249, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -1.23304, -0.212279, -1.76521, -1.74251, -1.39, -1.34686, -1.10249, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -1.24494, 0.0399249, -1.65344, -1.73391, -1.62375, -1.49582, -1.07819, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -1.24494, 0.0399249, -1.65344, -1.73391, -1.62375, -1.49582, -1.07819, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -1.19688, -0.325695, -1.94556, -1.75182, -1.29208, -1.16065, -1.13648, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  place_BLUE_CUBE1_SCAN_AREA2:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -1.19688, -0.325695, -1.94556, -1.75182, -1.29208, -1.16065, -1.13648, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.171782, 0.231331, -1.71402, -1.51895, -1.79705, -1.4196, -0.189751, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.171782, 0.231331, -1.71402, -1.51895, -1.79705, -1.4196, -0.189751, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  place_BLUE_CUBE1_SCAN_AREA1:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -1.19688, -0.325695, -1.94556, -1.75182, -1.29208, -1.16065, -1.13648, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.472823, 0.0581666, -1.63338, -1.73112, -1.6383, -1.51841, 1.26189, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.472823, 0.0581666, -1.63338, -1.73112, -1.6383, -1.51841, 1.26189, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.33152, -0.152907, -2.23882, -1.69181, -1.4715, -0.894228, 1.27218, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.33152, -0.152907, -2.23882, -1.69181, -1.4715, -0.894228, 1.27218, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.426033, -0.0719185, -1.95066, -1.71532, -1.55154, -1.18496, 1.2717, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  pick_GREEN_CUBE3_place:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.051208, 0.0554299, -1.93355, -0.0941986, -0.619891, -1.59593, 0.00603762, -0.454849, -1.71758, 0, 0, 1.91193, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.051208, 0.0554299, -1.10401, -0.420931, -2.22533, -1.76641, -1.18651, -0.896345, -1.18939, 0.479774, 0.479774, 1.91193, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.051208, 0.0554299, -1.10401, -0.420931, -2.22533, -1.76641, -1.18651, -0.896345, -1.18939, 0.479774, 0.479774, 1.91193, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.051208, 0.0554299, -1.09212, -0.300603, -2.26053, -1.74208, -1.32076, -0.864037, -1.12218, 0.479774, 0.479774, 1.91193, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.051208, 0.0554299, -1.09212, -0.300603, -2.26053, -1.74208, -1.32076, -0.864037, -1.12218, 0.479774, 0.479774, 1.91193, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.051208, 0.0554299, -1.19347, -0.199671, -1.96291, -1.74271, -1.42678, -1.15605, -1.09169, 0.479774, 0.479774, 1.91193, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  place_GREEN_CUBE3_SCAN_AREA1:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.051208, 0.0554299, -1.19347, -0.199671, -1.96291, -1.74271, -1.42678, -1.15605, -1.09169, 0.479774, 0.479774, 1.91193, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.472823, 0.0581666, -1.63338, -1.73112, -1.6383, -1.51841, 1.26189, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.472823, 0.0581666, -1.63338, -1.73112, -1.6383, -1.51841, 1.26189, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.33152, -0.152907, -2.23882, -1.69181, -1.4715, -0.894228, 1.27218, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.33152, -0.152907, -2.23882, -1.69181, -1.4715, -0.894228, 1.27218, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.426033, -0.0719185, -1.95066, -1.71532, -1.55154, -1.18496, 1.2717, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  place_GREEN_CUBE3_SCAN_AREA2:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.051208, 0.0554299, -1.19347, -0.199671, -1.96291, -1.74271, -1.42678, -1.15605, -1.09169, 0.479774, 0.479774, 1.91193, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.171782, 0.231331, -1.71402, -1.51895, -1.79705, -1.4196, -0.189751, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.171782, 0.231331, -1.71402, -1.51895, -1.79705, -1.4196, -0.189751, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  pick_RED_CUBE2_place:
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0442965, 0.0554299, -1.01777, -0.348215, -2.42826, -1.7421, -1.23444, -0.709693, -1.16256, 0.479774, 0.479774, 1.91185, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0442965, 0.0554299, -1.11563, -0.0846297, -2.215, -1.66867, -1.53862, -0.922529, -1.05682, 0.479774, 0.479774, 1.91185, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0442965, 0.0554299, -1.11563, -0.0846297, -2.215, -1.66867, -1.53862, -0.922529, -1.05682, 0.479774, 0.479774, 1.91185, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0442965, 0.0554299, -1.09401, -0.220478, -2.26085, -1.71686, -1.40496, -0.867964, -1.08838, 0.479774, 0.479774, 1.91185, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  place_RED_CUBE2_SCAN_AREA1:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0442965, 0.0554299, -1.09401, -0.220478, -2.26085, -1.71686, -1.40496, -0.867964, -1.08838, 0.479774, 0.479774, 1.91185, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.472823, 0.0581666, -1.63338, -1.73112, -1.6383, -1.51841, 1.26189, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.472823, 0.0581666, -1.63338, -1.73112, -1.6383, -1.51841, 1.26189, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.33152, -0.152907, -2.23882, -1.69181, -1.4715, -0.894228, 1.27218, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.33152, -0.152907, -2.23882, -1.69181, -1.4715, -0.894228, 1.27218, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.426033, -0.0719185, -1.95066, -1.71532, -1.55154, -1.18496, 1.2717, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  place_RED_CUBE2_SCAN_AREA2:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0442965, 0.0554299, -1.09401, -0.220478, -2.26085, -1.71686, -1.40496, -0.867964, -1.08838, 0.479774, 0.479774, 1.91185, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.171782, 0.231331, -1.71402, -1.51895, -1.79705, -1.4196, -0.189751, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.171782, 0.231331, -1.71402, -1.51895, -1.79705, -1.4196, -0.189751, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  pick_drop_SCAN_AREA1:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29999, 0, 0.131842, 0.0495102, -1.95245, -0.0958905, -0.588301, -1.60012, 0.0176649, -0.433269, -1.72906, 0, 0, 1.91127, -0.0983272, 0.600463, -1.65282, -0.0213938, -0.474088, -1.76564, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29999, 0, 0.131842, 0.0495102, -1.95245, -0.0958905, -0.588301, -1.60012, 0.0176649, -0.433269, -1.72906, 0.391111, 0.391111, -0.279584, -0.406528, 2.69991, -1.49837, 0.712513, -0.644232, -1.06891, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29999, 0, 0.131842, 0.0495102, -1.95245, -0.0958905, -0.588301, -1.60012, 0.0176649, -0.433269, -1.72906, 0.391111, 0.391111, -0.279584, -0.406528, 2.69991, -1.49837, 0.712513, -0.644232, -1.06891, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29999, 0, 0.131842, 0.0495102, -1.95245, -0.0958905, -0.588301, -1.60012, 0.0176649, -0.433269, -1.72906, 0.391111, 0.391111, -0.496698, -0.358633, 3.12997, -1.46437, 0.0242601, -0.465199, -0.52246, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29999, 0, 0.131842, 0.0495102, -1.95245, -0.0958905, -0.588301, -1.60012, 0.0176649, -0.433269, -1.72906, 0.391111, 0.391111, -0.496698, -0.358633, 3.12997, -1.46437, 0.0242601, -0.465199, -0.52246, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29999, 0, 0.131842, 0.0495102, -1.95245, -0.0958905, -0.588301, -1.60012, 0.0176649, -0.433269, -1.72906, 0.391111, 0.391111, -0.25436, -0.373694, 2.64642, -1.48912, 0.798813, -0.665439, -1.12864, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+  drop_SCAN_AREA1_BLUE_BOX:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0517316, 0.0555338, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, -0.0429247, -0.142073, 2.16749, -1.53181, 1.37411, -0.988064, -3.04262, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0517316, 0.0555338, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, 1.56845, -0.0759435, 1.61738, -1.51842, 3.07331, -1.33799, 1.52721, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+  drop_SCAN_AREA1_RED_BOX1:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0517316, 0.0555338, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, -0.0429247, -0.142073, 2.16749, -1.53181, 1.37411, -0.988064, -3.04262, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0530929, 0.0554299, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, 1.06546, 0.19364, -0.727921, -0.652529, -0.720399, -1.88411, 1.88271, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+  pick_drop_SCAN_AREA2:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0530929, 0.0554299, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0, 0, 1.90862, -0.0995961, 0.591804, -1.62097, -0.0729356, -0.497907, -1.78688, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0530929, 0.0554299, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, 0.342138, 0.074871, 1.82505, -1.68985, 1.6782, -1.32827, -2.94118, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0530929, 0.0554299, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, 0.342138, 0.074871, 1.82505, -1.68985, 1.6782, -1.32827, -2.94118, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0530929, 0.0554299, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, 0.211207, -0.11417, 2.26111, -1.66292, 1.49881, -0.875734, -2.95533, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0530929, 0.0554299, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, 0.211207, -0.11417, 2.26111, -1.66292, 1.49881, -0.875734, -2.95533, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0530929, 0.0554299, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, 0.25722, -0.13707, 2.13667, -1.69751, 1.48915, -0.995441, -2.94701, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+  drop_SCAN_AREA2_RED_BOX1:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0530929, 0.0554299, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, 0.25722, -0.13707, 2.13667, -1.69751, 1.48915, -0.995441, -2.94701, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0530929, 0.0554299, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, 1.06546, 0.19364, -0.727921, -0.652529, -0.720399, -1.88411, 1.88271, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+  drop_SCAN_AREA2_BLUE_BOX:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0530929, 0.0554299, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, 0.25722, -0.13707, 2.13667, -1.69751, 1.48915, -0.995441, -2.94701, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0517316, 0.0555338, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, 1.56845, -0.0759435, 1.61738, -1.51842, 3.07331, -1.33799, 1.52721, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+  pick_RED_TAPE1_place:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29999, 0, -0.136869, 0.0495102, -1.89641, -0.103842, -0.644105, -1.60461, -0.0306374, -0.467772, -1.67837, 0, 0, 1.89179, -0.0964661, 0.614253, -1.65108, -0.00484957, -0.486445, -1.78208, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29999, 0, -0.136869, 0.0495102, -1.45017, 0.186883, -1.17879, -1.78206, -1.68368, -1.98888, -1.30009, 0.28194, 0.28194, 1.89179, -0.0964661, 0.614253, -1.65108, -0.00484957, -0.486445, -1.78208, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29999, 0, -0.136869, 0.0495102, -1.45017, 0.186883, -1.17879, -1.78206, -1.68368, -1.98888, -1.30009, 0.28194, 0.28194, 1.89179, -0.0964661, 0.614253, -1.65108, -0.00484957, -0.486445, -1.78208, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29999, 0, -0.136869, 0.0495102, -1.50387, 0.0201159, -1.53987, -1.78161, -1.584, -1.60524, -1.2936, 0.28194, 0.28194, 1.89179, -0.0964661, 0.614253, -1.65108, -0.00484957, -0.486445, -1.78208, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29999, 0, -0.136869, 0.0495102, -1.50387, 0.0201159, -1.53987, -1.78161, -1.584, -1.60524, -1.2936, 0.28194, 0.28194, 1.89179, -0.0964661, 0.614253, -1.65108, -0.00484957, -0.486445, -1.78208, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29999, 0, -0.136869, 0.0495102, -1.50079, -0.0249702, -1.46031, -1.77505, -1.52372, -1.67385, -1.29273, 0.28194, 0.28194, 1.89179, -0.0964661, 0.614253, -1.65108, -0.00484957, -0.486445, -1.78208, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  place_RED_TAPE_SCAN_AREA1:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0301593, 0.0554299, -1.48311, 0.117311, -1.32801, -1.7816, -1.6376, -1.83171, -1.2954, 0.28194, 0.28194, 1.91301, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0301593, 0.0554299, -0.454992, -0.236588, -1.50337, -1.68666, -1.32785, -1.60876, -0.326479, 0.28194, 0.28194, 1.91301, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0301593, 0.0554299, -0.454992, -0.236588, -1.50337, -1.68666, -1.32785, -1.60876, -0.326479, 0.28194, 0.28194, 1.91301, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0301593, 0.0554299, -0.439754, 0.14981, -1.38505, -1.73443, -1.69113, -1.77673, -0.30255, 0.28194, 0.28194, 1.91301, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0301593, 0.0554299, -0.439754, 0.14981, -1.38505, -1.73443, -1.69113, -1.77673, -0.30255, 0.28194, 0.28194, 1.91301, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0301593, 0.0554299, -0.440303, -0.33686, -1.76368, -1.72074, -1.25779, -1.34051, -0.359754, 0.28194, 0.28194, 1.91301, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  place_RED_TAPE_SCAN_AREA2:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0301593, 0.0554299, -1.48311, 0.117311, -1.32801, -1.7816, -1.6376, -1.83171, -1.2954, 0.28194, 0.28194, 1.91301, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0415737, 0.0554299, -0.135001, -0.0548926, -1.3073, -1.53932, -1.52244, -1.83554, -0.152759, 0.28194, 0.28194, 1.91392, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0415737, 0.0554299, -0.135001, -0.0548926, -1.3073, -1.53932, -1.52244, -1.83554, -0.152759, 0.28194, 0.28194, 1.91392, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0415737, 0.0554299, -0.156544, -0.0561909, -1.622, -1.57761, -1.51488, -1.51929, -0.152615, 0.28194, 0.28194, 1.91392, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0415737, 0.0554299, -0.156544, -0.0561909, -1.622, -1.57761, -1.51488, -1.51929, -0.152615, 0.28194, 0.28194, 1.91392, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0415737, 0.0554299, -0.149348, -0.020736, -1.41242, -1.566, -1.55056, -1.72923, -0.15089, 0.28194, 0.28194, 1.91392, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  pick_RED_TAPE_SCAN_AREA1:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0448201, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0, 0, 1.9116, -0.100527, 0.606877, -1.64862, -0.00965088, -0.498473, -1.71853, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0448201, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, 0.0600324, -0.173111, 1.6482, -1.49, 1.39166, -1.50873, -2.98847, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0448201, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, 0.0600324, -0.173111, 1.6482, -1.49, 1.39166, -1.50873, -2.98847, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0448201, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, -0.0309398, -0.384427, 2.13972, -1.52024, 1.09767, -1.07035, -2.88521, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0448201, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, -0.0309398, -0.384427, 2.13972, -1.52024, 1.09767, -1.07035, -2.88521, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0448201, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, -0.0180293, -0.44705, 2.09655, -1.51249, 1.03988, -1.13008, -2.85748, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+  drop_SCAN_AREA1_RED_TAPE:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0448201, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, -0.0180293, -0.44705, 2.09655, -1.51249, 1.03988, -1.13008, -2.85748, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0448201, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, 1.78033, -0.495673, 1.34216, -0.811995, 1.33267, -2.06228, 2.20258, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+  pick_RED_TAPE_SCAN_AREA2:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0460767, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0, 0, 1.89767, -0.108479, 0.644079, -1.60027, 0.0300322, -0.542722, -1.71683, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0460767, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, 0.316685, -0.42675, 1.92199, -1.69805, 1.16146, -1.19913, -2.7973, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0460767, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, 0.316685, -0.42675, 1.92199, -1.69805, 1.16146, -1.19913, -2.7973, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0460767, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, 0.348162, -0.138839, 1.7418, -1.69983, 1.45294, -1.38478, -2.89954, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0460767, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, 0.348162, -0.138839, 1.7418, -1.69983, 1.45294, -1.38478, -2.89954, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0460767, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, 0.358846, -0.088771, 1.55828, -1.69216, 1.48116, -1.57244, -2.90474, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+  drop_SCAN_AREA2_RED_TAPE:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0460767, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, 0.358846, -0.088771, 1.55828, -1.69216, 1.48116, -1.57244, -2.90474, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0460767, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, 1.92381, -0.509641, 1.30255, -1.00558, 1.24105, -2.04506, 0.776191, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+  pick_BLACK_CUBE_place:
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0442965, 0.0554299, -1.01777, -0.348215, -2.42826, -1.7421, -1.23444, -0.709693, -1.16256, 0.479774, 0.479774, 1.91185, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0442965, 0.0554299, -1.11563, -0.0846297, -2.215, -1.66867, -1.53862, -0.922529, -1.05682, 0.479774, 0.479774, 1.91185, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0442965, 0.0554299, -1.11563, -0.0846297, -2.215, -1.66867, -1.53862, -0.922529, -1.05682, 0.479774, 0.479774, 1.91185, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0442965, 0.0554299, -1.09401, -0.220478, -2.26085, -1.71686, -1.40496, -0.867964, -1.08838, 0.479774, 0.479774, 1.91185, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  place_BLACK_CUBE_SCAN_AREA1:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0442965, 0.0554299, -1.09401, -0.220478, -2.26085, -1.71686, -1.40496, -0.867964, -1.08838, 0.479774, 0.479774, 1.91185, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.472823, 0.0581666, -1.63338, -1.73112, -1.6383, -1.51841, 1.26189, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.472823, 0.0581666, -1.63338, -1.73112, -1.6383, -1.51841, 1.26189, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.33152, -0.152907, -2.23882, -1.69181, -1.4715, -0.894228, 1.27218, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.33152, -0.152907, -2.23882, -1.69181, -1.4715, -0.894228, 1.27218, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.426033, -0.0719185, -1.95066, -1.71532, -1.55154, -1.18496, 1.2717, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  place_BLACK_CUBE_SCAN_AREA2:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0442965, 0.0554299, -1.09401, -0.220478, -2.26085, -1.71686, -1.40496, -0.867964, -1.08838, 0.479774, 0.479774, 1.91185, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.171782, 0.231331, -1.71402, -1.51895, -1.79705, -1.4196, -0.189751, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.171782, 0.231331, -1.71402, -1.51895, -1.79705, -1.4196, -0.189751, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  pick_GREEN_CUBE1_place:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -1.95237, -0.0958905, -0.602092, -1.60012, 0.018012, -0.433225, -1.72981, 0, 0, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -1.24555, -0.27882, -1.66535, -1.72184, -1.30707, -1.43927, 0.44555, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -1.24555, -0.27882, -1.66535, -1.72184, -1.30707, -1.43927, 0.44555, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -1.24677, -0.0721897, -1.58665, -1.73819, -1.50223, -1.54319, 0.489906, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -1.24677, -0.0721897, -1.58665, -1.73819, -1.50223, -1.54319, 0.489906, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -1.24514, -0.256026, -1.66461, -1.72598, -1.33032, -1.44176, 0.453138, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  place_GREEN_CUBE1_SCAN_AREA1:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -1.24514, -0.256026, -1.66461, -1.72598, -1.33032, -1.44176, 0.453138, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.472823, 0.0581666, -1.63338, -1.73112, -1.6383, -1.51841, 1.26189, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.472823, 0.0581666, -1.63338, -1.73112, -1.6383, -1.51841, 1.26189, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.33152, -0.152907, -2.23882, -1.69181, -1.4715, -0.894228, 1.27218, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.33152, -0.152907, -2.23882, -1.69181, -1.4715, -0.894228, 1.27218, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.426033, -0.0719185, -1.95066, -1.71532, -1.55154, -1.18496, 1.2717, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  place_GREEN_CUBE1_SCAN_AREA2:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -1.24514, -0.256026, -1.66461, -1.72598, -1.33032, -1.44176, 0.453138, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.171782, 0.231331, -1.71402, -1.51895, -1.79705, -1.4196, -0.189751, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.171782, 0.231331, -1.71402, -1.51895, -1.79705, -1.4196, -0.189751, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  pick_BLUE_CUBE1_place:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -1.93247, -0.0955521, -0.619571, -1.60172, -0.00281298, -0.442971, -1.68995, 0, 0, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -1.23304, -0.212279, -1.76521, -1.74251, -1.39, -1.34686, -1.10249, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -1.23304, -0.212279, -1.76521, -1.74251, -1.39, -1.34686, -1.10249, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -1.24494, 0.0399249, -1.65344, -1.73391, -1.62375, -1.49582, -1.07819, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -1.24494, 0.0399249, -1.65344, -1.73391, -1.62375, -1.49582, -1.07819, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -1.19688, -0.325695, -1.94556, -1.75182, -1.29208, -1.16065, -1.13648, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  place_BLUE_CUBE1_SCAN_AREA2:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -1.19688, -0.325695, -1.94556, -1.75182, -1.29208, -1.16065, -1.13648, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.171782, 0.231331, -1.71402, -1.51895, -1.79705, -1.4196, -0.189751, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.171782, 0.231331, -1.71402, -1.51895, -1.79705, -1.4196, -0.189751, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  place_BLUE_CUBE1_SCAN_AREA1:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -1.19688, -0.325695, -1.94556, -1.75182, -1.29208, -1.16065, -1.13648, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.472823, 0.0581666, -1.63338, -1.73112, -1.6383, -1.51841, 1.26189, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.472823, 0.0581666, -1.63338, -1.73112, -1.6383, -1.51841, 1.26189, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.33152, -0.152907, -2.23882, -1.69181, -1.4715, -0.894228, 1.27218, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.33152, -0.152907, -2.23882, -1.69181, -1.4715, -0.894228, 1.27218, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.426033, -0.0719185, -1.95066, -1.71532, -1.55154, -1.18496, 1.2717, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  pick_GREEN_CUBE3_place:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.051208, 0.0554299, -1.93355, -0.0941986, -0.619891, -1.59593, 0.00603762, -0.454849, -1.71758, 0, 0, 1.91193, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.051208, 0.0554299, -1.10401, -0.420931, -2.22533, -1.76641, -1.18651, -0.896345, -1.18939, 0.479774, 0.479774, 1.91193, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.051208, 0.0554299, -1.10401, -0.420931, -2.22533, -1.76641, -1.18651, -0.896345, -1.18939, 0.479774, 0.479774, 1.91193, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.051208, 0.0554299, -1.09212, -0.300603, -2.26053, -1.74208, -1.32076, -0.864037, -1.12218, 0.479774, 0.479774, 1.91193, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.051208, 0.0554299, -1.09212, -0.300603, -2.26053, -1.74208, -1.32076, -0.864037, -1.12218, 0.479774, 0.479774, 1.91193, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.051208, 0.0554299, -1.19347, -0.199671, -1.96291, -1.74271, -1.42678, -1.15605, -1.09169, 0.479774, 0.479774, 1.91193, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  place_GREEN_CUBE3_SCAN_AREA1:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.051208, 0.0554299, -1.19347, -0.199671, -1.96291, -1.74271, -1.42678, -1.15605, -1.09169, 0.479774, 0.479774, 1.91193, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.472823, 0.0581666, -1.63338, -1.73112, -1.6383, -1.51841, 1.26189, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.472823, 0.0581666, -1.63338, -1.73112, -1.6383, -1.51841, 1.26189, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.33152, -0.152907, -2.23882, -1.69181, -1.4715, -0.894228, 1.27218, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.33152, -0.152907, -2.23882, -1.69181, -1.4715, -0.894228, 1.27218, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.426033, -0.0719185, -1.95066, -1.71532, -1.55154, -1.18496, 1.2717, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  place_GREEN_CUBE3_SCAN_AREA2:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.051208, 0.0554299, -1.19347, -0.199671, -1.96291, -1.74271, -1.42678, -1.15605, -1.09169, 0.479774, 0.479774, 1.91193, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.171782, 0.231331, -1.71402, -1.51895, -1.79705, -1.4196, -0.189751, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.171782, 0.231331, -1.71402, -1.51895, -1.79705, -1.4196, -0.189751, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  pick_RED_CUBE2_place:
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0442965, 0.0554299, -1.01777, -0.348215, -2.42826, -1.7421, -1.23444, -0.709693, -1.16256, 0.479774, 0.479774, 1.91185, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0442965, 0.0554299, -1.11563, -0.0846297, -2.215, -1.66867, -1.53862, -0.922529, -1.05682, 0.479774, 0.479774, 1.91185, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0442965, 0.0554299, -1.11563, -0.0846297, -2.215, -1.66867, -1.53862, -0.922529, -1.05682, 0.479774, 0.479774, 1.91185, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0442965, 0.0554299, -1.09401, -0.220478, -2.26085, -1.71686, -1.40496, -0.867964, -1.08838, 0.479774, 0.479774, 1.91185, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  place_RED_CUBE2_SCAN_AREA1:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0442965, 0.0554299, -1.09401, -0.220478, -2.26085, -1.71686, -1.40496, -0.867964, -1.08838, 0.479774, 0.479774, 1.91185, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.472823, 0.0581666, -1.63338, -1.73112, -1.6383, -1.51841, 1.26189, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.472823, 0.0581666, -1.63338, -1.73112, -1.6383, -1.51841, 1.26189, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.33152, -0.152907, -2.23882, -1.69181, -1.4715, -0.894228, 1.27218, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.33152, -0.152907, -2.23882, -1.69181, -1.4715, -0.894228, 1.27218, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.426033, -0.0719185, -1.95066, -1.71532, -1.55154, -1.18496, 1.2717, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  place_RED_CUBE2_SCAN_AREA2:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0442965, 0.0554299, -1.09401, -0.220478, -2.26085, -1.71686, -1.40496, -0.867964, -1.08838, 0.479774, 0.479774, 1.91185, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.171782, 0.231331, -1.71402, -1.51895, -1.79705, -1.4196, -0.189751, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.171782, 0.231331, -1.71402, -1.51895, -1.79705, -1.4196, -0.189751, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  pick_drop_SCAN_AREA1:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0517316, 0.0555338, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0, 0, 1.90488, -0.0964661, 0.586512, -1.64109, -0.0352771, -0.48207, -1.72127, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0517316, 0.0555338, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, 0.0354331, 0.0292734, 1.8713, -1.52585, 1.5875, -1.26936, -3.06818, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0517316, 0.0555338, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, 0.0354331, 0.0292734, 1.8713, -1.52585, 1.5875, -1.26936, -3.06818, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0517316, 0.0555338, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, 0.0417842, 0.193041, 1.81908, -1.46906, 1.74391, -1.30838, -3.04513, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0517316, 0.0555338, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, 0.0417842, 0.193041, 1.81908, -1.46906, 1.74391, -1.30838, -3.04513, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0517316, 0.0555338, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, -0.0429247, -0.142073, 2.16749, -1.53181, 1.37411, -0.988064, -3.04262, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+  drop_SCAN_AREA1_BLUE_BOX:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0517316, 0.0555338, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, -0.0429247, -0.142073, 2.16749, -1.53181, 1.37411, -0.988064, -3.04262, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0517316, 0.0555338, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, 1.56845, -0.0759435, 1.61738, -1.51842, 3.07331, -1.33799, 1.52721, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+  drop_SCAN_AREA1_RED_BOX1:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0517316, 0.0555338, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, -0.0429247, -0.142073, 2.16749, -1.53181, 1.37411, -0.988064, -3.04262, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0530929, 0.0554299, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, 1.06546, 0.19364, -0.727921, -0.652529, -0.720399, -1.88411, 1.88271, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+  pick_drop_SCAN_AREA2:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0530929, 0.0554299, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0, 0, 1.90862, -0.0995961, 0.591804, -1.62097, -0.0729356, -0.497907, -1.78688, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0530929, 0.0554299, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, 0.342138, 0.074871, 1.82505, -1.68985, 1.6782, -1.32827, -2.94118, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0530929, 0.0554299, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, 0.342138, 0.074871, 1.82505, -1.68985, 1.6782, -1.32827, -2.94118, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0530929, 0.0554299, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, 0.211207, -0.11417, 2.26111, -1.66292, 1.49881, -0.875734, -2.95533, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0530929, 0.0554299, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, 0.211207, -0.11417, 2.26111, -1.66292, 1.49881, -0.875734, -2.95533, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0530929, 0.0554299, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, 0.25722, -0.13707, 2.13667, -1.69751, 1.48915, -0.995441, -2.94701, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+  drop_SCAN_AREA2_RED_BOX1:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0530929, 0.0554299, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, 0.25722, -0.13707, 2.13667, -1.69751, 1.48915, -0.995441, -2.94701, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0530929, 0.0554299, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, 1.06546, 0.19364, -0.727921, -0.652529, -0.720399, -1.88411, 1.88271, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+  drop_SCAN_AREA2_BLUE_BOX:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0530929, 0.0554299, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, 0.25722, -0.13707, 2.13667, -1.69751, 1.48915, -0.995441, -2.94701, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0517316, 0.0555338, -1.93048, -0.0919145, -0.615562, -1.59911, -0.0044327, -0.44519, -1.71071, 0.479774, 0.479774, 1.56845, -0.0759435, 1.61738, -1.51842, 3.07331, -1.33799, 1.52721, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+  pick_RED_TAPE1_place:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0301593, 0.0554299, -1.94806, -0.0953829, -0.603695, -1.60056, 0.0128636, -0.437185, -1.72541, 0, 0, 1.91301, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0301593, 0.0554299, -1.47668, 0.111856, -1.29085, -1.77875, -1.62574, -1.86681, -1.29269, 0.28194, 0.28194, 1.91301, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0301593, 0.0554299, -1.47668, 0.111856, -1.29085, -1.77875, -1.62574, -1.86681, -1.29269, 0.28194, 0.28194, 1.91301, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0301593, 0.0554299, -1.4926, 0.176121, -1.39455, -1.78437, -1.70882, -1.77812, -1.30901, 0.28194, 0.28194, 1.91301, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0301593, 0.0554299, -1.4926, 0.176121, -1.39455, -1.78437, -1.70882, -1.77812, -1.30901, 0.28194, 0.28194, 1.91301, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0301593, 0.0554299, -1.48311, 0.117311, -1.32801, -1.7816, -1.6376, -1.83171, -1.2954, 0.28194, 0.28194, 1.91301, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  place_RED_TAPE1_SCAN_AREA1:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0301593, 0.0554299, -1.48311, 0.117311, -1.32801, -1.7816, -1.6376, -1.83171, -1.2954, 0.28194, 0.28194, 1.91301, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0301593, 0.0554299, -0.454992, -0.236588, -1.50337, -1.68666, -1.32785, -1.60876, -0.326479, 0.28194, 0.28194, 1.91301, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0301593, 0.0554299, -0.454992, -0.236588, -1.50337, -1.68666, -1.32785, -1.60876, -0.326479, 0.28194, 0.28194, 1.91301, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0301593, 0.0554299, -0.439754, 0.14981, -1.38505, -1.73443, -1.69113, -1.77673, -0.30255, 0.28194, 0.28194, 1.91301, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0301593, 0.0554299, -0.439754, 0.14981, -1.38505, -1.73443, -1.69113, -1.77673, -0.30255, 0.28194, 0.28194, 1.91301, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0301593, 0.0554299, -0.440303, -0.33686, -1.76368, -1.72074, -1.25779, -1.34051, -0.359754, 0.28194, 0.28194, 1.91301, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  place_RED_TAPE1_SCAN_AREA2:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0301593, 0.0554299, -1.48311, 0.117311, -1.32801, -1.7816, -1.6376, -1.83171, -1.2954, 0.28194, 0.28194, 1.91301, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0415737, 0.0554299, -0.135001, -0.0548926, -1.3073, -1.53932, -1.52244, -1.83554, -0.152759, 0.28194, 0.28194, 1.91392, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0415737, 0.0554299, -0.135001, -0.0548926, -1.3073, -1.53932, -1.52244, -1.83554, -0.152759, 0.28194, 0.28194, 1.91392, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0415737, 0.0554299, -0.156544, -0.0561909, -1.622, -1.57761, -1.51488, -1.51929, -0.152615, 0.28194, 0.28194, 1.91392, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0415737, 0.0554299, -0.156544, -0.0561909, -1.622, -1.57761, -1.51488, -1.51929, -0.152615, 0.28194, 0.28194, 1.91392, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0415737, 0.0554299, -0.149348, -0.020736, -1.41242, -1.566, -1.55056, -1.72923, -0.15089, 0.28194, 0.28194, 1.91392, -0.0974812, 0.619064, -1.65268, -0.0216831, -0.474064, -1.76547, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  pick_RED_TAPE_SCAN_AREA1:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0448201, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0, 0, 1.9116, -0.100527, 0.606877, -1.64862, -0.00965088, -0.498473, -1.71853, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0448201, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, 0.0600324, -0.173111, 1.6482, -1.49, 1.39166, -1.50873, -2.98847, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0448201, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, 0.0600324, -0.173111, 1.6482, -1.49, 1.39166, -1.50873, -2.98847, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0448201, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, -0.0309398, -0.384427, 2.13972, -1.52024, 1.09767, -1.07035, -2.88521, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0448201, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, -0.0309398, -0.384427, 2.13972, -1.52024, 1.09767, -1.07035, -2.88521, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0448201, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, -0.0180293, -0.44705, 2.09655, -1.51249, 1.03988, -1.13008, -2.85748, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+  drop_SCAN_AREA1_RED_TAPE:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0448201, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, -0.0180293, -0.44705, 2.09655, -1.51249, 1.03988, -1.13008, -2.85748, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0448201, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, 1.78033, -0.495673, 1.34216, -0.811995, 1.33267, -2.06228, 2.20258, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+  pick_RED_TAPE_SCAN_AREA2:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0460767, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0, 0, 1.89767, -0.108479, 0.644079, -1.60027, 0.0300322, -0.542722, -1.71683, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0460767, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, 0.316685, -0.42675, 1.92199, -1.69805, 1.16146, -1.19913, -2.7973, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0460767, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, 0.316685, -0.42675, 1.92199, -1.69805, 1.16146, -1.19913, -2.7973, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0460767, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, 0.348162, -0.138839, 1.7418, -1.69983, 1.45294, -1.38478, -2.89954, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0460767, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, 0.348162, -0.138839, 1.7418, -1.69983, 1.45294, -1.38478, -2.89954, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0460767, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, 0.358846, -0.088771, 1.55828, -1.69216, 1.48116, -1.57244, -2.90474, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+  drop_SCAN_AREA2_RED_TAPE:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0460767, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, 0.358846, -0.088771, 1.55828, -1.69216, 1.48116, -1.57244, -2.90474, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0460767, 0.0554299, -1.93065, -0.0949599, -0.611713, -1.59969, -0.00107757, -0.448845, -1.71062, 0.28194, 0.28194, 1.92381, -0.509641, 1.30255, -1.00558, 1.24105, -2.04506, 0.776191, 0.5, 0.5]
+           velocities: []
+           accelerations: []
+           effort: []
+  pick_BLACK_CUBE_place:
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0442965, 0.0554299, -1.01777, -0.348215, -2.42826, -1.7421, -1.23444, -0.709693, -1.16256, 0.479774, 0.479774, 1.91185, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0442965, 0.0554299, -1.11563, -0.0846297, -2.215, -1.66867, -1.53862, -0.922529, -1.05682, 0.479774, 0.479774, 1.91185, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0442965, 0.0554299, -1.11563, -0.0846297, -2.215, -1.66867, -1.53862, -0.922529, -1.05682, 0.479774, 0.479774, 1.91185, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0442965, 0.0554299, -1.09401, -0.220478, -2.26085, -1.71686, -1.40496, -0.867964, -1.08838, 0.479774, 0.479774, 1.91185, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  place_BLACK_CUBE_SCAN_AREA1:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0442965, 0.0554299, -1.09401, -0.220478, -2.26085, -1.71686, -1.40496, -0.867964, -1.08838, 0.479774, 0.479774, 1.91185, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.472823, 0.0581666, -1.63338, -1.73112, -1.6383, -1.51841, 1.26189, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.472823, 0.0581666, -1.63338, -1.73112, -1.6383, -1.51841, 1.26189, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.33152, -0.152907, -2.23882, -1.69181, -1.4715, -0.894228, 1.27218, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.33152, -0.152907, -2.23882, -1.69181, -1.4715, -0.894228, 1.27218, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0430398, 0.0552222, -0.426033, -0.0719185, -1.95066, -1.71532, -1.55154, -1.18496, 1.2717, 0.391111, 0.391111, 1.91177, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+  place_BLACK_CUBE_SCAN_AREA2:
+      approach:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0442965, 0.0554299, -1.09401, -0.220478, -2.26085, -1.71686, -1.40496, -0.867964, -1.08838, 0.479774, 0.479774, 1.91185, -0.0984118, 0.580098, -1.6534, -0.0217409, -0.47376, -1.76543, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      engage:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.171782, 0.231331, -1.71402, -1.51895, -1.79705, -1.4196, -0.189751, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+      escape:
+        joint_names: ['navX', 'navY', 'dummyZ', 'dummyRX', 'dummyRY', 'RotTheta', 'torso_lift_joint', 'head_pan_joint', 'head_tilt_joint', 'laser_tilt_mount_joint', 'r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint', 'r_gripper_joint', 'dummyGripper', 'l_shoulder_pan_joint', 'l_shoulder_lift_joint', 'l_upper_arm_roll_joint', 'l_elbow_flex_joint', 'l_forearm_roll_joint', 'l_wrist_flex_joint', 'l_wrist_roll_joint', 'l_gripper_joint', 'dummyLGripper']
+        nbPoints: 2
+        point_0:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.171782, 0.231331, -1.71402, -1.51895, -1.79705, -1.4196, -0.189751, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []
+        point_1:
+           positions: [3.108, 6.91, 0, -0, 0, -0, 0.29701, 0, 0.0472286, 0.0554299, -0.0477669, -0.378294, -2.2293, -1.61673, -1.13435, -0.94588, -0.275493, 0.479774, 0.479774, 1.9116, -0.0979042, 0.606236, -1.65297, -0.0216252, -0.473847, -1.7656, 0, 0]
+           velocities: []
+           accelerations: []
+           effort: []

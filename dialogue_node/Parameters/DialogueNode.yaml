@@ -94,40 +94,47 @@ dialogue_node:
             isReachableBy: 'can reach'
             isVisibleBy: 'can see'
             isHoldBy: 'hold'
+            isScan: 'is scanned'
         translationTrueFrench:
             isOn: 'est sur'
             isIn: 'est dans'
             isReachableBy: 'peut atteindre'
             isVisibleBy: 'peut voire'
             isHoldBy: 'tient'
+            isScan: 'est scanné'
         translationFalse:
             isOn: 'is not on'
             isIn: 'is not in'
             isReachableBy: 'can not reach'
             isVisibleBy: 'can not see'
             isHoldBy: 'do not hold'
+            isScan: 'is not scanned'
         translationFalseFrench:
             isOn: 'nest pas sure'
             isIn: 'nest pas dans'
             isReachableBy: 'ne peut pas atteindre'
             isVisibleBy: 'ne peut pas voire'
             isHoldBy: 'ne tient pas'
+            isScan: 'nest pas scanné'
         translationAsk:
             isOn: 'on the'
             isIn: 'in the'
             isReachableBy: 'reachable by'
             isVisibleBy: 'visible by'
             isHoldBy: 'hold'
+            isScan: 'scanned'
         translationAskFrench:
             isOn: 'sur'
             isIn: 'dans'
             isReachableBy: 'accessible de'
             isVisibleBy: 'visible de'
             isHoldBy: 'tenu par'
+            isScan : 'scanné'
         isReverse:
             isOn: false
             isIn: false
             isReachableBy: true
             isVisibleBy: true
             isHoldBy: true
+            isScan: false
 

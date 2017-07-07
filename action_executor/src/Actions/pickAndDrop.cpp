@@ -44,7 +44,11 @@ PickAndDrop::PickAndDrop(supervisor_msgs::Action action, Connector* connector) :
     }
 
     //fill param for save/load traj
-    pickAction_.param1_ = "drop";
+    if(object_ == "RED_TAPE" || object_ == "RED_TAPE1" || object_ == "RED_TAPE2"){
+	pickAction_.param1_ = "RED_TAPE";
+    }else{
+    	pickAction_.param1_ = "drop";
+    }
     //find the support where the object is before pick
     std::vector<toaster_msgs::Fact> facts;
     toaster_msgs::Fact fact;
@@ -62,8 +66,13 @@ PickAndDrop::PickAndDrop(supervisor_msgs::Action action, Connector* connector) :
         pickAction_.param2_ = "SCAN_AREA2";
         dropAction_.param1_ = "SCAN_AREA2";
     }
-    dropAction_.param2_ = container_;
+    if(object_ == "RED_TAPE" || object_ == "RED_TAPE1" || object_ == "RED_TAPE2"){
+        dropAction_.param2_ = "RED_TAPE";
+    }else{
+        dropAction_.param2_ = container_;
+    }
 
+    connector_->objectToWatch_ = object_;
 }
 
 /**
@@ -186,6 +195,9 @@ bool PickAndDrop::exec(Server* action_server){
                 initialContainer_ = container_;
                 std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), container_, newObject);
                 container_ = newObject;
+		if(dropAction_.param2_ == initialContainer_){
+		  dropAction_.param2_ = container_;
+		}
                 //the robot should then look at the container
                 connector_->currentAction_.headFocus = container_;
                 if(dropAction_.plan()){

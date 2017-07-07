@@ -2,7 +2,6 @@
     <rosparam command="load" file="$(find plan_elaboration)/Parameters/PlanElaboration.yaml" />
     <rosparam command="load" file="$(find launchs)/Parameters/HighLevelActions.yaml" />
     <rosparam command="load" file="$(find launchs)/Parameters/Entities.yaml" />
-    <rosparam command="load" file="$(find launchs)/Parameters/General.yaml" />
 
     <node name="plan_elaboration" pkg="plan_elaboration" type="plan_elaboration" output="screen" />  <!-- Launch the plan elaboration -->
 </launch>

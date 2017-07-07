@@ -125,7 +125,7 @@ bool Scan::exec(Server* action_server){
            ROS_WARN("[action_executor] Impossible to retract right arm");
         }
     }
-    if(connector_->leftArmPose_ != connector_->leftArmRestPose_){
+    /*if(connector_->leftArmPose_ != connector_->leftArmRestPose_){
         supervisor_msgs::Action mvToAction;
         mvToAction.name = "moveTo";
         mvToAction.actors.push_back(connector_->robotName_);
@@ -140,7 +140,7 @@ bool Scan::exec(Server* action_server){
         }else{
            ROS_WARN("[action_executor] Impossible to retract right arm");
         }
-    }
+    }*/
 
     //Verification of head focus
     bool shouldWait = true;

@@ -68,7 +68,6 @@ void humanActionCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
     //when an action is executed by a human, we reset the gtp previous id
     executor_->connector_.previousId_ = -1;
     supervisor_msgs::Action humanAction = msg->actions[0];
-   ROS_WARN("object to watch: %s", executor_->connector_.objectToWatch_.c_str());
     if(humanAction.name == "place"){
 	for(int i = 0; i < humanAction.parameter_keys.size(); i++){
 		if(humanAction.parameter_keys[i] == "support"){
@@ -79,6 +78,19 @@ void humanActionCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
 			break;
 		}
 	}
+    }else if(humanAction.name == "pick"){
+        for(int i = 0; i < humanAction.parameter_keys.size(); i++){
+                if(humanAction.parameter_keys[i] == "object"){
+			if(humanAction.parameter_values[i] == "RED_TAPE2" && executor_->connector_.objectToWatch_ == "RED_TAPE"){
+				executor_->connector_.stopOrder_ = true;
+				break;
+			}
+                        if(humanAction.parameter_values[i] == executor_->connector_.objectToWatch_){
+                                executor_->connector_.stopOrder_ = true;
+                        }
+                        break;
+                }
+        }
     }
 }
 

@@ -50,10 +50,10 @@ HumanMonitor::HumanMonitor(ros::NodeHandle* node){
 void HumanMonitor::humanPick(std::string agent, std::string object){
 
     std::pair<bool, std::string> previousAttachment = hasInHand(agent);
-    if(previousAttachment.first){
+    /*if(previousAttachment.first){
         ROS_WARN("[human_monitor] %s has already %s in hand", agent.c_str(), previousAttachment.second.c_str());
         return;
-    }
+    }*/
 
     ROS_INFO("[human_monitor] %s has picked %s", agent.c_str(), object.c_str());
 
@@ -150,7 +150,7 @@ void HumanMonitor::humanPlace(std::string agent, std::string object, std::string
 
    //we remove the corresponding attachment
    for(std::vector<std::pair<std::string, std::string> >::iterator it = attachments_.begin(); it != attachments_.end(); it++){
-       if(it->first == agent){
+       if(it->first == agent && it->second == object){
            attachments_.erase(it);
            break;
        }
@@ -263,7 +263,7 @@ void HumanMonitor::humanDrop(std::string agent, std::string object, std::string 
 
    //we remove the corresponding attachment
    for(std::vector<std::pair<std::string, std::string> >::iterator it = attachments_.begin(); it != attachments_.end(); it++){
-       if(it->first == agent){
+       if(it->first == agent && it->second == object){
            attachments_.erase(it);
            break;
        }
@@ -476,14 +476,14 @@ void HumanMonitor::humanGoTo(std::string agent, std::string position){
  * */
 std::pair<bool, std::string> HumanMonitor::hasInHand(std::string agent){
     std::pair<bool, std::string> answer;
+    answer.first = false;
     for(std::vector<std::pair<std::string, std::string> >::iterator it = attachments_.begin(); it != attachments_.end(); it++){
         if(it->first == agent){
             answer.first = true;
             answer.second = it->second;
-            return answer;
+	    return answer;
         }
     }
-    answer.first = false;
     return answer;
 }
 

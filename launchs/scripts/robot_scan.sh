@@ -1,5 +1,18 @@
 rosservice call /database_manager/execute "{command: 'EMPTY', type: 'ALL', facts: [], agent: '', order: '', areaTopic: false ,agentTopic: false ,move3dTopic: false ,pdgTopic: false}"
 
+rosservice call /toaster_simu/add_entity "{id: 'BLACK_CUBE', name: 'BLACK_CUBE', type: 'object', ownerId: ''}"
+rosservice call /toaster_simu/set_entity_pose "{id: 'BLACK_CUBE', ownerId: '', type: 'object', pose:
+{position:
+  {x: 0.0,
+  y: 0.0,
+  z: 0.0},
+orientation:
+  {x: 0.0,
+  y: 0.0,
+  z: 0.0,
+  w: 1.0}}}"
+
+
 rosservice call /toaster_simu/add_entity "{id: 'TABLE_4', name: 'TABLE_4', type: 'object', ownerId: ''}"
 rosservice call /toaster_simu/set_entity_pose "{id: 'TABLE_4', ownerId: '', type: 'object', pose:
 {position:
@@ -159,7 +172,7 @@ rosservice call /toaster_simu/add_entity "{id: 'SCAN_AREA2', name: 'SCAN_AREA2',
 rosservice call /toaster_simu/set_entity_pose "{id: 'SCAN_AREA2', ownerId: '', type: 'object', pose:
 {position:
   {x: 3.6,
-  y: 7.0,
+  y: 6.95,
   z: 0.75},
 orientation:
   {x: 0.0,

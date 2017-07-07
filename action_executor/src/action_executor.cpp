@@ -142,6 +142,8 @@ action_server_(*node, name,
  * */
 void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& goal) {
 
+    ros::Duration(0.1).sleep();
+
     connector_.timerStart_ = ros::Time::now();
     ros::Time now;
 

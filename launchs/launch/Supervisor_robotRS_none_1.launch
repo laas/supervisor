@@ -1,0 +1,17 @@
+<launch>
+    <rosparam command="load" file="$(find robot_decision)/Parameters/RobotDecision.yaml" />
+    <rosparam command="load" file="$(find launchs)/Parameters/General_RS_none.yaml" />
+    <rosparam command="load" file="$(find human_monitor)/Parameters/HumanMonitor1.yaml" />
+    <rosparam command="load" file="$(find action_executor)/Parameters/SaveTraj1.yaml" />
+
+    <include file="$(find action_executor)/launch/ActionExecutor.launch"/>
+    <include file="$(find dialogue_node)/launch/DialogueNode.launch"/>
+    <include file="$(find simple_head_manager)/launch/SimpleHeadManager.launch"/>
+   <include file="$(find robot_decision)/launch/RobotDecision.launch"/>
+   <include file="$(find mental_states)/launch/MentalStates.launch"/>
+    <include file="$(find data_manager)/launch/DataManager.launch"/>
+    <include file="$(find human_monitor)/launch/HumanMonitor.launch"/>
+    <include file="$(find goal_manager)/launch/GoalManager.launch"/>
+    <include file="$(find plan_elaboration)/launch/PlanElaboration.launch"/>
+    <include file="$(find plan_maintainer)/launch/PlanMaintainer.launch"/>
+</launch>

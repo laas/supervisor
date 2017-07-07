@@ -1,5 +1,4 @@
 <launch>
-    <rosparam command="load" file="$(find launchs)/Parameters/General.yaml" />
     <rosparam command="load" file="$(find launchs)/Parameters/Entities.yaml" />
     <rosparam command="load" file="$(find launchs)/Parameters/HighLevelActions.yaml" />
     <rosparam command="load" file="$(find goal_manager)/Parameters/GoalManager.yaml" />

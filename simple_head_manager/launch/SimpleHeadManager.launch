@@ -1,6 +1,5 @@
 <launch>
     <rosparam command="load" file="$(find launchs)/Parameters/Entities.yaml" />
-    <rosparam command="load" file="$(find launchs)/Parameters/General.yaml" />
     <rosparam command="load" file="$(find simple_head_manager)/Parameters/SimpleHeadManager.yaml" />
 
     <node name="simple_head_manager" pkg="simple_head_manager" type="simple_head_manager" output="screen" />  <!-- Launch the simple_head_manager -->

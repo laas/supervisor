@@ -156,7 +156,7 @@ std::pair<bool, supervisor_msgs::SharedPlan> PlanElaboration::findPlan(){
         }
     }
 
-    dom_->objectLocked_ = "NONE";
+    //dom_->objectLocked_ = "NONE";
 
 
     return answer;
@@ -278,11 +278,11 @@ std::vector<toaster_msgs::Fact> PlanElaboration::computeAgentXFacts(std::vector<
         if(isInVector(toIgnoreFactsForXAgent_, it->property)){
             continue;
         }
-        if(isInVector(agentList_, it->subjectId) && highLevelNames_[it->targetId] != highLevelNames_[dom_->objectLocked_]){
+        if(isInVector(agentList_, it->subjectId)){
             //the fact concerns an agent and not the locked object
             bool added = false;
             for(std::vector<toaster_msgs::Fact>::iterator it2 = it+1; it2 != facts.end(); it2++){
-                if(highLevelNames_[it2->targetId] != highLevelNames_[dom_->objectLocked_]){
+//                if(highLevelNames_[it2->targetId] != highLevelNames_[dom_->objectLocked_]){
                     if(it2->property == it->property && highLevelNames_[it2->targetId] ==  highLevelNames_[it->targetId] && isInVector(agentList_, it2->subjectId) && (it2->subjectId != it->subjectId || added)){
                         //we find another similar fact for another agent, so we add a fact for the x agent
                         result.push_back(*it2);
@@ -310,12 +310,12 @@ std::vector<toaster_msgs::Fact> PlanElaboration::computeAgentXFacts(std::vector<
                         it2--;
                     }
                 }
-            }
-        }else if(isInVector(agentList_, it->targetId) && highLevelNames_[it->subjectId] != highLevelNames_[dom_->objectLocked_]){
+  //          }
+        }else if(isInVector(agentList_, it->targetId)){
             //the fact concerns an agent and not the locked object
             bool added = false;
             for(std::vector<toaster_msgs::Fact>::iterator it2 = it+1; it2 != facts.end(); it2++){
-                if(highLevelNames_[it2->subjectId] != highLevelNames_[dom_->objectLocked_]){
+    //            if(highLevelNames_[it2->subjectId] != highLevelNames_[dom_->objectLocked_]){
                     if(it2->property == it->property && highLevelNames_[it2->subjectId] == highLevelNames_[it->subjectId] && isInVector(agentList_, it2->targetId) && (it2->targetId != it->targetId || added)){
                         //we find another similar fact for another agent, so we add a fact for the x agent
                         result.push_back(*it2);
@@ -342,7 +342,7 @@ std::vector<toaster_msgs::Fact> PlanElaboration::computeAgentXFacts(std::vector<
                         it2--;
                     }
                 }
-            }
+      //      }
         }
     }
 
@@ -500,6 +500,26 @@ supervisor_msgs::SharedPlan PlanElaboration::convertPlan(hatp_msgs::Plan plan){
     for(std::vector<hatp_msgs::StreamNode>::iterator it = plan.streams.begin(); it != plan.streams.end(); it++){
        for(std::vector<unsigned int>::iterator itt = it->successors.begin(); itt != it->successors.end(); itt++){
           //TODO: remove useless link when HATP ok
+	  bool agX1 = false;
+	  bool agX2 = false;
+	  for(std::vector<supervisor_msgs::Action>::iterator ita = newPlan.actions.begin(); ita != newPlan.actions.end(); ita ++){
+		if(ita->id == it->taskId && ita->actors[0] == "AGENTX"){
+		  agX1 = true;
+		}
+		if(ita->id == *itt && ita->actors[0] == "AGENTX"){
+                  agX2 = true;
+                }
+   	  }
+	  if(agX1 && agX2){
+		for(std::vector<unsigned int>::iterator itp = it->predecessors.begin(); itp != it->predecessors.end(); itp++){
+			supervisor_msgs::Link link;
+          		link.origin = *itp;
+          		link.following = *itt;
+          		newPlan.links.push_back(link);
+		}
+		continue;
+	  }
+
           supervisor_msgs::Link link;
           link.origin = it->taskId;
           link.following = *itt;

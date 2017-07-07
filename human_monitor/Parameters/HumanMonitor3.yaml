@@ -1,0 +1,26 @@
+---
+human_monitor:
+    shouldDetect: false
+    rightHand: 'rightHand'
+    threshold:
+        pick: 0.5
+        place: 0.30
+        drop: 0.5
+        disengage: 0.50
+    replacementSupport:
+        PLACEMAT_1: 'TABLE_4'
+        PLACEMAT_2: 'TABLE_4'
+    humanStack: ['GREEN_CUBE1', 'BLUE_CUBE2', 'RED_CUBE2', 'BLUE_CUBE3', 'GREEN_CUBE3']
+    position:
+        stackPos:
+            x: 8.0
+            y: 11.0
+            theta: 0
+        tapePos:
+            x: 5.0
+            y: 11.0
+            theta: 0
+        scanPos:
+            x: 6.0
+            y: 6.1
+            theta: 180

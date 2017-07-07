@@ -73,6 +73,7 @@ void saySentence(std::string sentence, std::string receiver){
 
     #ifdef ACAPELA
     if(shoudlSpeak_){
+	ROS_INFO("speaking");
         acapela::SayGoal goal;
         goal.message = sentence;
         acSay->sendGoal(goal);
@@ -348,7 +349,7 @@ void giveInfoAction(supervisor_msgs::Action action, std::string actionState, std
                 if(!french_){
                     actorName = "you";
                 }else{
-                    actorName = "Tu";
+                    actorName = "Vous";
                 }
             }else{
                 if(!french_){
@@ -379,11 +380,19 @@ void giveInfoAction(supervisor_msgs::Action action, std::string actionState, std
                     }
                     node_->getParam(objectTopic, objectName);
                 }else{
+		   if(actionState == "DONE"){
                     if(!french_){
+                        objectName = "my cube";
+                    }else{
+                        objectName = "mon cube";
+                    }
+		   }else{
+			if(!french_){
                         objectName = "next cube";
                     }else{
-                        objectTopic = "le prochain cube";
+                        objectName = "le prochain cube";
                     }
+		   }
                 }
                 objectFound = true;
             }
@@ -413,7 +422,7 @@ void giveInfoAction(supervisor_msgs::Action action, std::string actionState, std
                 sentence = actorName + " placed the " + objectName + " on the " + supportName;
             }else{
                 if(action.actors[0] == robotName_){
-                    sentence = "J'ai posé le " + objectName + " sur le " + supportName;
+                    sentence = "J'ai posé " + objectName + " sur le " + supportName;
                 }else{
                     sentence = "Vous avez posé " + objectName + " sur " + supportName;
                 }
@@ -779,7 +788,7 @@ void askCanAction(supervisor_msgs::Action action, std::string receiver){
                     if(!french_){
                         objectName = "next cube";
                     }else{
-                        objectTopic = "le prochain cube";
+                        objectName = "le prochain cube";
                     }
                 }
                 objectFound = true;
@@ -816,7 +825,7 @@ void askCanAction(supervisor_msgs::Action action, std::string receiver){
                     if(!french_){
                         objectName = "next cube";
                     }else{
-                        objectTopic = "le prochain cube";
+                        objectName = "le prochain cube";
                     }
                 }
                 objectFound = true;
@@ -948,7 +957,7 @@ void askWantAction(supervisor_msgs::Action action, std::string receiver){
         if(!french_){
             sentence = "Do you want to pick the " + objectName +  "?";
         }else{
-            sentence = "Voulez vous prendre " + objectName +  "?";
+            sentence = "Est ce que vous voulez prendre " + objectName +  "?";
         }
     }else if(action.name == "place" || action.name == "pickandplace"){
         std::string objectTopic, supportTopic, objectName, supportName;
@@ -987,7 +996,7 @@ void askWantAction(supervisor_msgs::Action action, std::string receiver){
         if(!french_){
             sentence = "Do you want to place the " + objectName + " on the " + supportName + "?";
         }else{
-            sentence = "Voulez vous poser " + objectName + " sur " + supportName + "?";
+            sentence = "Est ce que vous voulez poser " + objectName + " sur " + supportName + "?";
         }
     }else if(action.name == "drop" || action.name == "pickanddrop"){
         std::string objectTopic, containerTopic, objectName, containerName;
@@ -1026,7 +1035,7 @@ void askWantAction(supervisor_msgs::Action action, std::string receiver){
         if(!french_){
             sentence = "Do you want to put the " + objectName + "?";
         }else{
-            sentence = "Voulez vous ranger " + objectName + "?";
+            sentence = "Est ce que vous voulez ranger " + objectName + "?";
         }
     }else if(action.name == "scan"){
         std::string objectTopic, objectName;
@@ -1049,7 +1058,7 @@ void askWantAction(supervisor_msgs::Action action, std::string receiver){
         if(!french_){
             sentence = "Do you want to scan the " + objectName + "?";
         }else{
-            sentence = "Voulez vous scanner " + objectName +  "?";
+            sentence = "Est ce que vous voulez scanner " + objectName +  "?";
         }
     }
 
@@ -1287,7 +1296,7 @@ void goalsListCallback(const supervisor_msgs::GoalsList::ConstPtr& msg){
             std::ofstream fileSave;
             //we save the execution time
             std::string fileName = "/home/sdevin/catkin_ws/src/supervisor/logs/Verb.txt";
-            fileSave.open(fileName.c_str(), std::ios::out|std::ios::ate);
+            fileSave.open(fileName.c_str(), std::ios::app);
             std::ostringstream strs;
             strs << nbQuestion_;
             std::string nbQ = strs.str();
@@ -1295,7 +1304,7 @@ void goalsListCallback(const supervisor_msgs::GoalsList::ConstPtr& msg){
             strs2 << nbInfo_;
             std::string nbInfo = strs2.str();
             fileSave << "Participant " << nbParticipant_.c_str() << "\t Condition " << condition_.c_str() << "\t " << nbInfo.c_str() << "\t" << nbQ.c_str() << std::endl;
-
+	     ROS_WARN("nb question: %s, nb info: %s",  nbQ.c_str(), nbInfo.c_str());
         }
     }
 }
@@ -1332,7 +1341,7 @@ int main (int argc, char **argv)
       }
   }
 
-  ros::Subscriber sub_goal = node.subscribe("/goal_manager/goalsList", 1, goalsListCallback);
+  ros::Subscriber sub_goal = node.subscribe("/goal_manager/goalsList", 10, goalsListCallback);
 
   //Services declarations
   ros::ServiceServer service_say = node_->advertiseService("dialogue_node/say", say); //say a sentence

@@ -23,6 +23,7 @@ Pick::Pick(supervisor_msgs::Action action, Connector* connector) : VirtualAction
         ROS_WARN("[action_executor] Missing parameter: object to pick");
     }
     actionName_ = "pick";
+    inRefinement_ = false;
 }
 
 /**
@@ -175,8 +176,6 @@ bool Pick::plan(){
  * @return true if the execution succeed
  * */
 bool Pick::exec(Server* action_server){
-
-   ros::Duration(5.0).sleep();
 
    while(true){
        if(execAction(gtpActionId_, subSolutions_, true, action_server)){

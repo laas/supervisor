@@ -36,7 +36,7 @@ Place::Place(supervisor_msgs::Action action, Connector* connector) : VirtualActi
     }
 
     replacementSupport_ = "NONE";
-
+    inRefinement_ = false;
     actionName_ = "place";
     param1_ = object_;
     param2_ = support_;
@@ -74,6 +74,7 @@ bool Place::preconditions(){
             initialSupport_ = support_;
             std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), support_, newObject);
             support_ = newObject;
+	    param2_ = support_;
         }else{
             ROS_WARN("[action_executor] No possible refinement for suport: %s", support_.c_str());
             return false;
@@ -121,6 +122,8 @@ bool Place::preconditions(){
  * @return true if the planning succeed
  * */
 bool Place::plan(){
+
+    subSolutions_.clear();
 
     if(connector_->saveMode_ == "load"){
         gtpActionId_ = 101;
@@ -285,6 +288,7 @@ bool Place::exec(Server* action_server){
             if(newObject != "NULL"){
                 std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), support_, newObject);
                 support_ = newObject;
+		param2_ = support_;
                 connector_->objectToWatch_ = support_;
                 connector_->currentAction_.headFocus = support_;
                 if(!this->plan()){

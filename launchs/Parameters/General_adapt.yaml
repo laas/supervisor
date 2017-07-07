@@ -1,0 +1,19 @@
+---
+supervisor:
+    waitActionServer: 30.0
+    simu: false
+    robot:
+        name: 'PR2_ROBOT'
+        toasterName: 'pr2'
+        hand:
+            right: 'r_gripper_palm_link'
+            left: 'l_gripper_palm_link'
+        griperJoint:
+            right: 'pr2r_gripper_joint'
+            left: 'pr2l_gripper_joint'
+    AgentX:  'AGENTX'
+    Omni: 'OMNI'
+    mainPartner: 'HERAKLES_HUMAN1'
+    systemMode: 'new' #new or hold
+    speakingMode: false
+    nbParticipant: '1'

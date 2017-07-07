@@ -55,6 +55,10 @@ void humanPickTape(std::string agent){
 void humanPickArea1(std::string agent){
 
     hm_->shouldLook_ = true;
+    if(onScan1_ == "NULL"){
+	ROS_ERROR("Nothing on SCAN 1!!");
+	return;
+    }
     hm_->humanPick(agent, onScan1_);
     humanEngaged[agent] = "SCAN_AREA1";
     onScan1_ = "NULL";
@@ -67,6 +71,10 @@ void humanPickArea1(std::string agent){
 void humanPickArea2(std::string agent){
 
     hm_->shouldLook_ = true;
+    if(onScan2_ == "NULL"){
+        ROS_ERROR("Nothing on SCAN 2!!");
+        return;
+    }
     hm_->humanPick(agent, onScan2_);
     humanEngaged[agent] = "SCAN_AREA2";
     onScan2_ = "NULL";
@@ -308,8 +316,8 @@ void previousActionCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
     std::vector<supervisor_msgs::Action> newPrev = msg->actions;
     if(newPrev.size() > previousActions_.size()){
         for(int i = previousActions_.size(); i < newPrev.size(); i++){
-            if(newPrev[i].actors[0] == robotName_){
-                if(newPrev[i].name == "pickandplace"){
+            if(newPrev[i].actors[0] == robotName_ && newPrev[i].succeed){
+                if(newPrev[i].name == "pickandplace" || newPrev[i].name == "place"){
                     //get object and support
                     std::string object, support;
                     for(int j = 0; j < newPrev[i].parameter_keys.size(); j++){
@@ -325,6 +333,20 @@ void previousActionCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                     }
                     if(support == "SCAN_AREA2"){
                         onScan2_ = object;
+                    }
+                }else if(newPrev[i].name == "pickanddrop"){
+                    //get object and support
+                    std::string object, support;
+                    for(int j = 0; j < newPrev[i].parameter_keys.size(); j++){
+                        if(newPrev[i].parameter_keys[j] == "object"){
+                            object = newPrev[i].parameter_values[j];
+                        }
+                    }
+                    if(onScan1_ == object){
+                        onScan1_ = "NULL";
+                    }
+                    if(onScan2_ == object){
+                        onScan2_ = "NULL";
                     }
                 }
             }
@@ -379,7 +401,7 @@ int main (int argc, char **argv)
   ros::ServiceServer service_action = node.advertiseService("human_monitor/human_action_simu", humaActionSimu); //allows the simulation to tell that a human has done an action
 
   ros::Subscriber sub = node.subscribe("agent_monitor/factList", 1, agentFactListCallback);
-  ros::Subscriber sub_prev_action = node.subscribe("/supervisor/previous_actions", 1, previousActionCallback);
+  ros::Subscriber sub_prev_action = node.subscribe("/supervisor/previous_actions", 10, previousActionCallback);
 
   ROS_INFO("[human_monitor] Ready");
 

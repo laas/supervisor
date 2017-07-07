@@ -13,7 +13,6 @@ The goal manager allows to choose a goal to execute
 #include <vector>
 #include <ros/ros.h>
 #include <fstream>
-
 #include "toaster_msgs/ExecuteDB.h"
 
 #include "supervisor_msgs/Goal.h"
@@ -35,10 +34,12 @@ std::vector<std::string> status_;
 std::vector<supervisor_msgs::Goal> possibleGoals_;
 
 ros::ServiceClient* client_db_execute_;
+ros::ServiceClient* client_say_;
 
 ros::Time start_;
 std::string nbParticipant_;
 std::string condition_;
+bool french;
 
 
 /**
@@ -177,10 +178,12 @@ bool cancelGoal(supervisor_msgs::String::Request  &req, supervisor_msgs::String:
 
 void writeLogs(){
 
+   ros::Duration(1.0).sleep();
+
     std::ofstream fileSaveTime, fileSaveMistakes;
     //we save the execution time
     std::string fileNameTime = "/home/sdevin/catkin_ws/src/supervisor/logs/Time.txt";
-    fileSaveTime.open(fileNameTime.c_str(), std::ios::out|std::ios::ate);
+    fileSaveTime.open(fileNameTime.c_str(), std::ios::app);
     ros::Time now = ros::Time::now();
     ros::Duration duration = now - start_;
     double d = duration.toSec();
@@ -192,7 +195,7 @@ void writeLogs(){
 
     //we save the number of mistakes
     std::string fileNameMistakes = "/home/sdevin/catkin_ws/src/supervisor/logs/Mistakes.txt";
-    fileSaveMistakes.open(fileNameMistakes.c_str(), std::ios::out|std::ios::ate);
+    fileSaveMistakes.open(fileNameMistakes.c_str(), std::ios::app);
     int nbMistakes = 0;
 
     //facts to check
@@ -218,10 +221,6 @@ void writeLogs(){
     facts.push_back(fact);
     fact.subjectId = "RED_CUBE3";
     facts.push_back(fact);
-    fact.subjectId = "RED_TAPE1";
-    facts.push_back(fact);
-    fact.subjectId = "RED_TAPE2";
-    facts.push_back(fact);
     fact.property = "isIn";
     fact.targetId = "BLUE_BOX";
     fact.subjectId = "BLUE_CUBE1";
@@ -244,12 +243,15 @@ void writeLogs(){
     srv.request.type = "INDIV";
     srv.request.agent = robotName_;
     srv.request.facts = facts;
+   int i = 0;
     if (client_db_execute_->call(srv)){
         std::vector<std::string> answer =  srv.response.results;
         for(std::vector<std::string>::iterator it = answer.begin(); it != answer.end(); it++){
             if(*it != "true"){
+		ROS_WARN("mistake in first list, fact %d", i);
                 nbMistakes++;
             }
+	   i++;
         }
     }else{
        ROS_ERROR("[goal_manager] Failed to call service database_manager/execute");
@@ -257,6 +259,12 @@ void writeLogs(){
 
     //facts to check for red objects
     facts.clear();
+    fact.property = "isScan";
+    fact.targetId = "true";
+    fact.subjectId = "RED_TAPE1";
+    facts.push_back(fact);
+    fact.subjectId = "RED_TAPE2";
+    facts.push_back(fact);
     fact.property = "isIn";
     fact.targetId = "RED_BOX1";
     fact.subjectId = "RED_CUBE1";
@@ -273,6 +281,33 @@ void writeLogs(){
     facts.push_back(fact);
     fact.targetId = "RED_BOX2";
     facts.push_back(fact);
+
+    //we check the facts
+    srv.request.facts = facts;
+    i = 0;
+    if (client_db_execute_->call(srv)){
+        std::vector<std::string> answer =  srv.response.results;
+        bool pair = true;
+        bool ok = false;
+        for(std::vector<std::string>::iterator it = answer.begin(); it != answer.end(); it++){
+            if(*it != "true" && !pair && !ok){
+                ROS_WARN("mistake in second list, fact %d", i);
+                nbMistakes++;
+            }else if(pair && *it == "true"){
+                ok = true;
+            }
+            if(!pair){
+                ok = false;
+            }
+            pair = !pair;
+           i++;
+        }
+    }else{
+       ROS_ERROR("[goal_manager] Failed to call service database_manager/execute");
+    }
+
+
+    facts.clear();
     fact.targetId = "RED_BOX1";
     fact.subjectId = "RED_TAPE1";
     facts.push_back(fact);
@@ -286,29 +321,27 @@ void writeLogs(){
 
     //we check the facts
     srv.request.facts = facts;
+    i = 0;
     if (client_db_execute_->call(srv)){
         std::vector<std::string> answer =  srv.response.results;
-        bool pair = true;
         bool ok = false;
         for(std::vector<std::string>::iterator it = answer.begin(); it != answer.end(); it++){
-            if(*it != "true" && !pair && !ok){
-                nbMistakes++;
-            }else if(pair && *it == "true"){
+            if(*it == "true" ){
                 ok = true;
+		break;
             }
-            if(!pair){
-                ok = false;
-            }
-            pair = !pair;
         }
+	if(!ok){
+		nbMistakes++;
+	}
     }else{
        ROS_ERROR("[goal_manager] Failed to call service database_manager/execute");
     }
 
     std::ostringstream strs2;
-    strs2 << d;
+    strs2 << nbMistakes;
     std::string mistakesString = strs2.str();
-    fileSaveTime << "Participant " << nbParticipant_.c_str() << "\t Condition " << condition_.c_str() << "\t " << mistakesString.c_str() << std::endl;
+    fileSaveMistakes << "Participant " << nbParticipant_.c_str() << "\t Condition " << condition_.c_str() << "\t " << mistakesString.c_str() << std::endl;
 }
 
 
@@ -376,6 +409,16 @@ bool endGoal(supervisor_msgs::String::Request  &req, supervisor_msgs::String::Re
     if(isIn){
         ROS_INFO("[goal_manager] Goal succeed: %s", currentGoal_.c_str());
         status = "DONE";
+        supervisor_msgs::String srv;
+            if(french){
+                srv.request.data = "Bravo!";
+            }else{
+                srv.request.data  = "Well done!";
+            }
+            if(!client_say_->call(srv)){
+                ROS_WARN("[goal_manager] Unable to call service dialogue_node/Say");
+            }
+
     }else{
         ROS_INFO("[goal_manager] Goal failed: %s", currentGoal_.c_str());
         status = "FAILED";
@@ -410,6 +453,7 @@ int main (int argc, char **argv)
 
   node_->getParam("/supervisor/robot/name", robotName_);
   node_->getParam("/supervisor/nbParticipant", nbParticipant_);
+  node_->getParam("dialogue_node/french", french);
 
   std::string systemMode;
   node_->getParam("/supervisor/systemMode", systemMode);
@@ -441,6 +485,9 @@ int main (int argc, char **argv)
   ros::ServiceClient client_db_execute = node_->serviceClient<toaster_msgs::ExecuteDB>("database_manager/execute");
   client_db_execute_ = &client_db_execute;
 
+  ros::ServiceClient client_say = node_->serviceClient<supervisor_msgs::String>("dialogue_node/say");
+  client_say_ = &client_say;
+
   ROS_INFO("[goal_manager] Ready");
 
   while(node.ok()){
@@ -455,6 +502,19 @@ int main (int argc, char **argv)
             pendingGoals_.erase(pendingGoals_.begin());
             ROS_INFO("[goal_manager] New goal: %s", currentGoal_.c_str());
             start_ = ros::Time::now();
+	    supervisor_msgs::String srv;
+	    if(currentGoal_ == "SCAN_US2"){
+		currentGoal_ = "SCAN_US";
+	    }else{
+	    /*if(french){
+	    	srv.request.data = "Commençons";
+	    }else{
+		srv.request.data = "Let's start!";
+	    }
+	    if(!client_say.call(srv)){
+		ROS_WARN("[goal_manager] Unable to call service dialogue_node/Say");
+	    } */
+	    }
           }
           //compute the new list to publish
           goals_.clear();

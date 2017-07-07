@@ -39,6 +39,7 @@ PickAndPlace::PickAndPlace(supervisor_msgs::Action action, Connector* connector)
     if(!foundSup){
         ROS_WARN("[action_executor] Missing parameter: support where to place");
     }
+    inRefinement_ = false;
 
     //fill param for save/load traj
     pickAction_.param1_ = object_;
@@ -46,7 +47,11 @@ PickAndPlace::PickAndPlace(supervisor_msgs::Action action, Connector* connector)
     placeAction_.param1_ = object_;
     placeAction_.param2_ = support_; 
 
-    connector_->objectToWatch_ = support_;
+    if(object_ == "RED_TAPE" || object_ == "RED_TAPE1"){
+	connector_->objectToWatch_ = "RED_TAPE";
+    }else{
+	connector_->objectToWatch_ = support_;
+	}
 }
 
 /**
@@ -82,6 +87,8 @@ bool PickAndPlace::preconditions(){
             pickAction_.initialObject_ = initialObject_;
             placeAction_.object_ = object_;
             placeAction_.initialObject_ = initialObject_;
+	     pickAction_.param1_ = object_;
+	    placeAction_.param1_ = object_;
         }else{
             ROS_WARN("[action_executor] No possible refinement for object: %s", object_.c_str());
             return false;
@@ -117,8 +124,11 @@ bool PickAndPlace::preconditions(){
         fact.property = "isReachableBy";
         fact.targetId = connector_->robotName_;
         precsTocheck.push_back(fact);
+	fact.subjectId = "NULL";
+        fact.property = "isOn";
+        fact.targetId = support_;
+        precsTocheck.push_back(fact);
     }
-
     return ArePreconditionsChecked(precsTocheck);
 
 }
@@ -129,6 +139,7 @@ bool PickAndPlace::preconditions(){
  * @return true if the planning succeed
  * */
 bool PickAndPlace::plan(){
+
 
     if(pickAction_.plan()){
         //we first plan the pick
@@ -151,14 +162,15 @@ bool PickAndPlace::plan(){
  * @return true if the execution succeed
  * */
 bool PickAndPlace::exec(Server* action_server){
-
+    
     if (connector_->noExec_){
         ros::Duration(0.5).sleep();
-    }
+    }    
 
     connector_->previousId_  = pickId_;
     if(pickAction_.exec(action_server) && pickAction_.post()){
         //look for a support if it was not refined
+	connector_->objectToWatch_ = support_;
         if(!isRefined(support_)){
             //we look for a refinment
             std::vector<toaster_msgs::Fact> conditions;
@@ -183,6 +195,7 @@ bool PickAndPlace::exec(Server* action_server){
                 connector_->objectToWatch_ = support_;
                 placeAction_.support_ = support_;
                 placeAction_.initialSupport_ = initialSupport_;
+                placeAction_.param2_ = support_;
                 //the robot should then look at the container
                 connector_->currentAction_.headFocus = support_;
                 if(placeAction_.plan()){

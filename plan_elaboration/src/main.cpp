@@ -8,6 +8,8 @@ The plan elaboration allows to find a plan to execute a goal
 **/
 
 #include "plan_elaboration/plan_elaboration.h"
+#include "supervisor_msgs/ActionsList.h"
+#include "supervisor_msgs/MentalStatesList.h"
 
 
 ros::NodeHandle* node_;
@@ -22,6 +24,8 @@ std::string nbParticipant_;
 std::string condition_;
 int nbReplaning_ = 0;
 bool started = false;
+
+int idPrevRobotPlan, idPrevRobotMS, idPrevHumanPlan, idPrevHumanMS;
 
 /**
  * \brief Callback of the goal list
@@ -76,8 +80,8 @@ void goalsListCallback(const supervisor_msgs::GoalsList::ConstPtr& msg){
             //we log results
             std::ofstream fileSave;
             //we save the execution time
-            std::string fileName = "/home/sdevin/catkin_ws/src/supervisor/logs/Verb.txt";
-            fileSave.open(fileName.c_str(), std::ios::out|std::ios::ate);
+            std::string fileName = "/home/sdevin/catkin_ws/src/supervisor/logs/NbReplan.txt";
+            fileSave.open(fileName.c_str(), std::ios::app);
             std::ostringstream strs;
             strs << nbReplaning_;
             std::string nbReplan = strs.str();
@@ -108,7 +112,6 @@ bool endPlan(supervisor_msgs::EndPlan::Request  &req, supervisor_msgs::EndPlan::
 
     if(req.evaluate){
         //the plan needs to be evaluate
-        ROS_WARN("new plan with %s locked for %s", req.objectLocked.c_str(), req.agentLocked.c_str());
         pe_->dom_->objectLocked_ = pe_->getLockedObject(req.objectLocked, req.agentLocked);
         pe_->dom_->agentLocked_ = req.agentLocked;
     }
@@ -125,6 +128,29 @@ bool endPlan(supervisor_msgs::EndPlan::Request  &req, supervisor_msgs::EndPlan::
 
     return true;
 }
+
+
+/**
+ * \brief Callback for the mental states
+ * @param msg topic msg
+ * */
+void msCallback(const supervisor_msgs::MentalStatesList::ConstPtr& msg){
+
+    idPrevRobotMS = msg->prevIdRobot;
+    idPrevHumanMS = msg->prevIdHuman;
+
+}
+
+/**
+ * \brief Callback for the mental states
+ * @param msg topic msg
+ * */
+void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){ 
+    idPrevRobotPlan = msg->prevIdRobot;
+    idPrevHumanPlan = msg->prevIdHuman;
+
+}
+
 
 int main (int argc, char **argv)
 {
@@ -163,11 +189,14 @@ int main (int argc, char **argv)
   hasPlan_ = false;
   needPlan_ = false;
 
-  ros::Subscriber sub_goal = node.subscribe("/goal_manager/goalsList", 1, goalsListCallback);
+  ros::Subscriber sub_goal = node.subscribe("/goal_manager/goalsList", 10, goalsListCallback);
 
   ros::ServiceServer service_end = node.advertiseService("plan_elaboration/end_plan", endPlan); //when a plan ends
 
   ros::Publisher plan_pub = node.advertise<supervisor_msgs::SharedPlan>("plan_elaboration/plan", 1);
+
+  ros::Subscriber sub_ms = node.subscribe("mental_states/mental_states", 1, msCallback);
+  ros::Subscriber sub_todo = node.subscribe("supervisor/actions_todo", 1,todoCallback);
 
   ros::ServiceClient client_goal = node_->serviceClient<supervisor_msgs::String>("goal_manager/end_goal");
   client_goal_ = &client_goal;
@@ -179,7 +208,8 @@ int main (int argc, char **argv)
 
   while(node.ok()){
     ros::spinOnce();
-    if(needPlan_){
+    if(needPlan_ && idPrevHumanMS == idPrevHumanPlan && idPrevRobotMS == idPrevRobotPlan){
+	ros::Duration(0.1).sleep();
         std::pair<bool, supervisor_msgs::SharedPlan> plan = pe_->findPlan();
         if(plan.first){
             //publish the plan
@@ -195,8 +225,7 @@ int main (int argc, char **argv)
             pe_->currentGoal_ = "NONE";
         }
         needPlan_ = false;
-    }
-    if(hasPlan_){
+    }else if(hasPlan_){
         plan_pub.publish(currentPlan_);
     }
     loop_rate.sleep();

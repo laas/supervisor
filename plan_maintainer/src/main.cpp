@@ -19,6 +19,7 @@ Main class of the plan maintainer
 #include "supervisor_msgs/ActionsList.h"
 #include "supervisor_msgs/EndPlan.h"
 #include "supervisor_msgs/GoalsList.h"
+#include "toaster_msgs/ExecuteDB.h"
 
 
 
@@ -42,6 +43,8 @@ std::string condition_;
 int nbActionRobot_ = 0;
 int nbActionHuman_ = 0;
 bool started = false;
+int testId;
+bool actionRobotFinished = false;
 
 /**
  * \brief Fill the highLevelNames map from param
@@ -103,14 +106,14 @@ void endCurrentPlan(){
  * \brief Update the current plan
  * */
 void updatePlan(){
-
     std::vector<supervisor_msgs::Action> newPlanned, newTodo, toCheck;
     toCheck.insert(toCheck.begin(),plannedActions_.begin(),plannedActions_.end());
     toCheck.insert(toCheck.begin(),todoActions_.begin(),todoActions_.end());
     for(std::vector<supervisor_msgs::Action>::iterator it = toCheck.begin(); it != toCheck.end(); it++){
         bool executed = false;
-        if(it->id == plannedRobotAction_.id){
-            //the action is in execution
+        if(it->id == plannedRobotAction_.id && actionRobotFinished){
+            //the action is over
+	     actionRobotFinished = false;
             executed = true;
             continue;
         }else{
@@ -241,27 +244,59 @@ supervisor_msgs::Action isInList(supervisor_msgs::Action action, std::vector<sup
  * */
 std::string getLockedObject(supervisor_msgs::Action action){
 
+    std::string object;
+
     if(action.name == "pick" || action.name == "pickandplace" || action.name == "pickandplacereachable" || action.name == "pickanddrop"){
         for(int i = 0; i < action.parameter_keys.size(); i++){
             if(action.parameter_keys[i] == "object"){
-                return action.parameter_values[i];
+                object = action.parameter_values[i];
             }
         }
     }else if(action.name == "place"){
         for(int i = 0; i < action.parameter_keys.size(); i++){
             if(action.parameter_keys[i] == "support"){
-                return action.parameter_values[i];
+                object = action.parameter_values[i];
             }
         }
     }else if(action.name == "drop"){
         for(int i = 0; i < action.parameter_keys.size(); i++){
             if(action.parameter_keys[i] == "container"){
-                return action.parameter_values[i];
+                object = action.parameter_values[i];
             }
         }
     }
 
-    return action.parameter_values[0];
+    if(highLevelRefinment_[object].size() > 0){
+	ROS_WARN("not refined object: %s", object.c_str());
+	//need to refine the object
+	std::vector<toaster_msgs::Fact> toTest;
+	for(std::vector<std::string>::iterator it = highLevelRefinment_[object].begin(); it != highLevelRefinment_[object].end(); it++){
+		toaster_msgs::Fact fact;
+		fact.subjectId = *it;
+		fact.property = "isReachableBy";
+		fact.targetId = action.actors[0];
+		toTest.push_back(fact);
+	}
+	std::vector<std::string> res;
+    	toaster_msgs::ExecuteDB srv;
+    	srv.request.command = "ARE_IN_TABLE";
+    	srv.request.type = "INDIV";
+    	srv.request.agent = robotName_;
+    	srv.request.facts = toTest;
+	ros::ServiceClient client_db_execute_ = node_->serviceClient<toaster_msgs::ExecuteDB>("database_manager/execute");
+    	if (client_db_execute_.call(srv)){
+          std::vector<std::string> res = srv.response.results;
+	  for(int i = 0; i < res.size(); i++){
+		if(res[i] == "true"){
+			return highLevelRefinment_[object][i];
+		}
+	  }
+    	}else{
+       	 ROS_ERROR("[action_executor] Failed to call service database_manager/execute");
+    	}
+    }
+
+    return object;
 }
 
 /**
@@ -281,7 +316,7 @@ void checkAction(supervisor_msgs::Action action, std::string actor){
         if (!client_end_plan_->call(srv)){
            ROS_ERROR("[plan_maintainer] Failed to call service plan_elaboration/end_plan");
         }
-        endCurrentPlan();
+      endCurrentPlan();
     }else{
         //look if the agent is the actor of the planned action
         if(plannedAction.actors[0] == actor){
@@ -449,6 +484,7 @@ void previousActionCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
             if(currentActions[i].actors[0] == robotName_){
                 prevIdRobot_ = currentActions[i].id;
                 nbActionRobot_++;
+		actionRobotFinished = true;
             }else{
                 prevIdHuman_ = currentActions[i].id;
                 nbActionHuman_++;
@@ -482,8 +518,23 @@ void previousActionCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                     }
                 }
             }else if(robotActing_ && robotProgressAction_.id == currentActions[i].id){
-                robotActing_ = false;
-            }
+		robotActing_ = false;
+		supervisor_msgs::EndPlan srv;
+                srv.request.success = false;
+                srv.request.evaluate = false;
+                if (!client_end_plan_->call(srv)){
+                  ROS_ERROR("[plan_maintainer] Failed to call service plan_elaboration/end_plan");
+                 }
+                endCurrentPlan();
+            }else{
+		supervisor_msgs::EndPlan srv;
+                srv.request.success = false;
+                srv.request.evaluate = false;
+                if (!client_end_plan_->call(srv)){
+                  ROS_ERROR("[plan_maintainer] Failed to call service plan_elaboration/end_plan");
+                 }
+                endCurrentPlan();
+	    }
         }
     }
     oldMsgPrevious_ = currentActions;
@@ -529,10 +580,10 @@ void goalsListCallback(const supervisor_msgs::GoalsList::ConstPtr& msg){
             //we log results
             std::ofstream fileSave;
             //we save the execution time
-            std::string fileName = "/home/sdevin/catkin_ws/src/supervisor/logs/Verb.txt";
-            fileSave.open(fileName.c_str(), std::ios::out|std::ios::ate);
+            std::string fileName = "/home/sdevin/catkin_ws/src/supervisor/logs/NbActions.txt";
+            fileSave.open(fileName.c_str(), std::ios::app);
             std::ostringstream strs;
-            strs << nbActionHuman_;
+            strs << (nbActionHuman_/2);
             std::string nbActH = strs.str();
             std::ostringstream strs2;
             strs2 << nbActionRobot_;
@@ -561,6 +612,7 @@ int main (int argc, char **argv)
       if(speakMode == "negotiation"){
         condition_ = "Negotiation";
       }else{
+
         condition_ = "Adaptation";
       }
   }else{
@@ -583,10 +635,10 @@ int main (int argc, char **argv)
   changed_ = false;
 
 
-  ros::Subscriber sub_goal = node.subscribe("/goal_manager/goalsList", 1, goalsListCallback);
-  ros::Subscriber sub_plan = node_->subscribe("plan_elaboration/plan", 1, planCallback);
-  ros::Subscriber sub_robot_action = node_->subscribe("/action_executor/current_robot_action", 1, robotActionCallback);
-  ros::Subscriber sub_humans_action = node_->subscribe("supervisor/previous_actions", 1, previousActionCallback);
+  ros::Subscriber sub_goal = node.subscribe("/goal_manager/goalsList", 100, goalsListCallback);
+  ros::Subscriber sub_plan = node_->subscribe("plan_elaboration/plan", 10, planCallback);
+  ros::Subscriber sub_robot_action = node_->subscribe("/action_executor/current_robot_action", 10, robotActionCallback);
+  ros::Subscriber sub_humans_action = node_->subscribe("supervisor/previous_actions", 100, previousActionCallback);
 
   ros::ServiceServer service_end = node.advertiseService("plan_maintainer/stop", stopSrv); //when a plan needs to be stopped
 

@@ -35,6 +35,7 @@ Drop::Drop(supervisor_msgs::Action action, Connector* connector) : VirtualAction
         ROS_WARN("[action_executor] Missing parameter: container where to drop");
     }
 
+    inRefinement_ = false;
     actionName_ = "drop";
     param1_ = "SCAN_AREA2";
     param2_ = container_;

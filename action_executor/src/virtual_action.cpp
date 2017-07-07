@@ -142,6 +142,8 @@ bool VirtualAction::ArePreconditionsChecked(std::vector<toaster_msgs::Fact> prec
  * */
 void VirtualAction::PutInHand(std::string object, std::string hand, int gtpId){
 
+   ROS_WARN("put in hand");
+
     //add the fact that the object is in the robot hand
     std::vector<toaster_msgs::Fact> toAdd;
     toaster_msgs::Fact fact;
@@ -202,9 +204,9 @@ void VirtualAction::RemoveFromHand(std::string object){
     //remove the fact that the object is in the robot hand
     std::vector<toaster_msgs::Fact> toRm;
     toaster_msgs::Fact fact;
-    fact.subjectId = "NULL";
+    fact.subjectId = object;
     fact.property = "isHoldBy";
-    fact.targetId = connector_->robotName_;
+    fact.targetId = "NULL";
     toRm.push_back(fact);
 
     toaster_msgs::SetInfoDB srv_fact;
@@ -435,15 +437,16 @@ bool VirtualAction::execAction(int actionId, std::vector<gtp_ros_msgs::SubSoluti
     if(connector_->saveMode_ == "save"){
         connector_->fileSave_ <<"  "  << actionName_ << "_" << param1_ << "_" << param2_ << ":" << std::endl;
     }
-
+    
     //the robot should have the gripper open to execute the trajectory
     if(shouldOpen && ((subSolutions[0].armId== 0 && !connector_->gripperRightOpen_) || (subSolutions[0].armId== 1 && !connector_->gripperLeftOpen_))){
         openGripper(subSolutions[0].armId, action_server);
     }
-
+    
     bool firstTraj = true;
     for(std::vector<gtp_ros_msgs::SubSolution>::iterator it = subSolutions.begin(); it != subSolutions.end(); it++){
      if(firstTraj && inRefinement_){
+	 ROS_WARN("not executing the first traj");
          firstTraj = false;
          continue;
      }
@@ -822,7 +825,6 @@ bool VirtualAction::isRefined(std::string object){
    if(connector_->highLevelRefinment_[object].size() > 0){
        return false;
    }
-
    return true;
 
 }
