@@ -10,7 +10,7 @@ project(graphical_interface)
 ##############################################################################
 
 # qt_build provides the qt cmake glue, roscpp the comms for a default talker
-find_package(catkin REQUIRED COMPONENTS qt_build roscpp actionlib)
+find_package(catkin REQUIRED COMPONENTS qt_build roscpp actionlib toaster_msgs supervisor_msgs)
 
 include_directories(include
   ${catkin_INCLUDE_DIRS}
