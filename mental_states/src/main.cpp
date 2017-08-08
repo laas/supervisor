@@ -196,11 +196,17 @@ void infoCallback(const supervisor_msgs::Info::ConstPtr& msg){
                 }else if(ms_->currentPlan_.id != -1){
                     //check if the action is from the plan
                     supervisor_msgs::Action inPlanAction = ms_->isInList(msg->action, itms->todoActions);
+                    if(inPlanAction.id == -1){
+                        inPlanAction = ms_->isInList(msg->action, itms->plannedActions);
+                    }
                     if(inPlanAction.id != -1){
                         if(inPlanAction.actors[0] == ms_->agentX_){
                             inPlanAction.actors[0] = msg->action.actors[0];
                         }
                         newAction = inPlanAction;
+                        newAction.succeed = msg->action.succeed;
+                    }else{
+                        newAction = ms_->addPrecsAndEffects(msg->action);
                         newAction.succeed = msg->action.succeed;
                     }
                 }else{
@@ -239,12 +245,12 @@ void infoCallback(const supervisor_msgs::Info::ConstPtr& msg){
     }else if(msg->type == "GOAL"){
         for(std::vector<supervisor_msgs::MentalState>::iterator itms = ms_->msList_.begin(); itms != ms_->msList_.end(); itms++){
             if(itms->agentName == msg->agent){
-                itms->robotGoal == msg->goal;
+                itms->robotGoal = msg->goal;
                 std::string actorsParam = "goal_manager/goals/" + msg->goal + "_actors";
                 std::vector<std::string> actors;
                 node_->getParam(actorsParam, actors);
                 if(ms_->isInList(actors, itms->agentName)){
-                    itms->agentGoal == msg->goal;
+                    itms->agentGoal = msg->goal;
                 }
             }
         }

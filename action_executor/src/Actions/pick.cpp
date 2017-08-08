@@ -14,7 +14,7 @@ Pick::Pick(supervisor_msgs::Action action, Connector* connector) : VirtualAction
 
     //looking for the parameters of the action
     bool found = false;
-    for(int i=0; i<=action.parameter_keys.size();i++){
+    for(int i=0; i<action.parameter_keys.size();i++){
         if(action.parameter_keys[i] == "object"){
             object_ = action.parameter_values[i];
             found = true;
@@ -24,6 +24,8 @@ Pick::Pick(supervisor_msgs::Action action, Connector* connector) : VirtualAction
     if(!found){
         ROS_WARN("[action_executor] Missing parameter: object to pick");
     }
+    actionName_ = "pick";
+    param1_ = object_;
 }
 
 /**
@@ -97,35 +99,65 @@ bool Pick::plan(){
     //FOR TESTS ONLY
     connector_->previousId_  = -1;
 
-    //we ask gtp a plan
-    std::vector<gtp_ros_msgs::ActionId> attachments;
-    std::vector<gtp_ros_msgs::Role> agents;
-    gtp_ros_msgs::Role role;
-    role.role = "mainAgent";
-    role.name = connector_->robotName_;
-    agents.push_back(role);
-    std::vector<gtp_ros_msgs::Role> objects;
-    role.role = "mainObject";
-    role.name = object_;
-    objects.push_back(role);
-    std::vector<gtp_ros_msgs::Point> points;
-    std::vector<gtp_ros_msgs::MiscData> datas;
+    if(connector_->saveMode_ == "load"){
+        gtpActionId_ = -2;
+        gtp_ros_msgs::SubSolution subSol;
+        subSol.agent = "PR2_ROBOT";
+        if(param2_ == "place"){
+            subSol.armId = 0;
+        }else{
+            subSol.armId = 1;
+        }
+        subSol.id = 0;
+        subSol.name = "approach";
+        subSol.type = "move";
+        subSolutions_.push_back(subSol);
+        subSol.id = 1;
+        subSol.name = "engage";
+        subSol.type = "move";
+        subSolutions_.push_back(subSol);
+        subSol.id = 2;
+        subSol.name = "grasp";
+        subSol.type = "grasp";
+        subSolutions_.push_back(subSol);
+        subSol.id = 3;
+        subSol.name = "escape";
+        subSol.type = "move";
+        subSolutions_.push_back(subSol);
+    }else{
+        //we ask gtp a plan
+        std::vector<gtp_ros_msgs::ActionId> attachments;
+        std::vector<gtp_ros_msgs::Role> agents;
+        gtp_ros_msgs::Role role;
+        role.role = "mainAgent";
+        role.name = connector_->robotName_;
+        agents.push_back(role);
+        std::vector<gtp_ros_msgs::Role> objects;
+        role.role = "mainObject";
+        role.name = object_;
+        objects.push_back(role);
+        std::vector<gtp_ros_msgs::Point> points;
+        std::vector<gtp_ros_msgs::MiscData> datas;
 
-    if(connector_->shouldUseRightHand_){
-    gtp_ros_msgs::MiscData data;
-    data.key = "hand";
-    data.value = "right";
-    datas.push_back(data);
+        if(connector_->shouldUseRightHand_){
+        gtp_ros_msgs::MiscData data;
+        data.key = "hand";
+        data.value = "right";
+        datas.push_back(data);
+        }
+
+        std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > answer = planGTP("pick", agents, objects, datas, points, attachments);
+        gtpActionId_ = answer.first;
+
+        if(gtpActionId_ == -1){
+        return false;
+        }
+
+        subSolutions_ = answer.second;
     }
 
-    std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > answer = planGTP("pick", agents, objects, datas, points, attachments);
-    gtpActionId_ = answer.first;
 
-    if(gtpActionId_ == -1){
-    return false;
-    }
 
-    subSolutions_ = answer.second;
     return true;
 }
 
@@ -140,6 +172,7 @@ bool Pick::exec(Server* action_server){
        if(execAction(gtpActionId_, subSolutions_, true, action_server)){
            return true;
        }else if(connector_->refineOrder_ ){
+	   	   connector_->refineOrder_  = false;
            connector_->previousId_  = -1;
            //the chosen object is already taken, we look for another refinement
            std::vector<toaster_msgs::Fact> conditions;

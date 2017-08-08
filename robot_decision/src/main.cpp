@@ -44,15 +44,19 @@ std::string mode_;
 bool timerStarted_;
 ros::Time start_;
 double timeAdaptation_, timeWaitHuman_;
-int previousManagedAction_;
+supervisor_msgs::Action previousManagedAction_, previousTalkedHumanAction_, previousHumanAction_;
 std::string currentGoal_;
 std::vector<toaster_msgs::Fact> areaFacts_;
-std::string areaInform_;
+std::string areaInform_, areaIdle_;
 std::vector<supervisor_msgs::Action> actionsTodo_, previousActions_;
 supervisor_msgs::SharedPlan currentPlan_;
 bool shouldRetractRight_, shouldRetractLeft_;
 std::string rightRestPosition_, leftRestPosition_;
 int planPrevId_, msPrevId_;
+bool isGivingInfo_;
+bool hasActed_;
+int prevRobotId_;
+bool alreadyReplan_;
 
 /**
  * \brief Fill the highLevelNames map from param
@@ -111,27 +115,59 @@ void fillHighLevelNames(){
  * */
 std::string getLockedObject(supervisor_msgs::Action action){
 
+    std::string object;
+
     if(action.name == "pick" || action.name == "pickandplace" || action.name == "pickandplacereachable" || action.name == "pickanddrop"){
         for(int i = 0; i < action.parameter_keys.size(); i++){
             if(action.parameter_keys[i] == "object"){
-                return action.parameter_values[i];
+                object = action.parameter_values[i];
             }
         }
-    }else if(action.name == "place" || action.name == "placereachable"){
+    }else if(action.name == "place"){
         for(int i = 0; i < action.parameter_keys.size(); i++){
             if(action.parameter_keys[i] == "support"){
-                return action.parameter_values[i];
+                object = action.parameter_values[i];
             }
         }
     }else if(action.name == "drop"){
         for(int i = 0; i < action.parameter_keys.size(); i++){
             if(action.parameter_keys[i] == "container"){
-                return action.parameter_values[i];
+                object = action.parameter_values[i];
             }
         }
     }
+ 
+    if(highLevelRefinment_[object].size() > 0){
+        //need to refine the object
+        std::vector<toaster_msgs::Fact> toTest;
+        for(std::vector<std::string>::iterator it = highLevelRefinment_[object].begin(); it != highLevelRefinment_[object].end(); it++){
+                toaster_msgs::Fact fact;
+                fact.subjectId = *it;
+                fact.property = "isReachableBy";
+                fact.targetId = action.actors[0];
+                toTest.push_back(fact);
+        }
+        std::vector<std::string> res;
+        toaster_msgs::ExecuteDB srv;
+        srv.request.command = "ARE_IN_TABLE";
+        srv.request.type = "INDIV";
+        srv.request.agent = robotName_;
+        srv.request.facts = toTest;
+        ros::ServiceClient client_db_execute_ = node_->serviceClient<toaster_msgs::ExecuteDB>("database_manager/execute");
+        if (client_db_execute_.call(srv)){
+          std::vector<std::string> res = srv.response.results;
+          for(int i = 0; i < res.size(); i++){
+                if(res[i] == "true"){
+                        return highLevelRefinment_[object][i];
+                }
+          }
+        }else{
+         ROS_ERROR("[action_executor] Failed to call service database_manager/execute");
+        }
+    }
 
-    return action.parameter_values[0];
+    return object;
+
 }
 
 /**
@@ -188,6 +224,67 @@ void actionDone(const actionlib::SimpleClientGoalState& state, const supervisor_
 
 
 /**
+ * \brief Says if an agent is in an area
+ * @param agent the tested agent
+ * @param area the tested area
+ * @return true if the agent is in the area
+ * */
+bool isInArea(std::string agent, std::string area){
+
+    for(std::vector<toaster_msgs::Fact>::iterator it = areaFacts_.begin(); it != areaFacts_.end(); it++){
+        if(it->property == "IsInArea" && it->subjectId == agent && it->targetId == area){
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+/**
+ * \brief Check if two actions are the same
+ * @param action1 first action to compare
+ * @param action2 second action to compare
+ * */
+bool areActionsEqual(supervisor_msgs::Action action1, supervisor_msgs::Action action2){
+
+    if(action1.id == action2.id){
+        return true;
+    }
+
+    //first check names
+    if(action1.name != action2.name){
+        return false;
+    }
+
+    //the check actors
+    if(action1.actors.size() != action2.actors.size()){
+        return false;
+    }else{
+        for(int i = 0; i < action2.actors.size(); i++){
+            if(action1.actors[i] != action2.actors[i] && action1.actors[i] != "AGENTX" && action2.actors[i] != "AGENTX"){
+                return false;
+            }
+        }
+    }
+
+    //then check params
+    if(action1.parameter_values.size() != action2.parameter_values.size()){
+        return false;
+    }else{
+        for(int i = 0; i < action1.parameter_values.size(); i++){
+            if(action1.parameter_values[i] != action2.parameter_values[i] && highLevelNames_[action1.parameter_values[i]] != action2.parameter_values[i] && action1.parameter_values[i] != highLevelNames_[action2.parameter_values[i]]){
+		return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+
+
+/**
  * \brief Callback for todo actions
  * @param msg topic msg
  * */
@@ -196,12 +293,18 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
     planPrevId_ = msg->prevId;
     actionsTodo_ = msg->actions;
 
+    if(planPrevId_ == prevRobotId_ && prevRobotId_ != -1){
+	hasActed_ = true;
+        prevRobotId_ = -1;
+    }
+
+    bool hasRobotAction = false;
+
     if(robotState_ == "IDLE" && actionsTodo_.size() > 0 && planPrevId_ == msPrevId_){
         bool isWaiting = false;
 
         supervisor_msgs::Action action;
         bool hasXAction = false;
-        bool hasRobotAction = false;
         //we look for actions with the robot has actor
         for(std::vector<supervisor_msgs::Action>::iterator it = actionsTodo_.begin(); it != actionsTodo_.end(); it++){
             if(it->actors[0] == robotName_){
@@ -214,11 +317,32 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                 action = *it;
             }
         }
-        if(action.id == previousManagedAction_ && !timerStarted_){
+        if(areActionsEqual(action, previousManagedAction_) && ((hasXAction & !timerStarted_) || hasRobotAction)){
             //we wait for the todo list update
             return;
+       }
+
+	supervisor_msgs::Action humanAction;
+    bool hasHumanAction = false;
+    for(std::vector<supervisor_msgs::Action>::iterator it = actionsTodo_.begin(); it != actionsTodo_.end(); it++){
+        if(it->actors[0] == mainPartner_ &&  it->id != 0){
+            //we remember the action to inform the human
+            hasHumanAction = true;
+            humanAction = *it;
+            break;
         }
-        previousManagedAction_ = action.id;
+    }
+    if(areActionsEqual(humanAction, previousTalkedHumanAction_)){
+        //we already informed about this action
+        hasHumanAction = false;
+    }
+           if(!areActionsEqual(humanAction, previousHumanAction_) && hasHumanAction){
+        previousHumanAction_ = humanAction;
+        alreadyReplan_ = false;
+    }
+
+
+        previousManagedAction_ = action;
         if(hasRobotAction){
             //we execute the action
             supervisor_msgs::ActionExecutorGoal goal;
@@ -227,6 +351,8 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
             actionClient_->sendGoal(goal,  &actionDone, Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
             robotState_ = "ACTING";
             currentAction_ = action;
+            hasActed_ = false;
+            prevRobotId_ = action.id;
         }else if(hasXAction){
             //we try to attribute the action
             /** @todo implement priority for identical actions*/
@@ -238,6 +364,8 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                 actionClient_->sendGoal(goal,  &actionDone, Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
                 robotState_ = "ACTING";
                 currentAction_ = action;
+                hasActed_ = false;
+                prevRobotId_ = action.id;
 
                 supervisor_msgs::EndPlan srv;
                 srv.request.success = false;
@@ -249,8 +377,11 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                 }
             }else{
                 //we try to attribute the action
-                /** @todo check the possible actors*/
                 std::vector<std::string> possibleActors;
+                if(timerStarted_ || isInArea(mainPartner_, areaIdle_)){
+                    possibleActors.push_back(mainPartner_);
+                }
+                possibleActors.push_back(robotName_);
                 if(possibleActors.size() == 1){
                     supervisor_msgs::EndPlan srv;
                     srv.request.success = false;
@@ -268,6 +399,8 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                         actionClient_->sendGoal(goal,  &actionDone, Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
                         robotState_ = "ACTING";
                         currentAction_ = action;
+                        hasActed_ = false;
+                        prevRobotId_ = action.id;
 
                         supervisor_msgs::EndPlan srv;
                         srv.request.success = false;
@@ -278,8 +411,7 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                            ROS_ERROR("[robot_decision] Failed to call service plan_elaboration/end_plan");
                         }
                     }
-                //}else if(possibleActors.size() > 1){
-                }else{
+                }else if(possibleActors.size() > 1){
                     if(mode_ == "negotiation"){
                         supervisor_msgs::Ask srv_ask;
                         srv_ask.request.type = "ACTION";
@@ -307,8 +439,8 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                               actionClient_->sendGoal(goal,  &actionDone, Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
                               robotState_ = "ACTING";
                               currentAction_ = action;
-
-                              ROS_ERROR("end plan from neg no!");
+                              hasActed_ = false;
+                              prevRobotId_ = action.id;
                               supervisor_msgs::EndPlan srv;
                               srv.request.success = false;
                               srv.request.evaluate = true;
@@ -338,8 +470,6 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                                 actionClient_->sendGoal(goal,  &actionDone, Client::SimpleActiveCallback(),  Client::SimpleFeedbackCallback());
                                 robotState_ = "ACTING";
                                 currentAction_ = action;
-
-                                ROS_ERROR("end plan from adaptation!");
                                 supervisor_msgs::EndPlan srv;
                                 srv.request.success = false;
                                 srv.request.evaluate = true;
@@ -366,18 +496,34 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                 ros::Duration d = ros::Time::now() - start_;
                 double duration = d.toSec();
                 if(duration >= timeWaitHuman_){
-                    //the partner does not perform its action, we look for another plan
-                    ROS_ERROR("end plan from human!");
-                    timerStarted_ = false;
-                    supervisor_msgs::EndPlan srv;
-                    srv.request.success = false;
-                    srv.request.evaluate = false;
-                    srv.request.forgiveAction = true;
-                    srv.request.objectLocked = getLockedObject(actionsTodo_[0]);
-                    srv.request.agentLocked = mainPartner_;
-                    if (!client_end_plan_->call(srv)){
-                       ROS_ERROR("[robot_decision] Failed to call service plan_elaboration/end_plan");
-                    }
+                     if(!alreadyReplan_){
+                        if(isInArea(mainPartner_, areaInform_) && hasHumanAction){
+		                    timerStarted_ = false;
+							supervisor_msgs::GiveInfo srv;
+		                    srv.request.type = "ACTION";
+		                     srv.request.action = humanAction;
+		                    srv.request.actionState = "SHOULD";
+		                    srv.request.partner = mainPartner_;
+		                    if (!client_inform_->call(srv)){
+		                       ROS_ERROR("[robot_decision] Failed to call service dialogue_node/give_info");
+		                    }
+                        }
+                        alreadyReplan_ = true;
+                   }else{
+                        if(isInArea(mainPartner_, areaInform_)){
+		                    timerStarted_ = false;
+							alreadyReplan_ = false;
+		                    supervisor_msgs::EndPlan srv;
+		                    srv.request.success = false;
+		                    srv.request.evaluate = false;
+		                    srv.request.forgiveAction = true;
+		                    srv.request.objectLocked = getLockedObject(actionsTodo_[0]);
+		                    srv.request.agentLocked = mainPartner_;
+		                    if (!client_end_plan_->call(srv)){
+		                       ROS_ERROR("[robot_decision] Failed to call service plan_elaboration/end_plan");
+		                    }
+                        }
+                  }
                 }
             }
         }
@@ -387,7 +533,7 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
         }
     }
 
-    if(robotState_ == "IDLE" && (actionsTodo_.size() == 0 || timerStarted_)){
+    if(robotState_ == "IDLE" && (actionsTodo_.size() == 0 || timerStarted_ || hasRobotAction)){
         //we retract the arms if needed
         if(shouldRetractRight_){
             supervisor_msgs::Action retractAction;
@@ -445,23 +591,6 @@ bool stopSrv(std_srvs::Trigger ::Request  &req, std_srvs::Trigger ::Response &re
 }
 
 /**
- * \brief Says if an agent is in an area
- * @param agent the tested agent
- * @param area the tested area
- * @return true if the agent is in the area
- * */
-bool isInArea(std::string agent, std::string area){
-
-    for(std::vector<toaster_msgs::Fact>::iterator it = areaFacts_.begin(); it != areaFacts_.end(); it++){
-        if(it->property == "IsInArea" && it->subjectId == agent && it->targetId == area){
-            return true;
-        }
-    }
-
-    return false;
-}
-
-/**
  * \brief Says if an element is in a list
  * @param element the tested element
  * @param list the tested list
@@ -515,7 +644,9 @@ supervisor_msgs::Action addPrecs(supervisor_msgs::Action action){
         fact.propertyType = it->propertyType;
         if(it->subjectId == "mainAgent"){
             fact.subjectId = action.actors[0];
-        }else{
+        }else if(it->subjectId == "true"){
+			fact.subjectId == "true";
+		}else{
             for(int i = 0; i < action.parameter_keys.size(); i++){
                 if(action.parameter_keys[i] == it->subjectId){
                     fact.subjectId = action.parameter_values[i];
@@ -525,6 +656,8 @@ supervisor_msgs::Action addPrecs(supervisor_msgs::Action action){
         }
         if(it->targetId == "mainAgent"){
             fact.targetId = action.actors[0];
+        }else if(it->targetId == "true"){
+                fact.targetId == "true";
         }else{
             for(int i = 0; i < action.parameter_keys.size(); i++){
                 if(action.parameter_keys[i] == it->targetId){
@@ -563,12 +696,12 @@ std::vector<bool> areFactsInTable(std::vector<toaster_msgs::Fact> facts, std::st
         for(std::vector<toaster_msgs::Fact>::iterator itf = facts.begin(); itf != facts.end(); itf++){
             if(itf->targetId == xAgent_ || itf->subjectId == xAgent_){
                 toReturn.push_back(true);
-                break;
+                continue;
             }
             bool find = false;
             for(std::vector<toaster_msgs::Fact>::iterator ita = agentFacts.begin(); ita != agentFacts.end(); ita++){
-                if(itf->property == ita->property && highLevelNames_[itf->subjectId] == highLevelNames_[ita->subjectId]
-                        && highLevelNames_[itf->targetId] == highLevelNames_[ita->targetId]){
+                if(itf->property == ita->property && (itf->subjectId == highLevelNames_[ita->subjectId] || itf->subjectId == ita->subjectId)
+                        && (itf->targetId == highLevelNames_[ita->targetId] || itf->targetId == ita->targetId)){
                     find = true;
                     break;
                 }
@@ -582,55 +715,6 @@ std::vector<bool> areFactsInTable(std::vector<toaster_msgs::Fact> facts, std::st
     }
 
     return toReturn;
-}
-
-
-/**
- * \brief Check if two actions are the same
- * @param action1 first action to compare
- * @param action2 second action to compare
- * */
-bool areActionsEqual(supervisor_msgs::Action action1, supervisor_msgs::Action action2){
-
-    if(action1.id == action2.id){
-        return true;
-    }
-
-    //first check names
-    if(action1.name.find("pickand") != std::string::npos){
-        action1.name = action1.name.substr(7);
-    }
-    if(action2.name.find("pickand") != std::string::npos){
-        action2.name = action2.name.substr(7);
-    }
-
-    if(action1.name != action2.name){
-        return false;
-    }
-
-    //the check actors
-    if(action1.actors.size() != action2.actors.size()){
-        return false;
-    }else{
-        for(int i = 0; i < action2.actors.size(); i++){
-            if(action1.actors[i] != action2.actors[i]){
-                return false;
-            }
-        }
-    }
-
-    //then check params
-    if(action1.parameter_values.size() != action2.parameter_values.size()){
-        return false;
-    }else{
-        for(int i = 0; i < action1.parameter_values.size(); i++){
-            if(highLevelNames_[action1.parameter_values[i]] != highLevelNames_[action2.parameter_values[i]]){
-                return false;
-            }
-        }
-    }
-
-    return true;
 }
 
 /**
@@ -664,8 +748,6 @@ void solveDB(std::string agent, supervisor_msgs::MentalState ms, supervisor_msgs
                 }
                 if(!find){
                     //we find the missing info
-                    ROS_WARN("DB to solve, action name: %s, object: %s", action.name.c_str(), action.parameter_values[0].c_str());
-                    ROS_WARN("missing action: %s", originAction.name.c_str());
                     supervisor_msgs::GiveInfo srv;
                     srv.request.type = "ACTION";
                     srv.request.action = originAction;
@@ -674,6 +756,7 @@ void solveDB(std::string agent, supervisor_msgs::MentalState ms, supervisor_msgs
                     if (!client_inform_->call(srv)){
                        ROS_ERROR("[robot_decision] Failed to call service dialogue_node/give_info");
                     }
+                    isGivingInfo_ = true;
                     return;
                 }
             }
@@ -689,11 +772,10 @@ void solveDB(std::string agent, supervisor_msgs::MentalState ms, supervisor_msgs
                 srv.request.fact = actionWithPrec.precs[i];
                 srv.request.isTrue = true;
                 srv.request.partner = agent;
-                ROS_WARN("DB to solve, action name: %s, object: %s", action.name.c_str(), action.parameter_values[0].c_str());
-                ROS_WARN("missing prec: %s", actionWithPrec.precs[i].property.c_str());
                 if (!client_inform_->call(srv)){
                    ROS_ERROR("[robot_decision] Failed to call service dialogue_node/give_info");
                 }
+                isGivingInfo_ = true;
                 return;
             }
         }
@@ -711,11 +793,10 @@ void solveDB(std::string agent, supervisor_msgs::MentalState ms, supervisor_msgs
                     srv.request.actionState = "FAILED";
                 }
                 srv.request.partner = agent;
-                ROS_WARN("DB to solve, action name: %s, object: %s", action.name.c_str(), action.parameter_values[0].c_str());
-                ROS_WARN("done action: %s", action.name.c_str());
                 if (!client_inform_->call(srv)){
                    ROS_ERROR("[robot_decision] Failed to call service dialogue_node/give_info");
                 }
+                isGivingInfo_ = true;
                 return;
             }
         }
@@ -761,11 +842,10 @@ void solveDB(std::string agent, supervisor_msgs::MentalState ms, supervisor_msgs
                     srv.request.type = "ACTION";
                     srv.request.action = toInformAction;
                     srv.request.partner = agent;
-                    ROS_WARN("DB to solve, action name: %s, object: %s", action.name.c_str(), action.parameter_values[0].c_str());
-                    ROS_WARN("wrong action, name: %s, object: %s", toInformAction.name.c_str(), toInformAction.parameter_values[0].c_str());
                     if (!client_inform_->call(srv)){
                        ROS_ERROR("[robot_decision] Failed to call service dialogue_node/give_info");
                     }
+                    isGivingInfo_ = true;
                     return;
                 }
             }
@@ -782,11 +862,10 @@ void solveDB(std::string agent, supervisor_msgs::MentalState ms, supervisor_msgs
                 srv.request.fact = actionWithPrec.precs[i];
                 srv.request.isTrue = false;
                 srv.request.partner = agent;
-                ROS_WARN("DB to solve, action name: %s, object: %s", action.name.c_str(), action.parameter_values[0].c_str());
-                ROS_WARN("missing prec: %s", actionWithPrec.precs[i].property.c_str());
                 if (!client_inform_->call(srv)){
                    ROS_ERROR("[robot_decision] Failed to call service dialogue_node/give_info");
                 }
+                isGivingInfo_ = true;
                 return;
             }
         }
@@ -837,7 +916,12 @@ void planCallback(const supervisor_msgs::SharedPlan::ConstPtr& msg){
 void msCallback(const supervisor_msgs::MentalStatesList::ConstPtr& msg){
 
     msPrevId_ = msg->prevId;
-    if(msg->changed && actionsTodo_.size() > 0 && msPrevId_ == planPrevId_){
+
+    if(msg->infoGiven){
+        isGivingInfo_ = false;
+    }
+
+    if(isGivingInfo_ == false && msg->changed && actionsTodo_.size() > 0 && msPrevId_ == planPrevId_){
         std::vector<supervisor_msgs::MentalState> ms = msg->mentalStates;
         for(std::vector<supervisor_msgs::MentalState>::iterator itms = ms.begin(); itms != ms.end(); itms++){
             //we inform only if the human is here
@@ -951,6 +1035,7 @@ int main (int argc, char **argv)
   node_->getParam("/robot_decision/timeAdaptation", timeAdaptation_);
   node_->getParam("/robot_decision/timeWaitHuman", timeWaitHuman_);
   node_->getParam("/robot_decision/areaInform", areaInform_);
+  node_->getParam("/robot_decision/areaIdle", areaIdle_);
   node_->getParam("/action_executor/restPosition/right", rightRestPosition_);
   node_->getParam("/action_executor/restPosition/left", leftRestPosition_);
 
@@ -958,9 +1043,11 @@ int main (int argc, char **argv)
   timerStarted_ = false;
   shouldRetractRight_ = true;
   shouldRetractLeft_ = true;
-  previousManagedAction_ = -1;
+  isGivingInfo_ = false;
+  hasActed_ = false;
   planPrevId_ = -1;
   msPrevId_ = -1;
+  prevRobotId_ = -1;
 
   fillHighLevelNames();
 

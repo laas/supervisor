@@ -15,7 +15,7 @@ Place::Place(supervisor_msgs::Action action, Connector* connector) : VirtualActi
     //we look for the action parameters
     bool foundObj = false;
     bool foundSup = false;
-    for(int i=0; i<=action.parameter_keys.size();i++){
+    for(int i=0; i<action.parameter_keys.size();i++){
         if(action.parameter_keys[i] == "object"){
             object_ = action.parameter_values[i];
             foundObj = true;
@@ -36,6 +36,9 @@ Place::Place(supervisor_msgs::Action action, Connector* connector) : VirtualActi
     }
 
     replacementSupport_ = "NONE";
+    actionName_ = "place";
+    param1_ = object_;
+    param2_ = support_;
 }
 
 /**
@@ -70,11 +73,13 @@ bool Place::preconditions(){
             initialSupport_ = support_;
             std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), support_, newObject);
             support_ = newObject;
+	    	param2_ = support_;
         }else{
             ROS_WARN("[action_executor] No possible refinement for suport: %s", support_.c_str());
             return false;
         }
     }
+    connector_->objectToWatch_ = support_;
 
     //the robot should lok at the support
     connector_->currentAction_.headFocus = support_;
@@ -103,6 +108,10 @@ bool Place::preconditions(){
     fact.property = "isReachableBy";
     fact.targetId = connector_->robotName_;
     precsTocheck.push_back(fact);
+    fact.subjectId = "NULL";
+    fact.property = "isOn";
+    fact.targetId = support_;
+    precsTocheck.push_back(fact);
 
     return ArePreconditionsChecked(precsTocheck);
 
@@ -118,110 +127,135 @@ bool Place::preconditions(){
  * */
 bool Place::plan(){
 
-    std::vector<gtp_ros_msgs::ActionId> attachments;
-    //If there is no previous task we look for a previous grasp
-    if(connector_->previousId_ == -1){
-        if(connector_->idGrasp_ == -1){
-            ROS_WARN("[action_executor] No previous Id nore previous grasp id");
-           return false;
-        }else{
-            gtp_ros_msgs::ActionId attach;
-            attach.taskId = connector_->idGrasp_;
-            attach.alternativeId = 0;
-            attachments.push_back(attach);
-        }
-    }
+    subSolutions_.clear();
 
-    //ask gtp a plan
-    std::vector<gtp_ros_msgs::Role> agents;
-    gtp_ros_msgs::Role role;
-    role.role = "mainAgent";
-    role.name = connector_->robotName_;
-    agents.push_back(role);
-    std::vector<gtp_ros_msgs::Role> objects;
-    role.role = "mainObject";
-    role.name = object_;
-    objects.push_back(role);
-    std::vector<gtp_ros_msgs::Point> points;
-    std::vector<gtp_ros_msgs::MiscData> datas;
-
-    if(connector_->shouldUseRightHand_){
-        gtp_ros_msgs::MiscData data;
-        data.key = "hand";
-        data.value = "right";
-        datas.push_back(data);
-    }
-
-    std::string actionName;
-    if(isManipulableObject(support_)){
-        role.role = "supportObject";
-        role.name = support_;
-        objects.push_back(role);
-        //if the support is also a manipulable object, this is a stack action
-        actionName = "stackObj";
-        //we add a point in order the objects to be align
-        gtp_ros_msgs::Point point;
-        point.key = "target";
-        point.point.x = 0.0;
-        point.point.y = 0.0;
-        point.point.z = 0.0;
-        points.push_back(point);
+    if(connector_->saveMode_ == "load"){
+        gtpActionId_ = -2;
+        gtp_ros_msgs::SubSolution subSol;
+        subSol.agent = "PR2_ROBOT";
+        subSol.armId = 0;
+        subSol.id = 0;
+        subSol.name = "approach";
+        subSol.type = "move";
+        subSolutions_.push_back(subSol);
+        subSol.id = 1;
+        subSol.name = "engage";
+        subSol.type = "move";
+        subSolutions_.push_back(subSol);
+        subSol.id = 2;
+        subSol.name = "release";
+        subSol.type = "release";
+        subSolutions_.push_back(subSol);
+        subSol.id = 3;
+        subSol.name = "escape";
+        subSol.type = "move";
+        subSolutions_.push_back(subSol);
     }else{
-        actionName = "place";
-        std::string replacementTopic = "/action_executor/planningSupport/" + support_;
-        //we look if there is a more specific placement to use for planning
-        if(connector_->node_->hasParam(replacementTopic)){
-            connector_->node_->getParam(replacementTopic, replacementSupport_);
-            role.role = "supportObject";
-            role.name = replacementSupport_;
-            objects.push_back(role);
-        }else{
-            role.role = "supportObject";
+        std::vector<gtp_ros_msgs::ActionId> attachments;
+        //If there is no previous task we look for a previous grasp
+        /*if(connector_->previousId_ == -1){
+            if(connector_->idGrasp_ == -1){
+                ROS_WARN("[action_executor] No previous Id nore previous grasp id");
+               return false;
+            }else{
+                gtp_ros_msgs::ActionId attach;
+                attach.taskId = connector_->idGrasp_;
+                attach.alternativeId = 0;
+                attachments.push_back(attach);
+            }
+        }*/
+
+        //ask gtp a plan
+        std::vector<gtp_ros_msgs::Role> agents;
+        gtp_ros_msgs::Role role;
+        role.role = "mainAgent";
+        role.name = connector_->robotName_;
+        agents.push_back(role);
+        std::vector<gtp_ros_msgs::Role> objects;
+        role.role = "mainObject";
+        role.name = object_;
+        objects.push_back(role);
+        std::vector<gtp_ros_msgs::Point> points;
+        std::vector<gtp_ros_msgs::MiscData> datas;
+
+        if(connector_->shouldUseRightHand_){
+            gtp_ros_msgs::MiscData data;
+            data.key = "hand";
+            data.value = "right";
+            datas.push_back(data);
+        }
+
+        std::string actionName;
+        if(isManipulableObject(support_)){
+	   		role.role = "supportObject";
             role.name = support_;
             objects.push_back(role);
-            //we look if there is a specific point where to place the object
-            std::string xParamTopic = "/action_executor/points/"+ support_ + "/" + object_ + "/x";
-            std::string yParamTopic = "/action_executor/points/"+ support_ + "/" + object_ + "/y";
-            std::string thetaParamTopic = "/action_executor/points/"+ support_ + "/" + object_ + "/theta";
-            if(connector_->node_->hasParam(xParamTopic)){
-                double pointX, pointY, pointTheta;
-                connector_->node_->getParam(xParamTopic, pointX);
-                connector_->node_->getParam(yParamTopic, pointY);
-                connector_->node_->getParam(thetaParamTopic, pointTheta);
-                double x, y;
-                try{
-                    //we look for the suppport position
-                    toaster_msgs::ObjectListStamped objectList  = *(ros::topic::waitForMessage<toaster_msgs::ObjectListStamped>("pdg/objectList",ros::Duration(1)));
-                    for(std::vector<toaster_msgs::Object>::iterator it = objectList.objectList.begin(); it != objectList.objectList.end(); it++){
-                      if(it->meEntity.id == support_){
-                         x = it->meEntity.pose.position.x;
-                         y = it->meEntity.pose.position.y;
-                         break;
-                      }
+            //if the support is also a manipulable object, this is a stack action
+            actionName = "stackObj";
+            //we add a point in order the objects to be align
+            gtp_ros_msgs::Point point;
+            point.key = "target";
+            point.point.x = 0.0;
+            point.point.y = 0.0;
+            point.point.z = 0.0;
+            points.push_back(point);
+        }else{
+            actionName = "place";
+            std::string replacementTopic = "/action_executor/planningSupport/" + support_;
+            //we look if there is a more specific placement to use for planning
+            if(connector_->node_->hasParam(replacementTopic)){
+                connector_->node_->getParam(replacementTopic, replacementSupport_);
+                role.role = "supportObject";
+                role.name = replacementSupport_;
+                objects.push_back(role);
+            }else{
+                role.role = "supportObject";
+                role.name = support_;
+                objects.push_back(role);
+                //we look if there is a specific point where to place the object
+                std::string xParamTopic = "/action_executor/points/"+ support_ + "/" + object_ + "/x";
+                std::string yParamTopic = "/action_executor/points/"+ support_ + "/" + object_ + "/y";
+                std::string thetaParamTopic = "/action_executor/points/"+ support_ + "/" + object_ + "/theta";
+                if(connector_->node_->hasParam(xParamTopic)){
+                    double pointX, pointY, pointTheta;
+                    connector_->node_->getParam(xParamTopic, pointX);
+                    connector_->node_->getParam(yParamTopic, pointY);
+                    connector_->node_->getParam(thetaParamTopic, pointTheta);
+                    double x, y;
+                    try{
+                        //we look for the suppport position
+                        toaster_msgs::ObjectListStamped objectList  = *(ros::topic::waitForMessage<toaster_msgs::ObjectListStamped>("pdg/objectList",ros::Duration(1)));
+                        for(std::vector<toaster_msgs::Object>::iterator it = objectList.objectList.begin(); it != objectList.objectList.end(); it++){
+                          if(it->meEntity.id == support_){
+                             x = it->meEntity.pose.position.x;
+                             y = it->meEntity.pose.position.y;
+                             break;
+                          }
+                        }
+                        x = x + pointX;
+                        y = y + pointY;
+                        gtp_ros_msgs::Point point;
+                        point.key = "target";
+                        point.point.x = x;
+                        point.point.y = y;
+                        point.point.z = pointTheta;
+                        points.push_back(point);
                     }
-                    x = x + pointX;
-                    y = y + pointY;
-                    gtp_ros_msgs::Point point;
-                    point.key = "target";
-                    point.point.x = x;
-                    point.point.y = y;
-                    point.point.z = pointTheta;
-                    points.push_back(point);
-                }
-                catch(const std::exception & e){
-                    ROS_WARN("[action_executor] Failed to read %s pose from toaster", support_.c_str());
-                }
-           }
+                    catch(const std::exception & e){
+                        ROS_WARN("[action_executor] Failed to read %s pose from toaster", support_.c_str());
+                    }
+               }
+            }
         }
+        std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > answer = planGTP(actionName, agents, objects, datas, points, attachments);
+        gtpActionId_ = answer.first;
+
+        if(gtpActionId_ == -1){
+            return false;
+         }
+
+        subSolutions_ = answer.second;
     }
-    std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > answer = planGTP(actionName, agents, objects, datas, points, attachments);
-    gtpActionId_ = answer.first;
-
-    if(gtpActionId_ == -1){
-        return false;
-     }
-
-    subSolutions_ = answer.second;
     return true;
 }
 
@@ -236,6 +270,7 @@ bool Place::exec(Server* action_server){
         if(execAction(gtpActionId_, subSolutions_, false, action_server)){
             return true;
         }else if(connector_->refineOrder_ ){
+            connector_->refineOrder_  = false;
             connector_->previousId_  = -1;
             //the chosen object is already taken, we look for another refinement
             std::vector<toaster_msgs::Fact> conditions;
@@ -255,6 +290,8 @@ bool Place::exec(Server* action_server){
             if(newObject != "NULL"){
                 std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), support_, newObject);
                 support_ = newObject;
+				param2_ = support_;
+                connector_->objectToWatch_ = support_;
                 connector_->currentAction_.headFocus = support_;
                 if(!this->plan()){
                     return false;

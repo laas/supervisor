@@ -229,7 +229,8 @@ void PlanElaboration::setPlanningTable(std::string agent){
         //we add specific domains fact in the world state
         std::vector<toaster_msgs::Fact> updatedFacts = dom_->computeSpecificFacts(agentFacts);
         //we get the final list of facts containing agentX capabilities
-        std::vector<toaster_msgs::Fact> finalFacts = computeAgentXFacts(updatedFacts);
+        std::vector<toaster_msgs::Fact> finalFacts;
+        finalFacts = computeAgentXFacts(updatedFacts);
         //we update the planning table with these facts
         srv_set.request.infoType = "RESET_PLANNING";
         srv_set.request.facts = finalFacts;
@@ -272,7 +273,7 @@ std::vector<toaster_msgs::Fact> PlanElaboration::computeAgentXFacts(std::vector<
         if(isInVector(toIgnoreFactsForXAgent_, it->property)){
             continue;
         }
-        if(isInVector(agentList_, it->subjectId) && highLevelNames_[it->targetId] != highLevelNames_[dom_->objectLocked_]){
+        if(isInVector(agentList_, it->subjectId)){
             //the fact concerns an agent and not the locked object
             bool added = false;
             for(std::vector<toaster_msgs::Fact>::iterator it2 = it+1; it2 != facts.end(); it2++){
@@ -305,7 +306,7 @@ std::vector<toaster_msgs::Fact> PlanElaboration::computeAgentXFacts(std::vector<
                     }
                 }
             }
-        }else if(isInVector(agentList_, it->targetId) && highLevelNames_[it->subjectId] != highLevelNames_[dom_->objectLocked_]){
+        }else if(isInVector(agentList_, it->targetId)){
             //the fact concerns an agent and not the locked object
             bool added = false;
             for(std::vector<toaster_msgs::Fact>::iterator it2 = it+1; it2 != facts.end(); it2++){
@@ -482,7 +483,7 @@ supervisor_msgs::SharedPlan PlanElaboration::convertPlan(hatp_msgs::Plan plan){
           std::string paramTopic = "highLevelActions/" + action.name + "_param";
           node_->getParam(paramTopic, action.parameter_keys );
           if(action.parameter_values.size() != action.parameter_keys.size()){
-              ROS_ERROR("[plan_elaboration] Incorrect action parameters for action: %s", action.name.c_str());
+              ROS_ERROR("[plan_elaboration] Incorrect action parameters for action: %s, with init name %s", action.name.c_str(), it->name.c_str());
               ROS_ERROR("[plan_elaboration] parameters are:");
               for(std::vector<std::string>::iterator itp = action.parameter_values.end(); itp != action.parameter_values.end(); itp++){
                   ROS_ERROR("                %s", itp->c_str());
@@ -679,7 +680,7 @@ std::string PlanElaboration::getLockedObject(std::string object, std::string age
     for(std::vector<std::string>::iterator it = possibleObjects.begin(); it != possibleObjects.end(); it++){
         toaster_msgs::Fact fact;
         fact.subjectId = *it;
-        fact.property = "isReachebleBy";
+        fact.property = "isReachableBy";
         fact.targetId = agent;
         toTest.push_back(fact);
     }

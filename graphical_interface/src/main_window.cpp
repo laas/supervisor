@@ -23,6 +23,8 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     node_.getParam("/graphical_interface/humanTab", dialogueTab_);
     node_.getParam("/graphical_interface/dialogueTab", humanTab_);
 
+    idAction_ = 0;
+
     //we fill the buttons
     //we retrieve the possible agents from param of the .yaml file
     std::vector<std::string> agents;
@@ -343,6 +345,8 @@ void MainWindow::on_pushButtonExecuteAction_clicked()
 {
     //we get all the parameters and construct the action
     supervisor_msgs::Action action;
+    action.id = idAction_;
+    idAction_++;
     action.actors.push_back(robotName_);
     action.name = ui.comboBoxNameAction->currentText().toStdString();
     action.parameter_keys.push_back("object");
@@ -353,7 +357,7 @@ void MainWindow::on_pushButtonExecuteAction_clicked()
     action.parameter_values.push_back(ui.comboBoxContainerAction->currentText().toStdString());
     action.parameter_keys.push_back("targetAgent");
     action.parameter_values.push_back(ui.comboBoxAgentAction->currentText().toStdString());
-    action.parameter_keys.push_back("confName");
+    action.parameter_keys.push_back("position");
     action.parameter_values.push_back(ui.comboBoxPositionAction->currentText().toStdString());
 
     //we send it to the action executor

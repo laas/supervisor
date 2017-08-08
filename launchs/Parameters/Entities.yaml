@@ -111,8 +111,8 @@ entities:
              GREY_TAPE: 0.105
              LOTR_TAPE: 0.105
              WALLE_TAPE: 0.105
-             RED_TAPE1: 0.105
-             RED_TAPE2: 0.105
+             RED_TAPE1: 0.0
+             RED_TAPE2: 0.0
              IKEA_SHELF_LIGHT_1: 0.00
              IKEA_SHELF_DARK: 0.00
              STICK: 0.0265

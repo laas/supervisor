@@ -16,7 +16,7 @@ PlaceReachable::PlaceReachable(supervisor_msgs::Action action, Connector* connec
     bool foundObj = false;
     bool foundSup = false;
     bool foundAg = false;
-    for(int i=0; i<=action.parameter_keys.size();i++){
+    for(int i=0; i<action.parameter_keys.size();i++){
         if(action.parameter_keys[i] == "object"){
             object_ = action.parameter_values[i];
             foundObj = true;

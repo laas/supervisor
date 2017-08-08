@@ -1,6 +1,6 @@
 ---
 robot_decision:
-    mode: 'negotiation' #negotiation or adaptation
-    timeAdaptation: 2.0
-    timeWaitHuman: 50.0
+    mode: 'adaptation' #negotiation or adaptation
+    timeAdaptation: 3.0
+    timeWaitHuman: 10.0
     areaInform: 'interaction'

@@ -81,6 +81,7 @@ private:
     double waitActionServer_; /**< time to wait for an action server*/
     bool simu_; /**< flag to indicate simu or not*/
     std::string robotName_; /**< name of the robot*/
+    int idAction_;
 
     bool goalTab_; /**< flag to indicate the goals tab is activated*/
     bool databaseTab_; /**< flag to indicate the database tab is activated*/

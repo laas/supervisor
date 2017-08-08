@@ -15,7 +15,7 @@ MoveTo::MoveTo(supervisor_msgs::Action action, Connector* connector) : VirtualAc
     //looking for the parameters of the action
     bool foundArm = false;
     bool foundPos = false;
-    for(int i=0; i<=action.parameter_keys.size();i++){
+    for(int i=0; i<action.parameter_keys.size();i++){
         if(action.parameter_keys[i] == "arm"){
             arm_ = action.parameter_values[i];
             foundArm = true;
@@ -29,7 +29,8 @@ MoveTo::MoveTo(supervisor_msgs::Action action, Connector* connector) : VirtualAc
         }
     }
     if(!foundArm){
-        ROS_WARN("[action_executor] Missing parameter: arm to move");
+        ROS_WARN("[action_executor] Missing parameter: arm to move, right by default");
+        arm_ = "right";
     }
     if(!foundPos){
         ROS_WARN("[action_executor] Missing parameter: position to reach");
@@ -112,7 +113,7 @@ bool MoveTo::exec(Server* action_server){
     }
 
     //for moveTo, the solution is only one trajectory
-    return executeTrajectory(gtpActionId_, 0, armId, action_server);
+    return executeTrajectory(gtpActionId_, 0, armId, action_server, "move");
 
 }
 

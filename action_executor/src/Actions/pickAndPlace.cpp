@@ -21,7 +21,7 @@ PickAndPlace::PickAndPlace(supervisor_msgs::Action action, Connector* connector)
     //we look for the action parameters
     bool foundObj = false;
     bool foundSup = false;
-    for(int i=0; i<=action.parameter_keys.size();i++){
+    for(int i=0; i<action.parameter_keys.size();i++){
         if(action.parameter_keys[i] == "object"){
             object_ = action.parameter_values[i];
             foundObj = true;
@@ -40,6 +40,13 @@ PickAndPlace::PickAndPlace(supervisor_msgs::Action action, Connector* connector)
     if(!foundSup){
         ROS_WARN("[action_executor] Missing parameter: support where to place");
     }
+    //fill param for save/load traj
+    pickAction_.param1_ = object_;
+    pickAction_.param2_ = "place";
+    placeAction_.param1_ = object_;
+    placeAction_.param2_ = support_; 
+
+	connector_->objectToWatch_ = support_;
 }
 
 /**
@@ -75,6 +82,8 @@ bool PickAndPlace::preconditions(){
             pickAction_.initialObject_ = initialObject_;
             placeAction_.object_ = object_;
             placeAction_.initialObject_ = initialObject_;
+	     	pickAction_.param1_ = object_;
+	    	placeAction_.param1_ = object_;
         }else{
             ROS_WARN("[action_executor] No possible refinement for object: %s", object_.c_str());
             return false;
@@ -110,8 +119,11 @@ bool PickAndPlace::preconditions(){
         fact.property = "isReachableBy";
         fact.targetId = connector_->robotName_;
         precsTocheck.push_back(fact);
+		fact.subjectId = "NULL";
+		fact.property = "isOn";
+		fact.targetId = support_;
+		precsTocheck.push_back(fact);
     }
-
     return ArePreconditionsChecked(precsTocheck);
 
 }
@@ -152,6 +164,7 @@ bool PickAndPlace::exec(Server* action_server){
     connector_->previousId_  = pickId_;
     if(pickAction_.exec(action_server) && pickAction_.post()){
         //look for a support if it was not refined
+		connector_->objectToWatch_ = support_;
         if(!isRefined(support_)){
             //we look for a refinment
             std::vector<toaster_msgs::Fact> conditions;
@@ -172,8 +185,10 @@ bool PickAndPlace::exec(Server* action_server){
                 initialSupport_ = support_;
                 std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), support_, newObject);
                 support_ = newObject;
+                connector_->objectToWatch_ = support_;
                 placeAction_.support_ = support_;
                 placeAction_.initialSupport_ = initialSupport_;
+                placeAction_.param2_ = support_;
                 //the robot should then look at the container
                 connector_->currentAction_.headFocus = support_;
                 if(placeAction_.plan()){

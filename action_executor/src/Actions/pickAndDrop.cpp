@@ -21,7 +21,7 @@ PickAndDrop::PickAndDrop(supervisor_msgs::Action action, Connector* connector) :
     //we look for the action parameters
     bool foundObj = false;
     bool foundCont = false;
-    for(int i=0; i<=action.parameter_keys.size();i++){
+    for(int i=0; i<action.parameter_keys.size();i++){
         if(action.parameter_keys[i] == "object"){
             object_ = action.parameter_values[i];
             foundObj = true;
@@ -40,6 +40,9 @@ PickAndDrop::PickAndDrop(supervisor_msgs::Action action, Connector* connector) :
     if(!foundCont){
         ROS_WARN("[action_executor] Missing parameter: container where to drop");
     }
+
+	pickAction_.param2_ = "drop";
+    connector_->objectToWatch_ = object_;
 }
 
 /**
@@ -162,6 +165,7 @@ bool PickAndDrop::exec(Server* action_server){
                 initialContainer_ = container_;
                 std::replace (connector_->currentAction_.parameter_values.begin(), connector_->currentAction_.parameter_values.end(), container_, newObject);
                 container_ = newObject;
+		  		dropAction_.param2_ = container_;
                 //the robot should then look at the container
                 connector_->currentAction_.headFocus = container_;
                 if(dropAction_.plan()){

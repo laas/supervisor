@@ -25,6 +25,7 @@ MsManager::MsManager(ros::NodeHandle* node)
 
     //Initialize clients
     client_db_ = node_->serviceClient<toaster_msgs::SetInfoDB>("database_manager/set_info");
+    client_execute_db_ = node_->serviceClient<toaster_msgs::ExecuteDB>("database_manager/execute");
 
     //Initialize high level names (from params)
     fillHighLevelNames();
@@ -559,3 +560,35 @@ void MsManager::addRmFactToAgent(toaster_msgs::Fact fact, std::string agent, boo
      ROS_ERROR("[mental_state] Failed to call service database_manager/set_info");
     }
 }
+
+
+/**
+ * \brief Function which check if a target is visible by an agent
+ * @param target the target name
+ * @param agent the agent name
+ * @return true if the target is visible by the agent
+ * */
+bool MsManager::isVisibleBy(std::string target, std::string agent){
+
+    if(agent == target){
+        return true;
+    }
+
+    toaster_msgs::Fact fact;
+    fact.subjectId = target;
+    fact.property = "isVisibleBy";
+    fact.targetId = agent;
+    std::vector<toaster_msgs::Fact> facts;
+    facts.push_back(fact);
+    toaster_msgs::ExecuteDB srv;
+    srv.request.command = "ARE_IN_TABLE";
+    srv.request.agent = robotName_;
+    srv.request.facts = facts;
+    if (client_execute_db_.call(srv)){
+        return srv.response.boolAnswer;
+    }else{
+       ROS_ERROR("[action_executor] Failed to call service database_manager/execute");
+    }
+    return false;
+}
+

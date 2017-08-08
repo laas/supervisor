@@ -17,6 +17,8 @@ Main class of the plan maintainer
 #include "supervisor_msgs/SharedPlan.h"
 #include "supervisor_msgs/ActionsList.h"
 #include "supervisor_msgs/EndPlan.h"
+#include "supervisor_msgs/GoalsList.h"
+#include "toaster_msgs/ExecuteDB.h"
 
 
 
@@ -34,6 +36,7 @@ ros::ServiceClient* client_end_plan_;
 int lastPlanId_;
 bool changed_;
 int prevId_;
+bool actionRobotFinished = false;
 
 
 /**
@@ -79,6 +82,20 @@ void fillHighLevelNames(){
 }
 
 /**
+ * \brief Clear all data about the current plan
+ * */
+void endCurrentPlan(){
+
+    currentPlan_ = -1;
+    changed_ = true;
+    previousActions_.clear();
+    todoActions_.clear();
+    plannedActions_.clear();
+}
+
+
+
+/**
  * \brief Update the current plan
  * */
 void updatePlan(){
@@ -88,8 +105,9 @@ void updatePlan(){
     toCheck.insert(toCheck.begin(),todoActions_.begin(),todoActions_.end());
     for(std::vector<supervisor_msgs::Action>::iterator it = toCheck.begin(); it != toCheck.end(); it++){
         bool executed = false;
-        if(it->id == plannedRobotAction_.id){
-            //the action is in execution
+        if(it->id == plannedRobotAction_.id && actionRobotFinished){
+            //the action is over
+	     	actionRobotFinished = false;
             executed = true;
             continue;
         }else{
@@ -132,8 +150,16 @@ void updatePlan(){
     todoActions_ = newTodo;
 
     /** @todo check if the todo actions are still feasible*/
-    /** @todo check if no more todo/in progress actions in the plan*/
-
+   if(plannedActions_.size() == 0 && todoActions_.size() == 0 && !robotActing_){
+	//end of the plan
+	supervisor_msgs::EndPlan srv;
+    srv.request.success = true;
+    srv.request.evaluate = false;
+    if (!client_end_plan_->call(srv)){
+       ROS_ERROR("[plan_maintainer] Failed to call service plan_elaboration/end_plan");
+    }
+    endCurrentPlan();
+   }
 }
 
 
@@ -205,46 +231,64 @@ supervisor_msgs::Action isInList(supervisor_msgs::Action action, std::vector<sup
 }
 
 /**
- * \brief Clear all data about the current plan
- * */
-void endCurrentPlan(){
-
-    currentPlan_ = -1;
-    changed_ = true;
-    previousActions_.clear();
-    todoActions_.clear();
-    plannedActions_.clear();
-}
-
-
-/**
  * \brief Function which return te object to lock given an action
  * @param action the attributed action
  * @return the object to lock
  * */
 std::string getLockedObject(supervisor_msgs::Action action){
 
+    std::string object;
+
     if(action.name == "pick" || action.name == "pickandplace" || action.name == "pickandplacereachable" || action.name == "pickanddrop"){
         for(int i = 0; i < action.parameter_keys.size(); i++){
             if(action.parameter_keys[i] == "object"){
-                return action.parameter_values[i];
+                object = action.parameter_values[i];
             }
         }
     }else if(action.name == "place"){
         for(int i = 0; i < action.parameter_keys.size(); i++){
             if(action.parameter_keys[i] == "support"){
-                return action.parameter_values[i];
+                object = action.parameter_values[i];
             }
         }
     }else if(action.name == "drop"){
         for(int i = 0; i < action.parameter_keys.size(); i++){
             if(action.parameter_keys[i] == "container"){
-                return action.parameter_values[i];
+                object = action.parameter_values[i];
             }
         }
     }
 
-    return action.parameter_values[0];
+    if(highLevelRefinment_[object].size() > 0){
+		//need to refine the object
+		std::vector<toaster_msgs::Fact> toTest;
+		for(std::vector<std::string>::iterator it = highLevelRefinment_[object].begin(); it != highLevelRefinment_[object].end(); it++){
+			toaster_msgs::Fact fact;
+			fact.subjectId = *it;
+			fact.property = "isReachableBy";
+			fact.targetId = action.actors[0];
+			toTest.push_back(fact);
+		}
+		std::vector<std::string> res;
+			toaster_msgs::ExecuteDB srv;
+			srv.request.command = "ARE_IN_TABLE";
+			srv.request.type = "INDIV";
+			srv.request.agent = robotName_;
+			srv.request.facts = toTest;
+		ros::ServiceClient client_db_execute_ = node_->serviceClient<toaster_msgs::ExecuteDB>("database_manager/execute");
+			if (client_db_execute_.call(srv)){
+		      std::vector<std::string> res = srv.response.results;
+		  for(int i = 0; i < res.size(); i++){
+			if(res[i] == "true"){
+				return highLevelRefinment_[object][i];
+			}
+		  }
+		}else{
+	   	 ROS_ERROR("[action_executor] Failed to call service database_manager/execute");
+		}
+    }
+
+    return object;
 }
 
 /**
@@ -403,6 +447,7 @@ void robotActionCallback(const supervisor_msgs::Action::ConstPtr& msg){
             previousActions_.push_back(plannedRobotAction_);
             updatePlan();
         }
+        robotActing_ = false;
     }
 
     if(!robotActing_ && msg->name != "" && msg->id != robotProgressAction_.id){
@@ -426,37 +471,56 @@ void previousActionCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
 
     //we look if there was a change in the action performed (nothing is suppose to disappear from this list)
     std::vector<supervisor_msgs::Action> currentActions = msg->actions;
-    if(currentPlan_ != -1 && currentActions.size() > oldMsgPrevious_.size()){
+    if(currentActions.size() > oldMsgPrevious_.size()){
         //the action(s) performed are at the end of the list
         for(int i = oldMsgPrevious_.size(); i < currentActions.size(); i++){
             prevId_ = currentActions[i].id;
-            if(robotActing_ && robotProgressAction_.id == currentActions[i].id){
-                //it was the robot current action
-                robotActing_ = false;
-                if(!currentActions[i].succeed){
-                    //the action failed, a new plan is needed
-                    supervisor_msgs::EndPlan srv;
-                    srv.request.success = false;
-                    srv.request.evaluate = false;
-                    if (!client_end_plan_->call(srv)){
-                       ROS_ERROR("[plan_maintainer] Failed to call service plan_elaboration/end_plan");
+            if(currentPlan_ != -1 ){
+                if(robotActing_ && robotProgressAction_.id == currentActions[i].id){
+                    //it was the robot current action
+                    robotActing_ = false;
+                    if(!currentActions[i].succeed){
+                        //the action failed, a new plan is needed
+                        supervisor_msgs::EndPlan srv;
+                        srv.request.success = false;
+                        srv.request.evaluate = false;
+                        if (!client_end_plan_->call(srv)){
+                           ROS_ERROR("[plan_maintainer] Failed to call service plan_elaboration/end_plan");
+                        }
+                        endCurrentPlan();
+                    }else{
+                        //the action succeed, we update the plan
+                        previousActions_.push_back(plannedRobotAction_);
+                        updatePlan();
                     }
-                    endCurrentPlan();
+                }else if(!robotActing_ && currentActions[i].actors[0] == robotName_){
+                    toTreatRobotResult_ = currentActions[i];
                 }else{
-                    //the action succeed, we update the plan
-                    previousActions_.push_back(plannedRobotAction_);
-                    updatePlan();
+                    //it is not the robot action
+                    checkAction(currentActions[i], currentActions[i].actors[0]);
+                    if(currentPlan_ != -1){
+                        //the plan was not broked by this action
+                        updatePlan();
+                    }
                 }
-            }else if(!robotActing_ && currentActions[i].actors[0] == robotName_){
-                toTreatRobotResult_ = currentActions[i];
+            }else if(robotActing_ && robotProgressAction_.id == currentActions[i].id){
+				robotActing_ = false;
+				supervisor_msgs::EndPlan srv;
+                srv.request.success = false;
+                srv.request.evaluate = false;
+                if (!client_end_plan_->call(srv)){
+                  ROS_ERROR("[plan_maintainer] Failed to call service plan_elaboration/end_plan");
+                 }
+                endCurrentPlan();
             }else{
-                //it is not the robot action
-                checkAction(currentActions[i], currentActions[i].actors[0]);
-                if(currentPlan_ != -1){
-                    //the plan was not broked by this action
-                    updatePlan();
-                }
-            }
+				supervisor_msgs::EndPlan srv;
+                srv.request.success = false;
+                srv.request.evaluate = false;
+                if (!client_end_plan_->call(srv)){
+                  ROS_ERROR("[plan_maintainer] Failed to call service plan_elaboration/end_plan");
+                 }
+                endCurrentPlan();
+	    }
         }
     }
     oldMsgPrevious_ = currentActions;

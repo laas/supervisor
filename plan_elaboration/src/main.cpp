@@ -150,8 +150,7 @@ int main (int argc, char **argv)
             pe_->currentGoal_ = "NONE";
         }
         needPlan_ = false;
-    }
-    if(hasPlan_){
+    }else if(hasPlan_){
         plan_pub.publish(currentPlan_);
     }
     loop_rate.sleep();

@@ -6,6 +6,7 @@ plan_elaboration:
     HATP_actions:
        Pick: 'pick'
        Place: 'place'
+       Drop: 'drop'
        PickAndPlace: 'pickandplace'
        PickAndPlaceReachable: 'pickandplacereachable'
        PickAndPlaceStick: 'pickandplaceStick'

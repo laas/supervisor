@@ -191,10 +191,10 @@ int main (int argc, char **argv)
       sub = node_->subscribe(*it, 1, previousCallback);
       previousSubs.push_back(sub);
   }
-  ros::Subscriber sub_add_todo = node.subscribe("/data_manager/add_data/actions_todo", 1, addTodoCallback);
-  ros::Subscriber sub_rm_todo = node.subscribe("/data_manager/rm_data/actions_todo", 1, rmTodoCallback);
-  ros::Subscriber sub_add_previous = node.subscribe("/data_manager/add_data/previous_actions", 1, addPreviousCallback);
-  ros::Subscriber sub_rm_previous = node.subscribe("/data_manager/rm_data/previous_actions", 1, rmPreviousCallback);
+  ros::Subscriber sub_add_todo = node.subscribe("/data_manager/add_data/actions_todo", 10, addTodoCallback);
+  ros::Subscriber sub_rm_todo = node.subscribe("/data_manager/rm_data/actions_todo", 10, rmTodoCallback);
+  ros::Subscriber sub_add_previous = node.subscribe("/data_manager/add_data/previous_actions", 10, addPreviousCallback);
+  ros::Subscriber sub_rm_previous = node.subscribe("/data_manager/rm_data/previous_actions", 10, rmPreviousCallback);
 
   //We create the publishers
   ros::Publisher todo_pub = node.advertise<supervisor_msgs::ActionsList>("supervisor/actions_todo", 1);

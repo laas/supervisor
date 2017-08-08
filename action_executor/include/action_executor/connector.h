@@ -20,6 +20,7 @@
 
 #include <gtp_ros_msgs/PlanAction.h>
 #include <gtp_ros_msgs/PublishTraj.h>
+#include <gtp_ros_msg/GTPTraj.h>
 
 #include <pr2motion/Arm_Right_MoveAction.h>
 #include <pr2motion/Arm_Left_MoveAction.h>
@@ -33,6 +34,7 @@
 #include <string>
 #include <vector>
 #include <ros/ros.h>
+#include <fstream>
 
 typedef actionlib::SimpleActionServer<supervisor_msgs::ActionExecutorAction> Server;
 typedef actionlib::SimpleActionClient<pr2motion::Arm_Right_MoveAction> Client_Right_Arm;
@@ -67,6 +69,13 @@ struct Connector{
     int nbPlanMax_;/**< nb max to try to plan*/
     bool noExec_;/**< flag true if we should not perform action execution*/
     bool noPlanning_;/**< flag true if we should not plan for action execution (can work only if noExec is also at true)*/
+    std::string saveMode_;
+    std::string saveFilePath_;
+    std::ofstream fileSave_;
+
+    ros::Publisher gtp_pub_; /**< publisher of gtp traj*/
+    trajectory_msgs::JointTrajectory curTraj_;
+    bool needTraj_;
 
     int previousId_;/**< previous gtp id*/
     int idGrasp_;/**< gtp id of the previous grasp*/
