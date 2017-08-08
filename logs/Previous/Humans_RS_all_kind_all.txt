@@ -1,0 +1,10 @@
+	 Nb wait: 0	 time wait: 43.4303
+	 Nb wait: 0	 time wait: 17.6316
+	 Nb wait: 0	 time wait: 23.3199
+	 Nb wait: 0	 time wait: 77.9965
+	 Nb wait: 0	 time wait: 11.4231
+	 Nb wait: 0	 time wait: 45.191
+	 Nb wait: 0	 time wait: 48.8088
+	 Nb wait: 0	 time wait: 34.7815
+	 Nb wait: 0	 time wait: 12.6737
+	 Nb wait: 0	 time wait: 62.7311

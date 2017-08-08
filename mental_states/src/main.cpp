@@ -295,6 +295,16 @@ void infoCallback(const supervisor_msgs::Info::ConstPtr& msg){
     }
 }
 
+/**
+ * \brief Callback for the area facts list topic
+ * @param msg topic msg
+ * */
+void areaFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
+
+    ms_->areaFacts_ = msg->factList;
+
+}
+
 int main (int argc, char **argv)
 {
   ros::init(argc, argv, "mental_states");
@@ -320,6 +330,7 @@ int main (int argc, char **argv)
   ros::Subscriber robot_action;
   ros::Subscriber sub_info;
   ros::Subscriber sub_prev;
+  ros::Subscriber sub_area = node.subscribe("area_manager/factList", 1, areaFactListCallback);
   if(systemMode_ == "new"){
       sub_db = node_->subscribe("database_manager/tables", 1, dbCallback);
       sub_goal = node_->subscribe("goal_manager/goalsList", 1, goalCallback);

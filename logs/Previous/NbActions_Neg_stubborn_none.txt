@@ -1,0 +1,10 @@
+Participant 999	 Condition Negotiation	 19	8
+Participant 999	 Condition Negotiation	 19	8
+Participant 999	 Condition Negotiation	 20	8
+Participant 999	 Condition Negotiation	 20	8
+Participant 999	 Condition Negotiation	 19	8
+Participant 999	 Condition Negotiation	 20	8
+Participant 999	 Condition Negotiation	 19	8
+Participant 999	 Condition Negotiation	 21	8
+Participant 999	 Condition Negotiation	 20	8
+Participant 999	 Condition Negotiation	 20	8

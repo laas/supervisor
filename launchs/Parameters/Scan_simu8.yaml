@@ -1,0 +1,78 @@
+scan_simu8:
+    objectsToPlace: ['RED_CUBE1', 'RED_CUBE2', 'RED_CUBE3','BLUE_CUBE1', 'BLUE_CUBE2', 'BLUE_CUBE3','GREEN_CUBE1', 'GREEN_CUBE2', 'GREEN_CUBE3']
+    stackHuman: ['BLUE_CUBE2', 'RED_CUBE1', 'RED_CUBE3', 'BLUE_CUBE3', 'GREEN_CUBE2']
+    stackRobot: ['BLUE_CUBE1','GREEN_CUBE1','RED_CUBE2', 'GREEN_CUBE3']
+    entityTypes: ['RED_CUBE1', 'RED_CUBE2', 'RED_CUBE3','BLUE_CUBE1', 'BLUE_CUBE2', 'BLUE_CUBE3','GREEN_CUBE1', 'GREEN_CUBE2', 'GREEN_CUBE3', 'SCAN_AREA1', 'SCAN_AREA2', 'HERAKLES_HUMAN1', 'PR2_ROBOT', 'AGENTX', 'AGENTX2']
+    entityColors: ['RED_CUBE1', 'RED_CUBE2', 'RED_CUBE3','BLUE_CUBE1', 'BLUE_CUBE2', 'BLUE_CUBE3','GREEN_CUBE1', 'GREEN_CUBE2', 'GREEN_CUBE3', 'BLUE_BOX', 'GREEN_BOX', 'RED_BOX1', 'RED_BOX2']
+    reachHuman: ['RED_CUBE1', 'BLUE_CUBE2', 'GREEN_CUBE2', 'BLUE_CUBE3', 'RED_CUBE3', 'SCAN_AREA1', 'SCAN_AREA2', 'RED_BOX2', 'GREEN_BOX']
+    reachRobot: ['GREEN_CUBE1','BLUE_CUBE1','RED_CUBE2', 'GREEN_CUBE3', 'SCAN_AREA1', 'SCAN_AREA2', 'RED_BOX1', 'BLUE_BOX']
+    nbTask: 10
+    seed: 0
+    type:
+        RED_CUBE1: 'cube'
+        RED_CUBE2: 'cube'
+        RED_CUBE3: 'cube'
+        BLUE_CUBE1: 'cube'
+        BLUE_CUBE2: 'cube'
+        BLUE_CUBE3: 'cube'
+        GREEN_CUBE1: 'cube'
+        GREEN_CUBE2: 'cube'
+        GREEN_CUBE3: 'cube'
+        SCAN_AREA1: 'area'
+        SCAN_AREA2: 'area'
+        HERAKLES_HUMAN1: 'human'
+        PR2_ROBOT: 'robot'
+        AGENTX: 'X'
+        AGENTX2: 'X'
+    color:
+        RED_CUBE1: 'red'
+        RED_CUBE2: 'red'
+        RED_CUBE3: 'red'
+        RED_BOX1: 'red'
+        RED_BOX2: 'red'
+        BLUE_CUBE1: 'blue'
+        BLUE_CUBE2: 'blue'
+        BLUE_CUBE3: 'blue'
+        BLUE_BOX: 'blue'
+        GREEN_CUBE1: 'green'
+        GREEN_CUBE2: 'green'
+        GREEN_CUBE3: 'green'
+        GREEN_BOX: 'green'
+    position:
+        BLUE_CUBE1:
+            x: 3.5
+            y: 6.4
+            z: 0.94
+        GREEN_CUBE1:
+            x: 3.5
+            y: 6.4
+            z: 0.88
+        RED_CUBE2:
+            x: 3.5
+            y: 6.4
+            z: 0.82
+        GREEN_CUBE3:
+            x: 3.5
+            y: 6.4
+            z: 0.76
+        BLUE_CUBE2:
+            x: 8.8
+            y: 10.6
+            z: 0.85
+        RED_CUBE1:
+            x: 8.8
+            y: 10.6
+            z: 0.79
+        RED_CUBE3:
+            x: 8.8
+            y: 10.6
+            z: 0.73
+        BLUE_CUBE3:
+            x: 8.8
+            y: 10.6
+            z: 0.67
+        GREEN_CUBE2:
+            x: 8.8
+            y: 10.6
+            z: 0.61
+

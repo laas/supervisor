@@ -1,7 +1,7 @@
 ---
 supervisor:
     waitActionServer: 30.0
-    simu: false
+    simu: true
     robot:
         name: 'PR2_ROBOT'
         toasterName: 'pr2'
@@ -17,3 +17,5 @@ supervisor:
     systemMode: 'new' #new or hold
     speakingMode: false
     nbParticipant: '999'
+    nbTask: 10
+    nbStart: 1

@@ -581,13 +581,12 @@ bool MsManager::isVisibleBy(std::string target, std::string agent){
         return true;
     }
 
-    toaster_msgs::Fact fact;
+    /*toaster_msgs::Fact fact;
     fact.subjectId = target;
     fact.property = "isVisibleBy";
     fact.targetId = agent;
     std::vector<toaster_msgs::Fact> facts;
     facts.push_back(fact);
-
     toaster_msgs::ExecuteDB srv;
     srv.request.command = "ARE_IN_TABLE";
     srv.request.agent = robotName_;
@@ -597,6 +596,14 @@ bool MsManager::isVisibleBy(std::string target, std::string agent){
     }else{
        ROS_ERROR("[action_executor] Failed to call service database_manager/execute");
     }
+    return false;*/
+
+    for(std::vector<toaster_msgs::Fact>::iterator it = areaFacts_.begin(); it != areaFacts_.end(); it++){
+        if(it->property == "IsInArea" && it->subjectId == agent && it->targetId == "interaction"){
+            return true;
+        }
+    }
+
     return false;
 }
 

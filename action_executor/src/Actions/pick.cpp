@@ -222,6 +222,18 @@ bool Pick::exec(Server* action_server){
  * */
 bool Pick::post(){
 
+    if(object_ == connector_->onScanArea1_){
+        connector_->onScanArea1_ = "NONE";
+    }
+    if(object_  == connector_->onScanArea2_){
+        connector_->onScanArea2_ = "NONE";
+    }
+
+    std_msgs::String msg;
+    msg.data = object_;
+    connector_->pick_pub_.publish(msg);
+    PutInHand(object_, "right", 0);
+
     //Check gripper position (completly close or not)
     if(gripperEmpty_  && !connector_->simu_){
         ROS_WARN("[action_executor] Robot failed to pick (gripper empty)");

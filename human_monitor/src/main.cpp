@@ -7,6 +7,7 @@
 
 
 #include <human_monitor/human_monitor.h>
+#include "supervisor_msgs/GoalsList.h"
 
 ros::NodeHandle* node_;
 HumanMonitor* hm_;
@@ -19,6 +20,9 @@ std::vector<std::string> humanStack_;
 std::string topStack_, onScan1_, onScan2_, humanTape_;
 std::vector<supervisor_msgs::Action> previousActions_;
 std::map<std::string, std::string> colors_;
+int seed;
+bool started = false;
+int nbExp;
 
 /**
 * \brief Call back for the topic agent_monitor/fact_list
@@ -207,9 +211,15 @@ bool humaActionSimu(supervisor_msgs::HumanAction::Request  &req, supervisor_msgs
             return true;
         }
        hm_->humanGoTo(req.agent, params["position"]);
+    }else if(req.action.name == "moveToStack"){
+       hm_->moveToStack(req.agent);
+    }else if(req.action.name == "moveToBox"){
+        hm_->moveToBox(req.agent);
+     }else if(req.action.name == "moveToTable"){
+        hm_->moveToTable(req.agent);
     }else if(req.action.name == "pickStack"){
        humanPickStack(req.agent);
-    }else if(req.action.name == "pickTape"){
+     }else if(req.action.name == "pickTape"){
         humanPickTape(req.agent);
      }else if(req.action.name == "pickArea1"){
         humanPickArea1(req.agent);
@@ -356,6 +366,43 @@ void previousActionCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
 }
 
 
+void resetEnv(){
+
+    std::ostringstream strs;
+    strs << nbExp;
+    std::string nbString = strs.str();
+    std::string topic = "scan_simu" + nbString + "/stackHuman";
+    node_->getParam(topic, humanStack_);
+
+    if(humanStack_.size() > 0){
+        topStack_ = humanStack_.front();
+        humanStack_.erase(humanStack_.begin());
+    }else{
+        topStack_ = "NULL";
+    }
+    onScan1_ = "NULL";
+    onScan2_ = "NULL";
+    nbExp++;
+}
+
+/**
+ * \brief Callback of the goal list
+ * @param msg topic msg
+ * */
+void goalsListCallback(const supervisor_msgs::GoalsList::ConstPtr& msg){
+
+    if(msg->changed){
+        if(msg->currentGoal == "SCAN_US" && !started){
+            started = true;
+        }
+        if(msg->currentGoal != "SCAN_US" && started){
+            started = false;
+            resetEnv();
+            seed++;
+            srand(seed);
+        }
+    }
+}
 
 /**
  * \brief Main function
@@ -376,19 +423,16 @@ int main (int argc, char **argv)
   node.getParam("/human_monitor/threshold/drop", dropThreshold);
   node.getParam("/human_monitor/threshold/disengage", disengageThreshold);
   node.getParam("/human_monitor/shouldDetect", shouldDetect);
-  node.getParam("/human_monitor/humanStack", humanStack_);
+  node.getParam("/supervisor/nbStart", nbExp);
 
   HumanMonitor hm(node_);
   hm_ = &hm;
 
-  if(humanStack_.size() > 0){
-      topStack_ = humanStack_.front();
-      humanStack_.erase(humanStack_.begin());
-  }else{
-      topStack_ = "NULL";
-  }
-  onScan1_ = "NULL";
-  onScan2_ = "NULL";
+  node_->getParam("scan_simu1/seed", seed);
+  srand (seed);
+
+  resetEnv();
+
   humanTape_ = "RED_TAPE2";
   colors_["GREEN_CUBE1"] = "green";
   colors_["GREEN_CUBE2"] = "green";
@@ -402,6 +446,7 @@ int main (int argc, char **argv)
 
   ros::Subscriber sub = node.subscribe("agent_monitor/factList", 1, agentFactListCallback);
   ros::Subscriber sub_prev_action = node.subscribe("/supervisor/previous_actions", 10, previousActionCallback);
+  ros::Subscriber sub_goal = node.subscribe("/goal_manager/goalsList", 10, goalsListCallback);
 
   ROS_INFO("[human_monitor] Ready");
 

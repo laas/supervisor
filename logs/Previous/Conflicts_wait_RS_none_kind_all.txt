@@ -1,0 +1,11 @@
+Nb wait 0
+Nb wait 0
+Nb wait 2
+Nb wait 2
+Nb wait 2
+Nb wait 2
+Nb wait 2
+Nb wait 3
+Nb wait 1
+Nb wait 2
+Nb wait 2

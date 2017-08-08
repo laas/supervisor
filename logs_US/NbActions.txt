@@ -128,3 +128,9 @@ Participant 1	 Condition RS-all	 19	11
 Participant 1	 Condition Adaptation	 22	9
 Participant 1	 Condition Negotiation	 21	10
 Participant 1	 Condition Negotiation	 20	11
+Participant 	 Condition RS-all	 0	0
+Participant 	 Condition RS-all	 0	0
+Participant 	 Condition RS-all	 0	0
+Participant 	 Condition RS-all	 0	0
+Participant 999	 Condition RS-none	 0	0
+Participant 999	 Condition RS-none	 0	0

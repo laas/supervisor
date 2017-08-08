@@ -3,6 +3,8 @@
 
 #include "supervisor_msgs/ActionExecutorAction.h"
 #include "supervisor_msgs/ActionsList.h"
+#include "supervisor_msgs/GoalsList.h"
+#include "std_msgs/String.h"
 
 #include <actionlib/server/simple_action_server.h>
 #include <actionlib/client/simple_action_client.h>
@@ -81,6 +83,12 @@ struct Connector{
     trajectory_msgs::JointTrajectory curTraj_;
     bool needTraj_;
 
+    int durationMin_;
+    int durationMax_;
+
+    int nbConflicts_;
+    ros::Publisher pick_pub_; /**< publisher of robot pick*/
+
     int previousId_;/**< previous gtp id*/
     int idGrasp_;/**< gtp id of the previous grasp*/
     actionlib::SimpleActionClient<gtp_ros_msgs::PlanAction>* acGTP_;/**< gtp action server*/
@@ -113,6 +121,9 @@ struct Connector{
 
     bool isActing_; /**< Flag indicating if the robot is executing an action*/
     supervisor_msgs::Action currentAction_; /**< Current action executed by the robot*/
+
+    std::string onScanArea1_;
+    std::string onScanArea2_;
 
     std::map<std::string, std::string> highLevelNames_; /**< high level names of objects*/
     std::map<std::string, std::vector<std::string> > highLevelRefinment_; /**< possible refinment for high level names*/

@@ -1,0 +1,10 @@
+Participant 999	 Condition Adaptation	 19	9
+Participant 999	 Condition Adaptation	 19	9
+Participant 999	 Condition Adaptation	 19	9
+Participant 999	 Condition Adaptation	 20	8
+Participant 999	 Condition Adaptation	 19	9
+Participant 999	 Condition Adaptation	 17	10
+Participant 999	 Condition Adaptation	 21	8
+Participant 999	 Condition Adaptation	 18	9
+Participant 999	 Condition Adaptation	 19	8
+Participant 999	 Condition Adaptation	 18	10

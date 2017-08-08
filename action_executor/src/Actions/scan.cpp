@@ -143,7 +143,7 @@ bool Scan::exec(Server* action_server){
     }*/
 
     //Verification of head focus
-    bool shouldWait = true;
+    /*bool shouldWait = true;
     ros::Time start_ = ros::Time::now();
     while(shouldWait){
         ros::Duration d = ros::Time::now() - start_;
@@ -159,7 +159,7 @@ bool Scan::exec(Server* action_server){
     if(headFocus_ != object_){
         ROS_WARN("Unable to get the head focus, aborting the action!");
         return false;
-    }
+    }*/
 
     if(!connector_->simu_){
         //turn on the light

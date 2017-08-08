@@ -1,0 +1,10 @@
+	 Condition Negotiation	 2	2
+	 Condition Negotiation	 2	2
+	 Condition Negotiation	 1	2
+	 Condition Negotiation	 1	1
+	 Condition Negotiation	 2	2
+	 Condition Negotiation	 1	3
+	 Condition Negotiation	 3	3
+	 Condition Negotiation	 1	0
+	 Condition Negotiation	 1	1
+	 Condition Negotiation	 2	1

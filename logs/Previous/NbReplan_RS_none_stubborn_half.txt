@@ -1,0 +1,10 @@
+Participant 999	 Condition RS-none	 45
+Participant 999	 Condition RS-none	 27
+Participant 999	 Condition RS-none	 27
+Participant 999	 Condition RS-none	 35
+Participant 999	 Condition RS-none	 38
+Participant 999	 Condition RS-none	 32
+Participant 999	 Condition RS-none	 25
+Participant 999	 Condition RS-none	 36
+Participant 999	 Condition RS-none	 25
+Participant 999	 Condition RS-none	 27

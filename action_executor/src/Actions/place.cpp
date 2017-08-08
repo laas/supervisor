@@ -80,6 +80,7 @@ bool Place::preconditions(){
             return false;
         }
     }
+    connector_->objectToWatch_ = support_;
 
     //the robot should lok at the support
     connector_->currentAction_.headFocus = support_;
@@ -96,6 +97,12 @@ bool Place::preconditions(){
        ROS_WARN("[action_executor] The support is not a known support object");
       return false;
     }
+    if(support_ == "SCAN_AREA1" && connector_->onScanArea1_ != "NONE"){
+        return false;
+    }
+    if(support_ == "SCAN_AREA2" && connector_->onScanArea2_ != "NONE"){
+        return false;
+    }
 
     //Then we check if the robot has the object in hand and if the support is reachable
     std::vector<toaster_msgs::Fact> precsTocheck;
@@ -108,6 +115,10 @@ bool Place::preconditions(){
     fact.property = "isReachableBy";
     fact.targetId = connector_->robotName_;
     precsTocheck.push_back(fact);
+    fact.subjectId = "NULL";
+        fact.property = "isOn";
+        fact.targetId = support_;
+        precsTocheck.push_back(fact);
 
     return ArePreconditionsChecked(precsTocheck);
 
@@ -313,6 +324,14 @@ bool Place::exec(Server* action_server){
  * */
 bool Place::post(){
 
+    if(support_ == "SCAN_AREA1"){
+        connector_->onScanArea1_ = object_;
+    }
+    if(support_ == "SCAN_AREA2"){
+        connector_->onScanArea2_ = object_;
+    }
+
+    RemoveFromHand(object_);
     if(replacementSupport_ != "NONE"){
         PutOnSupport(object_, replacementSupport_);
     }

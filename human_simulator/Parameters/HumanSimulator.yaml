@@ -1,0 +1,6 @@
+---
+human_simulator:
+    humanName: 'HERAKLES_HUMAN1'
+    mode: 'all' #all, none or half
+    stubborn: true
+    objects: ['RED_CUBE1', 'RED_CUBE2', 'RED_CUBE3', 'BLUE_CUBE1', 'BLUE_CUBE2', 'BLUE_CUBE3', 'GREEN_CUBE1', 'GREEN_CUBE2', 'GREEN_CUBE3']

@@ -29,6 +29,8 @@ action_server_(*node, name,
     connector_.torsoMoving_ = false;
     connector_.stopOrder_ = false;
     connector_.refineOrder_ = false;
+    connector_.onScanArea1_ = "NONE";
+    connector_.onScanArea2_ = "NONE";
     connector_.node_->getParam("/action_executor/restPosition/right", connector_.rightArmRestPose_);
     connector_.node_->getParam("/action_executor/restPosition/left", connector_.leftArmRestPose_);
     connector_.node_->getParam("/supervisor/waitActionServer", connector_.waitActionServer_);
@@ -41,6 +43,8 @@ action_server_(*node, name,
     connector_.node_->getParam("/action_executor/noPlanning", connector_.noPlanning_);
     connector_.node_->getParam("/action_executor/humanCost", connector_.humanCost_);
     connector_.node_->getParam("/action_executor/saveMode", connector_.saveMode_);
+    connector_.node_->getParam("/action_executor/durationMin", connector_.durationMin_);
+    connector_.node_->getParam("/action_executor/durationMax", connector_.durationMax_);
     connector_.node_->getParam("/action_executor/saveFilePath", connector_.saveFilePath_);
 
     //initialize high level names (from param)
@@ -50,6 +54,7 @@ action_server_(*node, name,
     previous_pub_ = connector_.node_->advertise<supervisor_msgs::ActionsList>("/data_manager/add_data/previous_actions", 1);
     current_pub_ = connector_.node_->advertise<supervisor_msgs::Action>("/action_executor/current_robot_action", 1);
     connector_.gtp_pub_ = connector_.node_->advertise<gtp_ros_msg::GTPTraj>("/gtp/trajectory", 1);
+    connector_.pick_pub_ = connector_.node_->advertise<std_msgs::String>("/action_executor/pick", 1);
 
     //Init services
     connector_.client_db_execute_ = connector_.node_->serviceClient<toaster_msgs::ExecuteDB>("database_manager/execute");
@@ -91,11 +96,6 @@ action_server_(*node, name,
     connector_.PR2motion_arm_right_Q_->waitForServer();
     connector_.PR2motion_arm_left_Q_ = new actionlib::SimpleActionClient<pr2motion::Arm_Left_MoveToQGoalAction>("pr2motion/Arm_Left_MoveToQGoal",true);
     connector_.PR2motion_arm_left_Q_->waitForServer();
-    ROS_INFO("Waiting for grippers actions server.");
-    connector_.gripper_right = new actionlib::SimpleActionClient<pr2_controllers_msgs::Pr2GripperCommandAction>("r_gripper_sensor_controller/gripper_action", true);
-    connector_.gripper_right->waitForServer();
-    connector_.gripper_left = new actionlib::SimpleActionClient<pr2_controllers_msgs::Pr2GripperCommandAction>("l_gripper_sensor_controller/gripper_action", true);
-    connector_.gripper_left->waitForServer();
     ROS_INFO("[action_executor] Action clients started.");
 
     //Init PR2motion
@@ -378,6 +378,7 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
             previous_pub_.publish(msg_previous);
         }
 	connector_.objectToWatch_ = "NULL";
+        connector_.nbConflicts_ ++;
         return;
     }
 

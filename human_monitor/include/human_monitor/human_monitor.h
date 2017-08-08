@@ -31,6 +31,9 @@ public:
     bool isManipulableObject(std::string object);
     bool isSupportObject(std::string support);
     bool isContainerObject(std::string container);
+    void moveToStack(std::string agent);
+    void moveToBox(std::string agent);
+    void moveToTable(std::string agent);
 
     bool shouldLook_;
 
@@ -52,6 +55,9 @@ private:
     ros::ServiceClient client_set_pose_; /**< toaster client to set entities poses*/
     ros::ServiceClient client_set_info_; /**< toaster client to set info in the database*/
     int currentId_; /**< current id for humans actions*/
+
+    int durationMin_;
+    int durationMax_;
 };
 
 #endif // HUMANMONITOR_H

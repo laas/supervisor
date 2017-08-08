@@ -1,0 +1,11 @@
+	 Condition RS-none	 2	0
+	 Condition RS-none	 3	0
+	 Condition RS-none	 1	0
+	 Condition RS-none	 0	0
+	 Condition RS-none	 4	0
+	 Condition RS-none	 4	0
+	 Condition RS-none	 4	0
+	 Condition RS-none	 1	0
+	 Condition RS-none	 3	0
+	 Condition RS-none	 3	0
+	 Condition Negotiation	 3	2

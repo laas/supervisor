@@ -1,0 +1,10 @@
+Participant 999	 Condition RS-all	 34
+Participant 999	 Condition RS-all	 31
+Participant 999	 Condition RS-all	 21
+Participant 999	 Condition RS-all	 29
+Participant 999	 Condition RS-all	 32
+Participant 999	 Condition RS-all	 19
+Participant 999	 Condition RS-all	 22
+Participant 999	 Condition RS-all	 30
+Participant 999	 Condition RS-all	 36
+Participant 999	 Condition RS-all	 36

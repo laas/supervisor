@@ -10,6 +10,7 @@
 #include <ros/ros.h>
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/client/terminal_state.h>
+#include <fstream>
 
 #include "std_srvs/Trigger.h"
 
@@ -60,6 +61,8 @@ std::vector<supervisor_msgs::Action> toTell_;
 std::string systemMode_;
 bool speakingMode_;
 bool alreadyReplan_;
+int nbWait_ = 0;
+bool started = false;
 
 /**
  * \brief Fill the highLevelNames map from param
@@ -168,8 +171,6 @@ std::string getLockedObject(supervisor_msgs::Action action){
          ROS_ERROR("[action_executor] Failed to call service database_manager/execute");
         }
     }
-
-    ROS_WARN("refined object: %s", object.c_str());
 
     return object;
 
@@ -306,16 +307,12 @@ void todoHoldCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
     supervisor_msgs::Action humanAction;
     bool hasHumanAction = false;
     for(std::vector<supervisor_msgs::Action>::iterator it = actionsTodo_.begin(); it != actionsTodo_.end(); it++){
-        if(it->actors[0] == mainPartner_){
-	    if(it->name == "pickandplace" && (it->parameter_values[0] == "RED_TAPE1" || it->parameter_values[0] == "RED_TAPE2")){
-		if(actionsTodo_.size() > 1){
-		    continue;
-		}
-	    }
-            //we remember the action to inform the human
+        if(it->actors[0] == mainPartner_ && it->id != 0){
             hasHumanAction = true;
             humanAction = *it;
             break;
+        }if(it->id == 0 && it->actors[0] == mainPartner_){
+           ROS_ERROR("name of the 0 action: %s", humanAction.name.c_str());
         }
     }
     if(areActionsEqual(humanAction, previousTalkedHumanAction_)){
@@ -323,9 +320,9 @@ void todoHoldCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
         hasHumanAction = false;
     }
 
-    if(!areActionsEqual(humanAction, previousHumanAction_)){
-	previousHumanAction_ = humanAction;
-	alreadyReplan_ = false;
+    if(!areActionsEqual(humanAction, previousHumanAction_) && hasHumanAction){
+    previousHumanAction_ = humanAction;
+    alreadyReplan_ = false;
     }
 
     bool hasRobotAction = false;
@@ -340,7 +337,7 @@ void todoHoldCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                 	if(actionsTodo_.size() > 1){
                     		continue;
                 	}
-            	}	
+                }
                 hasRobotAction = true;
                 action = *it;
                 break;
@@ -397,7 +394,8 @@ void todoHoldCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                     if(duration >= timeWaitHuman_){
 			if(!alreadyReplan_){
 			ROS_WARN("informing");
-			if(isInArea(mainPartner_, areaInform_)){
+            if(isInArea(mainPartner_, areaInform_) && hasHumanAction){
+                nbWait_++;
 			timerStarted_ = false;
 			supervisor_msgs::GiveInfo srv;
                         srv.request.type = "ACTION";
@@ -528,7 +526,7 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
 	supervisor_msgs::Action humanAction;
     bool hasHumanAction = false;
     for(std::vector<supervisor_msgs::Action>::iterator it = actionsTodo_.begin(); it != actionsTodo_.end(); it++){
-        if(it->actors[0] == mainPartner_){
+        if(it->actors[0] == mainPartner_ &&  it->id != 0){
             if(it->name == "pickandplace" && (it->parameter_values[0] == "RED_TAPE1" || it->parameter_values[0] == "RED_TAPE2")){
                 if(actionsTodo_.size() > 1){
                     continue;
@@ -544,7 +542,7 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
         //we already informed about this action
         hasHumanAction = false;
     }
-           if(!areActionsEqual(humanAction, previousHumanAction_)){
+           if(!areActionsEqual(humanAction, previousHumanAction_) && hasHumanAction){
         previousHumanAction_ = humanAction;
         alreadyReplan_ = false;
     }
@@ -760,19 +758,21 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                     if(duration >= timeWaitHuman_){
                         if(!alreadyReplan_){
                         ROS_WARN("informing");
-                        if(isInArea(mainPartner_, areaInform_)){
+                        if(isInArea(mainPartner_, areaInform_) && hasHumanAction){
                         timerStarted_ = false;
 			supervisor_msgs::GiveInfo srv;
                         srv.request.type = "ACTION";
                          srv.request.action = humanAction;
                         srv.request.actionState = "SHOULD";
                         srv.request.partner = mainPartner_;
+                        nbWait_++;
                         if (!client_inform_->call(srv)){
                            ROS_ERROR("[robot_decision] Failed to call service dialogue_node/give_info");
                         }
                         }
                         alreadyReplan_ = true;
                         }else{
+                            if(isInArea(mainPartner_, areaInform_)){
                         ROS_WARN("replaning");
                         timerStarted_ = false;
 			alreadyReplan_ = false;
@@ -785,6 +785,7 @@ void todoCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
                         if (!client_end_plan_->call(srv)){
                            ROS_ERROR("[robot_decision] Failed to call service plan_elaboration/end_plan");
                         }
+                            }
                         }
                     }
 	
@@ -1157,6 +1158,25 @@ void areaFactListCallback(const toaster_msgs::FactList::ConstPtr& msg){
 void goalCallback(const supervisor_msgs::GoalsList::ConstPtr& msg){
 
     currentGoal_ = msg->currentGoal;
+
+    if(msg->changed){
+        if(msg->currentGoal == "SCAN_US" && !started){
+            started = true;
+        }
+        if(msg->currentGoal != "SCAN_US" && started){
+            started = false;
+            //we log results
+            std::ofstream fileSave;
+            //we save the execution time
+            std::string fileName = "/home/sdevin/catkin_ws/src/supervisor/logs/Conflicts_wait.txt";
+            fileSave.open(fileName.c_str(), std::ios::app);
+            std::ostringstream strs;
+            strs << nbWait_;
+            std::string stringNb = strs.str();
+            fileSave << "Nb wait " << stringNb.c_str() << std::endl;
+            nbWait_ = 0;
+        }
+    }
 }
 
 /**
@@ -1356,10 +1376,10 @@ int main (int argc, char **argv)
 
   ros::Subscriber sub_todo;
   ros::Subscriber sub_ms;
-  ros::Subscriber sub_goal = node.subscribe("goal_manager/goalsList", 1, goalCallback);
-  ros::Subscriber sub_area = node.subscribe("area_manager/factList", 1, areaFactListCallback);
-  ros::Subscriber sub_plan = node.subscribe("plan_elaboration/plan", 1, planCallback);
-  ros::Subscriber sub_prev = node.subscribe("supervisor/previous_actions", 1, previousCallback);
+  ros::Subscriber sub_goal = node.subscribe("goal_manager/goalsList", 10, goalCallback);
+  ros::Subscriber sub_area = node.subscribe("area_manager/factList", 10, areaFactListCallback);
+  ros::Subscriber sub_plan = node.subscribe("plan_elaboration/plan", 10, planCallback);
+  ros::Subscriber sub_prev = node.subscribe("supervisor/previous_actions", 10, previousCallback);
   if(systemMode_ == "new"){
       sub_ms = node.subscribe("mental_states/mental_states", 1, msCallback);
       sub_todo = node.subscribe("supervisor/actions_todo", 1,todoCallback);

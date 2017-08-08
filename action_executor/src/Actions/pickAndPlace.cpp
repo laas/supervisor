@@ -112,6 +112,13 @@ bool PickAndPlace::preconditions(){
       return false;
     }
 
+    if(support_ == "SCAN_AREA1" && connector_->onScanArea1_ != "NONE"){
+        return false;
+    }
+    if(support_ == "SCAN_AREA2" && connector_->onScanArea2_ != "NONE"){
+        return false;
+    }
+
     //Then we check if the object and the support are reachable
     std::vector<toaster_msgs::Fact> precsTocheck;
     toaster_msgs::Fact fact;
@@ -124,11 +131,11 @@ bool PickAndPlace::preconditions(){
         fact.property = "isReachableBy";
         fact.targetId = connector_->robotName_;
         precsTocheck.push_back(fact);
-	fact.subjectId = "NULL";
+    }
+    fact.subjectId = "NULL";
         fact.property = "isOn";
         fact.targetId = support_;
         precsTocheck.push_back(fact);
-    }
     return ArePreconditionsChecked(precsTocheck);
 
 }

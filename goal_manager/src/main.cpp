@@ -14,6 +14,9 @@ The goal manager allows to choose a goal to execute
 #include <ros/ros.h>
 #include <fstream>
 #include "toaster_msgs/ExecuteDB.h"
+#include "toaster_msgs/RemoveFromHand.h"
+#include "toaster_msgs/SetEntityPose.h"
+#include "toaster_msgs/SetInfoDB.h"
 
 #include "supervisor_msgs/Goal.h"
 #include "supervisor_msgs/GoalsList.h"
@@ -35,11 +38,18 @@ std::vector<supervisor_msgs::Goal> possibleGoals_;
 
 ros::ServiceClient* client_db_execute_;
 ros::ServiceClient* client_say_;
+ros::ServiceClient* client_rm_hand_;
+ros::ServiceClient* client_set_pose_;
+ros::ServiceClient* client_set_db_;
 
 ros::Time start_;
 std::string nbParticipant_;
 std::string condition_;
 bool french;
+int nbMaxTask_;
+int nbTask_ = 0;
+bool needRestart_ = false;
+int nbExp;
 
 
 /**
@@ -178,9 +188,7 @@ bool cancelGoal(supervisor_msgs::String::Request  &req, supervisor_msgs::String:
 
 void writeLogs(){
 
-   ros::Duration(1.0).sleep();
-
-    std::ofstream fileSaveTime, fileSaveMistakes;
+    std::ofstream fileSaveTime;
     //we save the execution time
     std::string fileNameTime = "/home/sdevin/catkin_ws/src/supervisor/logs/Time.txt";
     fileSaveTime.open(fileNameTime.c_str(), std::ios::app);
@@ -190,158 +198,198 @@ void writeLogs(){
     std::ostringstream strs;
     strs << d;
     std::string dString = strs.str();
-    fileSaveTime << "Participant " << nbParticipant_.c_str() << "\t Condition " << condition_.c_str() << "\t " << dString.c_str() << std::endl;
+    fileSaveTime <<  "\t Condition " << condition_.c_str() << "\t " << dString.c_str() << std::endl;
 
 
-    //we save the number of mistakes
-    std::string fileNameMistakes = "/home/sdevin/catkin_ws/src/supervisor/logs/Mistakes.txt";
-    fileSaveMistakes.open(fileNameMistakes.c_str(), std::ios::app);
-    int nbMistakes = 0;
+}
 
-    //facts to check
+
+
+void resetEnv(){
+
+
+    std::vector<std::string> objectsToPlace, stackHuman, stackRobot;
+
+    std::ostringstream strs;
+    strs << nbExp;
+    std::string nbString = strs.str();
+    std::string topicStackHuman = "scan_simu" + nbString + "/stackHuman";
+    node_->getParam(topicStackHuman, stackHuman);
+    std::string topicStackRobot = "scan_simu" + nbString + "/stackRobot";
+    node_->getParam(topicStackRobot, stackRobot);
+
+    ROS_WARN("Setting stack %s", nbString.c_str());
+
+    node_->getParam("scan_simu1/objectsToPlace", objectsToPlace);
+
+    //remove objects from hands
+    for(std::vector<std::string>::iterator it = objectsToPlace.begin(); it != objectsToPlace.end(); it++){
+        toaster_msgs::RemoveFromHand srv;
+        srv.request.objectId = *it;
+        if (!client_rm_hand_->call(srv)){
+         ROS_ERROR("[goal_manager] Failed to call service pdg/remove_from_hand");
+        }
+    }
+
+    //set objects poses
+    for(std::vector<std::string>::iterator it = objectsToPlace.begin(); it != objectsToPlace.end(); it++){
+        toaster_msgs::SetEntityPose srv;
+        srv.request.id = *it;
+        srv.request.type = "object";
+        std::string posXtopic = "scan_simu"  + nbString +  "/position/" + *it + "/x";
+        node_->getParam(posXtopic, srv.request.pose.position.x);
+        std::string posYtopic = "scan_simu"  + nbString +  "/position/" + *it + "/y";
+        node_->getParam(posYtopic, srv.request.pose.position.y);
+        std::string posZtopic = "scan_simu"  + nbString +  "/position/" + *it + "/z";
+        node_->getParam(posZtopic, srv.request.pose.position.z);
+        srv.request.pose.orientation.x = 0.0;
+        srv.request.pose.orientation.y = 0.0;
+        srv.request.pose.orientation.z = 0.0;
+        srv.request.pose.orientation.w = 1.0;
+        if (!client_set_pose_->call(srv)){
+         ROS_ERROR("Failed to call service toaster_simu/set_entity_pose");
+        }
+    }
+
+    //set human pose
+    toaster_msgs::SetEntityPose srv_set;
+    srv_set.request.id = "head";
+    srv_set.request.ownerId = "HERAKLES_HUMAN1";
+    srv_set.request.type = "joint";
+    srv_set.request.pose.position.x = 5.0;
+    srv_set.request.pose.position.y = 7.1;
+    srv_set.request.pose.position.z = 0.0;
+    srv_set.request.pose.orientation.x = 0.0;
+    srv_set.request.pose.orientation.y = 0.0;
+    srv_set.request.pose.orientation.z = 1.0;
+    srv_set.request.pose.orientation.w = 0.0;
+    if (!client_set_pose_->call(srv_set)){
+     ROS_ERROR("Failed to call service toaster_simu/set_entity_pose");
+    }
+    srv_set.request.id = "HERAKLES_HUMAN1";
+    srv_set.request.type = "human";
+    if (!client_set_pose_->call(srv_set)){
+     ROS_ERROR("Failed to call service toaster_simu/set_entity_pose");
+    }
+
+    //reset DB
+    toaster_msgs::ExecuteDB srv_reset;
+    srv_reset.request.command = "EMPTY";
+    srv_reset.request.type = "ALL";
+    if (!client_db_execute_->call(srv_reset)){
+       ROS_ERROR("[goal_manager] Failed to call service database_manager/execute");
+    }
+
+    bool first = true;
+    std::string previousCube;
     std::vector<toaster_msgs::Fact> facts;
+    for(std::vector<std::string>::iterator it = stackHuman.begin(); it != stackHuman.end(); it++){
+        if(first){
+            previousCube = *it;
+            first = false;
+        }else{
+            toaster_msgs::Fact fact;
+            fact.subjectId = previousCube;
+            fact.property = "isOn";
+            fact.propertyType = "state";
+            fact.targetId = *it;
+            fact.factObservability = 1.0;
+            facts.push_back(fact);
+            previousCube = *it;
+        }
+    }
+    first = true;
+    for(std::vector<std::string>::iterator it = stackRobot.begin(); it != stackRobot.end(); it++){
+        if(first){
+            previousCube = *it;
+            first = false;
+        }else{
+            toaster_msgs::Fact fact;
+            fact.subjectId = previousCube;
+            fact.property = "isOn";
+            fact.propertyType = "state";
+            fact.targetId = *it;
+            fact.factObservability = 1.0;
+            facts.push_back(fact);
+            previousCube = *it;
+        }
+    }
+
+    std::vector<std::string> reachHuman;
+    std::string topicReachHuman = "scan_simu" + nbString + "/reachHuman";
+    node_->getParam(topicReachHuman, reachHuman);
+    for(std::vector<std::string>::iterator it = reachHuman.begin(); it != reachHuman.end(); it++){
+            toaster_msgs::Fact fact;
+            fact.subjectId = *it;
+            fact.property = "isReachableBy";
+            fact.propertyType = "state";
+            fact.targetId = "HERAKLES_HUMAN1";
+            fact.factObservability = 1.0;
+            facts.push_back(fact);
+    }
+
+    std::vector<std::string> reachRobot;
+    std::string topicReachRobot = "scan_simu" + nbString + "/reachRobot";
+    node_->getParam(topicReachRobot, reachRobot);
+    for(std::vector<std::string>::iterator it = reachRobot.begin(); it != reachRobot.end(); it++){
+            toaster_msgs::Fact fact;
+            fact.subjectId = *it;
+            fact.property = "isReachableBy";
+            fact.propertyType = "state";
+            fact.targetId = robotName_;
+            fact.factObservability = 1.0;
+            facts.push_back(fact);
+    }
+
+
+    std::vector<std::string> entityTypes;
+    node_->getParam("scan_simu1/entityTypes", entityTypes);
+    for(std::vector<std::string>::iterator it = entityTypes.begin(); it != entityTypes.end(); it++){
+        toaster_msgs::Fact fact;
+        fact.subjectId = *it;
+        fact.property = "type";
+        fact.propertyType = "state";
+        std::string typeTopic = "scan_simu1/type/" + *it;
+        node_->getParam(typeTopic, fact.targetId);
+        fact.factObservability = 1.0;
+        facts.push_back(fact);
+    }
+    std::vector<std::string> entityColors;
+    node_->getParam("scan_simu1/entityColors", entityColors);
+    for(std::vector<std::string>::iterator it = entityColors.begin(); it != entityColors.end(); it++){
+        toaster_msgs::Fact fact;
+        fact.subjectId = *it;
+        fact.property = "color";
+        fact.propertyType = "state";
+        std::string colorTopic = "scan_simu1/color/" + *it;
+        node_->getParam(colorTopic, fact.targetId);
+        fact.factObservability = 1.0;
+        facts.push_back(fact);
+    }
+
     toaster_msgs::Fact fact;
-    fact.property = "isScan";
+    fact.subjectId = "FTRUE";
+    fact.property = "value";
+    fact.propertyType = "state";
     fact.targetId = "true";
-    fact.subjectId = "BLUE_CUBE1";
+    fact.factObservability = 1.0;
     facts.push_back(fact);
-    fact.subjectId = "BLUE_CUBE2";
-    facts.push_back(fact);
-    fact.subjectId = "BLUE_CUBE3";
-    facts.push_back(fact);
-    fact.subjectId = "GREEN_CUBE1";
-    facts.push_back(fact);
-    fact.subjectId = "GREEN_CUBE2";
-    facts.push_back(fact);
-    fact.subjectId = "GREEN_CUBE3";
-    facts.push_back(fact);
-    fact.subjectId = "RED_CUBE1";
-    facts.push_back(fact);
-    fact.subjectId = "RED_CUBE2";
-    facts.push_back(fact);
-    fact.subjectId = "RED_CUBE3";
-    facts.push_back(fact);
-    fact.property = "isIn";
-    fact.targetId = "BLUE_BOX";
-    fact.subjectId = "BLUE_CUBE1";
-    facts.push_back(fact);
-    fact.subjectId = "BLUE_CUBE2";
-    facts.push_back(fact);
-    fact.subjectId = "BLUE_CUBE3";
-    facts.push_back(fact);
-    fact.targetId = "GREEN_BOX";
-    fact.subjectId = "GREEN_CUBE1";
-    facts.push_back(fact);
-    fact.subjectId = "GREEN_CUBE2";
-    facts.push_back(fact);
-    fact.subjectId = "GREEN_CUBE3";
+    fact.subjectId = "FFALSE";
+    fact.targetId = "false";
     facts.push_back(fact);
 
-    //we check the facts
-    toaster_msgs::ExecuteDB srv;
-    srv.request.command = "ARE_IN_TABLE";
-    srv.request.type = "INDIV";
-    srv.request.agent = robotName_;
+    toaster_msgs::SetInfoDB srv;
     srv.request.facts = facts;
-   int i = 0;
-    if (client_db_execute_->call(srv)){
-        std::vector<std::string> answer =  srv.response.results;
-        for(std::vector<std::string>::iterator it = answer.begin(); it != answer.end(); it++){
-            if(*it != "true"){
-		ROS_WARN("mistake in first list, fact %d", i);
-                nbMistakes++;
-            }
-	   i++;
-        }
-    }else{
-       ROS_ERROR("[goal_manager] Failed to call service database_manager/execute");
+    srv.request.infoType = "FACT";
+    srv.request.add = true;
+    srv.request.agentId = robotName_;
+    if (!client_set_db_->call(srv)){
+     ROS_ERROR("[goal_manager] Failed to call service database_manager/set_info");
     }
-
-    //facts to check for red objects
-    facts.clear();
-    fact.property = "isScan";
-    fact.targetId = "true";
-    fact.subjectId = "RED_TAPE1";
-    facts.push_back(fact);
-    fact.subjectId = "RED_TAPE2";
-    facts.push_back(fact);
-    fact.property = "isIn";
-    fact.targetId = "RED_BOX1";
-    fact.subjectId = "RED_CUBE1";
-    facts.push_back(fact);
-    fact.targetId = "RED_BOX2";
-    facts.push_back(fact);
-    fact.targetId = "RED_BOX1";
-    fact.subjectId = "RED_CUBE2";
-    facts.push_back(fact);
-    fact.targetId = "RED_BOX2";
-    facts.push_back(fact);
-    fact.targetId = "RED_BOX1";
-    fact.subjectId = "RED_CUBE3";
-    facts.push_back(fact);
-    fact.targetId = "RED_BOX2";
-    facts.push_back(fact);
-
-    //we check the facts
-    srv.request.facts = facts;
-    i = 0;
-    if (client_db_execute_->call(srv)){
-        std::vector<std::string> answer =  srv.response.results;
-        bool pair = true;
-        bool ok = false;
-        for(std::vector<std::string>::iterator it = answer.begin(); it != answer.end(); it++){
-            if(*it != "true" && !pair && !ok){
-                ROS_WARN("mistake in second list, fact %d", i);
-                nbMistakes++;
-            }else if(pair && *it == "true"){
-                ok = true;
-            }
-            if(!pair){
-                ok = false;
-            }
-            pair = !pair;
-           i++;
-        }
-    }else{
-       ROS_ERROR("[goal_manager] Failed to call service database_manager/execute");
+    srv.request.agentId = "HERAKLES_HUMAN1";
+    if (!client_set_db_->call(srv)){
+     ROS_ERROR("[goal_manager] Failed to call service database_manager/set_info");
     }
-
-
-    facts.clear();
-    fact.targetId = "RED_BOX1";
-    fact.subjectId = "RED_TAPE1";
-    facts.push_back(fact);
-    fact.targetId = "RED_BOX2";
-    facts.push_back(fact);
-    fact.targetId = "RED_BOX1";
-    fact.subjectId = "RED_TAPE2";
-    facts.push_back(fact);
-    fact.targetId = "RED_BOX2";
-    facts.push_back(fact);
-
-    //we check the facts
-    srv.request.facts = facts;
-    i = 0;
-    if (client_db_execute_->call(srv)){
-        std::vector<std::string> answer =  srv.response.results;
-        bool ok = false;
-        for(std::vector<std::string>::iterator it = answer.begin(); it != answer.end(); it++){
-            if(*it == "true" ){
-                ok = true;
-		break;
-            }
-        }
-	if(!ok){
-		nbMistakes++;
-	}
-    }else{
-       ROS_ERROR("[goal_manager] Failed to call service database_manager/execute");
-    }
-
-    std::ostringstream strs2;
-    strs2 << nbMistakes;
-    std::string mistakesString = strs2.str();
-    fileSaveMistakes << "Participant " << nbParticipant_.c_str() << "\t Condition " << condition_.c_str() << "\t " << mistakesString.c_str() << std::endl;
 }
 
 
@@ -403,6 +451,8 @@ bool endGoal(supervisor_msgs::String::Request  &req, supervisor_msgs::String::Re
     if(req.data == "OK"){
         writeLogs();
         isIn = true;
+    }else{
+        ROS_INFO("[goal_manager] HATP returns %s", req.data.c_str());
     }
 
     //Publish the result
@@ -418,10 +468,15 @@ bool endGoal(supervisor_msgs::String::Request  &req, supervisor_msgs::String::Re
             if(!client_say_->call(srv)){
                 ROS_WARN("[goal_manager] Unable to call service dialogue_node/Say");
             }
+        if(nbExp > nbMaxTask_){
+            needRestart_ = false;
+        }
+        nbExp ++;
 
     }else{
         ROS_INFO("[goal_manager] Goal failed: %s", currentGoal_.c_str());
         status = "FAILED";
+        needRestart_ = false;
     }
     previousGoals_.push_back(currentGoal_);
     previousStatus_.push_back(status);
@@ -454,6 +509,8 @@ int main (int argc, char **argv)
   node_->getParam("/supervisor/robot/name", robotName_);
   node_->getParam("/supervisor/nbParticipant", nbParticipant_);
   node_->getParam("dialogue_node/french", french);
+  node_->getParam("supervisor/nbTask", nbMaxTask_);
+  node_->getParam("supervisor/nbStart", nbExp);
 
   std::string systemMode;
   node_->getParam("/supervisor/systemMode", systemMode);
@@ -485,8 +542,17 @@ int main (int argc, char **argv)
   ros::ServiceClient client_db_execute = node_->serviceClient<toaster_msgs::ExecuteDB>("database_manager/execute");
   client_db_execute_ = &client_db_execute;
 
+  ros::ServiceClient client_rm_hand = node_->serviceClient<toaster_msgs::RemoveFromHand>("pdg/remove_from_hand");
+  client_rm_hand_ = &client_rm_hand;
+
   ros::ServiceClient client_say = node_->serviceClient<supervisor_msgs::String>("dialogue_node/say");
   client_say_ = &client_say;
+
+  ros::ServiceClient client_set_pose = node_->serviceClient<toaster_msgs::SetEntityPose>("toaster_simu/set_entity_pose");
+  client_set_pose_ = &client_set_pose;
+
+  ros::ServiceClient client_set_db = node_->serviceClient<toaster_msgs::SetInfoDB>("database_manager/set_info");
+  client_set_db_ = &client_set_db;
 
   ROS_INFO("[goal_manager] Ready");
 
@@ -500,21 +566,12 @@ int main (int argc, char **argv)
             //start a new goal
             currentGoal_ = pendingGoals_[0];
             pendingGoals_.erase(pendingGoals_.begin());
+            if(currentGoal_ == "SCAN_US"){
+                resetEnv();
+                needRestart_ = true;
+            }
             ROS_INFO("[goal_manager] New goal: %s", currentGoal_.c_str());
             start_ = ros::Time::now();
-	    supervisor_msgs::String srv;
-	    if(currentGoal_ == "SCAN_US2"){
-		currentGoal_ = "SCAN_US";
-	    }else{
-	    /*if(french){
-	    	srv.request.data = "Commençons";
-	    }else{
-		srv.request.data = "Let's start!";
-	    }
-	    if(!client_say.call(srv)){
-		ROS_WARN("[goal_manager] Unable to call service dialogue_node/Say");
-	    } */
-	    }
           }
           //compute the new list to publish
           goals_.clear();
@@ -537,7 +594,21 @@ int main (int argc, char **argv)
       msg.currentGoal = currentGoal_;
       goals_pub.publish(msg);
 
-      changed = false;
+      if(currentGoal_ == "NONE" && needRestart_){
+          currentGoal_ = "SCAN_US";
+          ros::Duration(10.0).sleep();
+          ROS_INFO("[goal_manager] Restart goal: %s", currentGoal_.c_str());
+          resetEnv();
+          start_ = ros::Time::now();
+          if(currentGoal_ != "NONE"){
+              goals_.push_back(currentGoal_);
+              status_.push_back("PROGRESS");
+          }
+          changed = true;
+      }else{
+          changed = false;
+      }
+
       loop_rate.sleep();
   }
 }

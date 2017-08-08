@@ -20,6 +20,8 @@ HumanMonitor::HumanMonitor(ros::NodeHandle* node){
     node_->getParam("/supervisor/simu", simu_);
     node_->getParam("/supervisor/robot/name", robotName_);
     node_->getParam("/human_monitor/rightHand", humanHand_);
+    node_->getParam("/human_monitor/durationMin", durationMin_);
+    node_->getParam("/human_monitor/durationMax", durationMax_);
 
     currentId_ = -2;
 
@@ -47,7 +49,138 @@ HumanMonitor::HumanMonitor(ros::NodeHandle* node){
  * @param agent the human who does the action
  * @param object the object picked
  * */
+void HumanMonitor::moveToStack(std::string agent){
+
+
+    //move to the other room
+    toaster_msgs::SetEntityPose srv_setPose;
+    srv_setPose.request.id = "head";
+    srv_setPose.request.ownerId = agent;
+    srv_setPose.request.type = "joint";
+    srv_setPose.request.pose.position.x = 8.0;
+    srv_setPose.request.pose.position.y = 8.0;
+    srv_setPose.request.pose.position.z = 1.7;
+    srv_setPose.request.pose.orientation.x = 0.0;
+    srv_setPose.request.pose.orientation.y = 0.0;
+    srv_setPose.request.pose.orientation.z = 0.0;
+    srv_setPose.request.pose.orientation.w = 1.0;
+    if (!client_set_pose_.call(srv_setPose)){
+     ROS_ERROR("[human_monitor] Failed to call service pdg/set_entity_pose");
+    }
+    srv_setPose.request.id = agent;
+    srv_setPose.request.type = "human";
+    srv_setPose.request.pose.position.z = 0.0;
+    if (!client_set_pose_.call(srv_setPose)){
+     ROS_ERROR("[human_monitor] Failed to call service pdg/set_entity_pose");
+    }
+
+    //we wait execution time
+    int duration = rand() % (durationMax_ - durationMin_) + durationMin_;
+    ros::Time start = ros::Time::now();
+    bool shouldWait = true;
+    while(shouldWait){
+        ros::Time now = ros::Time::now();
+        ros::Duration d = now - start;
+        if(d.toSec() >= duration){
+            shouldWait = false;
+        }
+    }
+
+}
+
+/**
+ * \brief Function to call when a human picks an object
+ * @param agent the human who does the action
+ * @param object the object picked
+ * */
+void HumanMonitor::moveToBox(std::string agent){
+
+
+    //move to the other room
+    toaster_msgs::SetEntityPose srv_setPose;
+    srv_setPose.request.id = "head";
+    srv_setPose.request.ownerId = agent;
+    srv_setPose.request.type = "joint";
+    srv_setPose.request.pose.position.x = 6.1;
+    srv_setPose.request.pose.position.y = 8.0;
+    srv_setPose.request.pose.position.z = 1.7;
+    srv_setPose.request.pose.orientation.x = 0.0;
+    srv_setPose.request.pose.orientation.y = 0.0;
+    srv_setPose.request.pose.orientation.z = 0.0;
+    srv_setPose.request.pose.orientation.w = 1.0;
+    if (!client_set_pose_.call(srv_setPose)){
+     ROS_ERROR("[human_monitor] Failed to call service pdg/set_entity_pose");
+    }
+    srv_setPose.request.id = agent;
+    srv_setPose.request.type = "human";
+    srv_setPose.request.pose.position.z = 0.0;
+    if (!client_set_pose_.call(srv_setPose)){
+     ROS_ERROR("[human_monitor] Failed to call service pdg/set_entity_pose");
+    }
+
+    //we wait execution time
+    int duration = rand() % (durationMax_ - durationMin_) + durationMin_;
+    ros::Time start = ros::Time::now();
+    bool shouldWait = true;
+    while(shouldWait){
+        ros::Time now = ros::Time::now();
+        ros::Duration d = now - start;
+        if(d.toSec() >= duration){
+            shouldWait = false;
+        }
+    }
+
+}
+/**
+ * \brief Function to call when a human picks an object
+ * @param agent the human who does the action
+ * @param object the object picked
+ * */
+void HumanMonitor::moveToTable(std::string agent){
+
+    //we wait execution time
+    int duration = rand() % (durationMax_ - durationMin_) + durationMin_;
+    ros::Time start = ros::Time::now();
+    bool shouldWait = true;
+    while(shouldWait){
+        ros::Time now = ros::Time::now();
+        ros::Duration d = now - start;
+        if(d.toSec() >= duration){
+            shouldWait = false;
+        }
+    }
+
+    //move to the other room
+    toaster_msgs::SetEntityPose srv_setPose;
+    srv_setPose.request.id = "head";
+    srv_setPose.request.ownerId = agent;
+    srv_setPose.request.type = "joint";
+    srv_setPose.request.pose.position.x = 5.0;
+    srv_setPose.request.pose.position.y = 7.1;
+    srv_setPose.request.pose.position.z = 1.7;
+    srv_setPose.request.pose.orientation.x = 0.0;
+    srv_setPose.request.pose.orientation.y = 0.0;
+    srv_setPose.request.pose.orientation.z = 1.0;
+    srv_setPose.request.pose.orientation.w = 0.0;
+    if (!client_set_pose_.call(srv_setPose)){
+     ROS_ERROR("[human_monitor] Failed to call service pdg/set_entity_pose");
+    }
+    srv_setPose.request.id = agent;
+    srv_setPose.request.type = "human";
+    srv_setPose.request.pose.position.z = 0.0;
+    if (!client_set_pose_.call(srv_setPose)){
+     ROS_ERROR("[human_monitor] Failed to call service pdg/set_entity_pose");
+    }
+
+}
+
+/**
+ * \brief Function to call when a human picks an object
+ * @param agent the human who does the action
+ * @param object the object picked
+ * */
 void HumanMonitor::humanPick(std::string agent, std::string object){
+
 
     std::pair<bool, std::string> previousAttachment = hasInHand(agent);
     /*if(previousAttachment.first){
@@ -105,7 +238,6 @@ void HumanMonitor::humanPick(std::string agent, std::string object){
  * @param support the support where the object is placed
  * */
 void HumanMonitor::humanPlace(std::string agent, std::string object, std::string support){
-
 
     std::pair<bool, std::string> previousAttachment = hasInHand(agent);
     if(!previousAttachment.first){
@@ -176,8 +308,8 @@ void HumanMonitor::humanPlace(std::string agent, std::string object, std::string
         break;
      }
     }
-    z = z + objectHeight + supportHeight;
     toaster_msgs::SetEntityPose srv_setPose;
+    z = z + objectHeight + supportHeight;
     srv_setPose.request.id = object;
     srv_setPose.request.type = "object";
     srv_setPose.request.pose.position.x = x;

@@ -575,7 +575,7 @@ void goalsListCallback(const supervisor_msgs::GoalsList::ConstPtr& msg){
         if(msg->currentGoal == "SCAN_US" && !started){
             started = true;
         }
-        if(msg->currentGoal == "NONE" && started){
+        if(msg->currentGoal != "SCAN_US" && started){
             started = false;
             //we log results
             std::ofstream fileSave;
@@ -589,7 +589,8 @@ void goalsListCallback(const supervisor_msgs::GoalsList::ConstPtr& msg){
             strs2 << nbActionRobot_;
             std::string nbActR = strs2.str();
             fileSave << "Participant " << nbParticipant_.c_str() << "\t Condition " << condition_.c_str() << "\t " << nbActR.c_str() << "\t" << nbActH.c_str() << std::endl;
-
+            nbActionHuman_ = 0;
+            nbActionRobot_ = 0;
         }
     }
 }

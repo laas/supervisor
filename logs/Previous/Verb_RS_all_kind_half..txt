@@ -1,0 +1,10 @@
+	 Condition RS-all	 20	0
+	 Condition RS-all	 22	0
+	 Condition RS-all	 19	0
+	 Condition RS-all	 22	0
+	 Condition RS-all	 21	0
+	 Condition RS-all	 19	0
+	 Condition RS-all	 21	0
+	 Condition RS-all	 23	0
+	 Condition RS-all	 20	0
+	 Condition RS-all	 20	0

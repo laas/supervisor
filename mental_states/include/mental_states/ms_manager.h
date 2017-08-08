@@ -11,6 +11,7 @@
 #include "toaster_msgs/DatabaseTables.h"
 #include "toaster_msgs/SetInfoDB.h"
 #include "toaster_msgs/ExecuteDB.h"
+#include "toaster_msgs/FactList.h"
 
 #include "supervisor_msgs/MentalStatesList.h"
 #include "supervisor_msgs/SharedPlan.h"
@@ -45,6 +46,7 @@ public:
     supervisor_msgs::SharedPlan currentPlan_; /**< the current plan for the joint action*/
     std::string currentRobotGoal_; /**< the current goal of the robot*/
     std::vector<toaster_msgs::DatabaseTable> agentsTable_; /**< the knowledge of the agents from the database*/
+    std::vector<toaster_msgs::Fact> areaFacts_;
 private:
     ros::NodeHandle* node_; /**< Node handle*/
     ros::ServiceClient client_db_ ; /**< Client for the set info service of the database*/

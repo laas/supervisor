@@ -16,6 +16,7 @@ Simple dialogue node
 #include <fstream>
 
 #include "std_msgs/Bool.h"
+#include "std_msgs/String.h"
 
 #include "supervisor_msgs/GiveInfo.h"
 #include "supervisor_msgs/Ask.h"
@@ -44,11 +45,16 @@ std::vector<std::pair<std::string, supervisor_msgs::SharedPlan> > toSharePlans;
 ros::Publisher info_pub_;
 ros::Publisher speaking_pub_;
 
+ros::Publisher ask_pub_;
+ros::Publisher inform_pub_;
+ros::Publisher inform_scan_pub_;
+
 std::string nbParticipant_;
 std::string condition_;
 int nbQuestion_ = 0;
 int nbInfo_ = 0;
 bool started = false;
+int nbTask_ = 0;
 
 #ifdef ACAPELA
 double waitActionServer;
@@ -208,6 +214,12 @@ void giveInfoFact(toaster_msgs::Fact fact, bool isTrue, std::string receiver){
 
     //We verbalize the sentence
     saySentence(sentence, receiver);
+
+    if(fact.property == "isScan"){
+        std_msgs::String msg_scan;
+        msg_scan.data = fact.subjectId;
+        inform_scan_pub_.publish(msg_scan);
+    }
 
     supervisor_msgs::Info msg;
     msg.toRobot = false;
@@ -669,6 +681,23 @@ void giveInfoAction(supervisor_msgs::Action action, std::string actionState, std
     }else{
         action.succeed = false;
     }
+
+    if(actionState == "SHOULD" || actionState == "WILL"){
+        inform_pub_.publish(action);
+    }
+
+    if(actionState == "DONE"){
+        if(action.name == "scan"){
+            std_msgs::String msg_scan;
+            for(int i = 0; i < action.parameter_keys.size(); i++){
+                if(action.parameter_keys[i] == "object"){
+                    msg_scan.data = action.parameter_values[i];
+                }
+            }
+            inform_scan_pub_.publish(msg_scan);
+        }
+    }
+
     supervisor_msgs::Info msg;
     msg.toRobot = false;
     msg.agent = receiver;
@@ -1064,6 +1093,7 @@ void askWantAction(supervisor_msgs::Action action, std::string receiver){
 
     //We verbalize the sentence
     saySentence(sentence, receiver);
+    ask_pub_.publish(action);
 }
 
 
@@ -1289,6 +1319,8 @@ void goalsListCallback(const supervisor_msgs::GoalsList::ConstPtr& msg){
     if(msg->changed){
         if(msg->currentGoal == "SCAN_US" && !started){
             started = true;
+            nbQuestion_ = 0;
+            nbInfo_ = 0;
         }
         if(msg->currentGoal == "NONE" && started){
             started = false;
@@ -1303,8 +1335,9 @@ void goalsListCallback(const supervisor_msgs::GoalsList::ConstPtr& msg){
             std::ostringstream strs2;
             strs2 << nbInfo_;
             std::string nbInfo = strs2.str();
-            fileSave << "Participant " << nbParticipant_.c_str() << "\t Condition " << condition_.c_str() << "\t " << nbInfo.c_str() << "\t" << nbQ.c_str() << std::endl;
+            fileSave << "\t Condition " << condition_.c_str() << "\t " << nbInfo.c_str() << "\t" << nbQ.c_str() << std::endl;
 	     ROS_WARN("nb question: %s, nb info: %s",  nbQ.c_str(), nbInfo.c_str());
+            nbTask_ ++;
         }
     }
 }
@@ -1351,6 +1384,10 @@ int main (int argc, char **argv)
 
   info_pub_ = node_->advertise<supervisor_msgs::Info>("/dialogue_node/infoGiven", 1);
   speaking_pub_ = node_->advertise<std_msgs::Bool>("/dialogue_node/isSpeaking", 1);
+
+  ask_pub_ = node.advertise<supervisor_msgs::Action>("dialogue_node/asked_action", 1);
+  inform_pub_ = node.advertise<supervisor_msgs::Action>("dialogue_node/inform_action", 1);
+  inform_scan_pub_ = node.advertise<std_msgs::String>("dialogue_node/inform_scan", 1);
 
   #ifdef ACAPELA
   initAcapela();

@@ -223,6 +223,7 @@ bool Drop::exec(Server* action_server){
  * */
 bool Drop::post(){
 
+    RemoveFromHand(object_);
     PutInContainer(object_, container_);
 
     return true;

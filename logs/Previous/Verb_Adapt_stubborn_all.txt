@@ -1,0 +1,10 @@
+	 Condition Adaptation	 2	0
+	 Condition Adaptation	 0	0
+	 Condition Adaptation	 1	0
+	 Condition Adaptation	 2	0
+	 Condition Adaptation	 3	0
+	 Condition Adaptation	 2	0
+	 Condition Adaptation	 3	0
+	 Condition Adaptation	 1	0
+	 Condition Adaptation	 2	0
+	 Condition Adaptation	 3	0

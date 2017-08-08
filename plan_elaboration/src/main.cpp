@@ -34,6 +34,8 @@ int idPrevRobotPlan, idPrevRobotMS, idPrevHumanPlan, idPrevHumanMS;
 void goalsListCallback(const supervisor_msgs::GoalsList::ConstPtr& msg){
 
     if(msg->changed){
+        ROS_ERROR("pe_->currentGoal_: ", pe_->currentGoal_.c_str());
+        ROS_ERROR("msg->currentGoal: ", msg->currentGoal.c_str());
         if(pe_->currentGoal_ == "NONE" && msg->currentGoal != "NONE" && msg->currentGoal != "STOP"){
             //a new goal arrived
             pe_->currentGoal_ = msg->currentGoal;
@@ -86,6 +88,7 @@ void goalsListCallback(const supervisor_msgs::GoalsList::ConstPtr& msg){
             strs << nbReplaning_;
             std::string nbReplan = strs.str();
             fileSave << "Participant " << nbParticipant_.c_str() << "\t Condition " << condition_.c_str() << "\t " << nbReplan.c_str() << std::endl;
+            nbReplaning_ = 0;
 
         }
     }

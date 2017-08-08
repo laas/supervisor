@@ -431,6 +431,19 @@ std::pair<int, std::vector<gtp_ros_msgs::SubSolution> > VirtualAction::planGTP(s
 bool VirtualAction::execAction(int actionId, std::vector<gtp_ros_msgs::SubSolution> subSolutions, bool shouldOpen, Server* action_server){
 
     if(connector_->noPlanning_){
+        int duration = rand() % (connector_->durationMax_ - connector_->durationMin_) + connector_->durationMin_;
+        ros::Time start = ros::Time::now();
+        bool shouldWait = true;
+        while(shouldWait && !connector_->stopOrder_ && !connector_->refineOrder_){
+            ros::Time now = ros::Time::now();
+            ros::Duration d = now - start;
+            if(d.toSec() >= duration){
+                shouldWait = false;
+            }
+        }
+        if(connector_->stopOrder_ || connector_->refineOrder_){
+            return false;
+        }
         return true;
     }
 
