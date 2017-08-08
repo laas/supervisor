@@ -569,7 +569,7 @@ int main (int argc, char **argv)
 
   ros::Subscriber sub_plan = node_->subscribe("plan_elaboration/plan", 1, planCallback);
   ros::Subscriber sub_robot_action = node_->subscribe("/action_executor/current_robot_action", 1, robotActionCallback);
-  ros::Subscriber sub_humans_action = node_->subscribe("supervisor/previous_actions", 1, previousActionCallback);
+  ros::Subscriber sub_humans_action = node_->subscribe("mental_states/previous_actions", 1, previousActionCallback);
 
   ros::ServiceServer service_end = node.advertiseService("plan_maintainer/stop", stopSrv); //when a plan needs to be stopped
 

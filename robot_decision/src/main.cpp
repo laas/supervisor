@@ -1073,7 +1073,7 @@ int main (int argc, char **argv)
   ros::Subscriber sub_goal = node.subscribe("goal_manager/goalsList", 1, goalCallback);
   ros::Subscriber sub_area = node.subscribe("area_manager/factList", 1, areaFactListCallback);
   ros::Subscriber sub_plan = node.subscribe("plan_elaboration/plan", 1, planCallback);
-  ros::Subscriber sub_prev = node.subscribe("supervisor/previous_actions", 1, previousCallback);
+  ros::Subscriber sub_prev = node.subscribe("mental_states/previous_actions", 1, previousCallback);
 
 
   ros::ServiceServer service_stop = node.advertiseService("robot_decision/stop", stopSrv); //when an action needs to be stopped

@@ -260,7 +260,7 @@ int main (int argc, char **argv)
 
   ros::Subscriber sub_robot_action = node_->subscribe("/action_executor/current_robot_action", 1, robotActionCallback);
   ros::Subscriber sub_humans_action = node_->subscribe("/human_monitor/current_humans_action", 1, humansActionCallback);
-  ros::Subscriber sub_prev_action = node_->subscribe("/supervisor/previous_actions", 1, previousActionCallback);
+  ros::Subscriber sub_prev_action = node_->subscribe("/mental_states/previous_actions", 1, previousActionCallback);
   ros::Subscriber sub_dialogue = node_->subscribe("/dialogue_node/isSpeaking", 1, speakingCallback);
 
   ros::Publisher focus_pub = node_->advertise<std_msgs::String>("/simple_head_manager/focus", 1);

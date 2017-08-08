@@ -9,7 +9,7 @@ Main class of the mental_states manager
 
 ros::NodeHandle* node_;
 MsManager* ms_;
-bool needCheckEffect_, needCheckPrec_, needCheckGoal_;
+bool needCheckEffect_, needCheckPrec_, needCheckGoal_, previousChanged_;
 std::vector<supervisor_msgs::Action> oldMsgPrevious_;
 int prevId_;
 
@@ -103,6 +103,7 @@ void prevCallback(const supervisor_msgs::ActionsList::ConstPtr& msg){
         }
         oldMsgPrevious_ = currentActions;
         needCheckPrec_ = true;
+        previousChanged_  = true;
     }
 }
 
@@ -270,15 +271,18 @@ int main (int argc, char **argv)
   needCheckGoal_ = false;
   needCheckPrec_ = false;
   prevId_ =-1;
+  previousChanged_ = false;
 
   ros::Subscriber sub_db = node_->subscribe("database_manager/tables", 1, dbCallback);
-  ros::Subscriber sub_goal = node_->subscribe("goal_manager/goalsList", 1, goalCallback);
-  ros::Subscriber sub_prev = node_->subscribe("supervisor/previous_actions", 1, prevCallback);
-  ros::Subscriber sub_plan = node_->subscribe("plan_elaboration/plan", 1, planCallback);
+  ros::Subscriber sub_goal = node_->subscribe("goal_manager/goalsList", 10, goalCallback);
+  ros::Subscriber sub_prev = node_->subscribe("supervisor/previous_actions", 10, prevCallback);
+  ros::Subscriber sub_plan = node_->subscribe("plan_elaboration/plan", 10, planCallback);
   ros::Subscriber robot_action = node_->subscribe("/action_executor/current_robot_action", 1, robotActionCallback);
-  ros::Subscriber sub_info = node_->subscribe("/dialogue_node/infoGiven", 1, infoCallback);
+  ros::Subscriber sub_info = node_->subscribe("/dialogue_node/infoGiven", 10, infoCallback);
 
   ros::Publisher ms_pub = node_->advertise<supervisor_msgs::MentalStatesList>("/mental_states/mental_states", 1);
+  ros::Publisher prev_pub = node_->advertise<supervisor_msgs::MentalStatesList>("/mental_states/previous_actions", 1);
+
 
   ROS_INFO("[mental_states] mental_states ready");
 
@@ -307,6 +311,13 @@ int main (int argc, char **argv)
       toPublish.changed = changed;
       toPublish.prevId = prevId_;
       ms_pub.publish(toPublish);
+
+      supervisor_msgs::ActionsList toPublishPrevious;
+      toPublishPrevious.actions = oldMsgPrevious_;
+      toPublishPrevious.changed = previousChanged_;
+      toPublishPrevious.prevId = prevId_;
+      prev_pub.publish(toPublishPrevious);
+
 
       loop_rate.sleep();
   }
