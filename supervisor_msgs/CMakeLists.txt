@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib
   actionlib_msgs
   toaster_msgs
+  diagnostic_msgs
 )
 
 add_message_files(

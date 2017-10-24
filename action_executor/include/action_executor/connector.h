@@ -94,13 +94,6 @@ struct Connector{
     ros::ServiceClient client_gtp_traj_; /**< gtp client to publish a traj*/
     ros::ServiceClient client_db_set_; /**< toaster client for database set info commands*/
 
-    double timeDB_;/**< time spent in the database*/
-    double timePlan_;/**< time spent in the planning*/
-    double timeExec_;/**< time spent in the execution*/
-    double timeGTP_;/**< time spent in other gtp actions*/
-    double timeToaster_;/**< time spent in other gtp actions*/
-    ros::Time timerStart_;/**< timer set at the begining of the action*/
-
     bool isActing_; /**< Flag indicating if the robot is executing an action*/
     supervisor_msgs::Action currentAction_; /**< Current action executed by the robot*/
 

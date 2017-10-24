@@ -132,9 +132,6 @@ action_server_(*node, name,
  * */
 void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& goal) {
 
-    connector_.timerStart_ = ros::Time::now();
-    ros::Time now;
-
     //Checking the action parameters are valids
     if(goal->action.parameter_keys.size() != goal->action.parameter_values.size()){
         ROS_ERROR("[action_executor] In valid parameters: nb keys should be equal to nb values!");
@@ -142,13 +139,6 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
         result_.state = "NON_VALID";
         result_.shouldRetractRight = false;
         result_.shouldRetractLeft = false;
-        now = ros::Time::now();
-        ros::Duration d = now - connector_.timerStart_;
-        result_.timeTot = d.toSec();
-        result_.timeDB = connector_.timeDB_;
-        result_.timePlan = connector_.timePlan_;
-        result_.timeExec = connector_.timeExec_;
-        result_.timeGTP = connector_.timeGTP_;
         //we publish the action in the previous publisher
         if(goal->action.name != "moveTo"){
             supervisor_msgs::ActionsList msg_previous;
@@ -177,13 +167,6 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
         result_.state = "NON_VALID";
         result_.shouldRetractRight = false;
         result_.shouldRetractLeft = false;
-        now = ros::Time::now();
-        ros::Duration d = now - connector_.timerStart_;
-        result_.timeTot = d.toSec();
-        result_.timeDB = connector_.timeDB_;
-        result_.timePlan = connector_.timePlan_;
-        result_.timeExec = connector_.timeExec_;
-        result_.timeGTP = connector_.timeGTP_;
         action_server_.setAborted(result_);
         ROS_INFO("[action_executor] Action failed at creation");
         //we publish the action in the previous publisher
@@ -212,13 +195,6 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
         result_.report = false;
         result_.shouldRetractRight = false;
         result_.shouldRetractLeft = false;
-        now = ros::Time::now();
-        ros::Duration d = now - connector_.timerStart_;
-        result_.timeTot = d.toSec();
-        result_.timeDB = connector_.timeDB_;
-        result_.timePlan = connector_.timePlan_;
-        result_.timeExec = connector_.timeExec_;
-        result_.timeGTP = connector_.timeGTP_;
         if(!action_server_.isPreemptRequested()){
             result_.state = feedback_.state;
             action_server_.setAborted(result_);
@@ -245,13 +221,6 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
         result_.report = false;
         result_.shouldRetractRight = false;
         result_.shouldRetractLeft = false;
-        now = ros::Time::now();
-        ros::Duration d = now - connector_.timerStart_;
-        result_.timeTot = d.toSec();
-        result_.timeDB = connector_.timeDB_;
-        result_.timePlan = connector_.timePlan_;
-        result_.timeExec = connector_.timeExec_;
-        result_.timeGTP = connector_.timeGTP_;
         action_server_.setPreempted(result_);
         ROS_INFO("[action_executor] Action stoped");
         //we publish the action in the previous publisher
@@ -273,13 +242,6 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
         result_.report = false;
         result_.shouldRetractRight = false;
         result_.shouldRetractLeft = false;
-        now = ros::Time::now();
-        ros::Duration d = now - connector_.timerStart_;
-        result_.timeTot = d.toSec();
-        result_.timeDB = connector_.timeDB_;
-        result_.timePlan = connector_.timePlan_;
-        result_.timeExec = connector_.timeExec_;
-        result_.timeGTP = connector_.timeGTP_;
         if(!action_server_.isPreemptRequested()){
             result_.state = feedback_.state;
             action_server_.setAborted(result_);
@@ -302,13 +264,6 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
 
     if(action_server_.isPreemptRequested() || connector_.stopOrder_){
         connector_.isActing_ = false;
-        now = ros::Time::now();
-        ros::Duration d = now - connector_.timerStart_;
-        result_.timeTot = d.toSec();
-        result_.timeDB = connector_.timeDB_;
-        result_.timePlan = connector_.timePlan_;
-        result_.timeExec = connector_.timeExec_;
-        result_.timeGTP = connector_.timeGTP_;
         result_.state = "PREEMPTED";
         result_.report = false;
         result_.shouldRetractRight = false;
@@ -332,13 +287,6 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
     if(!act->exec(&action_server_)){
         connector_.isActing_ = false;
         result_.report = false;
-        now = ros::Time::now();
-        ros::Duration d = now - connector_.timerStart_;
-        result_.timeTot = d.toSec();
-        result_.timeDB = connector_.timeDB_;
-        result_.timePlan = connector_.timePlan_;
-        result_.timeExec = connector_.timeExec_;
-        result_.timeGTP = connector_.timeGTP_;
         if(connector_.rightArmRestPose_ != connector_.rightArmPose_){
             result_.shouldRetractRight = true;
         }else{
@@ -375,13 +323,6 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
     if(!act->post()){
         connector_.isActing_ = false;
         result_.report = false;
-        now = ros::Time::now();
-        ros::Duration d = now - connector_.timerStart_;
-        result_.timeTot = d.toSec();
-        result_.timeDB = connector_.timeDB_;
-        result_.timePlan = connector_.timePlan_;
-        result_.timeExec = connector_.timeExec_;
-        result_.timeGTP = connector_.timeGTP_;
         if(connector_.rightArmRestPose_ != connector_.rightArmPose_){
             result_.shouldRetractRight = true;
         }else{
@@ -412,13 +353,6 @@ void ActionExecutor::execute(const supervisor_msgs::ActionExecutorGoalConstPtr& 
         return;
     }
 
-    now = ros::Time::now();
-    ros::Duration d = now - connector_.timerStart_;
-    result_.timeTot = d.toSec();
-    result_.timeDB = connector_.timeDB_;
-    result_.timePlan = connector_.timePlan_;
-    result_.timeExec = connector_.timeExec_;
-    result_.timeGTP = connector_.timeGTP_;
     if(connector_.rightArmRestPose_ != connector_.rightArmPose_){
         result_.shouldRetractRight = true;
     }else{

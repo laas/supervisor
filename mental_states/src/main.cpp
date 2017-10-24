@@ -12,6 +12,7 @@ MsManager* ms_;
 bool needCheckEffect_, needCheckPrec_, needCheckGoal_, previousChanged_;
 std::vector<supervisor_msgs::Action> oldMsgPrevious_;
 int prevId_;
+bool infoGiven_;
 
 /**
  * \brief Callback of the database tables
@@ -177,6 +178,8 @@ void robotActionCallback(const supervisor_msgs::Action::ConstPtr& msg){
  * */
 void infoCallback(const supervisor_msgs::Info::ConstPtr& msg){
 
+    infoGiven_ = true;
+
     if(msg->type == "FACT"){
         if(msg->toRobot){
             ms_->addRmFactToAgent(msg->fact, ms_->robotName_, msg->isTrue);
@@ -272,6 +275,7 @@ int main (int argc, char **argv)
   needCheckPrec_ = false;
   prevId_ =-1;
   previousChanged_ = false;
+  infoGiven_ = false;
 
   ros::Subscriber sub_db = node_->subscribe("database_manager/tables", 1, dbCallback);
   ros::Subscriber sub_goal = node_->subscribe("goal_manager/goalsList", 10, goalCallback);
@@ -281,7 +285,7 @@ int main (int argc, char **argv)
   ros::Subscriber sub_info = node_->subscribe("/dialogue_node/infoGiven", 10, infoCallback);
 
   ros::Publisher ms_pub = node_->advertise<supervisor_msgs::MentalStatesList>("/mental_states/mental_states", 1);
-  ros::Publisher prev_pub = node_->advertise<supervisor_msgs::MentalStatesList>("/mental_states/previous_actions", 1);
+  ros::Publisher prev_pub = node_->advertise<supervisor_msgs::ActionsList>("/mental_states/previous_actions", 1);
 
 
   ROS_INFO("[mental_states] mental_states ready");
@@ -310,6 +314,7 @@ int main (int argc, char **argv)
       toPublish.mentalStates = ms_->msList_;
       toPublish.changed = changed;
       toPublish.prevId = prevId_;
+      toPublish.infoGiven = infoGiven_;
       ms_pub.publish(toPublish);
 
       supervisor_msgs::ActionsList toPublishPrevious;
@@ -319,6 +324,7 @@ int main (int argc, char **argv)
       prev_pub.publish(toPublishPrevious);
 
 
+      infoGiven_ = false;
       loop_rate.sleep();
   }
 

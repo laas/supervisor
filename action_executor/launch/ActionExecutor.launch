@@ -2,6 +2,7 @@
     <rosparam command="load" file="$(find action_executor)/Parameters/ActionExecutor.yaml" />
     <rosparam command="load" file="$(find launchs)/Parameters/General.yaml" />
     <rosparam command="load" file="$(find launchs)/Parameters/Entities.yaml" />
+    <!-- rosparam command="load" file="$(find action_executor)/Parameters/SaveTrajs.yaml" /-->
 
     <node name="action_executor" pkg="action_executor" type="action_executor" output="screen" />  <!-- Launch the action executor -->
 </launch>
